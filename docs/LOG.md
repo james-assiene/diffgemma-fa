@@ -142,6 +142,16 @@ not: BFCL wraps **every leaf at every nesting level** in a list of acceptable va
 unwrapping only the top level. Recursive unwrapping → 93.8%. Do not report an over-constraint rate
 without first checking the harness.
 
+### Final Phase 1 exit numbers
+
+| | |
+|---|---|
+| BFCL-Live full compile | **4,549 / 4,549, zero failures, all DFAs**, 42.7 min on 12 cores |
+| FA → random walk → `json.loads` | **5,157 / 5,160** (the 3 are a sampler UTF-8 artifact, not the grammar) |
+| ground truth → FA | **255 / 258 = 98.8%** |
+| remaining 3 rejections | 2 × `type: any` wildcard, 1 × nested array-of-objects — both shapes SPEC already flags |
+| tests | **270 green** |
+
 ### Not done
 
 Round-trip covers `live_simple` only; the `multiple`/`parallel` union and call-list grammars are

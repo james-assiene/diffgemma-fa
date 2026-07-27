@@ -1,6 +1,6 @@
 # Phase 1 findings — the constraint compiler
 
-Date: **2026-07-27**. Stack as `docs/ENV.md`. Deliverable: `diffgemma_fa/compile/`.
+Date: **2026-07-27**. Stack as `docs/ENV.md`. Deliverable: `diffgemma_fa/compile/`. 270 tests green.
 
 Phase 1 builds the pipeline SPEC §4.1 specifies:
 
@@ -48,7 +48,8 @@ be **removed**. Left in place, the grammar-final state has two destinations on t
 The automaton is then **spuriously nondeterministic**, which silently drops eq (8) off its `∃`
 fast path onto the multiplicity-weighted one, and makes `is_dfa` false for *every* grammar. Nothing
 fails; the sampler just gets slower and the `is_dfa` gate becomes useless. With the edge stripped
-(`lift.py: drop_labels`), real BFCL schemas lift to genuine DFAs — measured **256/256 DFA**.
+(`lift.py: drop_labels`), real BFCL schemas lift to genuine DFAs — measured **4,549 / 4,549 DFA**
+across the whole of BFCL-Live.
 
 ### 1.3 BFCL's `any` cannot be passed through
 
@@ -92,10 +93,31 @@ uses `null` / `""` for "omitted":
 ```
 
 Unwrapping only the top level leaves `["AIR_CLEAN"]` as the value of a parameter declared `string`,
-which reads as grammar over-constraint when it is nothing of the sort. **Measured impact: ground
-truth acceptance went 82.5% → 93.8% on `live_simple` purely from unwrapping recursively.**
-`bfcl_data.materialize_ground_truth` does it properly. Worth stating loudly because the wrong
-number looks exactly like a real bug.
+which reads as grammar over-constraint when it is nothing of the sort.
+
+There is a second, sharper trap in the same encoding. `""` among a parameter's acceptable values
+means **"this parameter may be omitted"**, and omission is then always an acceptable answer — so it
+must be *preferred*, not skipped past:
+
+```json
+{"unit": ["", "N/A"]}     against     enum ["seconds", "milliseconds"]
+```
+
+reads as "omitted, or N/A", and since `"N/A"` is not in the enum, **omission is the only valid
+reading**. Taking the second entry looks like the grammar rejecting a correct answer.
+
+**Measured impact of getting both right, on `live_simple`:**
+
+| harness | ground truth accepted |
+|---|---|
+| unwrap top level only | 82.5% |
+| + unwrap recursively | 93.8% |
+| + prefer omission on `""` | **98.8%** |
+
+**Three times in Phase 1 an apparent over-constraint turned out to be the harness misreading BFCL's
+ground-truth encoding.** `bfcl_data.materialize_ground_truth` now handles all three and
+`tests/test_bfcl_data.py` pins them. The lesson generalises: do not report an over-constraint rate
+without first auditing the harness — a wrong one looks exactly like a real grammar bug.
 
 ---
 
@@ -210,16 +232,40 @@ Both sit within the predicted order. The four-layer scheme delivers what §4.4 c
 
 ## 5. Phase 1 exit criteria (SPEC §8)
 
-*(Filled from `artifacts/phase1_roundtrip.json` and `artifacts/bfcl_compile_report.json`.)*
+From `artifacts/phase1_roundtrip.json` and `artifacts/bfcl_compile_report.json`.
 
-### 5.1 Round-trip, `BFCL_v4_live_simple` — see §6 for coverage caveats
+### 5.1 "Compiles all 6 task grammars"
+
+BFCL/xLAM JSON ✅ (4,549/4,549), BFCL/xLAM Python ✅, Sudoku ✅, Countdown ✅, GSM-Symbolic ✅,
+refusal branch ✅. **Spider ✗** — deferred, see §5.3.
+
+### 5.2 Round-trip, `BFCL_v4_live_simple` (258 records, 258 automata)
 
 | direction | result |
 |---|---|
-| FA → random walk → `json.loads` | **pending final run** |
-| ground truth → FA | **pending final run** |
+| FA → random walk → `json.loads` | **5,157 / 5,160 (99.94%)** |
+| ground truth → FA | **255 / 258 (98.8%)** |
+| all deterministic | 258 DFA / 0 NFA |
 
-### 5.2 Coverage — stated, not silently capped
+**The three remaining ground-truth rejections are both of the shapes SPEC already flags as
+hazardous**, not general grammar defects:
+
+| record | cause |
+|---|---|
+| `live_simple_117-73-0` | `input_value: {"type": "any"}` — the §4.2 wildcard; viable prefix, not accepting |
+| `live_simple_122-78-0` | `model: {"type": "any"}` — same |
+| `live_simple_189-114-0` | array of objects (`data: array of dict with properties`); rejected |
+
+Left open deliberately. Both shapes are opt-in (`allow_wildcard=True`) and the wildcard is already
+documented as 26–130× the median compile cost; chasing outlines' internal expansion for two records
+is not the best use of Phase 2. **Re-check once Phase 2's exactness harness exists**, which is a
+better instrument for it.
+
+**The 3 invalid-JSON samples out of 5,160 are a *sampler* artifact, not a grammar defect.** The
+random walk picks tokens from classes with ~260k members; a token sequence the FA legitimately
+accepts can decode to invalid UTF-8, which `json.loads` then rejects. The FA accepted all 5,160.
+
+### 5.3 Coverage — stated, not silently capped
 
 Per CLAUDE.md's rule, everything not covered:
 
@@ -241,7 +287,7 @@ Per CLAUDE.md's rule, everything not covered:
 
 ## 6. What is green
 
-`pytest tests/ -q` → **256 passed**, covering:
+`pytest tests/ -q` → **270 passed**, covering:
 
 - Valmari: language preservation on 100 random partial DFAs, idempotence, determinism of the
   output, state-map residual-language agreement, trimming, the empty language, the completion trap,
