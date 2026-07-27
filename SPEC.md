@@ -1275,16 +1275,34 @@ on NFAs (§2.7).
 > box's cores — against the ~~4–7 days~~ originally projected. Phase 0's hand-written estimate of
 > ~0.9 h was the right order.
 >
-> Two things the real data changed that the hand-written schemas did not show:
+> **11 schemas failed with `ValueError: Unsupported type: any`.** BFCL's `any` has no JSON Schema
+> spelling and must be translated to a *typeless* schema (`{}`), not passed through as the literal
+> string. Fixed in `compile/schema.py`; the wildcard is still refused unless `allow_wildcard=True`.
+
+> **[V-P1] Full-pipeline compile of all of BFCL-Live** (`python -m diffgemma_fa.compile.tasks.bfcl
+> --splits live --jobs 12`, `artifacts/bfcl_compile_report.json`). This is the whole pipeline —
+> regex, lift, **Valmari**, class tables — not just the lift the table above timed:
 >
-> - **`states_max = 3,573`, above the 2,459 this spec quotes as the paper's largest BFCL DFA and
->   above any usable tree bucket.** The dispatch rule in §5.6 is not hypothetical: some BFCL
->   grammars must go to the chain path. `bucket_size(..., allow_oversize=True)` flags them via
->   `CompiledAutomaton.needs_chain_path` rather than aborting the run.
-> - **11 schemas failed with `ValueError: Unsupported type: any`.** BFCL's `any` has no JSON Schema
->   spelling and must be translated to a *typeless* schema (`{}`), not passed through as the literal
->   string. Fixed in `compile/schema.py`; the wildcard is still refused unless
->   `allow_wildcard=True`.
+> | | |
+> |---|---|
+> | compiled | **4,549 / 4,549, zero failures** |
+> | all deterministic | **4,549 DFA / 0 NFA** |
+> | wall, 12 workers | **2,562 s = 42.7 min** |
+> | CPU, serial equivalent | **26,908 s = 7.5 h** |
+> | `\|S\|` median / p90 / **max** | 97 / 205 / **595** |
+> | bucket histogram | 16:68 · 32:239 · 64:831 · **128:2,292** · 256:797 · 512:308 · 1024:14 |
+> | largest tree | **2.14 GB** |
+>
+> **Two corrections to the numbers above.** First, the lift-only median of 0.42 s is *not* the
+> per-schema cost: the full pipeline is ~5.9 s of CPU per schema, and **pure-Python Valmari
+> dominates it** (~1 s/schema at this grammar size, against ~0.15 s for the lift). §4.5's "pure
+> Python is fine" holds — 43 minutes across 12 cores — but the honest figure for the full pipeline
+> is **hours serial, not 38 minutes**. Second, the `states_max = 3,573` in the lift-only table is
+> the **raw** lifted count; after minimization and stop-token augmentation the largest BFCL-Live
+> automaton is **595 states**. So every BFCL grammar lands in the 1024 bucket or below,
+> `needs_chain_path` never fires, and the largest tree is 2.14 GB against ~20 GB of headroom.
+> **The chain-path fallback is not needed for BFCL at all** — it remains necessary only for Spider
+> (§5.6, open question 0a).
 
 Consequences:
 

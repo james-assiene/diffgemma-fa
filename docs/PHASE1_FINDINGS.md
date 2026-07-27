@@ -99,72 +99,112 @@ number looks exactly like a real bug.
 
 ---
 
-## 3. §4.7 re-measured on real BFCL-Live — 38 minutes, not 4–7 days
+## 3. §4.7 re-measured on real BFCL-Live
+
+SPEC projected 4–8 min per schema and **4–7 days serially** for BFCL-Live's 1,351 records. Both
+numbers below are far smaller, but they measure different things and the distinction matters.
+
+### 3.1 Lift only (regex → DFA → `get_transitions`)
 
 1,351 records → **4,549 schemas** (records carry 1–8+ functions).
 
 | | |
 |---|---|
-| compiled | **4,538 / 4,549** (the 11 are §1.3's `any`, since fixed) |
+| compiled | 4,538 / 4,549 (the 11 are §1.3's `any`, since fixed) |
 | median | **0.42 s** |
 | p90 / p99 | 0.78 s / 1.66 s |
-| max | **15.8 s** — the `{}` / `any` wildcard shape |
-| **total, serial** | **2,272 s = 37.9 min** |
-| states median / p90 / max | **114 / 249 / 3,573** |
+| max | 15.8 s — the `{}` / `any` wildcard shape |
+| total, serial | **2,272 s = 37.9 min** |
+| states median / p90 / max | 114 / 249 / **3,573** (raw, pre-minimization) |
 
-SPEC originally projected 4–8 min per schema and **4–7 days serially**; Phase 0's hand-written
-estimate of ~0.9 h was the right order and the real figure is 0.63 h. **The vocabulary pre-filter
-is unnecessary and has not been built.**
+### 3.2 Full pipeline, which is the number to quote
+
+`python -m diffgemma_fa.compile.tasks.bfcl --splits live --jobs 12` — regex, lift, **Valmari**, and
+class tables:
+
+| | |
+|---|---|
+| compiled | **4,549 / 4,549, zero failures** |
+| all deterministic | **4,549 DFA / 0 NFA** |
+| wall, 12 workers | **2,562 s = 42.7 min** |
+| CPU, serial equivalent | **26,908 s = 7.5 h** |
+| per schema: median / p90 / max | **4.28 s / 9.44 s / 313.8 s** |
+| `\|S\|` median / p90 / **max** | 97 / 205 / **595** |
+| bucket histogram | 16:68 · 32:239 · 64:831 · **128:2,292** · 256:797 · 512:308 · 1024:14 |
+| edges median / max | 270 / 3,068 |
+| largest tree | **2.14 GB** |
+
+**Pure-Python Valmari dominates** — ~1 s per schema against ~0.15 s for the lift. SPEC §4.5's
+"pure Python is fine" holds (43 min across 12 cores), but the honest full-pipeline figure is
+**hours serially, not 38 minutes**. Still ~250× better than the original projection, and **the
+vocabulary pre-filter is unnecessary and has not been built.**
 
 The one shape worth watching remains `{}` / missing `type` / `additionalProperties: true` / BFCL
-`any`: 26–130× the median, and the realistic route to "regex too large".
+`any`: the 313.8 s worst case, and the realistic route to "regex too large".
 
-### 3.1 `states_max = 3,573` exceeds every usable tree bucket
+### 3.3 The chain-path fallback is not needed for BFCL
 
-Above the 2,459 SPEC quotes as the paper's largest BFCL DFA, and above the top bucket the measured
-~20 GB of free HBM admits (2048 → 8.59 GB; 4096 → 34.3 GB). **SPEC §5.6's chain-path fallback is
-not hypothetical.** `bucket_size(..., allow_oversize=True)` flags these through
-`CompiledAutomaton.needs_chain_path` instead of aborting the run; Phase 3's dispatcher must honour
-it, and the eval must report the tree/chain split per request.
+The `states_max = 3,573` in §3.1 is the **raw lifted** count and is misleading for dispatch. After
+Valmari and stop-token augmentation the largest BFCL-Live automaton is **595 states**. Every
+grammar lands in the 1024 bucket or below, the largest tree is **2.14 GB** against ~20 GB of
+measured headroom, and `needs_chain_path` never fires.
 
-(That figure is the *raw lifted* count. After Valmari and augmentation the `live_simple` maximum is
-much smaller — see §5.)
+So SPEC §5.6's chain fallback — and the paper's quoted 2,459-state worst case — do **not** bind on
+BFCL. The fallback remains necessary only for Spider (open question 0a). The mechanism is
+implemented and flagged (`bucket_size(..., allow_oversize=True)` →
+`CompiledAutomaton.needs_chain_path`) so Phase 3's dispatcher can honour it, but on this benchmark
+it is dead code.
 
 ---
 
 ## 4. Numbers SPEC asks for that are unpublished
 
+All measured over the full 4,549-schema BFCL-Live compile.
+
 ### 4.1 Label-class dedup ratio (§4.4 Layer 1, open question 9)
 
 Measured **per edge**, which is the quantity §4.4 actually defines — Phase 0 measured distinct
-label sets per *state*, which is a different and less useful number.
+label sets per *state*, a different and less useful number.
 
-- `live_simple` mean: **1.68 edges per class**
+- **1.69 median, 1.79 mean, 14.69 max** edges per class
+- **151 classes median, 532 max**
 
-Lower than SPEC's hoped "170k edges → O(10²–10³) classes", because these grammars are small
-(83 states mean) and their edges are genuinely diverse. The ratio should be re-measured on the
-large `|S| ≈ 2,000+` grammars where the class layer actually matters.
+SPEC hoped "170k edges → O(10²–10³) classes". The class *count* lands squarely in that range
+(151–532), so the layer behaves as designed. The *ratio* is low (1.69) only because these grammars
+are small — 270 edges median — so there is little repetition to exploit. Re-measure on Spider,
+where the class layer is load-bearing.
 
 ### 4.2 Post-lift minimization ratio (§4.5, unpublished)
 
 SPEC notes nobody in the literature minimizes *after* the token lift, and asks for the number.
 
-- `live_simple` mean: **1.11× state reduction**
-- **max: 9.29×**
+- **1.09× mean state reduction, 9.95× max**
+- Only **21 of 4,549** schemas (0.5%) reduce by more than 1.5×
 
-So the second pass is usually marginal but occasionally dramatic. It costs ~1 s per schema in pure
-Python — the dominant term in the per-schema budget at this grammar size — so it is worth keeping
-for the tail but is a candidate to make optional.
+So the second pass is marginal for almost everything and dramatic for a handful. It also **costs
+~1 s per schema and is the dominant term in the compile budget** (§3.2). Recommendation: keep it —
+43 min for the whole benchmark is cheap, and a 9.95× reduction on the largest grammars is exactly
+where tree memory matters — but make it a flag, since 99.5% of schemas gain almost nothing.
 
 ### 4.3 Complement sizes and `K_max` (§4.4 Layer 2b)
 
 The largest label class in every real BFCL schema covers **~99.6% of the vocabulary**
-(max observed 261,154 of 262,141), giving `|N_c|` of **987–1,585**.
+(max observed 261,154 of 262,141), giving `|N_c|` of **987–1,591**.
 
 **SPEC's `K_max = 256` default is too small by ~6×.** With it, every one of these classes falls
 back to positive storage in the max table and Layer 3's `nnz ≈ 25,000` budget is violated by ~four
 orders of magnitude. `classes.py` defaults to **1,100** and additionally *derives* `K_max` from the
 grammar (`auto_k_max`), asserting `K > max_c |N_c|` at build time.
+
+### 4.4 The class-layer memory budget holds
+
+SPEC §4.4 Layer 3 predicts `nnz ≈ 25,000` and ~100 KB of tables (plus a separate 512 KB argmax
+table). Measured across all 4,549 schemas:
+
+- `nnz_sum` **9,125 median, 51,200 max**
+- total class tables **76.2 KB median, 425.2 KB max**
+
+Both sit within the predicted order. The four-layer scheme delivers what §4.4 claims.
 
 ---
 

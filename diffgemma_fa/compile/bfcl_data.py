@@ -134,10 +134,17 @@ def materialize_ground_truth(
                         if u is not None]
             if not value:
                 return None
-            first = value[0]
-            if first == "" and len(value) > 1:
-                first = value[1]
-            return unwrap(first, sub)
+            # `""` among the acceptable values means "this parameter may be
+            # omitted", and omission is then *always* an acceptable answer — so
+            # prefer it. Skipping past `""` to the next entry is wrong and not
+            # merely suboptimal: `{"unit": ["", "N/A"]}` against an enum of
+            # ["seconds", "milliseconds"] has omission as its ONLY valid
+            # reading, because "N/A" is not in the enum. Measured on
+            # live_simple, taking the second value there produced 12 of 24
+            # apparent grammar rejections.
+            if any(v == "" for v in value):
+                return None
+            return unwrap(value[0], sub)
         if isinstance(value, dict):
             inner = (sub.get("properties") or {}) if sub else {}
             out = {}
