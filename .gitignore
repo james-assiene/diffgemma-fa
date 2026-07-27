@@ -11,3 +11,5 @@ artifacts/*
 !artifacts/phase0_*.json
 __pycache__/
 *.pyc
+# BFCL / benchmark checkouts live under artifacts/data (large, upstream-owned)
+artifacts/data/

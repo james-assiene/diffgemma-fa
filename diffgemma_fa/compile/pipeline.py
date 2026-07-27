@@ -1,0 +1,146 @@
+"""End-to-end compilation. SPEC §4.1.
+
+```
+grammar spec (JSON Schema | regex | task DSL)
+      |  §4.2      ->  byte-level regex
+      |  regex-automata dense::DFA (anchored, via outlines_core)
+   byte DFA        ->  minimize (inside outlines, over ByteClasses)
+      |  §4.3         token lift
+   token DFA/NFA   ->  minimize (Valmari, §4.5)
+      |  §4.4         label interning -> classes -> CSR x2 (sum and max)
+   Automaton artifact (padded to a power-of-two |S| bucket)
+```
+"""
+
+from __future__ import annotations
+
+import dataclasses
+import time
+from typing import Any, Sequence
+
+from diffgemma_fa.compile import schema as schema_mod
+from diffgemma_fa.compile import vocab as vocab_mod
+from diffgemma_fa.compile.automaton import CompiledAutomaton, compile_automaton
+from diffgemma_fa.compile.lift import lift_regex
+
+__all__ = ["CompileReport", "compile_regex", "compile_json_schema"]
+
+
+@dataclasses.dataclass(frozen=True)
+class CompileReport:
+    """The artifact plus the numbers Phase 1 must report."""
+
+    automaton: CompiledAutomaton
+    regex_len: int
+    seconds_regex: float
+    seconds_index: float
+    seconds_transitions: float
+    seconds_minimize: float
+    seconds_classes: float
+    states_raw: int
+    states_minimized: int
+    transitions_raw: int
+    transitions_minimized: int
+
+    @property
+    def seconds_total(self) -> float:
+        return (self.seconds_regex + self.seconds_index + self.seconds_transitions
+                + self.seconds_minimize + self.seconds_classes)
+
+    @property
+    def minimization_state_ratio(self) -> float:
+        """SPEC §4.5: unpublished — nobody does the post-lift pass."""
+        return self.states_raw / max(1, self.states_minimized)
+
+    def summary(self) -> dict:
+        d = self.automaton.summary()
+        d.update({
+            "regex_len": self.regex_len,
+            "seconds_total": round(self.seconds_total, 3),
+            "seconds_regex": round(self.seconds_regex, 4),
+            "seconds_index": round(self.seconds_index, 3),
+            "seconds_transitions": round(self.seconds_transitions, 3),
+            "seconds_minimize": round(self.seconds_minimize, 3),
+            "seconds_classes": round(self.seconds_classes, 3),
+            "states_raw": self.states_raw,
+            "states_minimized": self.states_minimized,
+            "minimization_state_ratio": round(self.minimization_state_ratio, 3),
+            "transitions_raw": self.transitions_raw,
+            "transitions_minimized": self.transitions_minimized,
+        })
+        return d
+
+
+def compile_regex(
+    regex: str,
+    *,
+    name: str,
+    vocabulary: Any = None,
+    end_tokens: Sequence[int] = vocab_mod.END_TOKENS,
+    vocab_size: int | None = None,
+    do_minimize: bool = True,
+    ladder: Sequence[int] | None = None,
+    k_max: int | None = None,
+    schema_hash: str = "",
+) -> CompileReport:
+    """Compile an anchored byte-level regex into a `CompiledAutomaton`."""
+    vocabulary = vocabulary if vocabulary is not None else vocab_mod.build_vocabulary()
+    if vocab_size is None:
+        vocab_size = int(vocab_mod.gemma_tokenizer().vocab_size)
+
+    lifted = lift_regex(regex, vocabulary, do_minimize=do_minimize)
+
+    t0 = time.perf_counter()
+    automaton = compile_automaton(
+        lifted.dfa,
+        name=name,
+        end_tokens=end_tokens,
+        vocab_size=vocab_size,
+        ladder=ladder,
+        k_max=k_max,
+        schema_hash=schema_hash,
+    )
+    seconds_classes = time.perf_counter() - t0
+
+    return CompileReport(
+        automaton=automaton,
+        regex_len=len(regex),
+        seconds_regex=0.0,
+        seconds_index=lifted.seconds_index,
+        seconds_transitions=lifted.seconds_transitions,
+        seconds_minimize=lifted.seconds_minimize,
+        seconds_classes=seconds_classes,
+        states_raw=lifted.states_raw,
+        states_minimized=lifted.states_minimized,
+        transitions_raw=lifted.transitions_raw,
+        transitions_minimized=lifted.transitions_minimized,
+    )
+
+
+def compile_json_schema(
+    json_schema: dict,
+    *,
+    name: str,
+    from_bfcl: bool = False,
+    allow: Sequence[str] = (),
+    allow_wildcard: bool = False,
+    whitespace_pattern: str | None = "",
+    **kwargs: Any,
+) -> CompileReport:
+    """Compile a JSON Schema (or BFCL parameter block) end to end.
+
+    `whitespace_pattern=""` forbids inter-token whitespace by default, which
+    shrinks the automaton substantially and costs nothing the benchmark scores.
+    """
+    t0 = time.perf_counter()
+    regex = schema_mod.build_regex(
+        json_schema, from_bfcl=from_bfcl, allow=allow,
+        allow_wildcard=allow_wildcard, whitespace_pattern=whitespace_pattern,
+    )
+    seconds_regex = time.perf_counter() - t0
+
+    from diffgemma_fa.compile.automaton import schema_fingerprint
+
+    report = compile_regex(regex, name=name,
+                           schema_hash=schema_fingerprint(json_schema), **kwargs)
+    return dataclasses.replace(report, seconds_regex=seconds_regex)
