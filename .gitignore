@@ -1,0 +1,7 @@
+.venv/
+.jax_cache/
+.hf/
+logs/
+artifacts/
+__pycache__/
+*.pyc
