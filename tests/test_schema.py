@@ -157,3 +157,75 @@ def test_clean_schema_passes():
         },
         "required": ["city"],
     })
+
+
+def test_bfcl_any_becomes_a_typeless_wildcard_not_a_literal():
+    """BFCL's `any` has no JSON Schema spelling — the equivalent is *omitting*
+    `type`. Passing the literal string to outlines raises
+    `ValueError: Unsupported type: any`; measured on BFCL-Live that killed 11
+    of 4,549 schemas."""
+    out = normalize_bfcl_schema({"type": "any"})
+    assert "type" not in out
+    assert out.get("__wildcard__") is True
+
+
+def test_any_still_refused_by_default_and_allowed_on_request():
+    n = normalize_bfcl_schema({"type": "dict",
+                               "properties": {"p": {"type": "any"}}})
+    with pytest.raises(UnsupportedSchemaError, match="wildcard"):
+        check_supported(n)
+    check_supported(n, allow_wildcard=True)
+
+
+def test_any_compiles_end_to_end_to_the_seven_way_alternation():
+    from diffgemma_fa.compile.schema import build_regex
+
+    rx = build_regex({"type": "dict", "required": ["p"],
+                      "properties": {"p": {"type": "any"}}},
+                     from_bfcl=True, allow_wildcard=True, whitespace_pattern="")
+    assert len(rx) > 5000, "the wildcard should expand to the big alternation"
+    assert "__wildcard__" not in rx, "internal marker must not leak into the regex"
+
+
+def test_array_level_enum_is_pushed_down_into_items():
+    """BFCL routinely writes an *element* enum at the array level:
+
+        {"type": "array", "items": {"type": "string"}, "enum": ["view", ...]}
+
+    Read literally that demands the whole array equal one of those strings —
+    unsatisfiable — and outlines' precedence (`enum` above `type`) compiles
+    exactly that, silently requiring `"metrics":"view"` where the reference
+    answer is `"metrics":["view"]`. Measured on live_simple, this one pattern
+    caused 21 of 23 remaining ground-truth rejections.
+    """
+    out = normalize_bfcl_schema({
+        "type": "array",
+        "items": {"type": "string"},
+        "enum": ["view", "trust"],
+    })
+    assert out["type"] == "array"
+    assert "enum" not in out
+    assert out["items"]["enum"] == ["view", "trust"]
+    assert out["items"]["type"] == "string"
+
+
+def test_array_level_enum_does_not_clobber_an_existing_item_enum():
+    out = normalize_bfcl_schema({
+        "type": "array",
+        "items": {"type": "string", "enum": ["a"]},
+        "enum": ["b"],
+    })
+    assert out["items"]["enum"] == ["a"]
+
+
+def test_scalar_enum_plus_type_stays_benign():
+    """The common, harmless case must keep compiling."""
+    check_supported({"type": "string", "enum": ["c", "f"]})
+    check_supported({"type": "integer", "enum": [1, 2]})
+
+
+def test_container_enum_plus_type_is_flagged():
+    """After normalization nothing should reach here, but a hand-written schema
+    with a container-level enum is genuinely ambiguous and must not pass."""
+    with pytest.raises(UnsupportedSchemaError, match="first-match-wins"):
+        check_supported({"type": "array", "enum": ["x"]})

@@ -130,6 +130,26 @@ def normalize_bfcl_schema(node: Any, *, path: str = "") -> Any:
     if not isinstance(node, dict):
         return node
 
+    # BFCL routinely writes an *element* enum at the array level:
+    #
+    #   {"type": "array", "items": {"type": "string"}, "enum": ["view", ...]}
+    #
+    # Read literally that says the whole array must equal one of those strings,
+    # which is unsatisfiable — and because outlines' precedence puts `enum`
+    # above `type`, it compiles to exactly that, silently requiring
+    # `"metrics":"view"` where the reference answer is `"metrics":["view"]`.
+    # Measured on `live_simple`, this single pattern caused 21 of 23 remaining
+    # ground-truth rejections. The intent is unambiguous, so push the enum down
+    # into `items` where it belongs.
+    if (isinstance(node.get("type"), str)
+            and node["type"] in ("array", "tuple")
+            and isinstance(node.get("enum"), list)):
+        node = dict(node)
+        enum_values = node.pop("enum")
+        items = dict(node.get("items") or {})
+        items.setdefault("enum", enum_values)
+        node["items"] = items
+
     out: dict[str, Any] = {}
     for key, value in node.items():
         if key in ("default", "optional", "description"):
@@ -139,7 +159,14 @@ def normalize_bfcl_schema(node: Any, *, path: str = "") -> Any:
             continue
         if key == "type" and isinstance(value, str):
             if value in WILDCARD_TYPES:
-                out["type"] = value  # left for check_supported to flag
+                # BFCL's `any` has no JSON Schema spelling — the equivalent is
+                # *omitting* `type`, which outlines expands to its 7-way
+                # alternation over all JSON types. Passing the literal string
+                # through instead makes outlines raise
+                # `ValueError: Unsupported type: any`; measured on BFCL-Live,
+                # that killed 11 of 4,549 schemas. `check_supported` still sees
+                # the wildcard via the marker below and can refuse it.
+                out["__wildcard__"] = True
                 continue
             if value not in BFCL_TYPE_MAP:
                 raise UnsupportedSchemaError(
@@ -211,10 +238,21 @@ def check_supported(
     # ubiquitous: BFCL v4 carries 9,405 `properties` and 5,786 `enum`, nearly
     # all of them alongside a redundant `type`, so treating this as an error
     # would reject essentially the whole benchmark for no gain in constraint.
+    #
+    # `enum`/`const` beating `type` is benign only for **scalar** types, where
+    # the enum already pins the value set. For `array`/`object` it is not: an
+    # array-level enum listing element values compiles to "the whole array
+    # equals this string". `normalize_bfcl_schema` rewrites the BFCL spelling
+    # of that; anything left here is genuinely ambiguous and must be flagged.
     present = [k for k in _PRECEDENCE if k in node]
     if len(present) > 1:
         winner, losers = present[0], present[1:]
-        benign = losers == ["type"] and winner in ("properties", "enum", "const")
+        scalar = node.get("type") in (
+            "string", "integer", "number", "boolean", "null", None
+        )
+        benign = losers == ["type"] and (
+            winner == "properties" or (winner in ("enum", "const") and scalar)
+        )
         if not benign and "first_match_wins" not in allow:
             raise UnsupportedSchemaError(
                 path, winner,
@@ -224,10 +262,10 @@ def check_supported(
 
     if not allow_wildcard:
         t = node.get("type")
-        if t in WILDCARD_TYPES:
+        if t in WILDCARD_TYPES or node.get("__wildcard__"):
             raise UnsupportedSchemaError(
                 path, "type",
-                f"{t!r} is a wildcard over all JSON types; pass allow_wildcard=True "
+                "a wildcard over all JSON types; pass allow_wildcard=True "
                 "to accept the ~26-130x compile cost (SPEC §4.2, §4.7)",
             )
         if node.get("additionalProperties") is True:
@@ -251,6 +289,15 @@ def check_supported(
         elif key in ("allOf", "anyOf", "oneOf", "prefixItems") and isinstance(value, list):
             check_supported(value, path=f"{path}.{key}" if path else key,
                             allow=allow, allow_wildcard=allow_wildcard)
+
+
+def _strip_markers(node: Any) -> Any:
+    """Remove the internal `__wildcard__` marker before handing to outlines."""
+    if isinstance(node, list):
+        return [_strip_markers(v) for v in node]
+    if not isinstance(node, dict):
+        return node
+    return {k: _strip_markers(v) for k, v in node.items() if k != "__wildcard__"}
 
 
 def build_regex(
@@ -279,6 +326,7 @@ def build_regex(
     if from_bfcl:
         schema = normalize_bfcl_schema(schema)
     check_supported(schema, allow=allow, allow_wildcard=allow_wildcard)
+    schema = _strip_markers(schema)
 
     kwargs = {}
     if whitespace_pattern is not None:

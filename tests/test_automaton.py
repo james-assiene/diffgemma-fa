@@ -194,3 +194,63 @@ def test_edges_group_by_state_pair():
     a = compile_automaton(dfa, name="t", end_tokens=(1,), vocab_size=V)
     pairs = list(zip(a.edge_src.tolist(), a.edge_dst.tolist()))
     assert pairs.count((0, 1)) == 1
+
+
+# --------------------------------------------------------------------------
+# Serialization
+# --------------------------------------------------------------------------
+
+def test_save_load_roundtrip(tmp_path):
+    """The artifact must survive a save/load cycle bit-for-bit — Phase 3
+    dispatches on these arrays and a silent dtype change would be invisible."""
+    from diffgemma_fa.compile import automaton as am
+
+    a = compile_automaton(line_dfa(3), name="rt", end_tokens=END_TOKENS,
+                          vocab_size=V, schema_hash="deadbeef")
+    p = str(tmp_path / "a.npz")
+    am.save(a, p)
+    b = am.load(p)
+
+    assert b.name == a.name and b.schema_hash == a.schema_hash
+    assert b.n_states == a.n_states and b.n_states_bucket == a.n_states_bucket
+    assert b.is_dfa == a.is_dfa
+    for field in ("edge_src", "edge_dst", "edge_class", "d", "is_final",
+                  "start_vector"):
+        x, y = getattr(a, field), getattr(b, field)
+        assert x.dtype == y.dtype, field
+        assert np.array_equal(x, y), field
+    for field in ("sum_is_neg", "sum_indptr", "sum_indices",
+                  "max_is_neg", "max_indptr", "max_indices", "class_id"):
+        x, y = getattr(a.tables, field), getattr(b.tables, field)
+        assert x.dtype == y.dtype, field
+        assert np.array_equal(x, y), field
+    assert b.tables.k_max == a.tables.k_max
+    assert b.tables.max_neg_size == a.tables.max_neg_size
+
+
+def test_loaded_automaton_simulates_identically(tmp_path):
+    from diffgemma_fa.compile import automaton as am
+    from diffgemma_fa.compile.validate import Simulator
+
+    a = compile_automaton(line_dfa(2), name="rt", end_tokens=(1,), vocab_size=V)
+    p = str(tmp_path / "b.npz")
+    am.save(a, p)
+    b = am.load(p)
+    assert Simulator(a).accepts([7, 7, 1])
+    assert Simulator(b).accepts([7, 7, 1])
+    assert not Simulator(b).accepts([7, 1])
+
+
+def test_oversize_bucket_flags_the_chain_path_instead_of_crashing():
+    """SPEC §5.6: anything above the top usable bucket goes to the chain
+    sampler. Measured on BFCL-Live the largest raw lifted automaton has 3,573
+    states — above both this ladder and the 2,459 the paper quotes — so this
+    path is real and must not abort a whole compile run."""
+    assert bucket_size(5000, allow_oversize=True) == 8192
+    with pytest.raises(ValueError, match="chain sampler"):
+        bucket_size(5000, allow_oversize=False)
+
+
+def test_small_automaton_is_not_flagged_for_the_chain_path():
+    a = compile_automaton(line_dfa(2), name="t", end_tokens=(1,), vocab_size=V)
+    assert not a.needs_chain_path

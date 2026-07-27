@@ -54,20 +54,42 @@ __all__ = [
 INF_DISTANCE = np.int32(1 << 24)
 
 
-def bucket_size(n: int, *, ladder: Sequence[int] | None = None) -> int:
+#: Powers of two up to the largest the measured HBM headroom admits.
+#: Phase 0 measured ~20 GB free on this H100: 2048 needs 8.59 GB, 4096 needs
+#: 34.3 GB. Derive this from the budget, never hardcode past it — AOT-warming a
+#: bucket you can never dispatch to tries to compile and allocate that program.
+DEFAULT_LADDER: tuple[int, ...] = (16, 32, 64, 128, 256, 512, 1024, 2048)
+
+
+def bucket_size(
+    n: int,
+    *,
+    ladder: Sequence[int] | None = None,
+    allow_oversize: bool = False,
+) -> int:
     """Round `|S|` up to the next power-of-two bucket. SPEC §5.5.
 
-    The ladder must be **derived from the memory budget**, not hardcoded: an
-    unrolled tree over `[256, S, S]` costs `(2L−1)·S²·4 B`, so warming a bucket
-    you can never dispatch to would try to compile and allocate a program that
-    does not fit. Phase 0 measured ~20 GB free on this H100, which admits 2048
-    (8.59 GB) but not 4096 (34.3 GB).
+    Args:
+      n: state count including the dead padding state.
+      ladder: usable buckets; defaults to `DEFAULT_LADDER`.
+      allow_oversize: return the next power of two beyond the ladder instead of
+        raising. The caller must then route the grammar to the chain sampler
+        (SPEC §5.6) — measured on BFCL-Live, the largest raw lifted automaton
+        has 3,573 states, above this ladder and above the 2,459 the paper
+        quotes, so this case is real and must not simply crash the run.
+
+    Raises:
+      ValueError: when `n` exceeds the ladder and `allow_oversize` is False.
     """
-    if ladder is None:
-        ladder = (16, 32, 64, 128, 256, 512, 1024, 2048)
+    ladder = DEFAULT_LADDER if ladder is None else ladder
     for b in ladder:
         if n <= b:
             return b
+    if allow_oversize:
+        b = ladder[-1]
+        while b < n:
+            b *= 2
+        return b
     raise ValueError(
         f"|S| = {n} exceeds the largest usable bucket {ladder[-1]}; this grammar "
         "must go to the chain sampler (SPEC §5.6)"
@@ -189,6 +211,11 @@ class CompiledAutomaton:
     tokenizer_hash: str
     compiler_version: str
 
+    #: True when `|S|` exceeded the usable bucket ladder. Such a grammar cannot
+    #: use the tree sampler and must be routed to the chain path (SPEC §5.6).
+    #: Log which path each request took and report the split.
+    needs_chain_path: bool = False
+
     @property
     def dead_state(self) -> int:
         """The absorbing pad state. Every bucketed index >= n_states is dead."""
@@ -220,6 +247,7 @@ class CompiledAutomaton:
             "max_finite_d": int(self.d[self.d < INF_DISTANCE].max())
             if (self.d < INF_DISTANCE).any() else None,
             "n_dead_states": int((self.d >= INF_DISTANCE).sum()),
+            "needs_chain_path": self.needs_chain_path,
         }
 
 
@@ -259,6 +287,7 @@ def compile_automaton(
     compiler_version: str = "phase1",
     ladder: Sequence[int] | None = None,
     k_max: int | None = None,
+    allow_oversize: bool = True,
 ) -> CompiledAutomaton:
     """Augment, measure `d`, intern labels, bucket. The whole back half of §4.
 
@@ -277,7 +306,9 @@ def compile_automaton(
     d_real = distance_to_final(aug.n_states, pairs, aug.finals)
 
     n = aug.n_states
-    bucket = bucket_size(n + 1, ladder=ladder)  # +1 for the dead state
+    bucket = bucket_size(n + 1, ladder=ladder, allow_oversize=allow_oversize)
+    usable_top = (DEFAULT_LADDER if ladder is None else ladder)[-1]
+    needs_chain_path = bucket > usable_top
 
     d = np.full(bucket, INF_DISTANCE, dtype=np.int32)
     d[:n] = d_real
@@ -303,6 +334,73 @@ def compile_automaton(
         schema_hash=schema_hash,
         tokenizer_hash=tokenizer_hash,
         compiler_version=compiler_version,
+        needs_chain_path=needs_chain_path,
+    )
+
+
+def save(automaton: CompiledAutomaton, path: str) -> None:
+    """Serialize to a single `.npz`.
+
+    The cache key is `(schema_hash, tokenizer_hash, compiler_version)` and it is
+    stored alongside the arrays. **Do not reuse `~/.cache/outlines`** — its key
+    ignores the tokenizer, so a vocabulary change silently returns a stale
+    automaton (SPEC §4.7(3)).
+    """
+    t = automaton.tables
+    np.savez_compressed(
+        path,
+        meta=np.frombuffer(
+            json.dumps({
+                "name": automaton.name,
+                "n_states": automaton.n_states,
+                "n_states_bucket": automaton.n_states_bucket,
+                "n_edges": automaton.n_edges,
+                "vocab_size": automaton.vocab_size,
+                "is_dfa": automaton.is_dfa,
+                "n_classes": t.n_classes,
+                "k_max": t.k_max,
+                "max_neg_size": t.max_neg_size,
+                "schema_hash": automaton.schema_hash,
+                "tokenizer_hash": automaton.tokenizer_hash,
+                "compiler_version": automaton.compiler_version,
+                "needs_chain_path": automaton.needs_chain_path,
+            }).encode(),
+            dtype=np.uint8,
+        ),
+        edge_src=automaton.edge_src, edge_dst=automaton.edge_dst,
+        edge_class=automaton.edge_class, d=automaton.d,
+        is_final=automaton.is_final, start_vector=automaton.start_vector,
+        class_size=t.class_size,
+        sum_is_neg=t.sum_is_neg, sum_indptr=t.sum_indptr, sum_indices=t.sum_indices,
+        max_is_neg=t.max_is_neg, max_indptr=t.max_indptr, max_indices=t.max_indices,
+        class_id=t.class_id,
+    )
+
+
+def load(path: str) -> CompiledAutomaton:
+    """Inverse of `save`."""
+    z = np.load(path, allow_pickle=False)
+    meta = json.loads(bytes(z["meta"]).decode())
+    tables = ClassTables(
+        n_classes=meta["n_classes"], n_edges=meta["n_edges"],
+        vocab_size=meta["vocab_size"], k_max=meta["k_max"],
+        class_id=z["class_id"], class_size=z["class_size"],
+        sum_is_neg=z["sum_is_neg"], sum_indptr=z["sum_indptr"],
+        sum_indices=z["sum_indices"],
+        max_is_neg=z["max_is_neg"], max_indptr=z["max_indptr"],
+        max_indices=z["max_indices"],
+        max_neg_size=meta["max_neg_size"],
+    )
+    return CompiledAutomaton(
+        name=meta["name"], n_states=meta["n_states"],
+        n_states_bucket=meta["n_states_bucket"], n_edges=meta["n_edges"],
+        vocab_size=meta["vocab_size"], is_dfa=meta["is_dfa"],
+        edge_src=z["edge_src"], edge_dst=z["edge_dst"], edge_class=z["edge_class"],
+        d=z["d"], is_final=z["is_final"], start_vector=z["start_vector"],
+        tables=tables, schema_hash=meta["schema_hash"],
+        tokenizer_hash=meta["tokenizer_hash"],
+        compiler_version=meta["compiler_version"],
+        needs_chain_path=meta.get("needs_chain_path", False),
     )
 
 

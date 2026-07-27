@@ -86,6 +86,78 @@ def load(splits: tuple[str, ...], *, data_dir: pathlib.Path = DATA_DIR) -> list[
     return [r for s in splits for r in iter_split(s, data_dir=data_dir)]
 
 
+def materialize_ground_truth(
+    args: dict,
+    schema: dict | None = None,
+) -> dict:
+    """Turn one BFCL ground-truth argument block into a concrete value dict.
+
+    BFCL's `possible_answer` format wraps **every leaf, at every nesting level**,
+    in a list of acceptable values:
+
+        {"body": {"airConJobMode": ["AIR_CLEAN"], "enabled": [true]}}
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ still wrapped, one level down
+
+    Unwrapping only the top level leaves `["AIR_CLEAN"]` as the value of a
+    parameter the schema declares `string`, which then looks like a grammar
+    over-constraint when it is nothing of the sort. Measured on
+    `live_simple`, that mistake accounted for most apparent rejections.
+
+    `null` is BFCL's "this parameter was omitted", not a value — a schema
+    declaring `type: string` is not violated by it, so those keys are dropped
+    rather than emitted as `null`.
+
+    Args:
+      args: the per-function argument block from `possible_answer`.
+      schema: the (BFCL-dialect) parameter schema, used to decide whether a
+        list is a genuine `array` value or an acceptable-values wrapper.
+
+    Returns:
+      A concrete argument dict, taking the first acceptable value throughout.
+    """
+    props = (schema or {}).get("properties") or {}
+
+    def unwrap(value, sub: dict | None):
+        sub = sub or {}
+        declared = sub.get("type")
+        if isinstance(value, list):
+            # A genuine array value keeps its list; an acceptable-values
+            # wrapper is unwrapped. When the schema says `array`, a list of
+            # lists is the wrapper and a flat list is the value.
+            if declared in ("array", "tuple"):
+                if value and all(isinstance(v, list) for v in value):
+                    value = value[0]
+                items = sub.get("items") or {}
+                # `null` elements are BFCL's "omitted" marker one level down,
+                # not a value the schema's `items` type is expected to admit.
+                return [u for u in (unwrap(v, items) for v in value)
+                        if u is not None]
+            if not value:
+                return None
+            first = value[0]
+            if first == "" and len(value) > 1:
+                first = value[1]
+            return unwrap(first, sub)
+        if isinstance(value, dict):
+            inner = (sub.get("properties") or {}) if sub else {}
+            out = {}
+            for k, v in value.items():
+                got = unwrap(v, inner.get(k))
+                if got is not None:
+                    out[k] = got
+            return out
+        if value == "":
+            return None
+        return value
+
+    out: dict = {}
+    for key, value in args.items():
+        got = unwrap(value, props.get(key))
+        if got is not None:
+            out[key] = got
+    return out
+
+
 def load_possible_answers(name: str, *, data_dir: pathlib.Path = DATA_DIR) -> dict[str, list]:
     """Ground-truth answers for a split, keyed by record id.
 

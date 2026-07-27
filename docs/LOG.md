@@ -87,3 +87,65 @@ generation. §4.2's outlines limitations were not re-verified.
 
 Phase 1 — `compile/`. First task should be downloading real BFCL schemas and re-measuring §4.7's
 projection against them before quoting the 0.9 h figure.
+
+---
+
+## 2026-07-27 — Phase 1 (same session)
+
+Built `diffgemma_fa/compile/`: `schema.py`, `vocab.py`, `lift.py`, `minimize.py` (Valmari),
+`classes.py`, `automaton.py`, `pipeline.py`, `validate.py`, `bfcl_data.py`, `tasks/`. 256 tests.
+Full write-up in `docs/PHASE1_FINDINGS.md`.
+
+### Package layout — a deliberate deviation from SPEC's tree
+
+SPEC §8 draws `compile/`, `infer/`, `model/`, `eval/` directly at the repo root, but CLAUDE.md's
+commands are `python -m diffgemma_fa.compile.tasks.bfcl`. Those are inconsistent: the module path
+requires `diffgemma_fa` to be an importable package. Resolved in favour of the **commands**, which
+are what actually get run: the package lives at `diffgemma_fa/compile/…` inside the repo, so the
+documented commands work from the repo root with no install step, and `tests/` and `docs/` stay
+outside the package.
+
+### Data
+
+`ShishirPatil/gorilla` sparse-cloned to `artifacts/data/gorilla` (16 MB, gitignored). SPEC §7.1
+confirmed: data is in git not HF, and v4 renamed `simple` → `simple_python`. **BFCL-Live is exactly
+1,351** (257+1,052+15+23 across the four live splits) — SPEC's figure is right; `live_relevance`
+(16) and `live_irrelevance` (884) are scored separately.
+
+### Three correctness bugs, none self-announcing
+
+1. **Reserved tokens leak into the grammar alphabet.** `<turn|>` (106) and `<|tool_response>` (50)
+   are *not* SentencePiece control tokens, so a JSON string body can match their plain-ASCII bytes.
+   The grammar could then emit a stop token mid-value → canvas truncated mid-grammar → empty
+   `A_{k+1}`. Fixed via `vocab.RESERVED_TOKENS`.
+2. **`T[final][eos]` had to be stripped, not just ignored.** SPEC §4.3 warns the edge exists;
+   leaving it makes every augmented automaton spuriously nondeterministic and silently drops eq (8)
+   off its fast path. Fixed in `lift.py`. Now 256/256 real BFCL schemas are genuine DFAs.
+3. **BFCL's `any` cannot pass through to outlines** (`ValueError: Unsupported type: any`, 11 of
+   4,549 schemas). Maps to a typeless schema now.
+
+### `[?]` resolved by measurement
+
+- **§4.7 on real data: 4,549 schemas, median 0.42 s, total 37.9 min serial.** Confirms Phase 0's
+  ~0.9 h order of magnitude against SPEC's original 4–7 days. Pre-filter still unnecessary.
+- **Open question 9, both halves.** Edge-level class dedup ratio **1.68**; post-lift minimization
+  **1.11× mean, 9.29× max** — the second pass is usually marginal, occasionally dramatic.
+- **`K_max`: measured `|N_c|` = 987–1,585**, so SPEC's 256 default is ~6× too small. Default is now
+  1,100 and is auto-derived per grammar.
+- **`states_max = 3,573` on BFCL-Live**, above the paper's quoted 2,459 and above any usable tree
+  bucket → SPEC §5.6's chain fallback is real, flagged via `needs_chain_path`.
+
+### A measurement trap worth remembering
+
+Ground-truth acceptance first read 82.5%, which looks exactly like grammar over-constraint. It was
+not: BFCL wraps **every leaf at every nesting level** in a list of acceptable values, and I was
+unwrapping only the top level. Recursive unwrapping → 93.8%. Do not report an over-constraint rate
+without first checking the harness.
+
+### Not done
+
+Round-trip covers `live_simple` only; the `multiple`/`parallel` union and call-list grammars are
+built and unit-tested but not round-tripped. The Python-format grammar is not round-tripped against
+ground truth, and its `d=2` depth-bound coverage is unmeasured. Spider is not implemented (NFA,
+and §5.6 says dense is infeasible). xLAM/GSM-Symbolic/Countdown/Sudoku grammars exist but no
+dataset is downloaded. All listed in `docs/PHASE1_FINDINGS.md` §5.2.

@@ -1083,6 +1083,24 @@ allowed only if the DFA consumes **all** its bytes; `guide.advance(eos)` raises 
 `outlines_core` top level, not `outlines_core.guide`. Wire
 `IncompatibleVocabulary{regex, error_state, missing_tokens}` (≥0.2.14) into validation.
 
+> **[V-P1] Two alphabet hazards that are correctness bugs, not hygiene.**
+>
+> **(a) Reserved tokens must be kept out of the grammar's alphabet.** `<eos>` (1) and `<pad>` (0)
+> *are* SentencePiece control tokens and drop out of the vocabulary automatically — but
+> **`<turn|>` (106) and `<|tool_response>` (50) are not.** They are ordinary pieces whose bytes are
+> plain ASCII, so `outlines_core` lets a JSON string body match them. A grammar that can emit one
+> internally means `_truncate_canvas_at_stop_tokens` cuts the canvas *mid-grammar* and `A_{k+1}`
+> goes empty — §3.1b failure mode 3, reached from the **grammar** region rather than the free-text
+> region §3.6 describes. Exclude `{PAD} ∪ end_tokens ∪ {100, 101, 105}` when building the
+> `Vocabulary` (`compile/vocab.py: RESERVED_TOKENS`).
+>
+> **(b) `T[final][eos]` must be stripped after lifting, not merely ignored.** The trap above is
+> real but understated: since stop tokens are handled out of band by the §3.5 augmentation, leaving
+> outlines' injected `final --eos--> final` edge in place gives the grammar-final state *two*
+> destinations on the EOS label. The result is an automaton that is **spuriously nondeterministic**,
+> which silently drops eq (8) off its `∃` fast path onto the multiplicity-weighted one and makes
+> `is_dfa` false for every grammar. With the edge stripped, real BFCL schemas lift to genuine DFAs.
+
 ### 4.4 Token-set representation
 
 Every step needs `W[i,e] = Σ_{v ∈ label(e)} p_i(v)` for all `i ∈ [256]`, `e ∈ [E]`, `E` up to
@@ -1238,8 +1256,35 @@ on NFAs (§2.7).
 > | **`{}` wildcard (§4.2's 7-way alternation)** | **16.7 s** | 3,261 | 36,210,539 |
 >
 > Realistic function-call schemas: **0.13–0.65 s each.** Mean over all eight including the
-> wildcard: 2.38 s. **BFCL-Live's 1,351 instances project to ~0.9 hours serially** — minutes on
-> this box's 26 cores. Building the `Vocabulary` itself costs a one-off 2.9 s.
+> wildcard: 2.38 s. Building the `Vocabulary` itself costs a one-off 2.9 s.
+
+> **[V-P1] Re-measured on the real BFCL-Live set, which is what the number should have been all
+> along** (`scripts/phase1_bfcl_timing.py`, `artifacts/phase1_bfcl_timing.json`). 1,351 records →
+> **4,549 schemas** (records carry 1–8+ functions, so schemas outnumber records ~3.4×):
+>
+> | | |
+> |---|---|
+> | compiled | **4,538 / 4,549** |
+> | median | **0.42 s** |
+> | p90 / p99 | 0.78 s / 1.66 s |
+> | max | **15.8 s** (the `{}`/`any` wildcard shape again) |
+> | **total, serial** | **2,272 s = 37.9 minutes** |
+> | states, median / p90 / max | **114 / 249 / 3,573** |
+>
+> So the real figure is **38 minutes serially for all of BFCL-Live**, a few minutes across this
+> box's cores — against the ~~4–7 days~~ originally projected. Phase 0's hand-written estimate of
+> ~0.9 h was the right order.
+>
+> Two things the real data changed that the hand-written schemas did not show:
+>
+> - **`states_max = 3,573`, above the 2,459 this spec quotes as the paper's largest BFCL DFA and
+>   above any usable tree bucket.** The dispatch rule in §5.6 is not hypothetical: some BFCL
+>   grammars must go to the chain path. `bucket_size(..., allow_oversize=True)` flags them via
+>   `CompiledAutomaton.needs_chain_path` rather than aborting the run.
+> - **11 schemas failed with `ValueError: Unsupported type: any`.** BFCL's `any` has no JSON Schema
+>   spelling and must be translated to a *typeless* schema (`{}`), not passed through as the literal
+>   string. Fixed in `compile/schema.py`; the wildcard is still refused unless
+>   `allow_wildcard=True`.
 
 Consequences:
 
@@ -1271,6 +1316,30 @@ Still worth keeping, cheaply:
 | Countdown | each step matches `A op B=C` | DFA | 47–77 |
 | GSM-Symbolic | symbolic expressions only inside `«…»` | DFA | 56 (single automaton) |
 | Spider | SQL grammar restricted to the schema's tables/columns | **NFA** | 8,796–19,509 |
+
+> **[V-P1] BFCL's `parameters` are NOT JSON Schema, and this spec never said so.** They are a
+> Python-flavoured dialect, and the Java/JavaScript splits leak their own type names in. Measured
+> occurrences across all BFCL v4 splits:
+>
+> | | | | |
+> |---|---|---|---|
+> | `string` 21,854 | `dict` **9,464** | `integer` 4,757 | `boolean` 3,115 |
+> | `float` **1,690** | `array` 959 | `any` 199 | `String` 115 |
+> | `tuple` 66 | `Array` 13 | `HashMap` 7 | `long` 7 |
+> | `ArrayList` 6 | `Boolean` 4 | `double` 1 | `char` 1 |
+>
+> **`object` and `number` occur zero times.** So `build_regex_from_schema` must be fed a translated
+> schema (`compile/schema.py: BFCL_TYPE_MAP`), and an unrecognised type name must **raise** rather
+> than be guessed at. `any` maps to a *typeless* schema, not the literal string — see §4.7.
+>
+> Also present, rarely: `maximum` (2), `minItems` (1), `maxItems` (1), `format` (4). outlines drops
+> all of them silently, so the §4.2 pre-pass fires on a handful of real schemas — cheap to tolerate
+> explicitly, which is the point of failing loud.
+>
+> **Ground truth has its own shape.** `possible_answer` wraps **every leaf, at every nesting level**,
+> in a list of acceptable values, and uses `null`/`""` for "omitted". Unwrapping only the top level
+> makes the grammar look ~16 points more over-constrained than it is — a trap worth stating because
+> the resulting number looks exactly like a real grammar bug.
 
 **BFCL's Python format — no canonical grammar exists; you author it.** Parsing is Python's `ast`,
 and **only `elem.keywords` are read — positional arguments are silently discarded**, guaranteeing a

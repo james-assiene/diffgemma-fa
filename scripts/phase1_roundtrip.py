@@ -33,33 +33,17 @@ ALLOW = (
 )
 
 
-def ground_truth_objects(gt_entry: dict, fn_name: str) -> list[dict]:
+def ground_truth_objects(gt_entry: dict, fn_name: str, schema: dict) -> list[dict]:
     """Materialise concrete argument dicts from a BFCL ground-truth entry.
 
-    Ground truth maps each parameter to a *list* of acceptable values, and an
-    empty string in that list means "may be omitted". This takes the first
-    acceptable value for each parameter, and separately a variant with all
-    omittable parameters dropped.
+    Delegates to `bfcl_data.materialize_ground_truth`, which unwraps BFCL's
+    acceptable-values lists **recursively** — see its docstring; unwrapping only
+    the top level makes the grammar look over-constrained when it is not.
     """
     args = gt_entry.get(fn_name)
     if args is None:
         return []
-    primary, minimal = {}, {}
-    for key, values in args.items():
-        if not isinstance(values, list) or not values:
-            continue
-        chosen = values[0]
-        optional = any(v == "" for v in values)
-        if chosen == "" and len(values) > 1:
-            chosen = values[1]
-        if chosen != "":
-            primary[key] = chosen
-            if not optional:
-                minimal[key] = chosen
-    out = [primary]
-    if minimal != primary:
-        out.append(minimal)
-    return out
+    return [bfcl_data.materialize_ground_truth(args, schema)]
 
 
 def ordered_dump(obj: dict, prop_order: list[str]) -> str:
@@ -142,7 +126,7 @@ def main() -> None:
         else:
             prop_order = list((params.get("properties") or {}).keys())
             for entry in gt:
-                for obj in ground_truth_objects(entry, fn.get("name", "")):
+                for obj in ground_truth_objects(entry, fn.get("name", ""), params):
                     text = ordered_dump(obj, prop_order)
                     ids = [int(x) for x in tok.encode(text)]
                     gt_total += 1
