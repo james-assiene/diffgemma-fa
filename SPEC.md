@@ -7,10 +7,12 @@ via Efficient Inference over Finite Automata*, [arXiv:2607.07026](https://arxiv.
 
 Target implementation: **`google-deepmind/gemma`, subpackage `gemma/diffusion/`** — the official
 JAX/Flax DiffusionGemma. Checkpoint: `gs://gemma-data/checkpoints/diffusiongemma-26B-A4B-it`
-(Orbax OCDBT, ~47.4 GB, publicly readable).
+(Orbax OCDBT, **37.63 GiB = 40.4 GB on disk**, publicly readable). [V, measured Phase 0]
 
-Status: written from source reading over the web plus numerical verification of §2's formulas on
-CPU. **Nothing has been run against the real model.** Phase 0 verifies the rest. Markers:
+Status: **Phase 0 complete (2026-07-27).** Originally written from source reading over the web plus
+numerical verification of §2's formulas on CPU; §1.2/§1.3 have now been verified against the
+installed `gemma` 4.1.0 and the real checkpoint on an H100 80GB. Corrections are marked
+**[V-P0]** and collected in `docs/PHASE0_FINDINGS.md`. Markers:
 
 - **[V]** — read verbatim from source, or verified numerically in this document's own test harness.
 - **[R]** — reported by docs/blog. Likely right, verify cheaply.
@@ -102,7 +104,7 @@ this spec in place where it is wrong.
 # PyPI is 4.0.1 (2026-05-20), BEFORE DiffusionGemma shipped. gemma/diffusion/ is NOT in it. [V]
 pip install "git+https://github.com/google-deepmind/gemma.git"   # declares __version__ 4.1.0
 python -c "import jax; print(jax.__version__, jax.devices())"
-gsutil -m cp -r gs://gemma-data/checkpoints/diffusiongemma-26B-A4B-it .   # ~47.4 GB, anonymous [V]
+gsutil -m cp -r gs://gemma-data/checkpoints/diffusiongemma-26B-A4B-it .   # 37.6 GiB, anonymous [V]
 ```
 
 ```python
@@ -112,12 +114,22 @@ params  = gm.ckpts.load_params(diffusion.CheckpointPath.DIFFUSIONGEMMA_26B_A4B_I
 sampler = diffusion.ChatSampler(model=model, params=params)
 ```
 
+`load_params` also accepts a **local directory path** — no need to re-read from `gs://` once the
+checkpoint is downloaded. [V-P0]
+
 Python ≥3.12. The subpackage is **entirely undocumented** — no `gm.diffusion` namespace, nothing on
 readthedocs, not in the README. **Source is the only spec.** [V]
 
-Record in `docs/ENV.md`: accelerator and memory, JAX/jaxlib versions, `nproc`, disk. ≥80 GB HBM
-lets bf16 params (~47.4 GB) coexist with a 0.3–8 GB tree; below ~64 GB you are fighting for room
-and should shrink the `|S|` budget (§5.6). Set on day one:
+Record in `docs/ENV.md`: accelerator and memory, JAX/jaxlib versions, `nproc`, disk.
+
+> **[V-P0] Measured memory, which is what the §5.6 budget must be built on.** The checkpoint is
+> 37.63 GiB on disk but **51.65 GB resident in HBM** once loaded, and generation peaks at
+> **56.5 GB**. On an 80 GB H100 at `XLA_PYTHON_CLIENT_MEM_FRACTION=.90` (limit 76.52 GB) that
+> leaves **~20 GB** free for the tree, not the 8 GB §5.6 assumes. Do not size the `|S|` ladder
+> from the on-disk figure. Below ~64 GB HBM you are fighting for room and should shrink the `|S|`
+> budget (§5.6).
+
+Set on day one:
 
 ```python
 jax.config.update("jax_compilation_cache_dir", "~/.cache/jax")   # highest-leverage single line
@@ -126,65 +138,108 @@ jax.config.update("jax_compilation_cache_dir", "~/.cache/jax")   # highest-lever
 ### 1.2 Verify the sampler source
 
 Read `gemma/diffusion/{_sampler,_early_stopping,_transformer,_chat_sampler}.py` and
-`gemma/gm/text/_sampler_loop.py` locally and tick each box. All **[V]** from source reads of
-`main`, but `main` moves.
+`gemma/gm/text/_sampler_loop.py` locally and tick each box.
 
-- [ ] `SampleFromPredictions.__call__(*, rng, denoiser_logits, canvas, current_noise_proportion,
+> **Phase 0 status: all boxes verified against `gemma` 4.1.0 (git main, installed 2026-07-27).**
+> Everything below is confirmed **[V-P0]** unless flagged **CORRECTED**. `main` moves — re-verify
+> if you upgrade `gemma`. Full evidence in `docs/PHASE0_FINDINGS.md`.
+
+- [x] `SampleFromPredictions.__call__(*, rng, denoiser_logits, canvas, current_noise_proportion,
       target_noise_proportion) -> Tokens` — **all keyword-only**, returns a bare `[B, L]` token
-      array, not a `(canvas, mask)` tuple.
-- [ ] It returns `jnp.where(selection_mask, denoiser_tokens, random_tokens)` with
+      array, not a `(canvas, mask)` tuple. [V-P0]
+- [x] It returns `jnp.where(selection_mask, denoiser_tokens, random_tokens)` with
       `denoiser_tokens = jax.random.categorical(...)` and
-      `random_tokens = jax.random.randint(0, text_vocab_size)`.
-- [ ] `selection_mask` is built from `jnp.zeros_like(...)` **every call** — non-monotone, nothing
-      mask-shaped in the carry.
-- [ ] Accept predicate: ascending `argsort` of entropy, `cumsum − sorted ≤ entropy_bound`. Default
-      `entropy_bound = 0.1`. Always accepts ≥1.
-- [ ] Entropy is `-Σ p log p` from `jax.nn.log_softmax(denoiser_logits.astype(float32))` — **nats**,
-      over the vocab axis, on the **shaped** logits.
-- [ ] `_WhileLoopCarry` is exactly `(step, canvas, sc_embeddings, rng, done)` — no extension slot.
-- [ ] `sample_next_canvas` returns `final_carry.canvas`; `_sample_step` writes *that same tensor* to
-      the KV cache and to `predicted_tokens`. **No argmax anywhere in the emission path.** (The only
-      `argmax` in `_sampler.py` is `first_stop_idx`.) **§3.1.**
-- [ ] `logit_shaper`'s output (`shaped_prediction`) is the single tensor consumed by **both**
+      `random_tokens = jax.random.randint(0, text_vocab_size)`. [V-P0]
+- [x] `selection_mask` is built from `jnp.zeros_like(...)` **every call** — non-monotone, nothing
+      mask-shaped in the carry. [V-P0] (It is `zeros_like(sorted_index, dtype=bool)`, scattered
+      through `.at[arange(B)[:,None], sorted_index].set(sorted_selection_mask)`.)
+- [x] Accept predicate: ascending `argsort` of entropy, `cumsum − sorted ≤ entropy_bound`. Default
+      `entropy_bound = 0.1`. Always accepts ≥1 (the first sorted element gives `0 ≤ bound`). [V-P0]
+- [x] Entropy is `-Σ p log p` from `jax.nn.log_softmax(denoiser_logits.astype(float32))` — **nats**,
+      over the vocab axis, on the **shaped** logits. [V-P0]
+- [x] `_WhileLoopCarry` is exactly `(step, canvas, sc_embeddings, rng, done)` — no extension slot.
+      [V-P0]
+- [x] `sample_next_canvas` returns `final_carry.canvas`; `_sample_step` writes *that same tensor* to
+      the KV cache and to `predicted_tokens`. **No argmax anywhere in the emission path.** The only
+      `argmax` in `_sampler.py` is `first_stop_idx` at line 305 — verified by grep, exactly one hit.
+      **§3.1.** [V-P0]
+- [x] `logit_shaper`'s output (`shaped_prediction`) is the single tensor consumed by **both**
       `sample_from_predictions` **and** `embedder.encode_logits` for self-conditioning. **§5.2.**
-- [ ] Softcap is applied inside `call_with_self_conditioning`, before the shaper.
-- [ ] `_truncate_canvas_at_stop_tokens` keeps the first stop token and PADs after it;
+      [V-P0]
+- [x] Softcap is applied inside `call_with_self_conditioning`, before the shaper — the last three
+      lines of `DiffusionMixin.call_with_self_conditioning`, `tanh(logits/cap)*cap`. [V-P0]
+- [x] `_truncate_canvas_at_stop_tokens` keeps the first stop token and PADs after it;
       `& ~done` makes a finished sequence emit an all-PAD block. `PAD_TOKEN = 0`.
-      `end_tokens = (EOS, END_OF_TURN, BEGIN_OF_TOOL_RESPONSE, *stop_tokens)`.
-- [ ] `_sample_step` advances by a fixed `canvas_length`; the last block does **not** shrink.
-- [ ] `canvas_length = 256`, `max_denoising_steps = 48`.
+      `end_tokens = (EOS, END_OF_TURN, BEGIN_OF_TOOL_RESPONSE, *stop_tokens)`. [V-P0]
+      Measured ids: **`EOS=1, END_OF_TURN=106, BEGIN_OF_TOOL_RESPONSE=50`**; `PAD=0`.
+- [x] `_sample_step` advances by a fixed `canvas_length`; the last block does **not** shrink. [V-P0]
+- [x] `canvas_length = 256`, `max_denoising_steps = 48` — defaults on the diffusion
+      `Sampler`/`ChatSampler`. Note they are **required fields with no default** on
+      `DiffusionSampler` itself. [V-P0]
 
-**Resolved since the first draft — confirm these rather than rediscovering them:**
+**Resolved since the first draft:**
 
-- [ ] **`ChainedEarlyStop` is AND** — `jnp.all(jnp.stack([...]), axis=0)`. [V] Combined with
+- [x] **`ChainedEarlyStop` is AND** — `jnp.all(jnp.stack([...]), axis=0)`. [V-P0] Combined with
       `TokenStabilityEarlyStop.should_stop = jnp.all(argmax(logits) == previous_canvas, axis=-1)`
       (no fields, no patience), early stop **can only fire on a step whose predecessor achieved
       full entropy-acceptance** — a uniform random token will essentially never equal an argmax.
-      So random tokens reach the output **only via the budget path**: 48 steps exhausted without a
-      stability fixed point. That is the invariant to state and test (§6.4).
-- [ ] **`DiffusionSampler`'s own default is `NoEarlyStop`** — only `Sampler`/`ChatSampler` inject
+      The reasoning is confirmed: `previous_canvas` is the canvas that *entered* this step, so
+      stability requires the previous step to have accepted all 256 positions.
+      **But see §1.4 — the empirical consequence is the opposite of what this spec predicted.**
+- [x] **`DiffusionSampler`'s own default is `NoEarlyStop`** — only `Sampler`/`ChatSampler` inject
       the chain. A directly-constructed `DiffusionSampler` **never early-stops** and therefore
       *always* exits via the budget path. If you construct one directly in tests, you will see the
-      random-token failure mode every time. [V]
-- [ ] **`_MIN_TEMP = 1e-12`.** [V] So `AnnealingTemperatureShaperConfig(min_temperature=1e-12,
-      max_temperature=1e-12)` is legal and gives `logits / 1e-12` → the categorical collapses to
-      argmax and all entropies collapse to 0 (all 256 positions accept immediately).
+      random-token failure mode every time. [V-P0]
+- [x] **`_MIN_TEMP = 1e-12`.** [V-P0] `AnnealingTemperatureShaperConfig.__post_init__` rejects
+      `min_temperature < _MIN_TEMP` and `max < min`, so `min = max = 1e-12` is legal and gives
+      `logits / 1e-12` → the categorical collapses to argmax and all entropies collapse to 0.
       **A near-greedy path is reachable by configuration alone, with no code change.** §3.9 depends
-      on this.
-- [ ] **`forbidden_tokens` and `sampling` are definitively inert on the diffusion path.** They are
+      on this. Config defaults are `exponent=1.0, max_temperature=0.8, min_temperature=0.4`; with
+      48 steps the last *executed* step sits at `noise_proportion = 1/48`, giving `T = 0.4083` —
+      hence the "0.8 → 0.408" schedule quoted throughout. [V-P0]
+- [x] **`forbidden_tokens` and `sampling` are definitively inert on the diffusion path.** They are
       read only in the base `SamplerLoop._sample_step` (which does
       `einops.rearrange(logits, 'B 1 V -> B V')` — strictly single-token autoregressive), and
-      `DiffusionSampler._sample_step` is an `@override` that references neither. [V] **Do not use
+      `DiffusionSampler._sample_step` is an `@override` that references neither. [V-P0] **Do not use
       them for constraints; they will silently do nothing.**
-- [ ] **The outer block loop is `jax.lax.while_loop` inside `jax.jit`**, with a **traced**
+- [x] **The outer block loop is `jax.lax.while_loop` inside `jax.jit`**, with a **traced**
       `max_new_tokens`. Structure: `jit _sample_loop → lax.while_loop (blocks) → _sample_step →
       sample_next_canvas → lax.while_loop (denoising steps)`. **There is no Python between blocks.**
-      [V] **§5.3 is built entirely on this.**
-- [ ] `SamplingState` is a `flax.struct.dataclass` with `predicted_tokens: Int['B max_out_length']`
-      holding everything committed so far, plus `step`, `done`, `cache`, `rng`, … Remaining budget
-      is `max_new_tokens - state.step`. [V]
-- [ ] `SamplingState.cache_info` is referenced in `cond_fn` but was **not retrieved** — find its
-      definition before subclassing.
+      [V-P0] **§5.3 is built entirely on this.**
+- [x] `SamplingState` is a `flax.struct.dataclass(kw_only=True)` with
+      `predicted_tokens: Int['B max_out_length']` holding everything committed so far, plus
+      `step, done, last_token, last_token_pos, cache, rng, init_cache_length,
+      full_attention_mask` — **exactly nine fields**. [V-P0]
+- [x] **`SamplingState.cache_info` RESOLVED: it is a `@property`, not a field** —
+      `return _cache_helper.Cache(self.cache)`, defined in `_sampler_loop.py`. It is therefore
+      *derived*, and widening `SamplingState` does not have to supply it. [V-P0]
+
+**CORRECTED and newly found — these change the design, see §5.3:**
+
+- [x] **CORRECTED. `max_new_tokens` is not a field of `SamplingState` at all.** It is a parameter
+      of `_sample_loop`, captured only in that function's `cond_fn` closure. So
+      `R = max_new_tokens − state.step` is **not computable inside `_sample_step`**, contrary to
+      what §5.3 and §3.5 previously asserted. [V-P0]
+- [x] **CORRECTED. `sample_next_canvas` never receives `state`.** Its signature is
+      `(*, canvas_length, max_denoising_steps, batch_size, cache, params, rng,
+      full_attention_mask)`. Neither `state.step`, nor `predicted_tokens`, nor any per-block carry
+      is reachable from inside it. The only per-block quantity available there is
+      `cache_layer['end_index']` (tokens committed so far). **This is why `_sample_step` must be
+      forked after all — see §5.3(c).** [V-P0]
+- [x] **NEW. The block loop has a *third* exit condition.** `_sample_loop`'s `cond_fn` is
+      `(state.step < max_new_tokens) & ~all(state.done) & ~state.cache_info.is_full`.
+      §3.1b lists only budget truncation and early stopping; **cache exhaustion is a third way to
+      terminate mid-grammar** and must be closed the same way. [V-P0]
+- [x] **NEW. The stock entropy computation is already `0·log 0`-safe.** Both
+      `SampleFromPredictions` and `EntropyEarlyStop` do
+      `log_probs = jnp.where(probs == 0, 0.0, log_probs)` before the sum. So §2.4's NaN hazard does
+      **not** apply to the stock entropy path even with `-1e30`/`-inf` logits. The hazard is real
+      and unguarded in exactly one place: **`embedder.encode_logits(shaped_prediction)`**, the
+      self-conditioning tap. Keep §2.4's finite-sentinel rule, but know where it actually bites.
+      [V-P0]
+- [x] **NEW. `_sample_loop` runs a second, global truncation pass after the block loop.**
+      `_mask_tokens_after_end_tokens` zeroes everything strictly after the first `end_token` across
+      the whole `predicted_tokens` buffer. Per-block truncation is not the last word. [V-P0]
 
 ### 1.3 Verify the tokenizer
 
@@ -193,16 +248,61 @@ tok = sampler.tokenizer
 print(tok.vocab_size, tok.special_tokens)   # expect 262144 = 2^18
 ```
 
-1. **Model vocab (262,144) may exceed the real token count** — the lm_head is padded to a power of
-   two. Pad slots decode to `""` and must be excluded from every automaton alphabet.
-2. **A `<mask>` token exists but is NOT the diffusion mechanism.** DiffusionGemma corrupts by
-   replacing tokens with uniform random tokens. [V]
-3. Confirm `outlines_core.Vocabulary.from_pretrained` accepts Gemma's decoder config — it
-   dispatches on `ByteFallback` + a `Replace` normalizer carrying `▁` (U+2581) and raises
-   `UnsupportedByTokenProcessor` otherwise. If it rejects, write the normalization yourself
-   (~30 lines: `<0xXX>` → raw byte, else `token.replace("▁", " ").encode()`).
-4. Is the end-of-thought marker a **single dedicated token id**? §3.6's two-state construction
-   depends on it.
+**All four resolved in Phase 0. Two were wrong.**
+
+1. **CORRECTED — there is no lm_head padding.** `vocab_size = 262,144 = 2^18` [V-P0], but the
+   SentencePiece model has **262,144 real pieces** and the highest non-empty id is **262,143**.
+   Exactly **three** ids decode to `""`: `PAD=0`, `EOS=1`, `BOS=2` — control tokens, not padding.
+   The contiguous empty tail is **length 0**. So there are no dead slots to exclude; what must be
+   excluded from `FREE` is the control/special set, which §3.6 already requires. [V-P0]
+2. **CONFIRMED. A `<mask>` token exists (`MASK = 4`, a single token id) but is NOT the diffusion
+   mechanism.** DiffusionGemma corrupts by replacing tokens with uniform random tokens
+   (`jax.random.randint(0, text_vocab_size)`). [V-P0]
+3. **CORRECTED — `Vocabulary.from_pretrained` is not the path.** It fails on
+   `google/gemma-3-4b-it` with **HTTP 401**: the repo is gated, so this is an auth failure, not the
+   `UnsupportedByTokenProcessor` rejection this spec anticipated. **Build the `Vocabulary`
+   directly from Gemma's own SentencePiece model instead** — it is the ~30 lines described here and
+   needs no HF access at all:
+
+   ```python
+   vocab = outlines_core.Vocabulary(tok.special_tokens.EOS, {})
+   sp = tok._sp
+   for i in range(sp.GetPieceSize()):
+       if sp.IsControl(i) or sp.IsUnknown(i):
+           continue                                    # emit no bytes; keep out of the alphabet
+       piece = sp.IdToPiece(i)
+       if len(piece) == 6 and piece.startswith('<0x'): # byte fallback
+           b = bytes([int(piece[3:5], 16)])
+       else:
+           b = piece.replace('▁', ' ').encode()
+       if b:
+           vocab.insert(b, i)
+   ```
+
+   Measured: **262,140 pieces mapped** (256 byte-fallback, 4 control/unknown skipped),
+   `len(vocab) = 262,141`, built in **2.9 s**. `outlines_core.Index(regex, vocab)` and
+   `.get_transitions()` both work on it. See `scripts/phase0_outlines.py`. [V-P0]
+4. **RESOLVED, and better than expected — but the marker is not what this spec assumed.**
+   There is **no** `END_OF_THOUGHT` token and nothing thought-related in `special_tokens`. The
+   released model emits a **channel-tagged** format, and the channel delimiters *are* single
+   dedicated token ids:
+
+   | literal | token id(s) | single dedicated? |
+   |---|---|---|
+   | `<\|channel>` | **100** | ✅ yes |
+   | `<channel\|>` | **101** | ✅ yes |
+   | `thought` | 45518 | (an ordinary word token) |
+   | `<\|channel>thought\n<channel\|>` | `[100, 45518, 107, 101]` | 4 tokens |
+
+   So §3.6's two-state construction **does hold**, keyed on ids **100/101**, not on a hypothetical
+   `END_OF_THOUGHT`. No Aho–Corasick is needed and there is no BPE-ambiguity problem. Rewrite §3.6
+   against the real format. [V-P0]
+
+`special_tokens` in full, measured: `PAD=0, EOS=1, BOS=2, UNK=3, MASK=4,
+BEGIN_OF_TOOL_RESPONSE=50, START_OF_TURN=105, END_OF_TURN=106, START_OF_IMAGE=255999,
+START_OF_AUDIO=256000, IMAGE_PLACEHOLDER=258880, AUDIO_PLACEHOLDER=258881, END_OF_IMAGE=258882,
+END_OF_AUDIO=258883`. Note `<|channel>`/`<channel|>` (100/101) are **not** in this enum despite
+being dedicated ids — do not enumerate the special set from `special_tokens` alone. [V-P0]
 
 ### 1.4 Smoke test and baseline instrumentation
 
@@ -210,6 +310,36 @@ Generate 20 prompts unconstrained. Capture per step: `n_accepted`, `mean_entropy
 `Σ H − max H`; per block: **the number of non-accepted positions on the final executed step**, and
 **whether the block exited via early stop or via the 48-step budget** (§1.2's invariant). Time a
 step, record peak HBM. This is the baseline §3.4 recalibrates against.
+
+#### [V-P0] Measured baseline — H100 80GB, `ChatSampler` defaults, 2026-07-27
+
+Scripts: `scripts/phase0_smoke.py` (20 prompts, `max_new_tokens=256`) and
+`scripts/phase0_multiblock.py` (3 long prompts, `max_new_tokens=1024`). Raw data in
+`artifacts/phase0_baseline.json` and `artifacts/phase0_multiblock.json`.
+
+| Quantity | Measured |
+|---|---|
+| Blocks observed | **31** (20 single-block + 11 across 3 multi-block runs, up to 4 blocks deep) |
+| Exited via **early stop** | **31 / 31** |
+| Exited via the **48-step budget** | **0 / 31** |
+| Denoising steps actually executed per block | **3 – 31** of 48 (median ≈ 12) |
+| Non-accepted positions on the final executed step | **0** in 30 blocks, **1** in one block |
+| Params resident / peak HBM | 51.65 GB / **56.5 GB** of a 76.52 GB limit |
+| Checkpoint load | 35–36 s from local disk |
+| First generation (cold compile) | 47.3 s → 11.9 s with a warm `jax_compilation_cache_dir` |
+| Steady-state generation, 256 tokens | **1.2 – 4.2 s** (≈ 0.21 s per denoising step) |
+
+**Three consequences, all of which change decisions elsewhere in this spec:**
+
+1. **The stock model never exhausts its step budget on ordinary prompts.** It converges in 3–31 of
+   48 steps. §7.4's `48 → 24 → 12 → 6` ablation is therefore measuring something different from
+   what was intended below ~24 steps: the model already stops well short of 48, so the first two
+   rungs may be no-ops. Report *executed* steps, not the cap.
+2. **§3.1's invariant is false as written — see the correction there.** Early stopping does *not*
+   keep uniform random tokens out of the emission.
+3. **The emitted format is channel-tagged.** Every one of the 11 long generations began with
+   exactly `<|channel>thought\n<channel|>` = ids `[100, 45518, 107, 101]` at positions 0–3, with no
+   second channel marker anywhere in the output. §3.6 must be written against this.
 
 ---
 
@@ -560,16 +690,39 @@ restores the paper's setting: replace the per-position categorical with §2.6's 
 sampler and the emitted canvas is a draw from the constrained posterior, hence in `C`.
 
 **The residual hole.** Positions not accepted on the **final executed step** are emitted as uniform
-random tokens over the whole 262k vocab, with no cleanup pass. §1.2 resolves how bad this is:
-`ChainedEarlyStop` is **AND**, and `TokenStabilityEarlyStop` requires `argmax(logits)` to equal the
-*entire previous canvas* — which a random token essentially never satisfies. So:
+random tokens over the whole 262k vocab, with no cleanup pass.
 
-> **Invariant (stock model).** Random tokens reach the output **only when the 48-step budget is
-> exhausted without reaching a stability fixed point.** Note this is *always* the case for a
-> directly-constructed `DiffusionSampler`, whose own `early_stop_fn` default is `NoEarlyStop`. [V]
+> **⚠ CORRECTED [V-P0]. The invariant this spec previously stated here is FALSE, and the error was
+> in the direction that matters.** The old claim was:
+>
+> > ~~Random tokens reach the output **only when the 48-step budget is exhausted** without reaching
+> > a stability fixed point.~~
+>
+> **Early stopping does not protect the emission.** Read `body_fn` carefully:
+>
+> ```python
+> out      = self.sample_step(...)                 # out.sampled_tokens is the fresh sample
+> new_done = carry.done | self.early_stop_fn.should_stop(
+>     step=step, canvas=out.sampled_tokens,
+>     previous_canvas=carry.canvas, logits=out.logits)
+> canvas   = jnp.where(carry.done[:, None], carry.canvas, out.sampled_tokens)   # OLD done
+> ```
+>
+> `should_stop` is evaluated on `previous_canvas` and `logits` — it certifies convergence of the
+> step's **input**, not of its **output**. The gate on the emitted canvas is `carry.done`, the
+> *old* flag, so on the step where early stop first fires the canvas still becomes
+> `out.sampled_tokens`, **including that step's own unaccepted positions**. The loop then exits.
+> A block can therefore early-stop *and* emit uniform random tokens in the same step.
+>
+> **Measured (§1.4): 31/31 blocks exited via early stop, 0/31 via the budget — and one block still
+> emitted a random token** (1 unaccepted position on its final step). So the failure mode is real,
+> is *not* gated by the budget path, and is simply **rare** on ordinary prompts: ~1 block in 31,
+> ~1 position in 7,936. It is still unconditional-guarantee-breaking, and it is exactly what J0's
+> decoupled `emit_canvas` closes.
 
-Instrument the frequency in §1.4 and report it — it is a fact about the released model that nobody
-has published.
+Two things remain true and matter for testing: a directly-constructed `DiffusionSampler` defaults
+to `NoEarlyStop` and so *always* runs the full 48 steps [V-P0]; and the frequency above is a fact
+about the released model that nobody has published — report it.
 
 #### [D] Emission designs
 
@@ -610,7 +763,7 @@ against J0.**
 
 The argument uses only the *support* of the constrained posterior, not maximality, which is why it
 covers both emission modes. Membership in `L(M)` is **not** implied by a constrained emission
-alone. Three failure modes, all of which must be closed:
+alone. **Four** failure modes, all of which must be closed:
 
 1. **Budget truncation** — the block cap is reached with `A_k ∩ F = ∅`. `Live = {s : d(s) < ∞}` is
    an *unbounded-horizon* predicate and does not close this.
@@ -618,6 +771,11 @@ alone. Three failure modes, all of which must be closed:
    automaton awareness, halting mid-grammar.
 3. **Stop token from a non-accepting state** — if the free-text region (§3.6) admits any of
    `end_tokens`, the emission can terminate inside the thinking channel.
+4. **[V-P0] Cache exhaustion — a third loop exit this spec previously missed.** `_sample_loop`'s
+   `cond_fn` is `(state.step < max_new_tokens) & ~all(state.done) & ~state.cache_info.is_full`.
+   The cache filling up halts generation mid-grammar exactly as budget truncation does, and is
+   *not* covered by the `R = max_new_tokens − step` accounting. Bound `R` by the remaining **cache**
+   capacity as well: `R = min(max_new_tokens − step, cache_length − used_cache_length)`.
 
 **The three closures.**
 
@@ -754,15 +912,32 @@ Four traps:
 
 ### 3.6 Thinking mode and the free-text region
 
+> **[V-P0] Rewritten against the real format.** There is no `END_OF_THOUGHT` token. The released
+> model emits a **channel-tagged** response whose delimiters *are* single dedicated token ids:
+> **`<|channel>` = 100** and **`<channel|>` = 101**. Every one of the 11 long generations in §1.4
+> opened with exactly `[100, 45518, 107, 101]` (`<|channel>thought\n<channel|>`) at positions 0–3
+> and contained **no further channel marker** — the header is a prefix, not a thought/answer split.
+
 ```
-FA_total  =  FREE*  ·  END_OF_THOUGHT  ·  FA_grammar  ·  STOP  ·  Σ*
-FREE      =  any token except END_OF_THOUGHT, every end_token, and PAD
+FA_total  =  HEADER  ·  FA_grammar  ·  STOP  ·  Σ*
+HEADER    =  100 · Σ_name+ · 107 · 101          # <|channel> <name> \n <channel|>
+FREE      =  any token except 100, 101, every end_token, and PAD
 ```
 
-**The two-state construction only holds if the marker is a single dedicated token id.** For a
-multi-token marker, "no occurrence of `w`" needs Aho–Corasick (`|w|+1` states plus failure links),
-**and** you must enumerate every token sequence the tokenizer can produce for it — a BPE can
-segment it more than one way. §1.3 checks which case you are in.
+Because the header is a fixed 4-token prefix in every observed sample, the `FREE*` free-text region
+of the original construction is **not needed for this model** — anchor `FA_grammar` immediately
+after token **101**. Keep a `FREE*` variant behind a flag in case a prompt elicits a longer or
+repeated header; the two-state "no occurrence of `w`" construction is cheap and correct either way
+now that `w` is a single id.
+
+**The two-state construction only holds if the marker is a single dedicated token id** — which it
+is here, so no Aho–Corasick and no BPE-segmentation enumeration is required. (For a multi-token
+marker you would need `|w|+1` states plus failure links **and** every tokenization of the marker;
+that risk is retired.) [V-P0]
+
+**Caveat on coverage.** Only `thought` was observed as a channel name across 11 long generations;
+`<|channel>final` and `<|channel>answer` tokenize fine (`[100, 10218]`, `[100, 14433]`) but were
+never emitted. Do not hardcode `thought` — accept `Σ_name+` between 100 and 107.
 
 **Joint decoding over a segmented automaton has its own failure mode** [?]: the decoder chooses the
 split point *jointly*, so tiny probability differences can place the marker at position 0 or 255.
@@ -901,7 +1076,8 @@ and llguidance are per-step bitmask engines with no automaton export.
 
 Traps [V]: `get_transitions()` deep-clones the whole nested map into Python dicts on every call
 (once, at compile time, never in a loop); state ids are raw `regex-automata` dense ids — byte
-offsets, multiples of 8, not dense, renumber immediately; matching is **anchored**; a token is
+offsets, **multiples of 64 as measured here, not 8** (observed range 256…2,816 with a uniform
+stride of 64 [V-P0]) — not dense, renumber immediately; matching is **anchored**; a token is
 allowed only if the DFA consumes **all** its bytes; `guide.advance(eos)` raises even though
 `T[final][eos]` exists, so handle stop tokens out of band (you do anyway, §3.5); import from the
 `outlines_core` top level, not `outlines_core.guide`. Wire
@@ -939,11 +1115,23 @@ fails — so the bound is tight. [V]
 
 > **But `K` is unbounded under Layer 2's `|S_c| > V/2` rule** — worst case `|N_c| = 131,072`, giving
 > `K = 131,073`, a 134 MB topk buffer plus a 262k-wide partial sort per position. **The max table
-> must use its own polarity rule:** store the complement only when `|N_c| ≤ K_max` (default
-> `K_max = 256`), otherwise store the class positively for the max table even if it is stored
-> negatively for the sum table. Then `K = 257` is a compile-time constant. **The two tables have
-> independent `Pos`/`Neg` partitions — do not share the polarity flag array**, and note §2.4's
-> `r_i(v)` uses the *sum* table's partition.
+> must use its own polarity rule:** store the complement only when `|N_c| ≤ K_max`, otherwise store
+> the class positively for the max table even if it is stored negatively for the sum table. Then
+> `K = K_max + 1` is a compile-time constant. **The two tables have independent `Pos`/`Neg`
+> partitions — do not share the polarity flag array**, and note §2.4's `r_i(v)` uses the *sum*
+> table's partition.
+
+> **[V-P0] `K_max = 256` is too small — use ~1,100.** Measured on the eight schemas of §4.7, the
+> largest label class in every one covers **261,077–261,153 of 262,141 tokens** (~99.6% of the
+> vocab) — emphatic confirmation that Layer 2's complement trick is load-bearing. But that puts
+> `|N_c|` at **988–1,064**, comfortably above a `K_max` of 256. With `K_max = 256` those classes
+> would all fall back to positive storage for the max table, and Layer 3's "mean post-complement
+> `|S_c| ≈ 50`, `nnz ≈ 25,000`" budget would be violated by ~four orders of magnitude — the max CSR
+> would carry ~261k entries per class.
+>
+> The fix is free: `K_max = 1100` gives `K = 1101`, a topk buffer of `1101 × 256 × 4 B ≈ 1.1 MB`.
+> **Set `K_max` from the compiled grammar's measured `max_c |N_c|`, with 1,100 as the default**,
+> and assert `K > max_c |N_c|` at build time (§4.4's verified bound is tight at `K = |N_c|`).
 
 **Layer 3 — CSR over classes.** `C ≈ 500`, mean post-complement `|S_c| ≈ 50` → `nnz ≈ 25,000`.
 int32 indices, **no values array** (all ones). ~100 KB, cache-resident. (The per-class argmax table
@@ -1031,23 +1219,47 @@ mass (§5.7); and **the edge-multiplicity-weighted token draw of eq (8)**, which
 gets wrong (§2.6). §2.2's soft-proxy caveat applies to **sampling only** — `--emission=map` is exact
 on NFAs (§2.7).
 
-### 4.7 Compilation throughput — a hard scheduling problem
+### 4.7 Compilation throughput — [V-P0] measured, and **not** a scheduling problem
 
-Extrapolating the one published measurement (132–261 s per schema at a **151k** vocab [R]) to 262k
-gives **4–8 minutes per schema**. BFCL-Live has **1,351** instances → **4–7 days serially.**
+> **The original estimate is retracted.** It extrapolated one published measurement (132–261 s per
+> schema at a **151k** vocab [R]) to 262k, giving ~~4–8 minutes per schema~~ and ~~4–7 days
+> serially for BFCL-Live's 1,351 instances~~. **Measured on this stack
+> (`outlines-core` 0.2.14, Gemma 262k vocab, `scripts/phase0_lift_timing.py`):**
+>
+> | schema shape | regex→DFA→lift, total | states | nnz |
+> |---|---|---|---|
+> | 1 string property | **0.126 s** | 25 | 268,397 |
+> | typical 3-property call (enum + int) | **0.271 s** | 75 | 268,750 |
+> | 8 properties, mixed types | **0.652 s** | 182 | 537,953 |
+> | nested object, depth 2 | **0.364 s** | 91 | 537,205 |
+> | array of strings | **0.262 s** | 56 | 537,077 |
+> | 20-way enum | **0.250 s** | 70 | 268,614 |
+> | array of objects | **0.390 s** | 95 | 537,315 |
+> | **`{}` wildcard (§4.2's 7-way alternation)** | **16.7 s** | 3,261 | 36,210,539 |
+>
+> Realistic function-call schemas: **0.13–0.65 s each.** Mean over all eight including the
+> wildcard: 2.38 s. **BFCL-Live's 1,351 instances project to ~0.9 hours serially** — minutes on
+> this box's 26 cores. Building the `Vocabulary` itself costs a one-off 2.9 s.
 
-Mitigations by leverage [D]:
+Consequences:
 
-1. **Pre-filter the vocabulary by the regex's byte alphabet.** `regex-automata` gives you
-   `ByteClasses` free. A function-call JSON grammar over ASCII keys touches ~100 distinct bytes;
-   Gemma's 262k vocab is heavily multilingual, so dropping tokens with out-of-alphabet bytes should
-   cut the walk **5–10×**. ~20 lines, largest single payoff. **Measure on 20 schemas before
-   committing to the full run.**
-2. **Parallelize across cores** — embarrassingly parallel. 64 cores → hours.
-3. **Cache** on `(schema_hash, tokenizer_hash, compiler_version)`. Do not reuse `~/.cache/outlines`
+1. **The vocabulary pre-filter is unnecessary.** It was billed as the "largest single payoff" and
+   ~20 lines; at 0.3 s per schema there is nothing left to win. **Do not build it.** If a future
+   grammar set turns out to be wildcard-dominated, revisit — that is the only case with headroom.
+2. **Open question 5 is resolved: compilation throughput is not a project risk.**
+3. **The one thing to actually watch is `{}` / missing `type` / `additionalProperties: true`**
+   (§4.2). It is 26–130× slower than every other shape, produces 3,261 states and 36.2M
+   transitions, and is the realistic route to "regex too large". §4.2's fail-loud pre-pass should
+   flag it explicitly rather than let it through silently.
+
+Still worth keeping, cheaply:
+
+4. **Parallelize across cores** — embarrassingly parallel, and now the difference between minutes
+   and seconds rather than days and hours.
+5. **Cache** on `(schema_hash, tokenizer_hash, compiler_version)`. Do not reuse `~/.cache/outlines`
    — its key ignores the tokenizer.
-4. Minimize the byte DFA before lifting.
-5. Cap `maxLength`/`maxItems` at build time.
+6. Minimize the byte DFA before lifting.
+7. Cap `maxLength`/`maxItems` at build time.
 
 ### 4.8 Per-task grammars
 
@@ -1138,26 +1350,60 @@ you cannot unroll per block or size an array by it.
 > values must be traced; only shapes may be static.** Store static config on the hook objects
 > (entropy bound, vocab size, bucket sizes) and nothing else.
 
-**(c) `_sample_step` need not be forked.** The denoising `while_loop` lives entirely inside
-`sample_next_canvas`, which is a separate method with its own signature — so a subclass can widen
-`_WhileLoopCarry`, replace `body_fn`, and add joint constrained sampling **without touching
-`_sample_step`**, inheriting truncation, cache append and `predicted_tokens` bookkeeping unchanged.
-[V]
+**(c) ⚠ CORRECTED [V-P0] — `_sample_step` DOES need forking, and so does the entry point.**
 
-[D] **Recommended structure:**
+The original claim was that the denoising `while_loop` lives entirely inside `sample_next_canvas`,
+so a subclass could widen `_WhileLoopCarry`, replace `body_fn` and add joint constrained sampling
+**without touching `_sample_step`**. That half is true and still holds — the *within-block*
+machinery is fully encapsulated. What is false is that this suffices for the **per-block** protocol
+of §3.5. Two facts, both read from the installed source:
+
+```python
+# gemma/diffusion/_sampler.py — the real signature. No `state`.
+def sample_next_canvas(self, *, canvas_length, max_denoising_steps, batch_size,
+                       cache, params, rng, full_attention_mask) -> Tokens: ...
+
+# gemma/gm/text/_sampler_loop.py — max_new_tokens is a parameter of _sample_loop,
+# captured only in cond_fn's closure. It is NOT a field of SamplingState.
+def _sample_loop(self, *, params, state, max_new_tokens): ...
+def _sample_step(self, state, *, params): ...          # never sees max_new_tokens
+```
+
+1. **`sample_next_canvas` receives no `state`.** `A_k`, `state.step` and `predicted_tokens` are all
+   unreachable from the place the constrained sampler has to live. The only per-block quantity
+   visible there is `cache_layer['end_index']`.
+2. **`max_new_tokens` is not in `SamplingState`**, so `R = max_new_tokens − state.step` is not
+   computable even inside `_sample_step`.
+
+Since `b_L(s) = 1[d(s) ≤ R]` needs `R`, and `a_start = 1[s ∈ A_k]` needs `A_k`, **both must be
+threaded in explicitly**. CLAUDE.md's "minimum fork surface is `sample_next_canvas` plus a widened
+`SamplingState`, `_sample_step` does *not* need forking" is therefore **wrong** and should be read
+as the corrected version below.
+
+[D] **Recommended structure (revised):**
 
 - Subclass `DiffusionSampler` (frozen, kw-only, hashable fields only).
+- **Widen `SamplingState`** with `automaton_state: Bool['B S_bucket']` (`A_k`) and
+  `max_new_tokens: Int['']`. It is a `flax.struct.dataclass(kw_only=True)` with nine fields and a
+  derived `cache_info` **property** (not a field [V-P0]), so subclassing is mechanical.
+- **Fork `_sample_step`** — unavoidable. It must (i) read `A_k` and `R` off the widened state,
+  (ii) pass them into a widened `sample_next_canvas`, and (iii) recompute
+  `A_{k+1} = δ*(A_k, truncated_canvas)` and write it back. It is ~40 lines and still inherits
+  nothing structural from the parent beyond shape.
+- **Initialize the widened state at the entry point.** `init_state` is built by
+  `_prefill.prefill(...)` inside `gm.text.Sampler.sample`, so either override `sample` to widen the
+  prefilled state before calling `sampler.sample(...)`, or — cleaner — override
+  `_initialize_sampler_loop` *and* widen in a thin `sample` wrapper. `max_new_tokens` is a
+  per-request constant, so it can equally ride in the `params` pytree; `A_k` cannot, because it
+  changes every block.
 - Override **`sample_next_canvas`** — widened carry (§5.4), constrained sampler, constrained
   emission, `emit_canvas` passed to `should_stop`.
-- Thread the automaton as **traced arrays**. Two routes: widen `SamplingState` (a
-  `flax.struct.dataclass`, pytree-registered, so adding a fixed-shape field is mechanical — this is
-  the clean one), or pass the arrays in the `params` pytree under a reserved key (hackier, no
-  subclassing of `SamplingState`, works today). **Do not** put them on `self`.
+- Thread the automaton itself as **traced arrays**, either as extra `SamplingState` fields or in
+  the `params` pytree under a reserved key. **Do not** put them on `self` (§5.3b).
 - `A_k` is a traced `[S_bucket]` boolean/float array, **not** a Python set.
-- Remaining budget is `max_new_tokens - state.step` — available inside the loop with no new field.
-- `state.predicted_tokens` (`Int['B max_out_length']`) holds all committed context, so **a stateless
-  recompute of `A_k` from the committed prefix is viable** and avoids widening anything. It costs a
-  `lax.scan` over the prefix per block; measure before choosing it over a carried `A_k`.
+- The stateless alternative — recomputing `A_k` from `state.predicted_tokens` each block — **does
+  not avoid the fork**, since `predicted_tokens` is also unreachable from `sample_next_canvas`. It
+  only avoids the extra *field*. Measure before choosing it over a carried `A_k`.
 
 Minor hazard: `predicted_tokens.at[:, jnp.arange(256) + state.step].set(canvas)` can index past
 `max_out_length` on the final block; JAX silently drops out-of-bounds scatter indices, so overflow
@@ -1227,6 +1473,14 @@ All cells verified. [V])
 batching makes it `B·S_max²`. At an 8 GB budget and `B=1` the threshold is **`|S| = 1,978`**
 (decimal GB; **2,050** if you mean GiB — state which). So the paper's largest BFCL DFA (2,459
 states, 12.36 GB) **falls back to the chain sampler**, i.e. the +114% path.
+
+> **[V-P0] The 8 GB figure is not what this machine has — it has more.** Measured on the H100 80GB
+> at `MEM_FRACTION=.90`: allocator limit **76.52 GB**, params resident **51.65 GB**, generation
+> peak **56.5 GB** ⇒ **~20 GB genuinely free** for the tree at `B=1`. That lifts the memory-side
+> threshold from `|S| = 1,978` to **`|S| ≈ 3,127`**, which would bring the paper's largest BFCL DFA
+> (2,459 states, 12.36 GB) **inside** the tree path rather than falling back to the chain.
+> Recompute the ladder from the measured free HBM, not from the 8 GB placeholder — but see the
+> compute caveat immediately below, which is the binding constraint long before this one.
 
 > **But memory is the wrong binding constraint at that size.** Per §0's table, the tree's arithmetic
 > at the memory threshold (`|S| ≈ 2,000`) is already **~390% of a full model forward per denoising
@@ -1466,12 +1720,19 @@ diffgemma_fa/
 4. **§5.3 — carried `A_k` vs stateless recompute from `predicted_tokens`.** The stateless route
    avoids widening `SamplingState` but costs a `lax.scan` over the committed prefix per block.
    Measure.
-5. **§4.7 compilation throughput.** If the vocabulary pre-filter underdelivers, BFCL becomes a
-   multi-day job.
+5. ~~**§4.7 compilation throughput.**~~ **RESOLVED [V-P0], not a risk.** Measured 0.13–0.65 s per
+   realistic schema (16.7 s for the `{}` wildcard); BFCL-Live projects to **~0.9 h serially**, not
+   4–7 days. The vocabulary pre-filter is unnecessary and should not be built. The residual watch
+   item is the wildcard schema shape, not throughput.
 6. **§2.7 greedy semantics.** The paper is ambiguous; this spec commits to max-plus MAP. Compare
    against per-position constrained argmax and report the gap.
-7. **§1.2 — how often does the stock model exit via the budget path** (and therefore emit uniform
-   random tokens)? Unpublished fact about the released model.
+7. ~~**§1.2 — how often does the stock model exit via the budget path?**~~ **RESOLVED [V-P0], and
+   the question was mis-framed.** Measured over 31 blocks with `ChatSampler` defaults: **0/31 exit
+   via the budget, 31/31 via early stop**, converging in 3–31 of the 48 available steps. But the
+   budget path is *not* the gate on random tokens — §3.1's corrected reading shows early stopping
+   emits the fresh sample including its own unaccepted positions, and **1 of 31 blocks emitted a
+   random token anyway**. The unpublished facts to report are both of those, plus the median ~12
+   executed steps, which undercuts §7.4's `48→24` ablation rungs.
 8. **§3.8 BFCL irrelevance** — 45% of the single-turn benchmark; the paper's handling is unknown.
 9. **§4.5** post-lift minimization ratio and **§4.4** label-class dedup ratio — unpublished, cheap,
    citable.

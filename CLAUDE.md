@@ -18,9 +18,19 @@ from the model — the `[B, 256, V]` logits already produced at every denoising 
 and the params are never touched. If any step of the plan starts to need a training run, it is out
 of scope: write it up in `docs/LOG.md` and stop.
 
-Minimum fork surface is **`DiffusionSampler.sample_next_canvas` plus a widened `SamplingState`** —
-`_sample_step` does *not* need forking. SPEC §5.3 derives this from the library's real loop
-structure; read it before designing anything.
+Minimum fork surface is **`DiffusionSampler.sample_next_canvas`, a widened `SamplingState`, *and*
+`_sample_step`**. SPEC §5.3 derives this from the library's real loop structure; read it before
+designing anything.
+
+> **Corrected in Phase 0 (2026-07-27).** This paragraph previously said `_sample_step` does *not*
+> need forking. That is false against `gemma` 4.1.0: `sample_next_canvas` never receives `state`
+> (its signature is `canvas_length, max_denoising_steps, batch_size, cache, params, rng,
+> full_attention_mask`), and `max_new_tokens` is not a field of `SamplingState` at all — it lives
+> only in `_sample_loop`'s `cond_fn` closure. So neither `A_k` nor the remaining budget `R` can
+> reach the constrained sampler without forking `_sample_step`. The *within-block* claim survives:
+> the denoising `while_loop` is fully encapsulated in `sample_next_canvas`, so widening
+> `_WhileLoopCarry` and replacing `body_fn` needs no changes elsewhere. See
+> `docs/PHASE0_FINDINGS.md` §2.2.
 
 The tempting drift is SPEC §3.3 (renoising R1/R2) and §3.7 (constrained self-conditioning), which
 shift the model's *inputs* off its training distribution. Flags to ablate and possibly reject,
@@ -180,11 +190,14 @@ All documented with evidence in SPEC.md. These cost a day each.
 **Model**
 
 - **The emitted canvas is the *sample*, and non-accepted positions are emitted as uniform random
-  tokens over the full 262k vocab.** `ChainedEarlyStop` is AND and `TokenStabilityEarlyStop`
-  requires argmax to match the whole previous canvas, so this reaches the output **only via the
-  budget path** — 48 steps without a stability fixed point. **But a directly-constructed
-  `DiffusionSampler` defaults to `NoEarlyStop` and therefore *always* takes that path**, so it will
-  bite you in tests. (§3.1)
+  tokens over the full 262k vocab — and early stopping does NOT prevent this.** `should_stop` is
+  computed from `previous_canvas` and `logits`, so it certifies the step's *input*; the emitted
+  canvas is gated on the *old* `carry.done`, so the step on which early stop fires still emits its
+  own fresh sample including that step's unaccepted positions. **Measured in Phase 0: 31/31 blocks
+  early-stopped, 0/31 hit the budget, and 1/31 still emitted a random token.** (The earlier claim
+  here — that this reaches the output "only via the budget path" — was false; see
+  `docs/PHASE0_FINDINGS.md` §2.1.) A directly-constructed `DiffusionSampler` additionally defaults
+  to `NoEarlyStop` and so always runs all 48 steps, which will bite you in tests. (§3.1)
 - **The constraint mask must go in `logit_shaper`, not `sample_from_predictions`,** if you want it
   to reach self-conditioning — the SC tap is strictly upstream of the sampler. Use a finite
   sentinel (`-1e30`), never `-inf`. (§3.7, §2.4)

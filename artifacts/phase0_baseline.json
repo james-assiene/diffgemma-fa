@@ -1,0 +1,762 @@
+{
+  "checkpoint": "/home/ubuntu/diffgemma_fa/artifacts/ckpt/diffusiongemma-26B-A4B-it",
+  "load_seconds": 35.3,
+  "memory": {
+    "bytes_in_use_gb": 53.53,
+    "peak_bytes_in_use_gb": 56.52,
+    "bytes_limit_gb": 76.52
+  },
+  "jax_version": "0.11.0",
+  "n_prompts": 20,
+  "blocks_total": 20,
+  "blocks_exiting_via_budget": 0,
+  "blocks_exiting_via_early_stop": 20,
+  "mean_non_accepted_on_final_step": 0.0,
+  "max_non_accepted_on_final_step": 0,
+  "results": [
+    {
+      "idx": 0,
+      "prompt": "What is the capital of France?",
+      "output": "<|channel>thought\n<channel|>The capital of France is **Paris**.<turn|>",
+      "output_chars": 70,
+      "wall_seconds": 11.91,
+      "total_denoising_steps": 4,
+      "seconds_per_denoising_step": 2.9784,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 4,
+          "final_step_index": 3,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.000473,
+          "accepted_curve": [
+            253,
+            256,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        3
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 1.1e-05
+    },
+    {
+      "idx": 1,
+      "prompt": "Write a Python function that reverses a string.",
+      "output": "<|channel>thought\n<channel|>There are several ways to reverse a string in Python, depending on whether you want efficiency or readability.\n\n### 1. The Best Way: Slicing (Recommended)\nThis is the most \"Pythonic\" and fastest way to reverse a string. It uses the slice syntax `[start:stop:step]`.\n\n```python\ndef reverse_string(text):\n    return text[::-1]\n\n# Example usage:\nprint(reverse_string(\"Hello World\"))  # Output: dlroW olleH\n```\n\n### 2. Using the `reversed()` function\nIf you prefer a more explicit approach, you can use the built-in `reversed()` function, which returns an iterator, and then join it back into a string.\n\n```python\ndef reverse_string(text):\n    return \"\".join(reversed(text))\n\n# Example usage:\nprint(reverse_string(\"Python\"))  # Output: nohtyP\n```\n\n### 3. Using a Loop (The Algorithmic approach)\nIf you are practicing for a coding interview and they ask you to do it without using built-in shortcuts, you can use a for loop.\n\n```python\ndef reverse",
+      "output_chars": 970,
+      "wall_seconds": 2.95,
+      "total_denoising_steps": 11,
+      "seconds_per_denoising_step": 0.2682,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 11,
+          "final_step_index": 10,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 2.2e-05,
+          "accepted_curve": [
+            6,
+            15,
+            19,
+            61,
+            76,
+            127,
+            190,
+            228,
+            254,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        10
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 2e-05
+    },
+    {
+      "idx": 2,
+      "prompt": "Explain what a finite automaton is in two sentences.",
+      "output": "<|channel>thought\n<channel|>A finite automaton is a mathematical model of computation used to recognize patterns within strings by transitioning through a fixed set of states. It processes input one symbol at a time, moving between states based on predefined rules, and ultimately determining whether the input is valid based on its final state.",
+      "output_chars": 345,
+      "wall_seconds": 2.87,
+      "total_denoising_steps": 11,
+      "seconds_per_denoising_step": 0.2608,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 11,
+          "final_step_index": 10,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 1.2e-05,
+          "accepted_curve": [
+            196,
+            200,
+            208,
+            213,
+            214,
+            229,
+            246,
+            253,
+            255,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        10
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 1e-05
+    },
+    {
+      "idx": 3,
+      "prompt": "List three prime numbers greater than 100.",
+      "output": "<|channel>thought\n<channel|>Three prime numbers greater than 100 are:\n\n1. **101**\n2. **103**\n3. **107**<turn|>",
+      "output_chars": 110,
+      "wall_seconds": 1.73,
+      "total_denoising_steps": 4,
+      "seconds_per_denoising_step": 0.4336,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 4,
+          "final_step_index": 3,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.001827,
+          "accepted_curve": [
+            213,
+            232,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        3
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 0.00145
+    },
+    {
+      "idx": 4,
+      "prompt": "Convert 25 degrees Celsius to Fahrenheit.",
+      "output": "<|channel>thought\n<channel|>To convert Celsius to Fahrenheit, use the following formula:\n\n**\u00b0F = (\u00b0C \u00d7 9/5) + 32**\n\nStep-by-step calculation:\n1. Multiply 25 by 9/5 (1.8): $25 \\times 1.8 = 45$\n2. Add 32 to the result: $45 + 32 = 77$\n\n**Result:** 25 degrees Celsius is equal to **77 degrees Fahrenheit**.",
+      "output_chars": 302,
+      "wall_seconds": 2.43,
+      "total_denoising_steps": 10,
+      "seconds_per_denoising_step": 0.2435,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 10,
+          "final_step_index": 9,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.000152,
+          "accepted_curve": [
+            97,
+            119,
+            170,
+            192,
+            213,
+            240,
+            249,
+            254,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        9
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 0.000134
+    },
+    {
+      "idx": 5,
+      "prompt": "What is 17 * 23?",
+      "output": "<|channel>thought\n<channel|>17 * 23 = **391**\n\n**Here is a quick trick to solve it:**\nSince both 17 and 23 are equidistant from 20, you can use the difference of squares formula $(a-b)(a+b) = a^2 - b^2$:\n1. $20^2 = 400$\n2. $3^2 = 9$\n3. $400 - 9 = 391$<turn|>",
+      "output_chars": 258,
+      "wall_seconds": 3.47,
+      "total_denoising_steps": 16,
+      "seconds_per_denoising_step": 0.2168,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 16,
+          "final_step_index": 15,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.002226,
+          "accepted_curve": [
+            9,
+            84,
+            99,
+            99,
+            145,
+            138,
+            190,
+            190,
+            199,
+            201,
+            193,
+            189,
+            185,
+            198,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        15
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 0.001823
+    },
+    {
+      "idx": 6,
+      "prompt": "Name the largest planet in the solar system.",
+      "output": "<|channel>thought\n<channel|>The largest planet in the solar system is **Jupiter**.",
+      "output_chars": 82,
+      "wall_seconds": 1.23,
+      "total_denoising_steps": 3,
+      "seconds_per_denoising_step": 0.4094,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 3,
+          "final_step_index": 2,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.001106,
+          "accepted_curve": [
+            248,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        2
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 0.001106
+    },
+    {
+      "idx": 7,
+      "prompt": "Write a JSON object with keys 'name' and 'age'.",
+      "output": "<|channel>thought\n<channel|>```json\n{\n  \"name\": \"John Doe\",\n  \"age\": 30\n}\n```<turn|>",
+      "output_chars": 84,
+      "wall_seconds": 1.45,
+      "total_denoising_steps": 3,
+      "seconds_per_denoising_step": 0.482,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 3,
+          "final_step_index": 2,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 3.1e-05,
+          "accepted_curve": [
+            250,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        2
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 2.8e-05
+    },
+    {
+      "idx": 8,
+      "prompt": "Summarise the plot of Hamlet in one sentence.",
+      "output": "<|channel>thought\n<channel|>After the ghost of his murdered father reveals he was killed by his uncle, Danish Prince Hamlet struggles with indecision and madness, leading to a tragic chain of deaths that consumes nearly the entire royal court.",
+      "output_chars": 243,
+      "wall_seconds": 3.48,
+      "total_denoising_steps": 16,
+      "seconds_per_denoising_step": 0.2178,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 16,
+          "final_step_index": 15,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 1.3e-05,
+          "accepted_curve": [
+            203,
+            208,
+            213,
+            219,
+            227,
+            243,
+            250,
+            252,
+            252,
+            252,
+            253,
+            253,
+            253,
+            255,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        15
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 1.2e-05
+    },
+    {
+      "idx": 9,
+      "prompt": "What does the acronym GPU stand for?",
+      "output": "<|channel>thought\n<channel|>The acronym **GPU** stands for **Graphics Processing Unit**.<turn|>",
+      "output_chars": 95,
+      "wall_seconds": 2.0,
+      "total_denoising_steps": 5,
+      "seconds_per_denoising_step": 0.401,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 5,
+          "final_step_index": 4,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 6.1e-05,
+          "accepted_curve": [
+            105,
+            244,
+            256,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        4
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 3.2e-05
+    },
+    {
+      "idx": 10,
+      "prompt": "Give me a bash command to count lines in a file.",
+      "output": "<|channel>thought\n<channel|>The most common way to count lines in a file is using the `wc` (word count) command.\n\n### 1. The standard method\nTo count the lines in a single file:\n```bash\nwc -l filename.txt\n```\n*Output example:* `42 filename.txt`\n\n### 2. Count only the number\nIf you want **just the number** without the filename (useful for scripts), use redirection:\n```bash\nwc -l < filename.txt\n```\n*Output example:* `42`\n\n### 3. Count lines from a command output\nIf you want to count the lines produced by another command, use a pipe (`|`):\n```bash\ncat filename.txt | wc -l\n```\n\n### 4. Count lines in multiple files\nYou can pass multiple files to see the count for each plus a grand total:\n```bash\nwc -l file1.txt file2.txt file3.txt\n```<turn|>",
+      "output_chars": 746,
+      "wall_seconds": 3.38,
+      "total_denoising_steps": 14,
+      "seconds_per_denoising_step": 0.2411,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 14,
+          "final_step_index": 13,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.000448,
+          "accepted_curve": [
+            6,
+            16,
+            27,
+            62,
+            74,
+            95,
+            155,
+            191,
+            232,
+            243,
+            255,
+            255,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        13
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 0.00045
+    },
+    {
+      "idx": 11,
+      "prompt": "What year did the Apollo 11 mission land on the moon?",
+      "output": "<|channel>thought\n<channel|>The Apollo 11 mission landed on the moon in **1969**. The lunar module, *Eagle*, touched down on the lunar surface on July 20, 1969.",
+      "output_chars": 160,
+      "wall_seconds": 2.06,
+      "total_denoising_steps": 6,
+      "seconds_per_denoising_step": 0.3427,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 6,
+          "final_step_index": 5,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.000501,
+          "accepted_curve": [
+            211,
+            203,
+            230,
+            255,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        5
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 0.000496
+    },
+    {
+      "idx": 12,
+      "prompt": "Translate 'good morning' into Spanish.",
+      "output": "<|channel>thought\n<channel|>The translation for \"good morning\" in Spanish is:\n\n**Buenos d\u00edas**<turn|>",
+      "output_chars": 101,
+      "wall_seconds": 1.59,
+      "total_denoising_steps": 4,
+      "seconds_per_denoising_step": 0.398,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 4,
+          "final_step_index": 3,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.000402,
+          "accepted_curve": [
+            170,
+            227,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        3
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 0.000395
+    },
+    {
+      "idx": 13,
+      "prompt": "What is the derivative of x^3?",
+      "output": "<|channel>thought\n<channel|>The derivative of $x^3$ is **$3x^2$**.\n\n### Explanation:\nTo find this derivative, you use the **Power Rule**, which states that if $f(x) = x^n$, then:\n$$f'(x) = nx^{n-1}$$\n\n**Applying it to $x^3$:**\n1. The exponent ($n$) is **3**. Bring this down to the front as a multiplier.\n2. Subtract 1 from the exponent: $3 - 1 = 2$.\n\nThis gives you:\n$$\\frac{d}{dx}(x^3) = 3x^{3-1} = \\mathbf{3x^2}$$<turn|>",
+      "output_chars": 423,
+      "wall_seconds": 2.9,
+      "total_denoising_steps": 12,
+      "seconds_per_denoising_step": 0.2415,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 12,
+          "final_step_index": 11,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.000859,
+          "accepted_curve": [
+            20,
+            55,
+            108,
+            148,
+            168,
+            212,
+            252,
+            252,
+            254,
+            256,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        11
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 0.00071
+    },
+    {
+      "idx": 14,
+      "prompt": "Describe the difference between TCP and UDP.",
+      "output": "<|channel>thought\n<channel|>The fundamental difference between **TCP** (Transmission Control Protocol) and **UDP** (User Datagram Protocol) lies in how they prioritize **reliability versus speed**. \n\nThink of TCP as a **phone call** and UDP as a **postcard**.\n\nHere is a detailed breakdown of the differences across several categories:\n\n---\n\n### 1. TCP (Transmission Control Protocol)\nTCP is a **connection-oriented** protocol. It ensures that data arrives exactly as sent, in the correct order.\n\n*   **Handshake:** Before data is sent, the sender and receiver perform a \"three-way handshake\" (SYN, SYN-ACK, ACK) to establish a connection.\n*   **Reliability:** It guarantees delivery. If a packet is lost or corrupted during transit, TCP detects this and retransmits it.\n*   **Ordering:** Packets are numbered. If they arrive out of order, TCP reassembles them into the correct sequence before handing them to the application.\n*   **Flow Control:** It monitors the speed of data transfer to ensure the sender doesn't overwhelm the receiver.\n*   **Best use-cases:** Web browsing (HTTP/HTTPS), Email (SMTP/IMAP), File",
+      "output_chars": 1115,
+      "wall_seconds": 3.38,
+      "total_denoising_steps": 15,
+      "seconds_per_denoising_step": 0.2256,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 15,
+          "final_step_index": 14,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.001599,
+          "accepted_curve": [
+            6,
+            6,
+            17,
+            31,
+            52,
+            73,
+            120,
+            194,
+            225,
+            245,
+            251,
+            254,
+            255,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        14
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 6.4e-05
+    },
+    {
+      "idx": 15,
+      "prompt": "Write a regular expression matching an email address.",
+      "output": "<|channel>thought\n<channel|>Writing a \"perfect\" email regular expression is notoriously difficult because the official specification (RFC 5322) is incredibly complex. However, depending on your needs, here are the three most common approaches:\n\n### 1. The \"Practical\" Version (Recommended)\nThis is the most common version used in web development. It catches 99% of real-world emails while remaining short enough to read and maintain.\n\n```regex\n^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$\n```\n\n**How it works:**\n*   `^[a-zA-Z0-9._%+-]+`: Matches the username (letters, numbers, and common allowed symbols).\n*   `@`: Matches the literal \"@\" symbol.\n*   `[a-zA-Z0-9.-]+`: Matches the domain name (e.g., \"gmail\").\n*   `\\.`: Matches a literal dot.\n*   `[a-zA-Z]{2,}$`: Matches the Top-Level Domain (e.g., \"com\", \"org\", \"edu\"), ensuring it is",
+      "output_chars": 841,
+      "wall_seconds": 2.62,
+      "total_denoising_steps": 11,
+      "seconds_per_denoising_step": 0.238,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 11,
+          "final_step_index": 10,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.000218,
+          "accepted_curve": [
+            5,
+            5,
+            8,
+            32,
+            104,
+            190,
+            217,
+            231,
+            251,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        10
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 0.000219
+    },
+    {
+      "idx": 16,
+      "prompt": "What is the boiling point of water at sea level?",
+      "output": "<|channel>thought\n<channel|>The boiling point of water at sea level is **100 degrees Celsius** (**212 degrees Fahrenheit**).",
+      "output_chars": 124,
+      "wall_seconds": 1.8,
+      "total_denoising_steps": 6,
+      "seconds_per_denoising_step": 0.2999,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 6,
+          "final_step_index": 5,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.002284,
+          "accepted_curve": [
+            137,
+            202,
+            233,
+            239,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        5
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 0.002228
+    },
+    {
+      "idx": 17,
+      "prompt": "Give the first five Fibonacci numbers.",
+      "output": "<|channel>thought\n<channel|>The first five Fibonacci numbers are: **0, 1, 1, 2, 3**.\n\n*(Note: If you start the sequence with 1 instead of 0, the first five are 1, 1, 2, 3, 5.)*<turn|>",
+      "output_chars": 183,
+      "wall_seconds": 2.06,
+      "total_denoising_steps": 8,
+      "seconds_per_denoising_step": 0.2572,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 8,
+          "final_step_index": 7,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.00097,
+          "accepted_curve": [
+            151,
+            176,
+            204,
+            227,
+            254,
+            256,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        7
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 0.00025
+    },
+    {
+      "idx": 18,
+      "prompt": "What is the chemical symbol for gold?",
+      "output": "<|channel>thought\n<channel|>The chemical symbol for gold is **Au**. It comes from the Latin word for gold, *aurum*.<turn|>",
+      "output_chars": 122,
+      "wall_seconds": 1.48,
+      "total_denoising_steps": 5,
+      "seconds_per_denoising_step": 0.2964,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 5,
+          "final_step_index": 4,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.000893,
+          "accepted_curve": [
+            234,
+            246,
+            256,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        4
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 6.5e-05
+    },
+    {
+      "idx": 19,
+      "prompt": "Explain recursion to a five-year-old.",
+      "output": "<|channel>thought\n<channel|>Imagine you have a **magic box**. \n\nInside that box, there is a **smaller box**. \nAnd inside *that* box, there is an **even smaller box**. \n\nYou keep opening the boxes, over and over, looking for what is inside. Finally, you open a tiny box that has a **piece of candy** inside!\n\n**Recursion** is just a fancy word for when you do the same thing again and again until you find the answer. \n\nHere is another way to think about it:\n\nImagine you are lost and want to find your teddy bear.\n1. You look under the couch. (No bear.)\n2. You look under the bed. (No bear.)\n3. You look under the chair. (**Yes!**)\n\nYou kept doing the same action (looking under things) until you found what you were looking for. That is recursion!",
+      "output_chars": 748,
+      "wall_seconds": 4.23,
+      "total_denoising_steps": 20,
+      "seconds_per_denoising_step": 0.2113,
+      "blocks": [
+        {
+          "block": 0,
+          "steps_executed": 20,
+          "final_step_index": 19,
+          "non_accepted_on_final_step": 0,
+          "exit": "early_stop",
+          "final_mean_entropy": 0.001749,
+          "accepted_curve": [
+            5,
+            7,
+            28,
+            40,
+            52,
+            53,
+            47,
+            49,
+            49,
+            60,
+            72,
+            100,
+            123,
+            138,
+            156,
+            189,
+            234,
+            253,
+            256,
+            256
+          ]
+        }
+      ],
+      "n_blocks": 1,
+      "any_early_stop": true,
+      "stop_fired_steps": [
+        19
+      ],
+      "token_stability_ever": true,
+      "min_entropy_seen": 0.000893
+    }
+  ]
+}

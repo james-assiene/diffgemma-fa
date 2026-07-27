@@ -2,6 +2,12 @@
 .jax_cache/
 .hf/
 logs/
-artifacts/
+# Excluded as `artifacts/*` rather than `artifacts/` so the negation below can
+# re-include specific files — git cannot un-ignore anything inside a directory
+# that is itself excluded.
+artifacts/*
+# Keep the small Phase 0 measurement artifacts: they are the evidence behind
+# docs/PHASE0_FINDINGS.md and the SPEC corrections. ~40 KB total.
+!artifacts/phase0_*.json
 __pycache__/
 *.pyc
