@@ -556,6 +556,16 @@ nodes** to recover `Z`. [D]
 > root draw degenerates silently — it still returns tokens, they are simply not from the
 > constrained posterior. In float64 the identical code samples correctly and the draw is accepted.
 > This is §6.3's `Z == 0` cause (c), except that the scaling is *present* and still insufficient.
+
+> **[V-P5, 2026-07-28] `Z == 0` was undetectable end to end, for causes (a) and (b) too.**
+> `jax.random.categorical` and `argmax` are **shift-invariant**, so an all-sentinel root produces a
+> confident-looking draw that passes every shape and validity check — measured `valid == True` on
+> 200/200 draws from a provably empty language. The `valid` flag only asks whether the drawn state
+> path traverses existing edges, which such a draw satisfies by accident, and the production caller
+> discarded it anyway; MAP's `score`, a perfect detector, was discarded too. A root-mass predicate
+> now rides `ConstrainedSamplingState.feasible` out through the block `lax.while_loop` (there is no
+> Python between blocks, §5.3) and `sample_constrained` raises `ZeroPartitionError` on the concrete
+> value. Nothing catches it: only cause (c) is benign and the constrained paths run in log space.
 >
 > **[V-P4, at the real `L = 256`] float64 is necessary but NOT sufficient.** At `L = 64` float64
 > fixes it entirely; at the real canvas length `--emission=sample` degenerates on 2 of 6 real
@@ -814,6 +824,14 @@ alone. **Four** failure modes, all of which must be closed:
    *not* covered by the `R = max_new_tokens − step` accounting. Bound `R` by the remaining **cache**
    capacity as well: `R = min(max_new_tokens − step, cache_length − used_cache_length)`.
 
+   **[V-P5, 2026-07-28] That bound is off by one.** gemma defines `is_full` as
+   `end_index >= total_cache_length − 1`, not `>= total_cache_length` — its own comment reads
+   "maybe will lose the last token". So `cache_length − used` claims one token the loop will never
+   emit, and `b_L` then admits a state that cannot finish. The correct bound is
+   `R = min(max_new_tokens − step, cache_length − 1 − used_cache_length)`, and `R` for `b_L` is
+   that minus the canvas about to be emitted (§3.5 trap 1). Implemented in
+   `model/state.py::remaining_budget`; `tests/test_state.py` pins both.
+
 **The three closures.**
 
 - **Budget-aware terminal factor.** Precompute `d(s) = min tokens from s to F` by BFS on the
@@ -825,6 +843,14 @@ alone. **Four** failure modes, all of which must be closed:
 - **Automaton-aware stopping.** Conjoin `A_{k+1} ∩ F ≠ ∅` into the block-level done flag.
   **This needs care under J0** — see below.
 - **`FREE` must exclude every `end_token` and `PAD`**, not just the marker.
+
+**[V-P5, 2026-07-28] Closure 2 was *unsound*, not merely unenforced.** `advance_states` used to
+substitute the previous state set for an empty one — `where(nxt.any(), nxt, active)` — justified by
+PAD appearing after a stop token. That justification is false for the compiled automata: the
+unscored `ACC --Σ--> ACC` tail of §3.5 trap 4 spans `range(vocab_size)` and already absorbs PAD and
+every end token. With the fallback in place, the conjunct `A_{k+1} ∩ F ≠ ∅` could be **true for a
+string the automaton rejects**, i.e. the system affirmatively reports acceptance of a rejected
+string. The fallback is removed and the emptying is reported instead.
 
 > **Closure 2 is not free under J0.** §5.1's protocol is
 > `should_stop(*, step, canvas, previous_canvas, logits)`, and under J0 that `canvas` is the
@@ -1117,7 +1143,11 @@ running. [V] **Its limitations are severe and silent** — put them in Phase 1's
   > *self-consistent fixed point* the model happily confirms. `compile/schema.py:
   > require_nonempty_strings` sets `minLength: 1` on required non-enum strings; non-empty arguments
   > went **7/12 → 12/12**.
-- `additionalProperties: false` not honored. Only 6 `format` values. [V]
+- ~~`additionalProperties: false` not honored.~~ **[V-P5, 2026-07-28] Inverted.** Measured against
+  outlines-core 0.2.14, a schema with `properties` and no `additionalProperties` already accepts
+  `{"a":"x"}` and **rejects** `{"a":"x","b":1}`: closedness is the default, so `false` is redundant,
+  not dropped. Flagging it forced callers to `allow`-list `additionalProperties`, which then also
+  silenced the `true` case — the desensitisation §4.2 exists to prevent. Only 6 `format` values. [V]
 - `INTEGER` permits `-0`; `NUMBER` requires a **signed** exponent, so `1e10` is rejected. [V]
 - `properties` emitted in **map order only** — an over-constraint that rejects valid documents with
   reordered keys. State the key order in the prompt.
