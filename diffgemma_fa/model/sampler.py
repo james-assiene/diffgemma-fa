@@ -33,6 +33,8 @@ import jax.numpy as jnp
 from gemma.diffusion import _sampler as _diffusion_sampler
 from gemma.gm.text import _sampler_loop
 
+from diffgemma_fa.infer import marginals as _marginals
+from diffgemma_fa.infer import scans
 from diffgemma_fa.model import constrained as _constrained
 from diffgemma_fa.model.state import Automaton, ConstrainedSamplingState, widen
 
@@ -114,7 +116,7 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
     diagnose: bool = False
 
     def __post_init__(self) -> None:
-        if self.variant not in ("j0", "j1", "j2"):
+        if self.variant not in ("j0", "j1", "j2", "mask", "unconstrained"):
             raise ValueError(f"unknown variant {self.variant!r}")
         if self.emission not in ("map", "sample"):
             raise ValueError(f"unknown emission {self.emission!r}")
@@ -122,7 +124,7 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
         # joint draw (**J0 only**; J1/J2 are always a draw)". J1/J2 define the
         # emission to *be* the draw, so a MAP emission is not one of their
         # variants and is rejected rather than silently reinterpreted.
-        if self.variant in ("j1", "j2") and self.emission == "map":
+        if self.variant in ("j1", "j2", "mask") and self.emission == "map":
             raise ValueError(
                 f"variant={self.variant!r} is always a draw (SPEC §3.9); "
                 "emission='map' is J0-only. With J1's flattened marginals a "
@@ -282,6 +284,65 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
             p = p_real
             if self.variant == "j1":
                 p = jax.vmap(_constrained.flatten_unaccepted)(p_real, accepted)
+
+            if self.variant == "unconstrained":
+                # SPEC §7.2 baseline 1: the stock sampler, untouched.
+                sampled = self.sample_from_predictions(
+                    rng=sample_rng_, denoiser_logits=out.logits,
+                    canvas=carry.canvas, current_noise_proportion=cur_np,
+                    target_noise_proportion=tgt_np)
+                new_done = jnp.logical_or(
+                    carry.done,
+                    self.early_stop_fn.should_stop(
+                        step=step, canvas=sampled,
+                        previous_canvas=carry.canvas, logits=out.logits))
+                canvas = jnp.where(carry.done[:, None], carry.canvas, sampled)
+                return _ConstrainedCarry(
+                    step=step + 1, canvas=canvas, emit_canvas=canvas,
+                    sc_embeddings=out.sc_embeddings.astype(
+                        carry.sc_embeddings.dtype),
+                    rng=next_rng_, done=new_done)
+
+            if self.variant == "mask":
+                # SPEC §7.2 baseline 2 and §2.8's target: **naive per-position
+                # masking**. Mask to the support projection pi_i(C) and sample
+                # each position INDEPENDENTLY.
+                #
+                # This enforces the product of coordinate projections, which
+                # strictly contains C whenever C is not a product set — the
+                # paper's own example being that a grammar accepting real
+                # numbers admits "1." and ".1" and a factorized sampler then
+                # emits "..". Its CS column is the headline evidence that the
+                # joint method is needed at all.
+                def support_of(pi, act):
+                    aut = automaton.with_active(act)
+                    p_vl, W_e, M = _constrained._matrices(  # noqa: SLF001
+                        pi, aut, self.n_states_bucket, self.n_classes)
+                    tr = scans.up_sweep(M)
+                    a_v, b_v, _, _ = scans.prefix_suffix(
+                        tr, aut.active.astype(pi.dtype),
+                        _constrained.budget_terminal_factor(
+                            aut.d, remaining, dtype=pi.dtype))
+                    u = a_v[:-1][:, aut.edge_src] * b_v[1:][:, aut.edge_dst]
+                    return _marginals.scatter_edge_mass_to_tokens(
+                        u, aut.edge_class, aut.csr_indices, aut.csr_indptr,
+                        aut.is_neg, self.n_classes, pi.shape[-1])
+
+                r = jax.vmap(support_of)(p_real, automaton.active)   # [B, L, V]
+                masked = jnp.where(r > 0, out.logits.astype(jnp.float32),
+                                   _marginals.MASK_SENTINEL)
+                sampled = jax.random.categorical(sample_rng_, masked)
+                new_done = jnp.logical_or(
+                    carry.done,
+                    self.early_stop_fn.should_stop(
+                        step=step, canvas=sampled,
+                        previous_canvas=carry.canvas, logits=masked))
+                canvas = jnp.where(carry.done[:, None], carry.canvas, sampled)
+                return _ConstrainedCarry(
+                    step=step + 1, canvas=canvas, emit_canvas=canvas,
+                    sc_embeddings=out.sc_embeddings.astype(
+                        carry.sc_embeddings.dtype),
+                    rng=next_rng_, done=new_done)
 
             def per_example(pi, act, key):
                 aut = automaton.with_active(act)

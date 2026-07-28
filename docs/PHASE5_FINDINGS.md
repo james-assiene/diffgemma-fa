@@ -41,8 +41,14 @@ dev set spanning tasks; and `entropy_threshold` (the `EntropyEarlyStop` half of 
 a production value.
 
 Accuracy uses **BFCL's own normalisation** — lowercase and strip `",./-_*^` (SPEC §4.8) — not exact
-equality. An earlier version used strict equality and understated accuracy; those numbers are
-superseded. Every prediction is saved in `artifacts/phase5_*.json` so the metric can be re-derived
+equality, so the figure is comparable to the leaderboard's.
+
+> **Correction.** I earlier claimed a predicted `":black"` against a ground truth `black` would be a
+> BFCL *match*, and used that to argue strict equality was understating accuracy. **`:` is not in
+> BFCL's strip set** (`",./-_*^`), so it is not a match, and switching to BFCL's normalisation
+> changed no number — 1/19 before and after. The leading-`:` artifact had to be **fixed at the
+> grammar level** (§4.2b), not normalised away. Pinned by
+> `test_colon_is_NOT_in_bfcls_strip_set`. Every prediction is saved in `artifacts/phase5_*.json` so the metric can be re-derived
 offline without another GPU run.
 
 ---
@@ -143,8 +149,9 @@ it "shrinks the automaton and costs nothing the benchmark scores". **That reason
 Gemma puts the space *inside* the separator token (`": "`), so forbidding whitespace makes the
 model's own rendering `{"user_id": 7890, "special": "black"}` **unacceptable to the grammar**. The
 symptom was a leading `:` on essentially every string value — `":Divinópolis, MG"` against a ground
-truth of `Divinópolis, MG`, a one-character defect BFCL's normalisation does not strip. The cost of
-allowing whitespace is **8 states** (43 → 51) against ~20 GB of tree headroom.
+truth of `Divinópolis, MG`. BFCL's normalisation does **not** strip `:`, so every such argument
+scored zero. The cost of allowing whitespace is **8 states** (43 → 51) against ~20 GB of tree
+headroom.
 
 **Measured effect, same 12 records, same bound, J1-sample:**
 
