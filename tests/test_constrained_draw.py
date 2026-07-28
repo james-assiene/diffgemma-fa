@@ -244,3 +244,77 @@ def test_map_path_survives_fp32(grammar):
     toks = [int(x) for x in _map_tokens(C.joint_map)(p32, aut, jnp.int32(L),
                                         a.n_states_bucket, a.tables.n_classes)]
     assert Simulator(a).accepts(toks), "MAP must work in fp32"
+
+
+# ==========================================================================
+# The automaton must be TRACED, not baked in (SPEC §5.3)
+# ==========================================================================
+
+def test_one_compilation_serves_every_grammar_in_a_bucket():
+    """CLAUDE.md's headline JAX landmine, previously asserted nowhere.
+
+    `self` is a `static_argname` on both `_sample_loop` and `_sample_step`, so
+    anything stored on the sampler object is hashed as a compile-time constant.
+    Per-request automaton arrays held as attributes would trigger a **full
+    recompile per grammar** — hours across BFCL's 4,549 Live schemas, and it
+    defeats the compilation cache entirely. Values must be traced; only shapes
+    may be static.
+
+    Measured by XLA's own compile counter rather than by reading the code: a
+    dozen structurally different automata sharing a `|S|` bucket must produce
+    exactly **one** trace.
+    """
+    n, V, L, C_CLASSES = 8, 8, 4, 2
+    rng = np.random.default_rng(4)
+
+    def automaton_for(i):
+        # Different edges, different finals, different active set -- same shapes.
+        src = jnp.asarray(rng.integers(0, n, size=6), jnp.int32)
+        dst = jnp.asarray(rng.integers(0, n, size=6), jnp.int32)
+        return Automaton(
+            edge_src=src, edge_dst=dst,
+            edge_class=jnp.asarray(rng.integers(0, C_CLASSES, size=6), jnp.int32),
+            edge_valid=jnp.ones(6, bool),
+            csr_indices=jnp.arange(V * C_CLASSES, dtype=jnp.int32) % V,
+            csr_indptr=jnp.asarray([0, V, 2 * V], jnp.int32),
+            is_neg=jnp.zeros(C_CLASSES, bool),
+            d=jnp.asarray(rng.integers(0, 3, size=n), jnp.int32),
+            is_final=jnp.zeros(n, bool).at[i % n].set(True),
+            active=jnp.zeros(n, bool).at[0].set(True),
+        )
+
+    C.joint_draw.clear_cache()
+    p = jnp.full((L, V), 1.0 / V)
+    for i in range(12):
+        C.joint_draw(p, automaton_for(i), jnp.int64(16),
+                     jax.random.PRNGKey(i), n, C_CLASSES)
+    n_traces = C.joint_draw._cache_size()
+    assert n_traces == 1, (
+        f"{n_traces} XLA traces for 12 automata of identical shape — something "
+        "per-request landed on a static argument (SPEC §5.3)"
+    )
+
+
+def test_a_different_state_bucket_does_recompile():
+    """The complement: bucketing is what bounds the compile count, so a
+    genuinely different `|S|` bucket SHOULD trace again. Without this, the test
+    above would also pass on a function that never specialises at all."""
+    V, L, C_CLASSES = 8, 4, 2
+
+    def automaton_for(n):
+        return Automaton(
+            edge_src=jnp.zeros(4, jnp.int32), edge_dst=jnp.ones(4, jnp.int32),
+            edge_class=jnp.zeros(4, jnp.int32), edge_valid=jnp.ones(4, bool),
+            csr_indices=jnp.arange(V * C_CLASSES, dtype=jnp.int32) % V,
+            csr_indptr=jnp.asarray([0, V, 2 * V], jnp.int32),
+            is_neg=jnp.zeros(C_CLASSES, bool),
+            d=jnp.zeros(n, jnp.int32), is_final=jnp.ones(n, bool),
+            active=jnp.zeros(n, bool).at[0].set(True),
+        )
+
+    C.joint_draw.clear_cache()
+    p = jnp.full((L, V), 1.0 / V)
+    for n in (8, 16):
+        C.joint_draw(p, automaton_for(n), jnp.int64(16),
+                     jax.random.PRNGKey(0), n, C_CLASSES)
+    assert C.joint_draw._cache_size() == 2

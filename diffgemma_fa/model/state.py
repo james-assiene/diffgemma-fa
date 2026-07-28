@@ -91,6 +91,17 @@ class ConstrainedSamplingState(_sampler_loop.SamplingState):
     #: `state.cache_info.is_full`, which truncates mid-grammar exactly as the
     #: token budget does.
     cache_length: jnp.ndarray
+    #: `[B] bool` — SPEC §6.3's `Z == 0` detector, accumulated across blocks.
+    #: False means some block found **no** accepted string of the canvas length
+    #: from `A_k` within budget: cause (a) or (b) of CLAUDE.md's taxonomy, both
+    #: of which must raise. It cannot be raised where it is detected — the block
+    #: loop is a `lax.while_loop` under `jit` and there is no Python between
+    #: blocks (SPEC §5.3) — so it rides the carry out and `sample_constrained`
+    #: raises on the concrete value. Silence here is what let a draw from a
+    #: provably empty language return a confident-looking canvas:
+    #: `jax.random.categorical` and `argmax` are **shift-invariant**, so an
+    #: all-sentinel logit vector is indistinguishable from a uniform one.
+    feasible: jnp.ndarray
 
     @property
     def remaining_budget(self) -> jnp.ndarray:
@@ -101,7 +112,14 @@ class ConstrainedSamplingState(_sampler_loop.SamplingState):
         mid-grammar exactly as the token budget does.
         """
         by_tokens = self.max_new_tokens - self.step
-        by_cache = self.cache_length - (self.init_cache_length + self.step)
+        # `- 1` is not slop. `_sample_loop`'s `cond_fn` exits on
+        # `cache_info.is_full`, and gemma defines that as
+        # `end_index >= total_cache_length - 1` (note the comment there: "maybe
+        # will lose the last token"), not `>= total_cache_length`. With
+        # `end_index = init_cache_length + step`, a bound of `cache_length -
+        # used` therefore claims one token the loop will never emit, and `b_L`
+        # then admits a state that cannot finish.
+        by_cache = self.cache_length - 1 - (self.init_cache_length + self.step)
         return jnp.minimum(by_tokens, by_cache)
 
     def terminal_budget(self, canvas_length: int) -> jnp.ndarray:

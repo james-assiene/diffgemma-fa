@@ -40,8 +40,31 @@ def random_automaton(rng, n_states, nfa: bool):
             k = int(rng.integers(1, V))
             edges.append((s, d, frozenset(int(x) for x in
                                           rng.choice(V, size=k, replace=False))))
-        if edges:  # force a parallel overlapping pair
-            edges.append(edges[0])
+        if edges:
+            # Force a parallel pair that **overlaps but is not identical**.
+            #
+            # This used to be `edges.append(edges[0])` — a duplicate of the
+            # same `(src, dst, label)`. That has ZERO power against eq (8)'s
+            # multiplicity: duplicating a label scales `M` uniformly, and the
+            # scale cancels in normalisation. A mutation audit measured the
+            # consequence directly: the `∃`-indicator form of eq (8) survived
+            # all 721 tests, with deviation ≤ 9.4e-4 (five of six instances at
+            # ~1e-18) against a 2e-2 threshold, because λ was exactly 0 on the
+            # generated instances — not because the χ² threshold was loose.
+            #
+            # Distinct-but-overlapping labels on the *same* `(src, dst)` are
+            # what make the `∃` form and the edge-multiplicity-weighted form
+            # actually disagree: a token in the intersection contributes twice
+            # under the weighted form and once under `∃`.
+            s0, d0, lab0 = edges[0]
+            lab0 = set(lab0)
+            other = set(range(V)) - lab0
+            if lab0 and other:
+                overlap = {sorted(lab0)[0]}
+                fresh = {sorted(other)[0]}
+                edges.append((s0, d0, frozenset(overlap | fresh)))
+            else:
+                edges.append(edges[0])
     else:
         by_pair = {}
         for s in range(n_states):
@@ -435,3 +458,80 @@ def test_log_space_survives_a_range_that_kills_the_linear_form():
     assert log[1, 1] == pytest.approx(np.log(1e-60), rel=1e-4)
     assert lin[1, 1] == 0.0, "the linear form is expected to underflow here"
     assert np.isfinite(log).all()
+
+
+# ---------------------------------------------------------------------------
+# eq (8)'s edge multiplicity — a DETERMINISTIC probe (SPEC §2.6)
+# ---------------------------------------------------------------------------
+#
+# A mutation audit found the `∃`-indicator form of eq (8) surviving all 721
+# tests. Sharpening the random NFA generator to emit overlapping-but-distinct
+# parallel labels was necessary but **not sufficient**: the randomly chosen
+# instance still has to put a multiplicity-2 pair on a path the sampler
+# actually walks, and measured, it usually does not.
+#
+# So this probe is constructed rather than sampled. It is the minimal instance
+# on which the two forms disagree, and the disagreement is 0.167 in total
+# variation — nowhere near a threshold question.
+
+def _multiplicity_probe():
+    """`0 --{a,b}--> 1` and `0 --{b,c}--> 1`, one token, uniform `p`.
+
+    Token `b` lies on **two** distinct edges between the same state pair, so it
+    carries twice the path mass:
+
+        weighted:  p * mult = [1, 2, 1, 0] / 4  ->  [.25, .50, .25, 0]
+        ∃-form:    p * 1    = [1, 1, 1, 0] / 3  ->  [.33, .33, .33, 0]
+
+    `reference.enumerate_posterior` independently confirms the first — it
+    enumerates strings and sums over latent edge paths, so the multiplicity
+    falls out of the model definition rather than being asserted here.
+    """
+    A = R.Automaton(
+        n_states=2, vocab_size=V,
+        edges=((0, 1, frozenset({0, 1})), (0, 1, frozenset({1, 2}))),
+        start=np.array([1.0, 0.0]), finals=frozenset({1}))
+    p = np.full((1, V), 1.0 / V)
+    return A, p
+
+
+def test_the_reference_posterior_is_edge_multiplicity_weighted():
+    """Pins the arbiter itself, so the JAX assertion below cannot be 'fixed' by
+    quietly changing what the reference means."""
+    A, p = _multiplicity_probe()
+    post, Z = R.enumerate_posterior(p, A)
+    assert Z > 0
+    assert post[(1,)] == pytest.approx(0.5), "token on two edges must get 2x"
+    assert post[(0,)] == pytest.approx(0.25)
+    assert post[(2,)] == pytest.approx(0.25)
+    assert (3,) not in post
+
+
+def test_jax_sample_tokens_weights_by_edge_multiplicity():
+    """The JAX-side counterpart. `∃` here is off by 8.3e-2 per token against
+    a 1.5e-2 tolerance; on a DFA the two forms coincide exactly, which is why
+    CLAUDE.md says to gate the fast path on `is_dfa` rather than assume it."""
+    A, p = _multiplicity_probe()
+    post, _ = R.enumerate_posterior(p, A)
+    class_of, members, is_neg, indices, indptr, seg = class_tables(A)
+
+    src = jnp.asarray([e[0] for e in A.edges], jnp.int32)
+    dst = jnp.asarray([e[1] for e in A.edges], jnp.int32)
+    cid = jnp.asarray(class_of, jnp.int32)   # already per-edge
+    p_vl = jnp.asarray(p.T)                                    # [V, L=1]
+    states = jnp.asarray([0, 1], jnp.int32)                    # the only path
+
+    n = 40_000
+    keys = jax.random.split(jax.random.PRNGKey(11), n)
+    draw = jax.jit(jax.vmap(lambda k: tree.sample_tokens(
+        p_vl, states, src, dst, cid, jnp.asarray(indices),
+        jnp.asarray(indptr), jnp.asarray(is_neg), len(members), k)[0]))
+    got = np.asarray(draw(keys)).reshape(-1)
+
+    freq = np.bincount(got, minlength=V) / n
+    assert freq[3] == 0.0, "token on no edge was sampled"
+    for v in range(3):
+        assert freq[v] == pytest.approx(post[(v,)], abs=1.5e-2), (
+            f"token {v}: got {freq[v]:.4f}, exact {post[(v,)]:.4f} — the "
+            f"∃-indicator form predicts {1/3:.4f} for every one of the three"
+        )

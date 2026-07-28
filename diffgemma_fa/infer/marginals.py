@@ -33,6 +33,7 @@ __all__ = [
     "transition_matrices",
     "scatter_edge_mass_to_tokens",
     "constrained_marginals",
+    "constrained_marginals_and_partition",
     "entropy_from_q",
     "MASK_SENTINEL",
 ]
@@ -174,6 +175,46 @@ def constrained_marginals(
     Returns:
       `[L, V]`, each row summing to 1.
     """
+    return constrained_marginals_and_partition(
+        p_vl, a, b, edge_src, edge_dst, class_id, indices, indptr, is_neg,
+        n_classes)[0]
+
+
+@functools.partial(jax.jit, static_argnames=("n_classes",))
+def constrained_marginals_and_partition(
+    p_vl: jnp.ndarray,
+    a: jnp.ndarray,
+    b: jnp.ndarray,
+    edge_src: jnp.ndarray,
+    edge_dst: jnp.ndarray,
+    class_id: jnp.ndarray,
+    indices: jnp.ndarray,
+    indptr: jnp.ndarray,
+    is_neg: jnp.ndarray,
+    n_classes: int,
+) -> tuple[jnp.ndarray, jnp.ndarray]:
+    """`constrained_marginals`, plus the **per-position** partition function.
+
+    **Why this exists.** `Σ_v q_i(v) == 1` is advertised as a self-check but is
+    *vacuous*: `q` is produced by dividing by its own row sum, so the identity
+    holds bit-for-bit under an arbitrary scale error. A mutation audit injected
+    a missing `u_i × W[i,e]` factor, an `a`/`b` off-by-one, and a deliberate
+    1e7 scale error — all three left every row sum at exactly 1.0.
+
+    The non-vacuous invariant is one level up. Before normalisation,
+
+        Σ_v p_i(v) · r_i(v)  =  Z   for **every** `i`,
+
+    because both sides are the same sum over accepted length-`L` strings, just
+    grouped by a different position. So the `L` unnormalised row sums must all
+    be *equal*, and their common value is `Z`. That equality is what an
+    `a`/`b` misalignment or a dropped factor actually breaks, and it is
+    checkable without knowing `Z` in advance.
+
+    Returns:
+      `(q [L, V], Z_per_position [L])`. The second output is the detector; see
+      `tests/test_numerics.py`.
+    """
     V, L = p_vl.shape
     u = a[:-1][:, edge_src] * b[1:][:, edge_dst]                 # [L, E]
     r = scatter_edge_mass_to_tokens(u, class_id, indices, indptr, is_neg,
@@ -185,7 +226,8 @@ def constrained_marginals(
     # all-NaN, and `entropy_from_q` propagates that straight into SPEC §3.4's
     # acceptance mask. Verified by two reviewers independently.
     floor = jnp.finfo(row.dtype).tiny
-    return row / jnp.maximum(row.sum(axis=1, keepdims=True), floor)
+    Z_i = row.sum(axis=1)                                        # [L]
+    return row / jnp.maximum(Z_i[:, None], floor), Z_i
 
 
 @jax.jit

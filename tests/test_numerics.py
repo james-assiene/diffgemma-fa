@@ -18,7 +18,14 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from diffgemma_fa.infer import reference as R
+import jax
+
+jax.config.update("jax_enable_x64", True)
+
+import jax.numpy as jnp  # noqa: E402
+
+from diffgemma_fa.infer import marginals  # noqa: E402
+from diffgemma_fa.infer import reference as R  # noqa: E402
 
 V = 8
 
@@ -52,6 +59,48 @@ def ring_automaton(n_states: int = 6) -> R.Automaton:
     start[0] = 1.0
     return R.Automaton(n_states=n_states, vocab_size=V, edges=tuple(edges),
                        start=start, finals=frozenset({0, n_states - 1}))
+
+
+
+def class_tables(A: R.Automaton, threshold: int | None = None):
+    """Intern labels and build the CSR the JAX path consumes."""
+    threshold = V // 2 if threshold is None else threshold
+    lookup, members, class_of = {}, [], []
+    for _, _, lab in A.edges:
+        if lab not in lookup:
+            lookup[lab] = len(members)
+            members.append(lab)
+        class_of.append(lookup[lab])
+    is_neg = [len(m) > threshold for m in members]
+    stored = [sorted(set(range(V)) - set(m)) if is_neg[c] else sorted(m)
+              for c, m in enumerate(members)]
+    indptr = np.zeros(len(members) + 1, np.int32)
+    for c, st in enumerate(stored):
+        indptr[c + 1] = indptr[c] + len(st)
+    indices = np.array([x for st in stored for x in st], np.int32)
+    seg = np.array([c for c, st in enumerate(stored) for _ in st], np.int32)
+    return (np.array(class_of, np.int32), members, np.array(is_neg),
+            indices, indptr, seg)
+
+
+def _viable_instance(rng, L, nfa):
+    """A ring automaton (DFA) or a ring with an extra overlapping parallel edge
+    (NFA), plus sharp marginals, guaranteed to have `Z > 0` at this `L`."""
+    A = ring_automaton()
+    if nfa:
+        # Overlapping but DISTINCT label on an existing state pair, so the
+        # multiplicity is genuinely 2 on the shared token.
+        edges = list(A.edges) + [(0, 1, frozenset({2, 3}))]
+        A = R.Automaton(n_states=A.n_states, vocab_size=V, edges=tuple(edges),
+                        start=A.start, finals=A.finals)
+    for _ in range(40):
+        p = sharp_probs(rng, L, scale=2.0)
+        W = R.edge_weights(p, A)
+        M = R.transition_matrices(W, A)
+        fb = R.forward_backward(M, A.start, np.ones(A.n_states))
+        if np.all(fb.a[1:].sum(axis=1) > 0) and np.all(fb.b[:-1].sum(axis=1) > 0):
+            return A, p
+    raise AssertionError("no viable instance; fix the generator")
 
 
 # ---------------------------------------------------------------------------
@@ -248,3 +297,76 @@ def test_sampling_at_L256_stays_in_the_language():
         tokens, _ = R.sample_chain(p, A, fb, W, rng)
         assert len(tokens) == L
         assert R.accepts(A, tokens)
+
+
+# ==========================================================================
+# The NON-vacuous replacement for `Σ_v q_i(v) == 1`
+# ==========================================================================
+#
+# A mutation audit confirmed `Σ_v q_i(v) == 1` is vacuous in both code paths:
+# `q` is produced by dividing by its own row sum, so the identity survives a
+# dropped `u_i × W[i,e]` factor, an `a`/`b` off-by-one, and a deliberate 1e7
+# scale error — all three leave every row sum at exactly 1.0, and an error in
+# the log-scale accumulation leaves `q` bit-identical.
+#
+# The live invariant is one level up: before normalisation,
+#
+#     Σ_v p_i(v) · r_i(v) = Z   for EVERY i
+#
+# because both sides sum over the same set of accepted length-`L` strings,
+# merely grouped by a different position. The `L` unnormalised row sums must
+# therefore all be equal — checkable without knowing `Z`, and precisely what a
+# misalignment breaks.
+
+def _log_partition_by_position(A, p):
+    """`[L]` of `log Z` recovered independently at each position.
+
+    `forward_backward` is **scaled** (mandatory in fp32 at `L = 256`), so the
+    raw row sum at position `i` is `Z` divided by the scales that `a_i` and
+    `b_{i+1}` carry. Adding the log-scales back is what makes the `L` values
+    comparable — and it puts SPEC §2.4's log-scale accumulation *inside* the
+    invariant, so an error there is caught too. That is the mutation the
+    advertised `Σ_v q_i == 1` check leaves `q` bit-identical under.
+    """
+    W = R.edge_weights(p, A)
+    M = R.transition_matrices(W, A)
+    fb = R.forward_backward(M, A.start, A.final_vector())
+    class_of, members, is_neg, indices, indptr, _ = class_tables(A)
+    _q, Z_i = marginals.constrained_marginals_and_partition(
+        jnp.asarray(p.T), jnp.asarray(fb.a), jnp.asarray(fb.b),
+        jnp.asarray([e[0] for e in A.edges], jnp.int32),
+        jnp.asarray([e[1] for e in A.edges], jnp.int32),
+        jnp.asarray(class_of, jnp.int32), jnp.asarray(indices),
+        jnp.asarray(indptr), jnp.asarray(is_neg), len(members))
+    Z_i = np.asarray(Z_i)
+    assert np.all(Z_i > 0), "empty language slipped past the instance filter"
+    # `u_i(e) = a_i(src) * b_{i+1}(dst)` -- see `constrained_marginals`.
+    L = p.shape[0]
+    return np.log(Z_i) + fb.log_scale_a[:L] + fb.log_scale_b[1:L + 1]
+
+
+@pytest.mark.parametrize("nfa", [False, True])
+@pytest.mark.parametrize("seed", range(6))
+def test_the_partition_function_is_the_same_at_every_position(nfa, seed):
+    """`Σ_v p_i(v) r_i(v)` must not depend on `i`. This is the assertion that
+    `Σ_v q_i(v) == 1` was pretending to be."""
+    rng = np.random.default_rng(91000 + seed * 13 + int(nfa))
+    A, p = _viable_instance(rng, 8, nfa)
+    logZ_i = _log_partition_by_position(A, p)
+    spread = float(logZ_i.max() - logZ_i.min())
+    assert spread < 1e-9, (
+        f"log Z varies by {spread:.3g} nats across positions: {logZ_i} — an "
+        f"`a`/`b` misalignment, a dropped edge-weight factor, or a log-scale "
+        f"sum that does not run over every node"
+    )
+
+
+@pytest.mark.parametrize("nfa", [False, True])
+def test_that_partition_equals_the_brute_force_Z(nfa):
+    """And its common value is the enumerated `Z`, so the invariant is anchored
+    to ground truth rather than merely self-consistent."""
+    rng = np.random.default_rng(92000 + int(nfa))
+    A, p = _viable_instance(rng, 4, nfa)
+    _post, Z = R.enumerate_posterior(p, A)
+    logZ_i = _log_partition_by_position(A, p)
+    assert float(np.exp(logZ_i[0])) == pytest.approx(Z, rel=1e-9)

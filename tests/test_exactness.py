@@ -77,10 +77,23 @@ def random_nfa(rng: np.random.Generator, n_states: int) -> R.Automaton:
         k = int(rng.integers(1, V + 1))
         labels = frozenset(int(x) for x in rng.choice(V, size=k, replace=False))
         edges.append((s, d, labels))
-    # Force at least one genuinely parallel overlapping pair.
+    # Force at least one genuinely parallel **overlapping-but-distinct** pair.
+    #
+    # `edges.append(edges[0])` — an exact duplicate — is what this used to do,
+    # and the docstring's claim above was false for it: duplicating a label set
+    # scales `M` uniformly and the scale cancels in normalisation, so the
+    # multiplicity is unobservable. A mutation audit measured λ = 0 exactly on
+    # 2 of 4 NFA seeds, i.e. the `∃`-form bug was invisible by construction
+    # rather than by an unlucky threshold. Distinct labels sharing some tokens
+    # are what make the weighted and `∃` forms actually differ.
     if edges:
         s, d, labels = edges[0]
-        edges.append((s, d, labels))
+        rest = set(range(V)) - set(labels)
+        if labels and rest:
+            edges.append((s, d, frozenset({sorted(labels)[0],
+                                           sorted(rest)[0]})))
+        else:
+            edges.append((s, d, labels))
     start = np.zeros(n_states)
     start[0] = 1.0
     finals = frozenset(
