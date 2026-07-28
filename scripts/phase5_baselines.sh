@@ -24,7 +24,11 @@ run () {   # run <variant> <emission>
   python -m diffgemma_fa.eval.run --task "$TASK" --variant "$v" \
       --emission "$e" --n "$N" --out "$out" \
       > "logs/eval_${TASK}_${tag}.log" 2>&1
-  grep -E "^(cs_rate|schema_valid_rate|arg_accuracy|nonempty_rate|exact_call_rate|n):" \
+  if [ ! -f "$out" ]; then
+    echo "    !! $tag DIED without writing $out -- see logs/eval_${TASK}_${tag}.log"
+    tail -3 "logs/eval_${TASK}_${tag}.log" | sed 's/^/       /'
+  fi
+  grep -E "^(cs_rate|schema_valid_rate|arg_accuracy|nonempty_rate|exact_call_rate|zero_partition|n):" \
       "logs/eval_${TASK}_${tag}.log" | sed 's/^/    /'
 }
 

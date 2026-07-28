@@ -40,7 +40,8 @@ from diffgemma_fa.compile import bfcl_data, pipeline, schema as _schema  # noqa:
 from diffgemma_fa.compile.validate import Simulator  # noqa: E402
 from diffgemma_fa.compile.vocab import END_TOKENS  # noqa: E402
 from diffgemma_fa.eval import metrics  # noqa: E402
-from diffgemma_fa.model.sampler import ConstrainedDiffusionSampler  # noqa: E402
+from diffgemma_fa.model.sampler import (  # noqa: E402
+    ConstrainedDiffusionSampler, ZeroPartitionError)
 from diffgemma_fa.model.state import Automaton  # noqa: E402
 
 CKPT = "/home/ubuntu/diffgemma_fa/artifacts/ckpt/diffusiongemma-26B-A4B-it"
@@ -108,7 +109,7 @@ def main() -> None:
         truth.update(bfcl_data.load_possible_answers(s))
 
     sc = metrics.Scores()
-    rows, skipped = [], {}
+    rows, skipped, zero_partition = [], {}, []
     t_start = time.perf_counter()
 
     for idx, rec in enumerate(records):
@@ -149,10 +150,31 @@ def main() -> None:
             rng=jax.random.PRNGKey(args.seed * 10_000 + idx), sharding=None,
             max_out_length=base.max_out_length)
 
-        state = sampler.sample_constrained(
-            params=params, init_state=init,
-            max_new_tokens=args.max_new_tokens,
-            automaton=to_traced(a, batch=init.predicted_tokens.shape[0]))
+        try:
+            state = sampler.sample_constrained(
+                params=params, init_state=init,
+                max_new_tokens=args.max_new_tokens,
+                automaton=to_traced(a, batch=init.predicted_tokens.shape[0]))
+        except ZeroPartitionError as e:
+            # SPEC §6.3 cause (a) or (b): no accepted string of the canvas
+            # length exists from A_k within budget. The **library** must raise
+            # -- CLAUDE.md is explicit that only cause (c) is benign, and the
+            # constrained paths run in log space so (c) cannot occur.
+            #
+            # But a benchmark harness aborting all 130 records because one
+            # grammar has no in-budget completion is the wrong granularity: it
+            # destroys the other 129 measurements and tells you nothing about
+            # which record failed. So it is caught HERE, at the record level,
+            # counted in its own column, and the record scores as a failure.
+            # It is never swallowed: `zero_partition` is reported beside every
+            # rate and the offending ids are written to the artifact.
+            zero_partition.append({"id": rec.id, "fn": fn.get("name"),
+                                   "detail": str(e)[:200]})
+            sc.add(accepted=False, parsed_obj=None, want=None, schema_ok=False)
+            rows.append({"id": rec.id, "fn": fn.get("name"), "text": "",
+                         "parsed": None, "accepted": False, "schema_ok": False,
+                         "zero_partition": True})
+            continue
         jax.block_until_ready(state.predicted_tokens)
 
         toks = [int(x) for x in np.asarray(state.predicted_tokens)[0][
@@ -194,6 +216,10 @@ def main() -> None:
         "seed": args.seed,
         "records_available": len(records),
         "skipped_by_reason": skipped,
+        # SPEC §6.3 causes (a)/(b) hit at run time, per record. Reported, never
+        # folded into the other columns.
+        "zero_partition": len(zero_partition),
+        "zero_partition_records": zero_partition,
         "elapsed_seconds": round(time.perf_counter() - t_start, 1),
         **sc.as_dict(),
         "per_key": sc.detail,
@@ -211,7 +237,7 @@ def main() -> None:
               "schema_ok", "schema_valid_rate", "parsed",
               "nonempty", "nonempty_rate", "arg_correct", "arg_total",
               "arg_accuracy", "exact_calls", "exact_call_rate",
-              "skipped_by_reason", "elapsed_seconds"):
+              "skipped_by_reason", "zero_partition", "elapsed_seconds"):
         print(f"{k}: {out[k]}")
     print(f"\nwrote {path}")
 
