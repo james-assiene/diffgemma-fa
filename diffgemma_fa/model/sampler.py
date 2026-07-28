@@ -29,6 +29,7 @@ from typing import override
 
 import flax.struct
 import jax
+import numpy as np
 import jax.numpy as jnp
 from gemma.diffusion import _sampler as _diffusion_sampler
 from gemma.gm.text import _sampler_loop
@@ -86,6 +87,9 @@ class _ConstrainedCarry:
     sc_embeddings: jnp.ndarray
     rng: jnp.ndarray
     done: jnp.ndarray
+    #: `[B] bool` -- SPEC §6.3's `Z == 0` detector for the constrained draw,
+    #: ANDed over every denoising step that actually contributed an emission.
+    feasible: jnp.ndarray
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -155,10 +159,13 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
         state = widen(init_state, automaton=automaton,
                       max_new_tokens=jnp.asarray(max_new_tokens),
                       cache_length=self.cache_length)
-        return _sampler_loop.SamplerLoop.sample(
+        out = _sampler_loop.SamplerLoop.sample(
             self, params=params, init_state=state,
             max_new_tokens=jnp.asarray(max_new_tokens), stream=stream,
         )
+        if not stream:
+            _check_feasible(out)
+        return out
 
     # -- per block --------------------------------------------------------
     @functools.partial(jax.jit, static_argnames=("self",))
@@ -170,7 +177,7 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
         cache = state.cache
         batch_size = list(cache.values())[0]["end_index"].shape[0]
 
-        canvas = self.sample_next_canvas_constrained(
+        canvas, canvas_feasible = self.sample_next_canvas_constrained(
             canvas_length=self.canvas_length,
             max_denoising_steps=self.max_denoising_steps,
             batch_size=batch_size,
@@ -190,7 +197,7 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
 
         # A_{k+1} = delta*(A_k, TRUNCATED canvas) -- from the truncated canvas,
         # not from a MAP backtrace (SPEC §3.5 trap 2).
-        active = jax.vmap(
+        active, advance_ok = jax.vmap(
             lambda act, toks: _constrained.advance_states(
                 state.automaton.with_active(act), toks,
                 self.n_states_bucket, self.n_classes, self.text_vocab_size)
@@ -219,6 +226,11 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
             automaton=state.automaton.with_active(active),
             max_new_tokens=state.max_new_tokens,
             cache_length=state.cache_length,
+            # Sticky AND: once a block was infeasible the whole generation is
+            # suspect, and `advance_ok` catches the state set emptying at a
+            # block boundary -- which used to be papered over by a stale-carry
+            # fallback inside `advance_states`.
+            feasible=state.feasible & canvas_feasible & advance_ok,
         )
 
     # -- the denoising loop ----------------------------------------------
@@ -301,7 +313,7 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
                     step=step + 1, canvas=canvas, emit_canvas=canvas,
                     sc_embeddings=out.sc_embeddings.astype(
                         carry.sc_embeddings.dtype),
-                    rng=next_rng_, done=new_done)
+                    rng=next_rng_, done=new_done, feasible=carry.feasible)
 
             if self.variant == "mask":
                 # SPEC §7.2 baseline 2 and §2.8's target: **naive per-position
@@ -342,20 +354,22 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
                     step=step + 1, canvas=canvas, emit_canvas=canvas,
                     sc_embeddings=out.sc_embeddings.astype(
                         carry.sc_embeddings.dtype),
-                    rng=next_rng_, done=new_done)
+                    # Deliberately NOT flagged. An empty per-position support is
+                    # this baseline's *result*, not an error -- SPEC §2.8 exists
+                    # because factorized masking gets the joint wrong.
+                    rng=next_rng_, done=new_done, feasible=carry.feasible)
 
             def per_example(pi, act, key):
                 aut = automaton.with_active(act)
                 if self.emission == "map":
                     return _constrained.joint_map(
                         pi, aut, remaining, self.n_states_bucket, self.n_classes)
-                toks, _valid = _constrained.joint_draw(
+                return _constrained.joint_draw(
                     pi, aut, remaining, key, self.n_states_bucket,
                     self.n_classes)
-                return toks
 
             keys = jax.random.split(sample_rng_, batch_size)
-            emitted = jax.vmap(per_example)(p, automaton.active, keys)
+            emitted, ok = jax.vmap(per_example)(p, automaton.active, keys)
 
             if self.diagnose:
                 # Per-step visibility inside the jitted `while_loop`. There is
@@ -395,18 +409,55 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
             return _ConstrainedCarry(
                 step=step + 1, canvas=canvas, emit_canvas=emit,
                 sc_embeddings=out.sc_embeddings.astype(carry.sc_embeddings.dtype),
-                rng=next_rng_, done=new_done)
+                rng=next_rng_, done=new_done,
+                # `| carry.done` for the same reason `emit` is gated on it: a
+                # finished example's emission is frozen, so a later step's
+                # infeasibility never reaches the output.
+                feasible=carry.feasible & (ok | carry.done))
 
         init_carry = _ConstrainedCarry(
             step=jnp.int32(0), canvas=initial, emit_canvas=initial,
             sc_embeddings=jnp.zeros((batch_size, canvas_length, embed_dim),
                                     dtype=jnp.bfloat16),
-            rng=step_rng, done=jnp.zeros(batch_size, dtype=jnp.bool_))
+            rng=step_rng, done=jnp.zeros(batch_size, dtype=jnp.bool_),
+            feasible=jnp.ones(batch_size, dtype=jnp.bool_))
 
         final = jax.lax.while_loop(cond_fn, body_fn, init_carry)
         # `sample_next_canvas` returns the EMITTED canvas; `_sample_step`
         # truncates that and writes it to the cache and `predicted_tokens`.
-        return final.emit_canvas
+        return final.emit_canvas, final.feasible
+
+
+def _check_feasible(state) -> None:
+    """Raise SPEC §6.3's `Z == 0` outside the jit.
+
+    The block loop is a `lax.while_loop` under `jit` with a traced
+    `max_new_tokens`, so there is no Python between blocks (SPEC §5.3) and this
+    cannot be raised where it is detected. It rides `ConstrainedSamplingState`
+    out instead.
+
+    Deliberately NOT caught anywhere. CLAUDE.md: `Z == 0` has three causes and
+    only (c), fp32 underflow, is benign -- and the constrained paths run in log
+    space precisely so (c) cannot occur. What is left is (a) an empty automaton
+    or (b) no live continuation within budget, and both are bugs that must be
+    seen, not smoothed over.
+    """
+    feasible = getattr(state, "feasible", None)
+    if feasible is None:
+        return
+    bad = np.flatnonzero(~np.asarray(feasible))
+    if bad.size:
+        raise ZeroPartitionError(
+            f"Z == 0 for batch element(s) {bad.tolist()}: no accepted string of "
+            f"the canvas length exists from A_k within the remaining budget "
+            f"(SPEC §3.1b / §6.3 cause (a) or (b)). The emitted canvas for "
+            f"those elements is meaningless -- an all-sentinel root makes "
+            f"`categorical` and `argmax` return a confident-looking draw."
+        )
+
+
+class ZeroPartitionError(RuntimeError):
+    """`Z == 0`: the constrained posterior has no support. SPEC §6.3."""
 
 
 def _accept_mask(logits: jnp.ndarray, entropy_bound: float) -> jnp.ndarray:

@@ -61,6 +61,28 @@ def traced(a) -> Automaton:
     )
 
 
+# -- shims for the pair-returning APIs -------------------------------------
+# `joint_map`/`joint_draw`/`advance_states` each return a feasibility flag
+# beside their value (SPEC §6.3's Z == 0 detector). These wrappers keep the
+# existing assertions readable AND assert the flag, so a silent Z == 0 fails
+# the test rather than sliding past it.
+
+def _map_tokens(fn):
+    def go(*a, **kw):
+        toks, feasible = fn(*a, **kw)
+        assert bool(feasible), "Z == 0: constrained MAP has no support"
+        return toks
+    return go
+
+
+def _adv(fn):
+    def go(*a, **kw):
+        active, ok = fn(*a, **kw)
+        assert bool(ok), "state set emptied while advancing across the canvas"
+        return active
+    return go
+
+
 @pytest.fixture(scope="module")
 def long_grammar():
     """A grammar that **cannot** complete inside one short canvas.
@@ -138,7 +160,7 @@ def test_per_block_state_set_is_non_empty_and_within_budget(long_grammar, seed):
             f"budget {rem_after} (d = {[int(d[s]) for s in reached]})"
         )
 
-        active = C.advance_states(aut.with_active(active), jnp.asarray(canvas),
+        active = _adv(C.advance_states)(aut.with_active(active), jnp.asarray(canvas),
                                   a.n_states_bucket, a.tables.n_classes,
                                   a.vocab_size)
         if stopped:
@@ -206,7 +228,7 @@ def test_concatenation_of_all_blocks_is_accepted(long_grammar, seed):
         assert bool(valid)
         canvas, stopped = truncate_at_stop([int(x) for x in toks])
         whole.extend(canvas)
-        active = C.advance_states(aut.with_active(active), jnp.asarray(canvas),
+        active = _adv(C.advance_states)(aut.with_active(active), jnp.asarray(canvas),
                                   a.n_states_bucket, a.tables.n_classes,
                                   a.vocab_size)
         if stopped:
@@ -308,7 +330,7 @@ def test_closure_2_is_not_yet_enforced_in_the_sampler(long_grammar):
                                a.n_states_bucket, a.tables.n_classes)
     assert bool(valid)
     canvas, stopped = truncate_at_stop([int(x) for x in toks])
-    nxt = np.asarray(C.advance_states(aut, jnp.asarray(canvas),
+    nxt = np.asarray(_adv(C.advance_states)(aut, jnp.asarray(canvas),
                                       a.n_states_bucket, a.tables.n_classes,
                                       a.vocab_size))
     assert nxt.any(), "A_{k+1} must be non-empty"
@@ -317,3 +339,116 @@ def test_closure_2_is_not_yet_enforced_in_the_sampler(long_grammar):
             "A_{k+1} ∩ F must still be empty mid-grammar — that is exactly the "
             "condition closure 2 conjoins into the done flag"
         )
+
+
+# ==========================================================================
+# The Z == 0 detector actually fires (SPEC §6.3)
+# ==========================================================================
+#
+# These are the tests whose absence let a real defect survive all 721 others.
+# Two reviewers measured it independently: drawing from a **provably empty**
+# language returned `valid == True` on 200/200 draws and a canvas that looked
+# like a confident sample. The cause is that `jax.random.categorical` and
+# `argmax` are **shift-invariant**, so an all-sentinel logit vector is
+# indistinguishable from a uniform one — the failure is silent by construction
+# and only a root-mass predicate can see it.
+#
+# CLAUDE.md's taxonomy: (a) empty automaton and (b) no live continuation within
+# budget must RAISE; only (c) fp32 underflow is benign, and the constrained
+# paths run in log space so (c) cannot arise here.
+
+
+def _empty_language_automaton(*, n_bucket=8, vocab=8):
+    """An automaton with **no accepting state reachable at all**: cause (a).
+
+    Two states, one edge, `is_final` nowhere. `d(s) = INF_DISTANCE` for every
+    state, so `b_L` is all-false and the root mass is exactly the sentinel.
+    """
+    n_edges = 1
+    return Automaton(
+        edge_src=jnp.zeros(n_edges, jnp.int32),
+        edge_dst=jnp.ones(n_edges, jnp.int32),
+        edge_class=jnp.zeros(n_edges, jnp.int32),
+        edge_valid=jnp.ones(n_edges, bool),
+        csr_indices=jnp.arange(vocab, dtype=jnp.int32),
+        csr_indptr=jnp.asarray([0, vocab], jnp.int32),
+        is_neg=jnp.zeros(1, bool),
+        d=jnp.full(n_bucket, INF_DISTANCE, jnp.int32),
+        is_final=jnp.zeros(n_bucket, bool),
+        active=jnp.zeros(n_bucket, bool).at[0].set(True),
+    )
+
+
+def _uniform(L: int, V: int) -> jnp.ndarray:
+    return jnp.full((L, V), 1.0 / V, dtype=jnp.float64)
+
+
+def test_joint_draw_reports_infeasible_on_an_empty_language():
+    """Cause (a). `valid` alone is **not** a detector: it only asks whether the
+    drawn state path traverses existing edges, which an all-sentinel draw
+    satisfies by accident. `feasible` is the root-mass predicate."""
+    V, L = 8, 8
+    aut = _empty_language_automaton(vocab=V)
+    n_infeasible = 0
+    for seed in range(25):
+        _toks, ok = C.joint_draw(_uniform(L, V), aut, jnp.int64(64),
+                                 jax.random.PRNGKey(seed), 8, 1)
+        n_infeasible += int(not bool(ok))
+    assert n_infeasible == 25, (
+        f"Z == 0 went undetected on {25 - n_infeasible}/25 draws from a "
+        "provably empty language"
+    )
+
+
+def test_joint_map_reports_infeasible_on_an_empty_language():
+    V, L = 8, 8
+    aut = _empty_language_automaton(vocab=V)
+    _toks, ok = C.joint_map(_uniform(L, V), aut, jnp.int64(64), 8, 1)
+    assert not bool(ok), "constrained MAP claimed support for an empty language"
+
+
+def test_the_budget_makes_a_nonempty_language_infeasible():
+    """Cause (b), which is the one that actually happens in production: the
+    automaton is fine, but `b_L = 1[d(s) ≤ R]` admits nothing because no live
+    continuation can finish inside `R`. Distinguishing (b) from (a) matters —
+    (b) is a grammar/budget condition, not a compiler bug."""
+    V, L = 8, 4
+    n = 8
+    # A chain 0 -> 1 -> ... needing `n - 1` more tokens after the canvas.
+    aut = Automaton(
+        edge_src=jnp.arange(n - 1, dtype=jnp.int32),
+        edge_dst=jnp.arange(1, n, dtype=jnp.int32),
+        edge_class=jnp.zeros(n - 1, jnp.int32),
+        edge_valid=jnp.ones(n - 1, bool),
+        csr_indices=jnp.arange(V, dtype=jnp.int32),
+        csr_indptr=jnp.asarray([0, V], jnp.int32),
+        is_neg=jnp.zeros(1, bool),
+        # After L tokens we are at state L, needing `n - 1 - L` more.
+        d=jnp.asarray([n - 1 - i for i in range(n)], jnp.int32),
+        is_final=jnp.zeros(n, bool).at[n - 1].set(True),
+        active=jnp.zeros(n, bool).at[0].set(True),
+    )
+    need = n - 1 - L                       # tokens still needed after the canvas
+    _t, ok_ample = C.joint_draw(_uniform(L, V), aut, jnp.int64(need),
+                                jax.random.PRNGKey(0), n, 1)
+    assert bool(ok_ample), "an exactly-sufficient budget was called infeasible"
+    _t, ok_tight = C.joint_draw(_uniform(L, V), aut, jnp.int64(need - 1),
+                                jax.random.PRNGKey(0), n, 1)
+    assert not bool(ok_tight), (
+        "R one token short of the shortest completion must be Z == 0 (cause b)"
+    )
+
+
+def test_advance_states_reports_the_state_set_emptying():
+    """The stale-carry fallback this replaces made SPEC §3.1b closure 2
+    *unsound*, not merely unenforced: substituting the previous state set for an
+    empty one lets `A_{k+1} ∩ F ≠ ∅` be TRUE for a string the automaton
+    rejects, i.e. the system affirmatively reports acceptance of a rejected
+    string. The justification given for the fallback — PAD after a stop token —
+    is false for compiled automata, whose unscored `ACC --Σ--> ACC` tail already
+    absorbs PAD and every end token."""
+    V = 8
+    aut = _empty_language_automaton(vocab=V)      # one edge: 0 -> 1 only
+    # Two tokens: the first is fine, the second has no edge out of state 1.
+    _active, ok = C.advance_states(aut, jnp.asarray([0, 0], jnp.int32), 8, 1, V)
+    assert not bool(ok), "advance_states hid an empty state set"

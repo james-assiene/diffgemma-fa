@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import pytest
 
+from diffgemma_fa.compile import schema
 from diffgemma_fa.compile.schema import (
     BFCL_TYPE_MAP,
     UnsupportedSchemaError,
@@ -275,3 +276,56 @@ def test_container_enum_plus_type_is_flagged():
     with a container-level enum is genuinely ambiguous and must not pass."""
     with pytest.raises(UnsupportedSchemaError, match="first-match-wins"):
         check_supported({"type": "array", "enum": ["x"]})
+
+
+# ==========================================================================
+# `properties` is a map of NAMES, not a schema (found by review)
+# ==========================================================================
+
+def test_a_parameter_named_description_is_not_deleted():
+    """The keyword-drop used to be applied at **every** dict level, including
+    the `properties` map — where those strings are user-chosen parameter names.
+
+    Measured on BFCL v4: 41 such parameters, 13 of them `required`. On
+    `live_multiple_998-229-0` (`create_website_alert_config`) the compiled
+    grammar *rejected* the required `description` argument and *accepted* its
+    omission. That is an over-constraint — the direction `validate.py` calls
+    the far more dangerous one — producing well-formed JSON that can never
+    score.
+
+    It survived Phase 1 because the round-trip was measured on `live_simple`
+    only, which has **zero** occurrences, and `check_supported` recursed
+    correctly, so the fail-loud pre-pass could not see the asymmetry.
+    """
+    out = schema.normalize_bfcl_schema({
+        "type": "dict",
+        "properties": {
+            "description": {"type": "string"},
+            "default": {"type": "string"},
+            "optional": {"type": "boolean"},
+            "keep": {"type": "string", "description": "docs, genuinely dropped"},
+        },
+        "required": ["description", "keep"],
+    })
+    assert set(out["properties"]) == {"description", "default", "optional",
+                                      "keep"}
+    # ...while the keyword in *annotation* position is still dropped.
+    assert "description" not in out["properties"]["keep"]
+    assert out["properties"]["optional"]["type"] == "boolean"
+
+
+def test_the_degenerate_case_no_longer_collapses_to_the_empty_object():
+    """`{"required": ["description"]}` with `description` as the only property
+    used to compile to `\\{()?[ ]?\\}` — a grammar accepting only `{}`."""
+    out = schema.normalize_bfcl_schema(
+        {"type": "dict", "properties": {"description": {"type": "string"}},
+         "required": ["description"]})
+    assert out["properties"], "the only property was deleted"
+
+
+def test_defs_and_definitions_are_name_keyed_too():
+    for key in ("$defs", "definitions"):
+        out = schema.normalize_bfcl_schema(
+            {"type": "dict", key: {"default": {"type": "string"}},
+             "properties": {}})
+        assert list(out[key]) == ["default"], key

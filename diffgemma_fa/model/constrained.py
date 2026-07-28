@@ -186,12 +186,17 @@ def joint_draw(
                      neg)
     tr = scans.up_sweep_log(logM)
     k1, k2 = jax.random.split(key)
-    states = tree.sample_states_log(tr, log_a, log_b, k1)
-    return tree.sample_tokens(
+    states, feasible = tree.sample_states_log(tr, log_a, log_b, k1)
+    tokens, valid = tree.sample_tokens(
         p_vl, states, automaton.edge_src, automaton.edge_dst,
         automaton.edge_class, automaton.csr_indices, automaton.csr_indptr,
         automaton.is_neg, n_classes, k2,
     )
+    # `feasible` is the real Z == 0 signal; `valid` only says the drawn state
+    # path traverses existing edges, which is near-powerless (measured: True on
+    # 200/200 draws from a provably empty language). Both are returned, and
+    # callers must check `ok`.
+    return tokens, jnp.logical_and(feasible, valid)
 
 
 @functools.partial(jax.jit, static_argnames=("n_states", "n_classes"))
@@ -243,11 +248,12 @@ def joint_map(
     b_log = jnp.where(automaton.d <= remaining, jnp.zeros((), logp.dtype), neg)
 
     tr = scans.up_sweep_maxplus(Mt)
-    tokens, _, _ = tree.map_states_and_tokens(
+    tokens, _, _, feasible = tree.map_states_and_tokens(
         logp.T, tr, automaton.edge_src, automaton.edge_dst,
         automaton.edge_class, class_max, class_arg, a_log, b_log,
     )
-    return tokens
+    # MAP's own score is a perfect Z == 0 detector and used to be discarded.
+    return tokens, feasible
 
 
 @functools.partial(jax.jit, static_argnames=("n_states", "n_classes", "vocab_size"))
@@ -266,6 +272,10 @@ def advance_states(
 
     Membership of each token in each class is recovered complement-aware from
     the CSR, so this is correct for negated classes.
+
+    Returns:
+      `(active [S] bool, ok bool)` — `ok` is False if the state set was ever
+      emptied. **It must be checked**; see the no-fallback comment below.
     """
     seg = jnp.repeat(
         jnp.arange(n_classes, dtype=jnp.int32),
@@ -276,14 +286,22 @@ def advance_states(
         seg, automaton.csr_indices].set(True)
     member = jnp.where(automaton.is_neg[:, None], ~onehot, onehot)  # [C, V]
 
-    def step(active, tok):
+    def step(carry, tok):
+        active, ever_empty = carry
         edge_ok = member[automaton.edge_class, tok] & automaton.edge_valid
         live = active[automaton.edge_src] & edge_ok
         nxt = jnp.zeros((n_states,), dtype=bool).at[automaton.edge_dst].max(live)
-        # A canvas is PAD-filled after the first stop token; PAD keeps the set
-        # unchanged rather than killing it, because the automaton's unscored
-        # tail (SPEC §3.5 trap 4) already accepts anything after the stop.
-        return jnp.where(nxt.any(), nxt, active), None
+        # NO FALLBACK. This previously did `where(nxt.any(), nxt, active)`,
+        # justified by PAD after a stop token — but that justification is FALSE
+        # for the compiled automata: `ACC --Σ--> ACC` spans range(vocab_size),
+        # so PAD and every end token are already absorbed by the unscored tail.
+        #
+        # Substituting a stale carry for an empty set makes SPEC §3.1b closure 2
+        # UNSOUND rather than merely unenforced: the conjunct
+        # `done ∧ (A_{k+1} ∩ F ≠ ∅)` can then be TRUE for a string not in L(M),
+        # i.e. the system affirmatively reports acceptance of a rejected string.
+        return (nxt, ever_empty | ~nxt.any()), None
 
-    final, _ = jax.lax.scan(step, automaton.active, tokens)
-    return final
+    (final, ever_empty), _ = jax.lax.scan(
+        step, (automaton.active, jnp.bool_(False)), tokens)
+    return final, ~ever_empty

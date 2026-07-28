@@ -179,7 +179,13 @@ def constrained_marginals(
     r = scatter_edge_mass_to_tokens(u, class_id, indices, indptr, is_neg,
                                     n_classes, V)
     row = p_vl.T * r
-    return row / jnp.maximum(row.sum(axis=1, keepdims=True), 1e-300)
+    # The floor MUST be derived from the dtype, not hardcoded. `1e-300` flushes
+    # to exactly 0.0 in float32 (min normal 1.18e-38), so the guard silently
+    # does nothing in the dtype that needs it most: on Z == 0 the fp32 result is
+    # all-NaN, and `entropy_from_q` propagates that straight into SPEC §3.4's
+    # acceptance mask. Verified by two reviewers independently.
+    floor = jnp.finfo(row.dtype).tiny
+    return row / jnp.maximum(row.sum(axis=1, keepdims=True), floor)
 
 
 @jax.jit

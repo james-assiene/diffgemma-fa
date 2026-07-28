@@ -358,7 +358,7 @@ def test_maxplus_map_matches_reference(nfa, seed):
     a_log = np.where(A.start > 0, 0.0, scans.NEG_SENTINEL)
     b_log = np.where(A.final_vector() > 0, 0.0, scans.NEG_SENTINEL)
 
-    toks, states, score = tree.map_states_and_tokens(
+    toks, states, score, feasible = tree.map_states_and_tokens(
         jnp.asarray(logp.T), tr,
         jnp.asarray(np.array([e[0] for e in A.edges], np.int32)),
         jnp.asarray(np.array([e[1] for e in A.edges], np.int32)),

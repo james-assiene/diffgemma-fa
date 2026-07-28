@@ -78,6 +78,12 @@ BFCL_TYPE_MAP: dict[str, str] = {
 #: other shape. Callers must opt in.
 WILDCARD_TYPES = frozenset({"any"})
 
+#: Keys whose value is a **map of user-chosen names to schemas**, not a schema.
+#: The keyword-drop in `normalize_bfcl_schema` must never be applied to these
+#: keys' *keys*. Kept in sync with `check_supported`, which already recursed
+#: correctly here -- the asymmetry is what hid the bug.
+_NAME_KEYED = frozenset({"properties", "$defs", "definitions"})
+
 #: Keywords `outlines_core` genuinely ignores.
 #:
 #: **[V-P5] SPEC §4.2's list is wrong on four entries.** It groups
@@ -191,6 +197,26 @@ def normalize_bfcl_schema(node: Any, *, path: str = "") -> Any:
 
     out: dict[str, Any] = {}
     for key, value in node.items():
+        if key in _NAME_KEYED and isinstance(value, dict):
+            # A **map of names to schemas**. Recurse into the values only: at
+            # this level the dict's keys are user-chosen parameter names, and
+            # applying the keyword-drop below to them silently DELETES any
+            # parameter literally named `description`, `default` or `optional`.
+            #
+            # Measured on BFCL v4: 41 such parameters, 13 of them in `required`.
+            # `live_multiple_998-229-0` (`create_website_alert_config`) compiled
+            # to a grammar that *rejects* the required `description` argument and
+            # *accepts* its omission -- an over-constraint, which validate.py's
+            # docstring rightly calls the far more dangerous direction, producing
+            # well-formed JSON that can never score. It survived Phase 1 because
+            # the round-trip was measured on `live_simple` only, which has zero
+            # occurrences; `check_supported` recurses correctly here, so the
+            # fail-loud pre-pass could not see the asymmetry either.
+            out[key] = {
+                name: normalize_bfcl_schema(sub, path=f"{path}.{key}.{name}")
+                for name, sub in value.items()
+            }
+            continue
         if key in ("default", "optional", "description"):
             # `default` and `optional` are not JSON Schema constraints and
             # outlines ignores `description`; dropping them keeps the regex

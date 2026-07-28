@@ -49,8 +49,10 @@ def sample_states(
 
     # --- root: (s_0, s_L) jointly. The start is a VECTOR (SPEC §5.7). ------
     joint = a_start[:, None] * tree.root * b_final[None, :]
+    # dtype-derived floor: 1e-300 is exactly 0.0 in float32 (see marginals.py).
+    _tiny = jnp.finfo(joint.dtype).tiny
     flat = jax.random.categorical(
-        jax.random.fold_in(key, 0), jnp.log(jnp.maximum(joint.ravel(), 1e-300))
+        jax.random.fold_in(key, 0), jnp.log(jnp.maximum(joint.ravel(), _tiny))
     )
     s0, sL = flat // S, flat % S
 
@@ -81,9 +83,10 @@ def sample_states(
              * right[jnp.arange(n_intervals), :, s_hi])
 
         keys = jax.random.split(jax.random.fold_in(key, k + 1), n_intervals)
+        _tiny_w = jnp.finfo(w.dtype).tiny
         drawn = jax.vmap(
             lambda kk, ww: jax.random.categorical(
-                kk, jnp.log(jnp.maximum(ww, 1e-300))
+                kk, jnp.log(jnp.maximum(ww, _tiny_w))
             )
         )(keys, w)
         states = states.at[mid].set(drawn.astype(jnp.int32))
@@ -119,7 +122,8 @@ def sample_tokens(
     mult = _marginals.scatter_edge_mass_to_tokens(
         sel, class_id, indices, indptr, is_neg, n_classes, V
     )
-    logits = jnp.log(jnp.maximum(p_vl.T * mult, 1e-300))
+    _tiny_l = jnp.finfo(p_vl.dtype).tiny
+    logits = jnp.log(jnp.maximum(p_vl.T * mult, _tiny_l))
     keys = jax.random.split(key, L)
     tokens = jax.vmap(jax.random.categorical)(keys, logits).astype(jnp.int32)
     # A position with no admissible token means `sample_states` handed us a
@@ -196,7 +200,10 @@ def map_states_and_tokens(
     best_edge = jnp.argmax(masked, axis=1)                            # [L]
     chosen_class = class_id[best_edge]                                # [L]
     tokens = class_argmax[chosen_class, jnp.arange(L)].astype(jnp.int32)
-    return tokens, states, score
+    # `score` IS the feasibility signal and was previously discarded by the
+    # caller: on an empty language it comes back exactly at the sentinel.
+    feasible = score > (NEG_SENTINEL / 2.0)
+    return tokens, states, score, feasible
 
 
 def sample_states_log(
@@ -220,6 +227,21 @@ def sample_states_log(
     S = tree_log.levels[0].shape[1]
 
     joint = log_a_start[:, None] + tree_log.root + log_b_final[None, :]
+
+    # THE Z == 0 DETECTOR. One predicate on the root joint covers all three
+    # causes at once: empty A_k (log_a all-sentinel), infeasible budget (log_b
+    # all-sentinel), and no accepted string of length L (root all-sentinel).
+    #
+    # It has to be here and it has to be explicit. `categorical` and `argmax`
+    # are SHIFT-INVARIANT, so an all-sentinel vector is a constant additive
+    # offset that silently produces a confident, realizable-looking draw — and
+    # the per-position `valid` check cannot see it (measured: valid=True on
+    # 200/200 draws from a provably empty language, 0 of them accepted). The
+    # finite sentinel mandated by SPEC §2.7 is itself what removes the only
+    # accidental detector; an all `-inf` vector would have produced a NaN
+    # somebody noticed.
+    feasible = joint.max() > (NEG_SENTINEL / 2.0)
+
     flat = jax.random.categorical(jax.random.fold_in(key, 0), joint.ravel())
     s0, sL = flat // S, flat % S
 
@@ -244,4 +266,6 @@ def sample_states_log(
         drawn = jax.vmap(jax.random.categorical)(keys, w)
         states = states.at[mid].set(drawn.astype(jnp.int32))
 
-    return states
+    return states, feasible
+
+

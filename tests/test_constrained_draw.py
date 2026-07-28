@@ -28,6 +28,28 @@ from diffgemma_fa.model import constrained as C  # noqa: E402
 from diffgemma_fa.model.state import Automaton  # noqa: E402
 
 
+# -- shims for the pair-returning APIs -------------------------------------
+# `joint_map`/`joint_draw`/`advance_states` each return a feasibility flag
+# beside their value (SPEC §6.3's Z == 0 detector). These wrappers keep the
+# existing assertions readable AND assert the flag, so a silent Z == 0 fails
+# the test rather than sliding past it.
+
+def _map_tokens(fn):
+    def go(*a, **kw):
+        toks, feasible = fn(*a, **kw)
+        assert bool(feasible), "Z == 0: constrained MAP has no support"
+        return toks
+    return go
+
+
+def _adv(fn):
+    def go(*a, **kw):
+        active, ok = fn(*a, **kw)
+        assert bool(ok), "state set emptied while advancing across the canvas"
+        return active
+    return go
+
+
 @pytest.fixture(scope="module")
 def grammar():
     """A real BFCL-Live grammar, compiled end to end."""
@@ -76,7 +98,7 @@ def test_joint_map_is_accepted(grammar, seed):
     a, aut = grammar
     L = 64
     p = marginals(L, a.vocab_size, seed)
-    toks = [int(x) for x in C.joint_map(p, aut, jnp.int64(L),
+    toks = [int(x) for x in _map_tokens(C.joint_map)(p, aut, jnp.int64(L),
                                         a.n_states_bucket, a.tables.n_classes)]
     assert Simulator(a).accepts(toks)
 
@@ -87,7 +109,7 @@ def test_emission_contains_a_stop_token(grammar):
     a, aut = grammar
     L = 64
     p = marginals(L, a.vocab_size, 11)
-    toks = [int(x) for x in C.joint_map(p, aut, jnp.int64(L),
+    toks = [int(x) for x in _map_tokens(C.joint_map)(p, aut, jnp.int64(L),
                                         a.n_states_bucket, a.tables.n_classes)]
     assert any(t in END_TOKENS for t in toks), "no stop token in the emission"
 
@@ -103,7 +125,7 @@ def test_stop_token_is_not_pinned_to_the_last_position(grammar):
     positions = []
     for seed in range(8):
         p = marginals(L, a.vocab_size, seed)
-        toks = [int(x) for x in C.joint_map(p, aut, jnp.int64(L),
+        toks = [int(x) for x in _map_tokens(C.joint_map)(p, aut, jnp.int64(L),
                                             a.n_states_bucket,
                                             a.tables.n_classes)]
         first = next((i for i, t in enumerate(toks) if t in END_TOKENS), None)
@@ -149,7 +171,7 @@ def test_advance_states_matches_the_reference_simulator(grammar):
     p = marginals(L, a.vocab_size, 3)
     toks, _ = C.joint_draw(p, aut, jnp.int64(L), jax.random.PRNGKey(3),
                            a.n_states_bucket, a.tables.n_classes)
-    got = np.asarray(C.advance_states(aut, toks, a.n_states_bucket,
+    got = np.asarray(_adv(C.advance_states)(aut, toks, a.n_states_bucket,
                                       a.tables.n_classes, a.vocab_size))
     want = Simulator(a).run([int(x) for x in toks])
     assert set(np.nonzero(got)[0].tolist()) == want
@@ -164,7 +186,7 @@ def test_advance_states_never_empties_on_a_valid_canvas(grammar):
         p = marginals(L, a.vocab_size, seed)
         toks, _ = C.joint_draw(p, aut, jnp.int64(L), jax.random.PRNGKey(seed),
                                a.n_states_bucket, a.tables.n_classes)
-        nxt = np.asarray(C.advance_states(aut, toks, a.n_states_bucket,
+        nxt = np.asarray(_adv(C.advance_states)(aut, toks, a.n_states_bucket,
                                           a.tables.n_classes, a.vocab_size))
         assert nxt.any(), f"A_k+1 went empty on seed {seed}"
 
@@ -219,6 +241,6 @@ def test_map_path_survives_fp32(grammar):
     a, aut = grammar
     L = 64
     p32 = jnp.asarray(marginals(L, a.vocab_size, 5), dtype=jnp.float32)
-    toks = [int(x) for x in C.joint_map(p32, aut, jnp.int32(L),
+    toks = [int(x) for x in _map_tokens(C.joint_map)(p32, aut, jnp.int32(L),
                                         a.n_states_bucket, a.tables.n_classes)]
     assert Simulator(a).accepts(toks), "MAP must work in fp32"

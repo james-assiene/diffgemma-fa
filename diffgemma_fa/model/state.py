@@ -138,4 +138,5 @@ def widen(
         automaton=automaton,
         max_new_tokens=jnp.asarray(max_new_tokens),
         cache_length=jnp.asarray(cache_length),
+        feasible=jnp.ones(state.done.shape, dtype=jnp.bool_),
     )

@@ -201,7 +201,12 @@ def maxplus_combine(a: jnp.ndarray, b: jnp.ndarray) -> jnp.ndarray:
     Log space, never `(max, ×)`: exact, no scaling discussion, no underflow
     (SPEC §2.7).
     """
-    return jnp.max(a[..., :, :, None] + b[..., None, :, :], axis=-2)
+    out = jnp.max(a[..., :, :, None] + b[..., None, :, :], axis=-2)
+    # Re-clamp to the sentinel. Two sentinels sum to -6e38, which SATURATES TO
+    # -inf in float32 at the very first combine — defeating the whole reason
+    # this module uses a finite sentinel ("never -inf: fused kernels produce
+    # NaN from -inf + -inf"). `log_matmul` already re-clamps; this did not.
+    return jnp.maximum(out, jnp.asarray(NEG_SENTINEL, dtype=out.dtype))
 
 
 def up_sweep_maxplus(M: jnp.ndarray) -> TreeLevels:
