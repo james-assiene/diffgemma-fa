@@ -27,6 +27,7 @@ import dataclasses
 import functools
 from typing import override
 
+import flax.struct
 import jax
 import jax.numpy as jnp
 from gemma.diffusion import _sampler as _diffusion_sampler
@@ -35,7 +36,26 @@ from gemma.gm.text import _sampler_loop
 from diffgemma_fa.model import constrained as _constrained
 from diffgemma_fa.model.state import Automaton, ConstrainedSamplingState, widen
 
-__all__ = ["ConstrainedDiffusionSampler"]
+__all__ = ["ConstrainedDiffusionSampler", "_ConstrainedCarry"]
+
+
+@flax.struct.dataclass
+class _ConstrainedCarry:
+    """SPEC §5.4's widened denoising carry.
+
+    `canvas` is the **trajectory** — under J0 it keeps stock uniform renoising,
+    so the model's inputs stay on its training distribution. `emit_canvas` is
+    the constrained MAP or joint draw, and is what actually gets emitted. That
+    decoupling is what makes J0's guarantee unconditional and independent of
+    whether the accept prefix ever covers the canvas (SPEC §3.1).
+    """
+
+    step: jnp.ndarray
+    canvas: jnp.ndarray
+    emit_canvas: jnp.ndarray
+    sc_embeddings: jnp.ndarray
+    rng: jnp.ndarray
+    done: jnp.ndarray
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -58,15 +78,25 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
 
     n_states_bucket: int
     n_classes: int
-    variant: str = "j1"
+    variant: str = "j0"
     emission: str = "map"
     constrained_dtype: str = "float64"
 
     def __post_init__(self) -> None:
-        if self.variant not in ("j1", "j2"):
+        if self.variant not in ("j0", "j1", "j2"):
             raise ValueError(f"unknown variant {self.variant!r}")
         if self.emission not in ("map", "sample"):
             raise ValueError(f"unknown emission {self.emission!r}")
+        # SPEC §3.9's flag table: `--emission={map,sample}` selects "MAP or
+        # joint draw (**J0 only**; J1/J2 are always a draw)". J1/J2 define the
+        # emission to *be* the draw, so a MAP emission is not one of their
+        # variants and is rejected rather than silently reinterpreted.
+        if self.variant in ("j1", "j2") and self.emission == "map":
+            raise ValueError(
+                f"variant={self.variant!r} is always a draw (SPEC §3.9); "
+                "emission='map' is J0-only. With J1's flattened marginals a "
+                "joint MAP degenerates to the shortest string in the language."
+            )
         if self.emission == "sample" and self.constrained_dtype != "float64":
             raise ValueError(
                 "emission='sample' requires constrained_dtype='float64'; see "
@@ -209,14 +239,18 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
                 current_noise_proportion=cur_np, target_noise_proportion=tgt_np,
                 params=params, rng=sample_rng_)
 
-            p = jax.nn.softmax(out.logits.astype(dt), axis=-1)   # [B, L, V]
+            p_real = jax.nn.softmax(out.logits.astype(dt), axis=-1)  # [B, L, V]
+            accepted = _accept_mask(out.logits,
+                                    self.sample_from_predictions.entropy_bound)
 
+            # The EMISSION always uses the model's real marginals. Only J1's
+            # *trajectory* is flattened — that is the whole point of J0's
+            # decoupling (SPEC §3.1), and it is why J0's guarantee is
+            # unconditional and independent of whether the accept prefix ever
+            # covers the canvas.
+            p = p_real
             if self.variant == "j1":
-                # J1: flatten the marginals wherever the stock accept rule
-                # would have renoised, then draw ONE constrained joint sample.
-                accepted = _accept_mask(out.logits,
-                                        self.sample_from_predictions.entropy_bound)
-                p = jax.vmap(_constrained.flatten_unaccepted)(p, accepted)
+                p = jax.vmap(_constrained.flatten_unaccepted)(p_real, accepted)
 
             def per_example(pi, act, key):
                 aut = automaton.with_active(act)
@@ -229,27 +263,47 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
                 return toks
 
             keys = jax.random.split(sample_rng_, batch_size)
-            sampled = jax.vmap(per_example)(p, automaton.active, keys)
+            emitted = jax.vmap(per_example)(p, automaton.active, keys)
+
+            if self.variant == "j0":
+                # J0: the TRAJECTORY keeps stock uniform renoising, so the
+                # model's inputs stay on its training distribution, while the
+                # emission is constrained. Cost: the carry gains an
+                # `emit_canvas` field (SPEC §5.4) -- here the two are tracked
+                # as `canvas` (trajectory) and the returned `emitted`.
+                denoiser = jax.random.categorical(
+                    jax.random.fold_in(sample_rng_, 1),
+                    out.logits.astype(jnp.float32))
+                noise = jax.random.randint(
+                    jax.random.fold_in(sample_rng_, 2), carry.canvas.shape,
+                    minval=0, maxval=self.text_vocab_size)
+                trajectory = jnp.where(accepted, denoiser, noise)
+            else:
+                trajectory = emitted
 
             new_done = jnp.logical_or(
                 carry.done,
                 self.early_stop_fn.should_stop(
-                    step=step, canvas=sampled, previous_canvas=carry.canvas,
+                    step=step, canvas=emitted, previous_canvas=carry.canvas,
                     logits=out.logits))
-            canvas = jnp.where(carry.done[:, None], carry.canvas, sampled)
+            canvas = jnp.where(carry.done[:, None], carry.canvas, trajectory)
+            emit = jnp.where(carry.done[:, None], carry.emit_canvas, emitted)
 
-            return _diffusion_sampler._WhileLoopCarry(  # noqa: SLF001
-                step=step + 1, canvas=canvas,
+            return _ConstrainedCarry(
+                step=step + 1, canvas=canvas, emit_canvas=emit,
                 sc_embeddings=out.sc_embeddings.astype(carry.sc_embeddings.dtype),
                 rng=next_rng_, done=new_done)
 
-        init_carry = _diffusion_sampler._WhileLoopCarry(  # noqa: SLF001
-            step=jnp.int32(0), canvas=initial,
+        init_carry = _ConstrainedCarry(
+            step=jnp.int32(0), canvas=initial, emit_canvas=initial,
             sc_embeddings=jnp.zeros((batch_size, canvas_length, embed_dim),
                                     dtype=jnp.bfloat16),
             rng=step_rng, done=jnp.zeros(batch_size, dtype=jnp.bool_))
 
-        return jax.lax.while_loop(cond_fn, body_fn, init_carry).canvas
+        final = jax.lax.while_loop(cond_fn, body_fn, init_carry)
+        # `sample_next_canvas` returns the EMITTED canvas; `_sample_step`
+        # truncates that and writes it to the cache and `predicted_tokens`.
+        return final.emit_canvas
 
 
 def _accept_mask(logits: jnp.ndarray, entropy_bound: float) -> jnp.ndarray:

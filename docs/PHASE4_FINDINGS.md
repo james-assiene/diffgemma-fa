@@ -136,8 +136,21 @@ because `outlines`' JSON string pattern permits `""` — the highest-scoring mem
 close to the shortest one. The unscored tail removes the *bias against* stopping (§3.5 trap 4) but
 nothing pushes *toward* content.
 
-`--emission=sample` produced visibly richer output where it worked (`{"user_id":77890,"special":
-":black"}`), which is consistent with this reading.
+`--emission=sample` produced visibly richer output (`{"user_id":77890,"special":":black"}`,
+`{"loc":"","type":"comfort","time":22}`), which is consistent with this reading.
+
+> **A hypothesis I had and disproved, recorded so nobody re-runs it.** I first attributed the
+> minimality to **J1's flattening** — every non-accepted position becomes near-uniform at
+> `1/262144`, so any content reaching into one looked ruinously expensive for a joint MAP. That
+> explanation is **wrong**: implementing J0 properly, where the emission uses the model's *real*
+> marginals and only the trajectory is renoised, gives **the same minimal outputs**
+> (`{"location":""}`, 6/6 accepted). So the cause is not the flattening, and the remaining
+> candidates are the genuine length bias of a joint MAP over a variable-length language, the
+> prompt not steering the model hard enough, or the entropy bound being uncalibrated (SPEC §3.4,
+> still outstanding). **Phase 5 must not quote an accuracy number before this is understood.**
+>
+> `variant=j1/j2` with `emission=map` is still rejected, but on SPEC §3.9's grounds — those
+> variants *define* the emission to be a draw — not on the disproved causal claim.
 
 **Implications for Phase 5**, worth stating before any accuracy number is quoted:
 

@@ -56,7 +56,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=10)
     ap.add_argument("--emission", default="map", choices=["map", "sample"])
-    ap.add_argument("--variant", default="j1", choices=["j1", "j2"])
+    ap.add_argument("--variant", default="j0", choices=["j0", "j1", "j2"])
     ap.add_argument("--max-new-tokens", type=int, default=256)
     ap.add_argument("--out", default="/home/ubuntu/diffgemma_fa/artifacts/phase4_e2e.json")
     args = ap.parse_args()

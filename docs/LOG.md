@@ -288,3 +288,25 @@ exposed it.
 the sampler — the stock `early_stop_fn` is used unchanged. `test_closure_2_is_not_yet_enforced`
 marks this deliberately rather than letting the file imply coverage it lacks, and the CS test
 asserts termination-in-an-accepting-state explicitly instead of assuming it.
+
+
+---
+
+## 2026-07-28 — J0, and a hypothesis I disproved
+
+Implemented **J0** (SPEC §5.4's `_ConstrainedCarry` with a separate `emit_canvas`): the trajectory
+keeps stock uniform renoising so the model's inputs stay on its training distribution, while the
+emission is the constrained MAP/draw over the model's **real** marginals. 6/6 accepted end to end.
+`variant=j1/j2` with `emission=map` is now rejected on SPEC §3.9's grounds — those variants define
+the emission to *be* a draw.
+
+**A hypothesis I had and disproved, recorded so nobody re-runs it.** I attributed the minimal
+outputs (`{"location":""}`) to J1's flattening: every non-accepted position becomes near-uniform at
+1/262144, which looked like it would make any content ruinously expensive for a joint MAP. **That
+is wrong** — J0-map, whose emission uses the real marginals, gives the same minimal outputs. The
+remaining candidates are the genuine length bias of a joint MAP over a variable-length language,
+the prompt, or the uncalibrated entropy bound (SPEC §3.4, still outstanding). **Phase 5 must not
+quote an accuracy number before this is understood**; the docs and the code comment have been
+corrected rather than left with the tidy but false story.
+
+700 tests green.
