@@ -561,8 +561,14 @@ nodes** to recover `Z`. [D]
 > fixes it entirely; at the real canvas length `--emission=sample` degenerates on 2 of 6 real
 > prompts (no stop token, pure multilingual garbage) against **10/10 for `--emission=map`**. So the
 > sum-product sampling tree needs a **log-space** formulation (`logsumexp` combines), not merely a
-> wider float — which is exactly what §2.7 already does for MAP. **`--emission=map` is currently
-> the only emission that works at `L = 256`**, and §3.9 already makes it the default.
+> wider float — which is exactly what §2.7 already does for MAP.
+>
+> **[V-P4] Fixed — `infer/scans.up_sweep_log`.** Shifting by the left operand's row max and the
+> right operand's column max turns the combine back into an ordinary GEMM over entries in `[0,1]`,
+> so cuBLAS still does the work and the tree still emits **zero `while` loops and exactly `log₂ L`
+> GEMMs**. `jax.random.categorical` consumes logits directly, so the exponentiation that underflowed
+> never happens. End-to-end on the same 10 prompts, `--emission=sample` went from **4/6 to 10/10**
+> accepted, and the two recovered cases now emit the *ground-truth* enum values.
 >
 > **Consequences.** (1) The sum-product **sampling** path requires `jax_enable_x64`
 > (`model/constrained.py: require_x64` refuses to run otherwise, rather than drawing from a

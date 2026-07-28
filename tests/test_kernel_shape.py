@@ -137,3 +137,20 @@ def test_prefix_suffix_has_no_while_loop():
     a0 = jnp.ones((16,), dtype=jnp.float32)
     bf = jnp.ones((16,), dtype=jnp.float32)
     assert counts(f, M, a0, bf)["while"] == 0
+
+
+@pytest.mark.parametrize("L", [16, 64, 256])
+def test_log_space_tree_also_avoids_a_while_loop_and_is_log_depth(L):
+    """The log-space sum-product tree is the emission=sample path after Phase
+    4's underflow finding, so it needs the same `O(log L)` guarantee as the
+    linear one — and it keeps it, because `log_matmul` shifts by row/column
+    maxima and hands cuBLAS an ordinary GEMM instead of materialising `[S,S,S]`.
+    """
+    logM = jnp.asarray(
+        np.random.default_rng(2).standard_normal((L, 32, 32)).astype(np.float32)
+    )
+    c = counts(lambda m: scans.up_sweep_log(m).root, logM)
+    assert c["while"] == 0
+    assert c["dot"] == int(np.log2(L)), (
+        "log-space combines must still be one GEMM per level"
+    )

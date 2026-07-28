@@ -395,3 +395,43 @@ def test_entropy_from_q_is_nan_free_with_exact_zeros():
     h = MG.entropy_from_q(q)
     assert np.isfinite(np.asarray(h)).all()
     assert float(h[0]) == pytest.approx(np.log(2.0), rel=1e-12)
+
+
+@pytest.mark.parametrize("L", [4, 8, 16, 32])
+@pytest.mark.parametrize("seed", range(3))
+def test_log_space_tree_matches_the_linear_tree(L, seed):
+    """`up_sweep_log` must agree with `up_sweep` wherever the linear form is
+    still numerically valid — it is the same semiring, computed differently."""
+    rng = np.random.default_rng(78000 + seed + L)
+    S = int(rng.integers(3, 8))
+    M = np.abs(rng.random((L, S, S))) * 0.5 + 1e-3
+    lin = scans.up_sweep(jnp.asarray(M))
+    log = scans.up_sweep_log(jnp.asarray(np.log(M)))
+
+    blocks = R.block_products(M)
+    for k in range(log.n_levels):
+        w = 1 << k
+        for j in range(log.levels[k].shape[0]):
+            got = np.exp(np.asarray(log.levels[k][j]))
+            np.testing.assert_allclose(got, blocks[(j * w, (j + 1) * w)],
+                                       rtol=1e-9, atol=1e-13)
+
+
+def test_log_space_survives_a_range_that_kills_the_linear_form():
+    """The Phase 4 failure, reduced to a unit test.
+
+    A matrix with one unit entry (standing in for the unscored `ACC --Σ--> ACC`
+    tail, whose emission mass is exactly 1.0) and the rest at 1e-30: the linear
+    product underflows to zero, the log-space product does not.
+    """
+    L, S = 16, 4
+    M = np.full((L, S, S), 1e-30)
+    M[:, 0, 0] = 1.0
+
+    lin = np.asarray(scans.up_sweep(jnp.asarray(M, dtype=jnp.float32)).root)
+    log = np.asarray(scans.up_sweep_log(jnp.asarray(np.log(M), dtype=jnp.float32)).root)
+
+    # The dominant 1->1 path is 1e-30 * 1.0^14 * 1e-30 = 1e-60.
+    assert log[1, 1] == pytest.approx(np.log(1e-60), rel=1e-4)
+    assert lin[1, 1] == 0.0, "the linear form is expected to underflow here"
+    assert np.isfinite(log).all()

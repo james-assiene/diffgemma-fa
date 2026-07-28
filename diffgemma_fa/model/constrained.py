@@ -175,12 +175,18 @@ def joint_draw(
       plausible multilingual text.
     """
     p_vl, W_e, M = _matrices(p_lv, automaton, n_states, n_classes)
-    a_start = automaton.active.astype(p_lv.dtype)
-    b_final = budget_terminal_factor(automaton.d, remaining, dtype=p_lv.dtype)
+    neg = jnp.asarray(scans.NEG_SENTINEL, dtype=p_lv.dtype)
+    log_a = jnp.where(automaton.active, jnp.zeros((), p_lv.dtype), neg)
+    log_b = jnp.where(automaton.d <= remaining, jnp.zeros((), p_lv.dtype), neg)
 
-    tr = scans.up_sweep(M)
+    # Log space, not linear: at L = 256 the linear form underflows to exactly
+    # zero even in float64, because the unscored ACC --Sigma--> ACC tail pins
+    # every node's max at 1.0 while real grammar paths sit below 1e-49.
+    logM = jnp.where(M > 0, jnp.log(jnp.maximum(M, jnp.finfo(p_lv.dtype).tiny)),
+                     neg)
+    tr = scans.up_sweep_log(logM)
     k1, k2 = jax.random.split(key)
-    states = tree.sample_states(tr, a_start, b_final, k1)
+    states = tree.sample_states_log(tr, log_a, log_b, k1)
     return tree.sample_tokens(
         p_vl, states, automaton.edge_src, automaton.edge_dst,
         automaton.edge_class, automaton.csr_indices, automaton.csr_indptr,

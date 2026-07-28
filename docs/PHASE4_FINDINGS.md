@@ -81,8 +81,31 @@ merely a wider float. That is what §2.7 already does for MAP, and it is why MAP
 
 > Use **log space, not `(max, ×)`**: exact, no scaling discussion, no underflow.
 
-**That choice is now empirically vindicated, and `--emission=map` — already SPEC §3.9's default —
-is currently the only emission that works at the real canvas length.**
+### 2.1a Fixed: `scans.up_sweep_log`, and it keeps the GEMMs
+
+The naive `logsumexp` combine materialises `[S, S, S]` — `1e9` elements at `|S| = 1024`. Shifting
+by the **row** max of the left operand and the **column** max of the right leaves an ordinary matmul
+of matrices whose entries all lie in `[0, 1]`:
+
+    C[i,j] = ra[i] + cb[j] + log( Σ_k exp(A[i,k] − ra[i]) · exp(B[k,j] − cb[j]) )
+
+so cuBLAS still does the work and the `O(log L)` kernel-count property survives — asserted:
+`up_sweep_log` emits **zero `while` loops and exactly `log₂ L` GEMMs**, same as the linear tree.
+`jax.random.categorical` takes logits anyway, so the exponentiation that underflowed is never
+performed at all.
+
+**Re-measured end to end with the log-space tree, same 10 prompts:**
+
+| `--emission=sample` | before | after |
+|---|---|---|
+| accepted | 4 / 6 | **10 / 10** |
+
+And the two previously-degenerate `uber.ride` cases now produce
+`{"loc":"","type":"comfort","time":22}` and `{"loc":"","type":"plus","time":2}` — whose `type`
+values are **exactly BFCL's ground truth** for those two records. So the fix recovered not just
+validity but correctness.
+
+**`--emission=map` remains SPEC §3.9's default and is unaffected either way.**
 
 ### 2.2 What was done about it
 

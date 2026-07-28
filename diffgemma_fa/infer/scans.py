@@ -44,6 +44,8 @@ __all__ = [
     "NEG_SENTINEL",
     "maxplus_combine",
     "up_sweep_maxplus",
+    "log_matmul",
+    "up_sweep_log",
 ]
 
 #: Finite sentinel for "impossible" in the max-plus semiring. **Never `-inf`**:
@@ -221,4 +223,60 @@ def up_sweep_maxplus(M: jnp.ndarray) -> TreeLevels:
         cur = maxplus_combine(cur[0::2], cur[1::2])
         levels.append(cur)
         scales.append(jnp.zeros((cur.shape[0],), dtype=M.dtype))
+    return TreeLevels(levels=tuple(levels), log_scales=tuple(scales))
+
+
+# ---------------------------------------------------------------------------
+# Log-space sum-product — required at the real canvas length
+# ---------------------------------------------------------------------------
+
+def log_matmul(A: jnp.ndarray, B: jnp.ndarray) -> jnp.ndarray:
+    """`C[i,j] = logsumexp_k (A[i,k] + B[k,j])`, **still as a GEMM**.
+
+    Phase 4 measured that linear-space sum-product underflows at `L = 256` even
+    in float64: the unscored `ACC --Σ--> ACC` tail has emission mass exactly 1.0
+    and so pins every node's max at 1.0, while genuine grammar paths sit near
+    1e-49 and below. Per-node normalization cannot fix a dynamic range that
+    large *inside* one matrix. Log space can, and it is what SPEC §2.7 already
+    chose for MAP — "exact, no scaling discussion, no underflow".
+
+    The naive form materialises `[n, k, m]`, which is `1e9` elements at
+    `|S| = 1024`. Shifting by the **row** max of `A` and the **column** max of
+    `B` instead leaves an ordinary matmul of matrices whose entries all lie in
+    `[0, 1]`, so cuBLAS still does the work and the `O(log L)` kernel-count
+    property is preserved:
+
+        C[i,j] = ra[i] + cb[j] + log( Σ_k exp(A[i,k] − ra[i]) · exp(B[k,j] − cb[j]) )
+
+    Impossible entries carry `NEG_SENTINEL`, whose exponential is exactly 0, so
+    they propagate correctly without ever producing `NaN` from `-inf + -inf`.
+    """
+    ra = jnp.max(A, axis=-1, keepdims=True)
+    cb = jnp.max(B, axis=-2, keepdims=True)
+    ra = jnp.where(ra > NEG_SENTINEL / 2, ra, jnp.zeros_like(ra))
+    cb = jnp.where(cb > NEG_SENTINEL / 2, cb, jnp.zeros_like(cb))
+    prod = jnp.exp(A - ra) @ jnp.exp(B - cb)
+    tiny = jnp.asarray(jnp.finfo(A.dtype).tiny, dtype=A.dtype)
+    out = ra + cb + jnp.log(jnp.maximum(prod, tiny))
+    return jnp.where(prod > 0, out, jnp.full_like(out, NEG_SENTINEL))
+
+
+def up_sweep_log(logM: jnp.ndarray) -> TreeLevels:
+    """The Blelloch up-sweep over the **log** sum-product semiring.
+
+    Same shape, same `2L−1` nodes, same `log₂ L` combines — only the combine
+    changes. No normalisation is needed or meaningful here, which is the point:
+    log space removes the scaling question entirely rather than managing it.
+    """
+    L = logM.shape[0]
+    if L & (L - 1):
+        raise ValueError(f"L must be a power of two, got {L}")
+
+    cur = logM
+    levels = [cur]
+    scales = [jnp.zeros((L,), dtype=logM.dtype)]
+    while cur.shape[0] > 1:
+        cur = log_matmul(cur[0::2], cur[1::2])
+        levels.append(cur)
+        scales.append(jnp.zeros((cur.shape[0],), dtype=logM.dtype))
     return TreeLevels(levels=tuple(levels), log_scales=tuple(scales))

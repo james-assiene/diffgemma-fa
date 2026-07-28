@@ -29,7 +29,8 @@ import jax.numpy as jnp
 from diffgemma_fa.infer import marginals as _marginals
 from diffgemma_fa.infer.scans import NEG_SENTINEL, TreeLevels
 
-__all__ = ["sample_states", "sample_tokens", "map_states_and_tokens"]
+__all__ = ["sample_states", "sample_states_log", "sample_tokens",
+           "map_states_and_tokens"]
 
 
 def sample_states(
@@ -196,3 +197,51 @@ def map_states_and_tokens(
     chosen_class = class_id[best_edge]                                # [L]
     tokens = class_argmax[chosen_class, jnp.arange(L)].astype(jnp.int32)
     return tokens, states, score
+
+
+def sample_states_log(
+    tree_log: TreeLevels,
+    log_a_start: jnp.ndarray,
+    log_b_final: jnp.ndarray,
+    key: jax.Array,
+) -> jnp.ndarray:
+    """`sample_states` over the **log** sum-product tree. SPEC eq (7).
+
+    Identical structure; the only change is that weights arrive as logs and go
+    straight into `jax.random.categorical`, which takes logits anyway — so the
+    exponentiation that underflowed is never performed at all.
+
+    Phase 4 measured the linear form degenerating at `L = 256` even in float64,
+    because the unscored `ACC --Σ--> ACC` tail pins every node's max at 1.0
+    while real grammar paths sit below 1e-49. This removes the failure mode
+    rather than widening the float.
+    """
+    L = tree_log.levels[0].shape[0]
+    S = tree_log.levels[0].shape[1]
+
+    joint = log_a_start[:, None] + tree_log.root + log_b_final[None, :]
+    flat = jax.random.categorical(jax.random.fold_in(key, 0), joint.ravel())
+    s0, sL = flat // S, flat % S
+
+    states = jnp.zeros((L + 1,), dtype=jnp.int32)
+    states = states.at[0].set(s0.astype(jnp.int32))
+    states = states.at[L].set(sL.astype(jnp.int32))
+
+    for k in range(tree_log.n_levels - 2, -1, -1):
+        width = 1 << k
+        n_intervals = L // (2 * width)
+        if n_intervals == 0:
+            continue
+        idx = jnp.arange(n_intervals)
+        lo = idx.astype(jnp.int32) * (2 * width)
+        mid = lo + width
+        hi = lo + 2 * width
+        child = tree_log.levels[k]
+        left = child[idx * 2]
+        right = child[idx * 2 + 1]
+        w = left[idx, states[lo], :] + right[idx, :, states[hi]]
+        keys = jax.random.split(jax.random.fold_in(key, k + 1), n_intervals)
+        drawn = jax.vmap(jax.random.categorical)(keys, w)
+        states = states.at[mid].set(drawn.astype(jnp.int32))
+
+    return states
