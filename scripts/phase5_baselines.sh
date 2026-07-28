@@ -6,6 +6,15 @@
 # "Failed to initialize BLASLT support". Learned the hard way.
 #
 # Usage: scripts/phase5_baselines.sh [N_RECORDS] [TASK]
+#
+# **Launch from a COPY, never from this path directly**, e.g.
+#     cp scripts/phase5_baselines.sh $TMP/sweep.sh && setsid nohup bash $TMP/sweep.sh ...
+# bash reads a script incrementally from disk as it executes, so editing this
+# file while a sweep is running corrupts the running instance -- it died with
+# "unexpected EOF while looking for matching `'`" mid-sweep, having already
+# discarded two arms. The copy is immune.
+#
+# Arms whose artifact already exists are skipped, so a relaunch resumes.
 set -u
 cd /home/ubuntu/diffgemma_fa
 source env.sh
