@@ -78,7 +78,15 @@ BFCL_TYPE_MAP: dict[str, str] = {
 #: other shape. Callers must opt in.
 WILDCARD_TYPES = frozenset({"any"})
 
-# Keywords outlines-core silently ignores (SPEC §4.2, maintainer-confirmed).
+#: Keywords `outlines_core` genuinely ignores.
+#:
+#: **[V-P5] SPEC §4.2's list is wrong on four entries.** It groups
+#: `minLength`, `maxLength`, `minItems` and `maxItems` with the silently-dropped
+#: keywords; measured against outlines-core 0.2.14, **all four are enforced** —
+#: the generated regex rejects a too-short string and a too-long array. Only the
+#: *numeric* bounds are actually dropped. Keeping the wrong four in this list is
+#: not harmless: it forces callers to `allow`-list constraints that do work,
+#: which desensitises the very signal the fail-loud pre-pass exists to give.
 _SILENTLY_DROPPED = {
     "minimum": "numeric bounds are ignored; port llguidance's rx_int_range/rx_float_range",
     "maximum": "numeric bounds are ignored; port llguidance's rx_int_range/rx_float_range",
@@ -92,11 +100,11 @@ _SILENTLY_DROPPED = {
     "if": "ignored entirely",
     "then": "ignored entirely",
     "else": "ignored entirely",
-    "minItems": "ignored; cap at build time instead (SPEC §4.7)",
-    "maxItems": "ignored; cap at build time instead (SPEC §4.7)",
-    "minLength": "ignored; cap at build time instead (SPEC §4.7)",
-    "maxLength": "ignored; cap at build time instead (SPEC §4.7)",
 }
+
+#: Verified **enforced** by outlines-core 0.2.14, contra SPEC §4.2.
+ENFORCED_LENGTH_KEYWORDS = frozenset(
+    {"minLength", "maxLength", "minItems", "maxItems"})
 
 # First-match-wins precedence. If a schema carries one of these AND a
 # later-precedence sibling, the sibling is silently discarded.
@@ -111,6 +119,37 @@ _PRECEDENCE = (
     "$ref",
     "type",
 )
+
+
+def require_nonempty_strings(schema: dict[str, Any]) -> dict[str, Any]:
+    """Give every **required** string property `minLength: 1`.
+
+    Phase 5 measured that free-form string arguments collapse to `""` while
+    *enum* arguments come out correct — the empty string is a self-consistent
+    fixed point that the constrained sampler is right to allow and the model is
+    happy to confirm. BFCL schemas essentially never carry `minLength`, so the
+    grammar faithfully permits it.
+
+    This is a **compiler-side** decision, not a schema fidelity one: a required
+    argument whose value is the empty string cannot be what the benchmark
+    wants. Since `minLength` is genuinely enforced by outlines (contra SPEC
+    §4.2), it is the right lever.
+
+    Applied only to `required` properties, and only at the top level, so it
+    cannot silently over-constrain optional or nested fields.
+    """
+    out = dict(schema)
+    props = dict(out.get("properties") or {})
+    required = set(out.get("required") or [])
+    for key in list(props):
+        if key not in required:
+            continue
+        sub = props[key]
+        if isinstance(sub, dict) and sub.get("type") == "string" \
+                and "enum" not in sub and "minLength" not in sub:
+            props[key] = {**sub, "minLength": 1}
+    out["properties"] = props
+    return out
 
 
 def normalize_bfcl_schema(node: Any, *, path: str = "") -> Any:

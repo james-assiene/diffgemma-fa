@@ -83,11 +83,57 @@ def test_numeric_bounds_raise(kw: str, val):
 
 
 @pytest.mark.parametrize("kw", ["patternProperties", "propertyNames",
-                                "uniqueItems", "not", "if", "then", "else",
-                                "minItems", "maxItems", "minLength", "maxLength"])
+                                "uniqueItems", "not", "if", "then", "else"])
 def test_ignored_keywords_raise(kw: str):
     with pytest.raises(UnsupportedSchemaError, match=kw):
         check_supported({"type": "object", kw: {}})
+
+
+@pytest.mark.parametrize("kw", ["minLength", "maxLength", "minItems", "maxItems"])
+def test_length_keywords_are_enforced_and_must_not_raise(kw: str):
+    """**SPEC §4.2 is wrong on these four.** It lists them among the silently
+    dropped keywords; measured against outlines-core 0.2.14 all four are
+    genuinely enforced — the generated regex rejects a too-short string and a
+    too-long array.
+
+    Raising on them would be worse than cosmetic: callers would have to
+    `allow`-list constraints that actually work, desensitising the very signal
+    this pre-pass exists to give for the bounds that really are dropped.
+    """
+    check_supported({"type": "object", kw: 1})
+
+
+def test_min_length_really_forbids_the_empty_string():
+    """The measurement behind `require_nonempty_strings` — and the reason it is
+    the right lever for Phase 5's empty-argument collapse."""
+    import re
+
+    from diffgemma_fa.compile.schema import build_regex
+
+    rx = build_regex({"type": "object", "required": ["s"],
+                      "properties": {"s": {"type": "string", "minLength": 1}}},
+                     whitespace_pattern="")
+    assert re.fullmatch(rx, '{"s":"a"}')
+    assert not re.fullmatch(rx, '{"s":""}')
+
+
+def test_require_nonempty_strings_targets_only_required_free_strings():
+    from diffgemma_fa.compile.schema import require_nonempty_strings
+
+    out = require_nonempty_strings({
+        "type": "object",
+        "required": ["a", "c", "d"],
+        "properties": {
+            "a": {"type": "string"},                       # -> minLength 1
+            "b": {"type": "string"},                       # optional, untouched
+            "c": {"type": "string", "enum": ["x"]},        # enum, untouched
+            "d": {"type": "integer"},                      # not a string
+        },
+    })
+    assert out["properties"]["a"]["minLength"] == 1
+    assert "minLength" not in out["properties"]["b"]
+    assert "minLength" not in out["properties"]["c"]
+    assert "minLength" not in out["properties"]["d"]
 
 
 def test_additional_properties_false_raises():
@@ -142,9 +188,9 @@ def test_nested_violations_are_found_and_located():
 
 
 def test_violations_inside_array_items_are_found():
-    with pytest.raises(UnsupportedSchemaError, match="maxItems"):
+    with pytest.raises(UnsupportedSchemaError, match="uniqueItems"):
         check_supported({"type": "array", "items": {"type": "array",
-                                                    "maxItems": 3}})
+                                                    "uniqueItems": True}})
 
 
 def test_clean_schema_passes():

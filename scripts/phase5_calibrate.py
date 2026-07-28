@@ -110,6 +110,9 @@ def main() -> None:
     ap.add_argument("--bounds", default=",".join(str(b) for b in ENTROPY_BOUNDS))
     ap.add_argument("--emission", default="map", choices=["map", "sample"])
     ap.add_argument("--variant", default="j0", choices=["j0", "j1", "j2"])
+    ap.add_argument("--nonempty", action="store_true",
+                    help="give required string args minLength:1 (SPEC 4.2 says "
+                         "minLength is dropped; measured, it is enforced)")
     ap.add_argument("--diagnose", action="store_true",
                     help="dump the per-step emission for the first record")
     ap.add_argument("--out", default="/home/ubuntu/diffgemma_fa/artifacts/phase5_calibrate.json")
@@ -138,7 +141,8 @@ def main() -> None:
             try:
                 a = pipeline.compile_json_schema(
                     fn["parameters"], name=fn.get("name", ""), from_bfcl=True,
-                    allow=ALLOW, allow_wildcard=True).automaton
+                    allow=ALLOW, allow_wildcard=True,
+                    nonempty_required_strings=args.nonempty).automaton
             except Exception:  # noqa: BLE001
                 continue
 
@@ -247,7 +251,7 @@ def main() -> None:
 
     with open(args.out, "w") as f:
         json.dump({"variant": args.variant, "emission": args.emission,
-                   "rows": rows}, f, indent=2)
+                   "nonempty": args.nonempty, "rows": rows}, f, indent=2)
 
     print("\n===== SPEC §3.4 CALIBRATION =====")
     print(f"{'bound':>8} {'CS':>8} {'parsed':>7} {'nonempty':>9} {'arg_acc':>9}")

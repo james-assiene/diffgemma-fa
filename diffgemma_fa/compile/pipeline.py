@@ -125,6 +125,7 @@ def compile_json_schema(
     allow: Sequence[str] = (),
     allow_wildcard: bool = False,
     whitespace_pattern: str | None = "",
+    nonempty_required_strings: bool = False,
     **kwargs: Any,
 ) -> CompileReport:
     """Compile a JSON Schema (or BFCL parameter block) end to end.
@@ -133,8 +134,13 @@ def compile_json_schema(
     shrinks the automaton substantially and costs nothing the benchmark scores.
     """
     t0 = time.perf_counter()
+    prepared = json_schema
+    if nonempty_required_strings:
+        prepared = schema_mod.normalize_bfcl_schema(prepared) if from_bfcl else prepared
+        prepared = schema_mod.require_nonempty_strings(prepared)
+        from_bfcl = False
     regex = schema_mod.build_regex(
-        json_schema, from_bfcl=from_bfcl, allow=allow,
+        prepared, from_bfcl=from_bfcl, allow=allow,
         allow_wildcard=allow_wildcard, whitespace_pattern=whitespace_pattern,
     )
     seconds_regex = time.perf_counter() - t0

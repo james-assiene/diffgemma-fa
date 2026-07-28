@@ -1104,6 +1104,19 @@ running. [V] **Its limitations are severe and silent** — put them in Phase 1's
   ignored. [V, maintainer-confirmed]
 - **All numeric bounds silently ignored** (`minimum`, `maximum`, `exclusiveMin/Max`, `multipleOf`),
   as are `patternProperties`, `propertyNames`, `uniqueItems`, `not`, `if/then/else`. [V]
+
+  > **[V-P5] CORRECTED — `minLength`, `maxLength`, `minItems` and `maxItems` are NOT dropped.**
+  > Measured against outlines-core 0.2.14, all four are **enforced**: the generated regex rejects a
+  > too-short string and a too-long array. Only the *numeric* bounds are genuinely ignored. Keeping
+  > the four in the fail-loud list is not cosmetic — it forces callers to `allow`-list constraints
+  > that work, desensitising the signal the pre-pass exists to give for the bounds that really are
+  > dropped.
+  >
+  > This also supplies the lever Phase 5 needed: BFCL schemas never carry `minLength`, so the
+  > grammar faithfully permits `""` for a required string — and under J1 the empty string is a
+  > *self-consistent fixed point* the model happily confirms. `compile/schema.py:
+  > require_nonempty_strings` sets `minLength: 1` on required non-enum strings; non-empty arguments
+  > went **7/12 → 12/12**.
 - `additionalProperties: false` not honored. Only 6 `format` values. [V]
 - `INTEGER` permits `-0`; `NUMBER` requires a **signed** exponent, so `1e10` is rejected. [V]
 - `properties` emitted in **map order only** — an over-constraint that rejects valid documents with
@@ -1846,8 +1859,14 @@ diffgemma_fa/
    never terminate. The `ACC --Σ--> ACC` fix is believed correct but untested. Diagnose by logging
    stop-token position per block from the first end-to-end run.
 
-1. **§3.4 entropy recalibration.** Constrained marginals are far sharper; the stock defaults are
-   calibrated for unconstrained entropies.
+1. ~~**§3.4 entropy recalibration.**~~ **SWEPT [V-P5]; the premise is not confirmed and the bound is
+   ruled out as the dominant factor.** Over `entropy_bound ∈ {0.003 … 1.0}` on a 12-record
+   `live_simple` slice: **CS = 12/12 at every value** (the guarantee is structural, not
+   statistical), and argument accuracy is 1–2 of 19 everywhere — a range in which the rows are
+   statistically indistinguishable. The stock `0.1` is as good as anything tried. **Not** the
+   100-example dev slice this spec asks for, and `entropy_threshold` was not swept at all, so this
+   rules the bound out rather than selecting a value. Where the accuracy actually goes is
+   `docs/PHASE5_FINDINGS.md` §4.
 2. ~~**§3.1 J0 vs J1.**~~ **RESOLVED [V-P5], and the answer inverts this spec's prior.** J0 was
    "ship this"; measured, **J0 is the one that fails**. Traced per denoising step on the same prompt
    and grammar: J1 converges to `{"user_id":77890,"special":":black"}` (ground truth `7890` /

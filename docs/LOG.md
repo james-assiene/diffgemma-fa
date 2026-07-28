@@ -346,3 +346,38 @@ Two self-inflicted errors worth recording. I launched two 51 GB model instances 
 80 GB GPU and both died on `Failed to initialize BLASLT support`; and I twice wrapped a long GPU
 run in a foreground wait that my own tool timeout then SIGTERM'd. Long GPU runs now go out under
 `setsid` with a separate watcher.
+
+
+---
+
+## 2026-07-28 — SPEC §3.4 swept; a negative result, and the real cause chain
+
+Full write-up in `docs/PHASE5_FINDINGS.md`. **703 tests green.**
+
+**The entropy bound does not explain the accuracy.** Over the full §3.4 grid on 12 `live_simple`
+records: **CS = 12/12 at every bound** (the guarantee is structural), and argument accuracy is 1–2
+of 19 everywhere — statistically indistinguishable rows. Stock `0.1` is as good as anything. SPEC
+§3.4's premise that the defaults "will silently produce garbage" is **not confirmed** on this slice.
+Coverage stated: 12 records, one split, and `entropy_threshold` not swept.
+
+**SPEC §4.2 is wrong about four keywords.** `minLength`, `maxLength`, `minItems`, `maxItems` are
+**enforced** by outlines-core 0.2.14, not dropped; only the numeric bounds are dropped. Corrected in
+`_SILENTLY_DROPPED` — keeping them there forces callers to `allow`-list working constraints and
+desensitises the fail-loud signal.
+
+**The cause chain, three steps, two fixed:**
+
+1. **J0 starves the emission** (open question 2, resolved — see the previous entry).
+2. **The empty string is a self-consistent fixed point.** Under J1 the model sees `{"location":""}`
+   in its own canvas and confirms it; BFCL schemas never carry `minLength` so the grammar permits
+   it. `require_nonempty_strings` → non-empty args **7/12 → 12/12**.
+3. **The content is misplaced, not missing — unfixed.** Accuracy did not improve, but one output
+   contains the ground truth verbatim inside junk:
+   `{"loc":":{{    loc_\":221B Baker Street, Berkeley, CA, USA1  ",...}`. So the model *has* the
+   answer and the decode places it badly. Hypothesis (untested): marginals are positional over a
+   fixed 256-canvas while the grammar's fields start wherever the previous tokens end, and J1's
+   draw changes field lengths between steps, so alignment never settles. That would be a real
+   tension between variable-length grammars and fixed-canvas diffusion, not an implementation bug.
+
+**No BFCL number should be quoted from this work until (3) is resolved.** Format is solved (12/12
+CS, parsed, non-empty); content is 5–10% and the reason is characterised, not fixed.
