@@ -310,3 +310,39 @@ quote an accuracy number before this is understood**; the docs and the code comm
 corrected rather than left with the tidy but false story.
 
 700 tests green.
+
+
+---
+
+## 2026-07-28 — SPEC open question 2 resolved: J0 vs J1
+
+Added per-denoising-step instrumentation to the constrained sampler (`DIAGNOSTICS`, a module-level
+sink fed by `jax.debug.callback` — there is no Python between steps, so nothing else can see it).
+
+**J0 is the variant that fails, inverting SPEC's prior of "J0 — ship this".** Same prompt, same
+grammar, same entropy bound:
+
+| step | J0-map | J1-sample |
+|---|---|---|
+| 12 | `{"user_id":0}` | `{"user_id":17890}` |
+| 14 | `{"user_id":1}` | `{"user_id":77890,"special":":black"}` |
+| 21–47 | flips 0/1/6/8 **at H = 0.0000** | stable |
+
+Ground truth `7890` / `black`. The tell is the J0 column at H = 0.0000: a maximally confident model
+whose constrained MAP is arbitrary means the confidence is about something else — and it is. Under
+J0 the trajectory is stock uniform renoising, so the model never sees JSON, converges on a
+natural-language answer, and leaves its marginals peaked on tokens the grammar forbids. The
+emission then has no signal but length. **J0 buys an unconditional guarantee at the cost of all
+feedback** — exactly what §3.7 means by "its entire value is the self-conditioning feedback".
+
+This also **retires the Phase 4 hypothesis** that MAP's length bias was the cause: J1 uses the same
+joint machinery on the same grammar and does not collapse.
+
+Ship J1, or J0 + `--self-cond=constrained` (§3.7's `logit_shaper` mask, still unimplemented).
+
+### Process note
+
+Two self-inflicted errors worth recording. I launched two 51 GB model instances concurrently on an
+80 GB GPU and both died on `Failed to initialize BLASLT support`; and I twice wrapped a long GPU
+run in a foreground wait that my own tool timeout then SIGTERM'd. Long GPU runs now go out under
+`setsid` with a separate watcher.

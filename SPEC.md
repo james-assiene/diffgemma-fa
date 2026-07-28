@@ -1848,8 +1848,22 @@ diffgemma_fa/
 
 1. **§3.4 entropy recalibration.** Constrained marginals are far sharper; the stock defaults are
    calibrated for unconstrained entropies.
-2. **§3.1 J0 vs J1.** J1 gives a stronger invariant (every canvas ∈ C) but shifts the model's inputs
-   off-distribution. Genuinely open.
+2. ~~**§3.1 J0 vs J1.**~~ **RESOLVED [V-P5], and the answer inverts this spec's prior.** J0 was
+   "ship this"; measured, **J0 is the one that fails**. Traced per denoising step on the same prompt
+   and grammar: J1 converges to `{"user_id":77890,"special":":black"}` (ground truth `7890` /
+   `black`), while J0-map never leaves `{"user_id":1}` — and does so **at mean entropy 0.0000**,
+   flipping between `0/1/6/8` while maximally confident.
+   
+   The mechanism: under J0 the trajectory is stock uniform renoising, so the model never sees valid
+   JSON in its input canvas, converges confidently on a *natural-language* answer, and leaves its
+   marginals peaked on tokens the grammar forbids. The constrained emission then has no signal
+   beyond length and takes the shortest member of the language. **J0 has an unconditional guarantee
+   and zero feedback** — precisely what §3.7 identifies when it says the support mask's "entire
+   value is the self-conditioning feedback and the entropy signal".
+   
+   So ship **J1**, or J0 **paired with `--self-cond=constrained`** (§3.7's mask in `logit_shaper`,
+   still unimplemented) — the other channel by which the constraint can reach the model's inputs.
+   These are independently testable; ablate as a 2×2.
 3. **§3.3 renoising R0/R1/R2** and **§3.7 self-conditioning feedback** — both novel, both entangled
    with (2).
 4. **§5.3 — carried `A_k` vs stateless recompute from `predicted_tokens`.** The stateless route

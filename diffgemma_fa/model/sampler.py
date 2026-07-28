@@ -36,7 +36,35 @@ from gemma.gm.text import _sampler_loop
 from diffgemma_fa.model import constrained as _constrained
 from diffgemma_fa.model.state import Automaton, ConstrainedSamplingState, widen
 
-__all__ = ["ConstrainedDiffusionSampler", "_ConstrainedCarry"]
+__all__ = ["ConstrainedDiffusionSampler", "_ConstrainedCarry", "DIAGNOSTICS"]
+
+
+class _Diagnostics:
+    """Host-side sink for per-denoising-step traces.
+
+    Module state rather than an attribute, because `self` is a
+    `static_argname` and anything mutable on it would be baked into the trace.
+    """
+
+    def __init__(self) -> None:
+        self.rows: list[dict] = []
+        self.enabled = False
+
+    def reset(self) -> None:
+        self.rows = []
+
+    def record(self, step, n_accepted, mean_entropy, emitted, trajectory):
+        self.rows.append({
+            "step": int(step),
+            "n_accepted": int(n_accepted),
+            "mean_entropy": float(mean_entropy),
+            "emitted": [int(x) for x in emitted],
+            "trajectory": [int(x) for x in trajectory],
+        })
+
+
+DIAGNOSTICS = _Diagnostics()
+_DIAG = DIAGNOSTICS
 
 
 @flax.struct.dataclass
@@ -81,6 +109,9 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
     variant: str = "j0"
     emission: str = "map"
     constrained_dtype: str = "float64"
+    #: Emit a per-step trace to `DIAGNOSTICS`. Static, so turning it on
+    #: recompiles — which is fine, it is a debugging path.
+    diagnose: bool = False
 
     def __post_init__(self) -> None:
         if self.variant not in ("j0", "j1", "j2"):
@@ -264,6 +295,17 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
 
             keys = jax.random.split(sample_rng_, batch_size)
             emitted = jax.vmap(per_example)(p, automaton.active, keys)
+
+            if self.diagnose:
+                # Per-step visibility inside the jitted `while_loop`. There is
+                # no Python between denoising steps (SPEC §5.3), so a callback
+                # is the only way to see the emission converge — or not.
+                lp = jax.nn.log_softmax(out.logits.astype(jnp.float32))
+                pr = jnp.exp(lp)
+                h = -jnp.sum(jnp.where(pr == 0, 0.0, lp) * pr, axis=-1)
+                jax.debug.callback(
+                    _DIAG.record, step, jnp.sum(accepted[0]), jnp.mean(h[0]),
+                    emitted[0], carry.canvas[0])
 
             if self.variant == "j0":
                 # J0: the TRAJECTORY keeps stock uniform renoising, so the
