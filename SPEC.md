@@ -929,6 +929,17 @@ Four traps:
 1. **`b_L` is not `1[s ∈ F]`.** You do not know whether a block is the last one, and `1[s∈F]`
    forces the grammar to complete in exactly 256 tokens. The budget-aware form handles the final
    block automatically.
+
+   > **[V-P4] CORRECTED — the `R` above is off by one canvas.** `state.step` counts tokens
+   > committed **before** the block, but `b_L` is evaluated at the state reached **after** the
+   > block's `L` tokens. So the terminal factor must use
+   > **`R = max_new_tokens − state.step − canvas_length`**, not `max_new_tokens − state.step`.
+   >
+   > Using the unadjusted value is too permissive by exactly `L`: it admits states that cannot
+   > actually finish, and generation then **never terminates**, because nothing forces completion
+   > as the budget runs down. Caught by `tests/test_guarantee.py` — a multi-block run failed with
+   > "did not terminate in 8 blocks" and a reached state whose `d(s)` exceeded the real remainder.
+   > Fixed in `model/state.py: terminal_budget`.
 2. **Recompute `A_{k+1}` from the truncated canvas**, not from a MAP backtrace.
    `_truncate_canvas_at_stop_tokens` rewrites tokens after the first stop token to `PAD_TOKEN = 0`
    [V], and the PAD-truncated canvas is what enters the KV cache.

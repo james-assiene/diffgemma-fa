@@ -251,3 +251,40 @@ no-recompile-per-request property of §5.3(b) showing up in the timings.
 Phase 5 needs the log-space tree first if `--emission=sample` is to be evaluated at all. J0, the
 widened `EarlyStopFn` (§3.1b closure 2 is **not** yet enforced), and multi-block end-to-end runs
 are all outstanding — see `docs/PHASE4_FINDINGS.md` §5.
+
+
+---
+
+## 2026-07-28 — `tests/test_guarantee.py`, and the bug it caught
+
+CLAUDE.md names this file "the one thing that must not break"; it did not exist until now.
+**700 tests green.**
+
+It asserts the two *different* things CLAUDE.md warns against conflating — per-block viable prefix
+(`δ*(A_k, canvas_k) ≠ ∅` **and** `⊆ {s : d(s) ≤ R}`) and, separately, acceptance of the
+**concatenation** — plus a test asserting from the other side that a non-final canvas is *not*
+accepted on its own, so anyone who adds a per-canvas acceptance assertion finds a test explaining
+why it is wrong.
+
+### It immediately caught a real bug: `b_L`'s budget was off by one canvas
+
+SPEC §3.5 writes `R ← max_new_tokens − state.step` and applies `b_L(s) = 1[d(s) ≤ R]`. But
+`state.step` counts tokens committed **before** the block, while `b_L` is evaluated at the state
+reached **after** its `L` tokens. The correct terminal budget is
+`max_new_tokens − state.step − canvas_length`.
+
+Unadjusted it is too permissive by exactly `L`, so it admits states that cannot finish — and
+generation then **never terminates**, because nothing forces completion as the budget runs down.
+The test failed with "did not terminate in 8 blocks" and with reached states whose `d(s)` exceeded
+the real remainder. Fixed in `model/state.py: terminal_budget`; SPEC §3.5 trap 1 corrected.
+
+This is exactly the class of bug the file exists for: every single-block run passed happily before
+and after, and only a multi-block assertion on the *budget half* of the viable-prefix property
+exposed it.
+
+### Honest gap
+
+§3.1b **closure 2** (the automaton-aware stopping conjunct fed `emit_canvas`) is **not** enforced in
+the sampler — the stock `early_stop_fn` is used unchanged. `test_closure_2_is_not_yet_enforced`
+marks this deliberately rather than letting the file imply coverage it lacks, and the CS test
+asserts termination-in-an-accepting-state explicitly instead of assuming it.

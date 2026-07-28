@@ -94,10 +94,28 @@ class ConstrainedSamplingState(_sampler_loop.SamplingState):
 
     @property
     def remaining_budget(self) -> jnp.ndarray:
-        """`R`, bounded by **both** the token budget and cache capacity."""
+        """Tokens still available **including** the block about to be emitted.
+
+        Bounded by **both** the token budget and cache capacity — SPEC §3.1b's
+        fourth termination path is cache exhaustion, which truncates
+        mid-grammar exactly as the token budget does.
+        """
         by_tokens = self.max_new_tokens - self.step
         by_cache = self.cache_length - (self.init_cache_length + self.step)
         return jnp.minimum(by_tokens, by_cache)
+
+    def terminal_budget(self, canvas_length: int) -> jnp.ndarray:
+        """`R` for `b_L(s) = 1[d(s) ≤ R]`: the budget left **after** this canvas.
+
+        SPEC §3.5 writes `R ← max_new_tokens − state.step` and applies
+        `1[d(s) ≤ R]` as the terminal factor, but `state.step` counts tokens
+        committed *before* the block while `b_L` is evaluated at the state
+        reached *after* its `L` tokens. Using `R` unadjusted is therefore too
+        permissive by exactly `canvas_length`: it admits states that cannot
+        actually finish, and generation then fails to terminate because nothing
+        ever forces completion. `tests/test_guarantee.py` catches this.
+        """
+        return self.remaining_budget - canvas_length
 
 
 def widen(

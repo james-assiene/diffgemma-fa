@@ -116,7 +116,8 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
             rng=sample_rng,
             full_attention_mask=state.full_attention_mask,
             automaton=state.automaton,
-            remaining=state.remaining_budget,
+            # Budget left AFTER this canvas -- see state.terminal_budget.
+            remaining=state.terminal_budget(self.canvas_length),
         )
 
         canvas, batch_has_stop_token = _diffusion_sampler._truncate_canvas_at_stop_tokens(  # noqa: SLF001
