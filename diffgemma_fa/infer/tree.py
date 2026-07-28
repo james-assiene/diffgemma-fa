@@ -110,7 +110,7 @@ def sample_tokens(
     on an NFA without a special case.
 
     Returns:
-      `[L] int32`.
+      `(tokens [L] int32, valid bool)` — see the validity note below.
     """
     V, L = p_vl.shape
     sel = ((edge_src[None, :] == states[:-1, None])
@@ -120,7 +120,14 @@ def sample_tokens(
     )
     logits = jnp.log(jnp.maximum(p_vl.T * mult, 1e-300))
     keys = jax.random.split(key, L)
-    return jax.vmap(jax.random.categorical)(keys, logits).astype(jnp.int32)
+    tokens = jax.vmap(jax.random.categorical)(keys, logits).astype(jnp.int32)
+    # A position with no admissible token means `sample_states` handed us a
+    # state pair with no edge between it — which happens only when the boundary
+    # draw degenerated (see `model.constrained.require_x64`). Surfaced rather
+    # than silently returning a near-uniform draw over the full 262k vocab,
+    # which looks like plausible multilingual text and passes every shape check.
+    valid = jnp.all(mult.sum(axis=-1) > 0)
+    return tokens, valid
 
 
 def map_states_and_tokens(

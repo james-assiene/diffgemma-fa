@@ -214,3 +214,40 @@ assertions. Separately, the tree-vs-posterior test made 40,000 individual JAX di
 Phase 4 — `model/`. J1 before J0 (SPEC §5.4). Note Phase 0's correction: `_sample_step` **must**
 be forked, because `sample_next_canvas` never receives `state` and `max_new_tokens` is not a field
 of `SamplingState`.
+
+
+---
+
+## 2026-07-28 — Phase 4 (autonomous)
+
+`diffgemma_fa/model/`: widened `SamplingState`, forked `_sample_step` and denoising loop,
+constrained emission. Full write-up in `docs/PHASE4_FINDINGS.md`. **670 tests green.**
+
+### Exit criterion met
+
+10/10 end-to-end constrained generations on the real 26B-A4B checkpoint with real BFCL-Live
+grammars, **all accepted by an independent simulator**. Stop-token positions **4–13, never near
+255**, so SPEC §3.5 trap 4's own diagnostic passes and the unscored `ACC --Σ--> ACC` tail works.
+Repeat generations on the same `|S|` bucket take 9.6 s against ~38 s cold — the
+no-recompile-per-request property of §5.3(b) showing up in the timings.
+
+### Two findings
+
+1. **Per-node normalization is not enough, and our own §3.5 fix is why.** The unscored
+   `ACC --Σ--> ACC` edge has emission mass exactly 1.0, so it **pins the root's max at 1.0** and
+   normalizing by it is a no-op — while genuine grammar paths sit at ~1e-49 (smallest positive
+   entry measured: **1.2e-288**). fp32 underflows to exactly zero and the draw degenerates
+   *silently*, returning plausible multilingual text. float64 fixes `L=64` but **not `L=256`**:
+   sampling degenerates on 2 of 6 real prompts there. **The sum-product tree needs log space**, as
+   §2.7 already chose for MAP — which is why MAP is unaffected and is currently the only working
+   emission. `sample_tokens` now returns a `valid` flag so this can never be silent again.
+2. **Joint MAP prefers the minimal completion.** Emissions are schema-valid but empty
+   (`{"location":""}`), because every extra token multiplies in a probability < 1 and the grammar
+   admits `""`. Not a bug — but a `CS = 100%` number from these runs would be true and nearly
+   meaningless, which sharpens §3.8's existing warning.
+
+### Next
+
+Phase 5 needs the log-space tree first if `--emission=sample` is to be evaluated at all. J0, the
+widened `EarlyStopFn` (§3.1b closure 2 is **not** yet enforced), and multi-block end-to-end runs
+are all outstanding — see `docs/PHASE4_FINDINGS.md` §5.

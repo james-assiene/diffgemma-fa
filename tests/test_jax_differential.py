@@ -246,7 +246,7 @@ def test_tree_samples_are_accepted(nfa, seed):
         k1, k2 = jax.random.split(jax.random.fold_in(key, t))
         states = tree.sample_states(tr, jnp.asarray(A.start),
                                     jnp.asarray(A.final_vector()), k1)
-        toks = tree.sample_tokens(
+        toks, _valid = tree.sample_tokens(
             jnp.asarray(p.T), states,
             jnp.asarray(np.array([e[0] for e in A.edges], np.int32)),
             jnp.asarray(np.array([e[1] for e in A.edges], np.int32)),
@@ -277,7 +277,7 @@ def draw_batch(A, p, M, class_of, members, is_neg, indices, indptr, n, seed=0):
         k1, k2 = jax.random.split(k)
         states = tree.sample_states(tr, a0, bf, k1)
         return tree.sample_tokens(p_vl, states, src, dst, cid, idx, iptr, neg,
-                                  len(members), k2)
+                                  len(members), k2)[0]
 
     keys = jax.random.split(jax.random.PRNGKey(seed), n)
     return np.asarray(jax.jit(jax.vmap(one))(keys))

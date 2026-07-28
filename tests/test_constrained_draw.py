@@ -63,8 +63,9 @@ def test_joint_draw_is_accepted(grammar, seed):
     a, aut = grammar
     L = 64
     p = marginals(L, a.vocab_size, seed)
-    toks = C.joint_draw(p, aut, jnp.int64(L), jax.random.PRNGKey(seed),
-                        a.n_states_bucket, a.tables.n_classes)
+    toks, valid = C.joint_draw(p, aut, jnp.int64(L), jax.random.PRNGKey(seed),
+                               a.n_states_bucket, a.tables.n_classes)
+    assert bool(valid), "the boundary draw degenerated (see require_x64)"
     toks = [int(x) for x in toks]
     assert len(toks) == L
     assert Simulator(a).accepts(toks), f"constrained draw rejected: {toks[:12]}"
@@ -146,8 +147,8 @@ def test_advance_states_matches_the_reference_simulator(grammar):
     a, aut = grammar
     L = 64
     p = marginals(L, a.vocab_size, 3)
-    toks = C.joint_draw(p, aut, jnp.int64(L), jax.random.PRNGKey(3),
-                        a.n_states_bucket, a.tables.n_classes)
+    toks, _ = C.joint_draw(p, aut, jnp.int64(L), jax.random.PRNGKey(3),
+                           a.n_states_bucket, a.tables.n_classes)
     got = np.asarray(C.advance_states(aut, toks, a.n_states_bucket,
                                       a.tables.n_classes, a.vocab_size))
     want = Simulator(a).run([int(x) for x in toks])
@@ -161,8 +162,8 @@ def test_advance_states_never_empties_on_a_valid_canvas(grammar):
     L = 64
     for seed in range(6):
         p = marginals(L, a.vocab_size, seed)
-        toks = C.joint_draw(p, aut, jnp.int64(L), jax.random.PRNGKey(seed),
-                            a.n_states_bucket, a.tables.n_classes)
+        toks, _ = C.joint_draw(p, aut, jnp.int64(L), jax.random.PRNGKey(seed),
+                               a.n_states_bucket, a.tables.n_classes)
         nxt = np.asarray(C.advance_states(aut, toks, a.n_states_bucket,
                                           a.tables.n_classes, a.vocab_size))
         assert nxt.any(), f"A_k+1 went empty on seed {seed}"

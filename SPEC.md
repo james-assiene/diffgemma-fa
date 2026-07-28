@@ -557,6 +557,13 @@ nodes** to recover `Z`. [D]
 > constrained posterior. In float64 the identical code samples correctly and the draw is accepted.
 > This is §6.3's `Z == 0` cause (c), except that the scaling is *present* and still insufficient.
 >
+> **[V-P4, at the real `L = 256`] float64 is necessary but NOT sufficient.** At `L = 64` float64
+> fixes it entirely; at the real canvas length `--emission=sample` degenerates on 2 of 6 real
+> prompts (no stop token, pure multilingual garbage) against **10/10 for `--emission=map`**. So the
+> sum-product sampling tree needs a **log-space** formulation (`logsumexp` combines), not merely a
+> wider float — which is exactly what §2.7 already does for MAP. **`--emission=map` is currently
+> the only emission that works at `L = 256`**, and §3.9 already makes it the default.
+>
 > **Consequences.** (1) The sum-product **sampling** path requires `jax_enable_x64`
 > (`model/constrained.py: require_x64` refuses to run otherwise, rather than drawing from a
 > degenerate distribution). (2) §5.6's memory table **doubles** for that path — `(2L−1)·|S|²·8` B —

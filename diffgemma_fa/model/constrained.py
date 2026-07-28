@@ -168,7 +168,11 @@ def joint_draw(
     `b_L = 1[d(s) ≤ R]`.
 
     Returns:
-      `[L] int32`.
+      `(tokens [L] int32, valid bool)`. **`valid` is False when the boundary
+      draw degenerated**, which at `L = 256` happens even in float64 — see
+      `require_x64` and `docs/PHASE4_FINDINGS.md`. Callers must check it; the
+      degenerate draw is near-uniform over the full 262k vocab and looks like
+      plausible multilingual text.
     """
     p_vl, W_e, M = _matrices(p_lv, automaton, n_states, n_classes)
     a_start = automaton.active.astype(p_lv.dtype)
