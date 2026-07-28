@@ -82,17 +82,32 @@ def compile_regex(
     ladder: Sequence[int] | None = None,
     k_max: int | None = None,
     schema_hash: str = "",
+    channel_header: bool = True,
 ) -> CompileReport:
-    """Compile an anchored byte-level regex into a `CompiledAutomaton`."""
+    """Compile an anchored byte-level regex into a `CompiledAutomaton`.
+
+    `channel_header` prefixes SPEC §3.6's `<|channel>NAME\n<channel|>` header.
+    **On by default**: Phase 0 measured that every generation from the released
+    model opens with it, and without it the grammar forbids the model's first
+    token outright.
+    """
     vocabulary = vocabulary if vocabulary is not None else vocab_mod.build_vocabulary()
     if vocab_size is None:
         vocab_size = int(vocab_mod.gemma_tokenizer().vocab_size)
 
     lifted = lift_regex(regex, vocabulary, do_minimize=do_minimize)
 
+    grammar = lifted.dfa
+    if channel_header:
+        from diffgemma_fa.compile.automaton import prepend_channel_header
+
+        grammar = prepend_channel_header(
+            grammar, vocab_size=vocab_size,
+            reserved=tuple(end_tokens) + (vocab_mod.PAD_TOKEN,))
+
     t0 = time.perf_counter()
     automaton = compile_automaton(
-        lifted.dfa,
+        grammar,
         name=name,
         end_tokens=end_tokens,
         vocab_size=vocab_size,
@@ -124,14 +139,29 @@ def compile_json_schema(
     from_bfcl: bool = False,
     allow: Sequence[str] = (),
     allow_wildcard: bool = False,
-    whitespace_pattern: str | None = "",
+    whitespace_pattern: str | None = None,
     nonempty_required_strings: bool = False,
+    channel_header: bool = True,
     **kwargs: Any,
 ) -> CompileReport:
     """Compile a JSON Schema (or BFCL parameter block) end to end.
 
-    `whitespace_pattern=""` forbids inter-token whitespace by default, which
-    shrinks the automaton substantially and costs nothing the benchmark scores.
+    `whitespace_pattern` defaults to outlines' own (optional whitespace).
+
+    **[V-P5] It used to default to `""` — forbidding whitespace — on the
+    reasoning that this "shrinks the automaton and costs nothing the benchmark
+    scores". That reasoning was wrong.** Gemma's natural tokenisation of JSON
+    puts the space *inside* the separator token (`": "`), so forbidding
+    whitespace makes the model's own rendering
+    `{"user_id": 7890, "special": "black"}` **unacceptable to the grammar**, and
+    it is forced onto an off-distribution path. The measured symptom was a
+    leading `:` on essentially every string value (`":Divinópolis, MG"` where
+    the ground truth is `Divinópolis, MG`) — a one-character defect that BFCL's
+    normalisation does not strip and that therefore failed every such argument.
+
+    The cost of allowing whitespace is 8 states on a representative BFCL schema
+    (43 -> 51), against ~20 GB of measured tree headroom. Not a trade worth
+    making.
     """
     t0 = time.perf_counter()
     prepared = json_schema
@@ -147,6 +177,6 @@ def compile_json_schema(
 
     from diffgemma_fa.compile.automaton import schema_fingerprint
 
-    report = compile_regex(regex, name=name,
+    report = compile_regex(regex, name=name, channel_header=channel_header,
                            schema_hash=schema_fingerprint(json_schema), **kwargs)
     return dataclasses.replace(report, seconds_regex=seconds_regex)

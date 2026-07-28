@@ -77,6 +77,45 @@ def to_traced(a, batch: int) -> Automaton:
 _STRIP = '",./-_*^'
 
 
+def _extract_json(text: str):
+    """Pull the JSON object out of a channel-tagged completion.
+
+    The grammar now carries SPEC §3.6's `<|channel>NAME\n<channel|>` header, so
+    the emission legitimately *begins* with it — splitting on `<` (which the
+    header-less version did) yields the empty string and scores everything as
+    unparsable.
+    """
+    body = text
+    if "<channel|>" in body:
+        body = body.split("<channel|>", 1)[1]
+    start = body.find("{")
+    if start < 0:
+        return None
+    depth, in_str, esc = 0, False, False
+    for i in range(start, len(body)):
+        c = body[i]
+        if in_str:
+            if esc:
+                esc = False
+            elif c == "\\":
+                esc = True
+            elif c == '"':
+                in_str = False
+            continue
+        if c == '"':
+            in_str = True
+        elif c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                try:
+                    return json.loads(body[start:i + 1])
+                except Exception:  # noqa: BLE001
+                    return None
+    return None
+
+
 def normalise(v) -> str:
     s = str(v).strip().lower()
     for ch in _STRIP:
@@ -195,12 +234,7 @@ def main() -> None:
             text = tok.decode(toks)
             accepted = Simulator(a).accepts(toks)
 
-            body = text.split("<")[0]
-            parsed = None
-            try:
-                parsed = json.loads(body)
-            except Exception:  # noqa: BLE001
-                pass
+            parsed = _extract_json(text)
 
             agg["n"] += 1
             agg["accepted"] += int(accepted)

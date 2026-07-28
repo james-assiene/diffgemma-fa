@@ -42,6 +42,7 @@ from diffgemma_fa.compile.minimize import Dfa
 __all__ = [
     "CompiledAutomaton",
     "INF_DISTANCE",
+    "prepend_channel_header",
     "augment_with_stop_tokens",
     "distance_to_final",
     "compile_automaton",
@@ -93,6 +94,85 @@ def bucket_size(
     raise ValueError(
         f"|S| = {n} exceeds the largest usable bucket {ladder[-1]}; this grammar "
         "must go to the chain sampler (SPEC §5.6)"
+    )
+
+
+def prepend_channel_header(
+    dfa: Dfa,
+    *,
+    vocab_size: int,
+    open_token: int = 100,
+    close_token: int = 101,
+    newline_token: int = 107,
+    reserved: Iterable[int] = (),
+    max_name_tokens: int = 8,
+) -> Dfa:
+    """Prefix the grammar with SPEC §3.6's channel header.
+
+        FA_total = HEADER · FA_grammar · STOP · Σ*
+        HEADER   = 100 · Σ_name+ · 107 · 101      (`<|channel>NAME\n<channel|>`)
+
+    **Why this is load-bearing rather than cosmetic.** Phase 0 measured that
+    *every* generation from the released model opens with exactly
+    `[100, 45518, 107, 101]`. Without the header the grammar admits only `{` at
+    canvas position 0 — measured: 3 tokens, all variants of `{`, with token 100
+    forbidden — so the very first thing the model wants to emit is impossible,
+    and the whole canvas is decoded from an off-distribution prefix.
+
+    The channel *name* is left open (`Σ_name{1,max_name_tokens}`): only
+    `thought` was observed in Phase 0, but `final`/`answer` tokenise fine and
+    hardcoding one would be fragile. The bound is **not** optional — see the
+    comment on the name states below.
+
+    Args:
+      dfa: the lifted grammar, whose start becomes the header's continuation.
+      reserved: tokens that may not appear inside the name — the end tokens and
+        PAD, so the header cannot itself terminate the canvas.
+
+    Returns:
+      A new `Dfa` with `max_name_tokens + 2` states prepended; existing state
+      ids shift by that amount.
+    """
+    if max_name_tokens < 1:
+        raise ValueError("max_name_tokens must be >= 1")
+
+    name_alphabet = sorted(
+        frozenset(range(vocab_size))
+        - {open_token, close_token, newline_token, *reserved}
+    )
+
+    # Layout: h_open, then one state per accepted name token, then h_close.
+    #
+    # **The name repetition must be BOUNDED, never a Σ* self-loop.** A self-loop
+    # over the whole vocabulary has emission mass ~1.0 — exactly like the
+    # unscored `ACC --Σ--> ACC` tail — so staying in it is free, and a joint MAP
+    # will sit there for the entire canvas rather than pay a specific token's
+    # probability to leave. Measured with a self-loop: the MAP consumed all 64
+    # positions inside the name loop and never closed the header, leaving a
+    # viable-but-not-accepting prefix and a rejected emission.
+    # `consumed[i]` means "i name tokens have been read". The newline may close
+    # the name from `consumed[1..n]` but **not** from `consumed[0]`, which is
+    # what makes the repetition `Σ_name+` rather than `Σ_name*`.
+    n_name = max_name_tokens
+    h_open = 0
+    consumed = list(range(1, 2 + n_name))          # consumed[0] .. consumed[n]
+    h_close = consumed[-1] + 1
+    shift = h_close + 1
+
+    trans: list[tuple[int, int, int]] = [(h_open, open_token, consumed[0])]
+    for i in range(n_name):
+        trans.extend((consumed[i], v, consumed[i + 1]) for v in name_alphabet)
+    for i in range(1, n_name + 1):
+        trans.append((consumed[i], newline_token, h_close))
+    trans.append((h_close, close_token, dfa.start + shift))
+
+    trans.extend((src + shift, lbl, dst + shift) for src, lbl, dst in dfa.transitions)
+
+    return Dfa(
+        n_states=dfa.n_states + shift,
+        transitions=tuple(trans),
+        start=h_open,
+        finals=frozenset(f + shift for f in dfa.finals),
     )
 
 

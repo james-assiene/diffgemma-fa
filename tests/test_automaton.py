@@ -254,3 +254,67 @@ def test_oversize_bucket_flags_the_chain_path_instead_of_crashing():
 def test_small_automaton_is_not_flagged_for_the_chain_path():
     a = compile_automaton(line_dfa(2), name="t", end_tokens=(1,), vocab_size=V)
     assert not a.needs_chain_path
+
+
+# --------------------------------------------------------------------------
+# SPEC §3.6's channel header
+# --------------------------------------------------------------------------
+
+def test_channel_header_admits_the_models_own_first_token():
+    """Phase 0 measured that **every** generation opens with
+    `<|channel>NAME\\n<channel|>`. Without the header the grammar admits only
+    `{` at canvas position 0 — measured 3 tokens, all `{` variants, with token
+    100 forbidden — so the model's habitual first token is impossible and the
+    whole canvas is decoded from an off-distribution prefix."""
+    from diffgemma_fa.compile.automaton import prepend_channel_header
+
+    base = line_dfa(2)
+    hdr = prepend_channel_header(base, vocab_size=V, open_token=10,
+                                 close_token=11, newline_token=12,
+                                 reserved=END_TOKENS, max_name_tokens=3)
+    out = {lbl for s, lbl, _ in hdr.transitions if s == hdr.start}
+    assert out == {10}, "position 0 must admit exactly the channel-open token"
+
+
+def test_channel_header_name_repetition_is_BOUNDED():
+    """**The name must not be a Σ* self-loop.**
+
+    A self-loop over the whole vocabulary has emission mass ~1.0 — exactly like
+    the unscored `ACC --Σ--> ACC` tail — so staying in it is free and a joint
+    MAP will sit there for the entire canvas rather than pay a specific token's
+    probability to leave. Measured when this was a self-loop: the MAP consumed
+    all 64 positions inside the name loop, never closed the header, and the
+    emission was rejected.
+    """
+    from diffgemma_fa.compile.automaton import prepend_channel_header
+
+    hdr = prepend_channel_header(line_dfa(2), vocab_size=V, open_token=10,
+                                 close_token=11, newline_token=12,
+                                 reserved=END_TOKENS, max_name_tokens=3)
+    for src, lbl, dst in hdr.transitions:
+        assert not (src == dst), (
+            f"self-loop at state {src} on {lbl} — the name repetition must be "
+            "bounded, or the MAP never leaves it"
+        )
+
+
+def test_channel_header_accepts_one_to_max_name_tokens():
+    from diffgemma_fa.compile.automaton import prepend_channel_header
+    from diffgemma_fa.compile.validate import Simulator
+
+    n = 3
+    hdr = prepend_channel_header(line_dfa(1), vocab_size=V, open_token=10,
+                                 close_token=11, newline_token=12,
+                                 reserved=END_TOKENS, max_name_tokens=n)
+    a = compile_automaton(hdr, name="h", end_tokens=(1,), vocab_size=V)
+    sim = Simulator(a)
+    for k in range(1, n + 1):
+        word = [10] + [5] * k + [12, 11, 7, 1]
+        assert sim.accepts(word), f"a {k}-token name must be accepted"
+    too_long = [10] + [5] * (n + 1) + [12, 11, 7, 1]
+    assert not sim.accepts(too_long), "the name bound must actually bind"
+    empty_name = [10, 12, 11, 7, 1]
+    assert not sim.accepts(empty_name), (
+        "the name is Sigma_name PLUS, not star -- a zero-token name would let "
+        "the header collapse to `<|channel>\\n<channel|>`"
+    )

@@ -126,7 +126,61 @@ top level so it cannot silently over-constrain optional or nested fields).
 | baseline | 7/12 |
 | **with `minLength: 1`** | **12/12** |
 
-### 4.2 Not fixed: the content is *misplaced*, not missing
+### 4.2 Root cause found and fixed: the grammar forbade the model's own format
+
+The `221B Baker Street` case — ground truth verbatim, wrapped in junk — said the content was there
+and the decode was placing it badly. Two concrete causes, both mine, both fixed:
+
+**(a) The channel header was never wired in.** Phase 0 measured that *every* generation opens with
+`<|channel>NAME\n<channel|>` (ids `[100, 45518, 107, 101]`), and I rewrote SPEC §3.6 to say
+`FA_total = HEADER · FA_grammar · STOP · Σ*` — then never implemented it. Measured at canvas
+position 0 the grammar admitted **3 tokens, all variants of `{`, with token 100 forbidden**. The
+model's habitual first token was impossible, so the entire canvas was decoded from an
+off-distribution prefix. `prepend_channel_header` fixes it.
+
+**(b) `whitespace_pattern=""` forbade the model's tokenisation.** I set it deliberately, reasoning
+it "shrinks the automaton and costs nothing the benchmark scores". **That reasoning was wrong.**
+Gemma puts the space *inside* the separator token (`": "`), so forbidding whitespace makes the
+model's own rendering `{"user_id": 7890, "special": "black"}` **unacceptable to the grammar**. The
+symptom was a leading `:` on essentially every string value — `":Divinópolis, MG"` against a ground
+truth of `Divinópolis, MG`, a one-character defect BFCL's normalisation does not strip. The cost of
+allowing whitespace is **8 states** (43 → 51) against ~20 GB of tree headroom.
+
+**Measured effect, same 12 records, same bound, J1-sample:**
+
+| configuration | non-empty | argument accuracy |
+|---|---|---|
+| baseline | 7/12 | 1/19 = **5.3%** |
+| + `minLength: 1` | 12/12 | 1/19 = 5.3% |
+| + channel header | 12/12 | 1/19 = 5.3% |
+| **+ whitespace allowed** | **12/12** | **7–8/19 = 37–42%** |
+
+`user_id: 7890` and `special: black` are now **exact** (they were `77890` and `:black`), as are
+`2020 Addison Street, Berkeley, CA, USA`-class values, `comfort`, `plus`, `celsius`,
+`Divinópolis, MG`, `Riga, Latvia`, `London, UK`.
+
+**A trap this exposed, worth recording separately.** The first header implementation used a `Σ*`
+self-loop for the channel name. That loop has emission mass ~1.0 — exactly like the unscored
+`ACC --Σ--> ACC` tail — so it is *free* to stay in, and the joint MAP consumed all 64 canvas
+positions inside it without ever closing the header. **Any Σ-labelled self-loop in a grammar is an
+attractor for a joint decode.** The name repetition is now bounded (`Σ_name{1,8}`), and
+`test_channel_header_name_repetition_is_BOUNDED` asserts no self-loops exist.
+
+### 4.3 Residual: string boundary placement
+
+The remaining misses at 7/19 fall into two classes, both about *where the string ends*:
+
+| class | example | count |
+|---|---|---|
+| trailing junk | `2020 Addison Street, Berkeley, CA, USA1  ` (want `…USA`) | 2 |
+| truncated | `Tel` (want `Tel Aviv, Israel`), `Hyderabad`, `Naples,`, `San Francisco` | 4 |
+| model judgement | `Yosemite National Park, Mariposa, CA` (want `Mariposa, CA`) | 1 |
+
+Not a format failure — every one is a valid member of the language. This is the fixed-canvas /
+variable-length tension narrowed to its last component: the decode chooses the closing quote's
+position, and gets it slightly wrong in both directions.
+
+### 4.4 Previously: the content is *misplaced*, not missing
 
 Accuracy did **not** improve (1/19). The model mostly emits one junk character to satisfy the
 minimum. But one output is decisive:
