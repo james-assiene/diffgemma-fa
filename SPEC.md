@@ -542,6 +542,30 @@ a shorter canvas, pad to the next power of two with `M_i = I` for `i ≥ L`, and
 w.r.t. `s_m`, and cancel; likewise for the root draw. Accumulate `Σ log scale` over **all `2L−1`
 nodes** to recover `Z`. [D]
 
+> **[V-P4] ⚠ Per-node normalization is NOT sufficient in fp32, and the reason is this spec's own
+> §3.5 trap-4 fix.** Normalizing by the node max fixes the *overall* scale but not the **dynamic
+> range inside a single matrix**, and at the root that range is fatal:
+>
+> - `ACC --Σ--> ACC`, the unscored post-stop tail, has emission mass **exactly 1.0** by
+>   construction — so the root's max is pinned at 1.0 and dividing by it does nothing;
+> - a genuine constrained path is a product of per-token probabilities around `4e-6`, so at
+>   `L = 64` the root entry is `~1e-49`, and the **smallest positive entry measured on a real BFCL
+>   grammar was 1.2e-288**.
+>
+> fp32's smallest subnormal is ~1e-45, so the whole joint underflows to **exactly zero** and the
+> root draw degenerates silently — it still returns tokens, they are simply not from the
+> constrained posterior. In float64 the identical code samples correctly and the draw is accepted.
+> This is §6.3's `Z == 0` cause (c), except that the scaling is *present* and still insufficient.
+>
+> **Consequences.** (1) The sum-product **sampling** path requires `jax_enable_x64`
+> (`model/constrained.py: require_x64` refuses to run otherwise, rather than drawing from a
+> degenerate distribution). (2) §5.6's memory table **doubles** for that path — `(2L−1)·|S|²·8` B —
+> so at the measured ~20 GB headroom the ceiling falls from `|S| = 3,128` to **2,211**, and from
+> 1,978 to **1,399** at 8 GB. (3) **`--emission=map` is unaffected**, because §2.7 puts MAP in log
+> space precisely so that "no scaling discussion, no underflow" applies — that choice is now
+> empirically vindicated and is an argument for MAP as the default emission.
+> Pinned by `tests/test_constrained_draw.py::test_root_product_underflows_in_fp32_on_a_real_grammar`.
+
 **PRNG.** `keys = jax.random.split(jax.random.fold_in(key, level), n_nodes)`, then `vmap` the
 categorical across nodes. `n_nodes` is static because the tree is unrolled, satisfying `split`'s
 static-count requirement for free. Reproducibility across levels is *exact* — `fold_in` is a pure
