@@ -102,8 +102,11 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
         compiles once per bucket rather than once per grammar (SPEC §5.5).
       n_classes: padded class count. **Static** — `segment_sum`'s
         `num_segments` raises on a traced value.
-      variant: `j1` (single joint draw, flattened marginals at non-accepted) or
-        `j2` (baseline: constrained draw at accepted, uniform random elsewhere).
+      variant: `j0` (decoupled trajectory/emission), `j1` (single joint draw
+        with flattened marginals at non-accepted), `j2` (SPEC §7.2 baseline:
+        the constrained draw kept only at accepted positions, stock uniform
+        renoise elsewhere), `mask` (§2.8's naive per-position masking) or
+        `unconstrained` (the stock sampler).
       emission: `map` or `sample`.
       constrained_dtype: the sampling path needs float64
         (`constrained.require_x64` explains why in detail); MAP is fine in
@@ -230,7 +233,15 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
             # suspect, and `advance_ok` catches the state set emptying at a
             # block boundary -- which used to be papered over by a stale-carry
             # fallback inside `advance_states`.
-            feasible=state.feasible & canvas_feasible & advance_ok,
+            #
+            # `advance_ok` is folded in only for the variants that actually
+            # promise the guarantee. `j2`, `mask` and `unconstrained` emit
+            # tokens the automaton rejects **by construction** -- that is what
+            # they are measuring -- so an empty state set there is the result,
+            # not a bug, and raising on it would make the baselines unrunnable.
+            feasible=(state.feasible & canvas_feasible & advance_ok
+                      if self.variant in ("j0", "j1")
+                      else state.feasible & canvas_feasible),
         )
 
     # -- the denoising loop ----------------------------------------------
@@ -370,6 +381,28 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
 
             keys = jax.random.split(sample_rng_, batch_size)
             emitted, ok = jax.vmap(per_example)(p, automaton.active, keys)
+
+            if self.variant == "j2":
+                # SPEC §7.2 baseline 3, and until now NOT implemented: `j2` ran
+                # the same fully-constrained emission as J0 and therefore
+                # measured J0 twice under two names.
+                #
+                # J2 keeps the constrained draw only at **accepted** positions
+                # and leaves the rest as the stock uniform renoise over the full
+                # 262k vocab. That is precisely SPEC §3.1's finding — the
+                # emitted canvas is the sample, and non-accepted positions reach
+                # the output as random tokens — so its CS column is the evidence
+                # that constraining the sampler alone is necessary but **not
+                # sufficient**, and that the guarantee needs the emission itself
+                # to be a constrained object.
+                emitted = jnp.where(
+                    accepted, emitted,
+                    jax.random.randint(jax.random.fold_in(sample_rng_, 3),
+                                       emitted.shape, minval=0,
+                                       maxval=self.text_vocab_size))
+                # The joint draw was still feasible; J2 corrupts it deliberately
+                # afterwards, so `ok` stays the Z == 0 signal and does not become
+                # a report on the baseline's (expected) constraint violations.
 
             if self.diagnose:
                 # Per-step visibility inside the jitted `while_loop`. There is

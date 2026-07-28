@@ -136,15 +136,27 @@ def require_nonempty_strings(schema: dict[str, Any]) -> dict[str, Any]:
     happy to confirm. BFCL schemas essentially never carry `minLength`, so the
     grammar faithfully permits it.
 
-    This is a **compiler-side** decision, not a schema fidelity one: a required
-    argument whose value is the empty string cannot be what the benchmark
-    wants. Since `minLength` is genuinely enforced by outlines (contra SPEC
-    §4.2), it is the right lever.
+    This is a **compiler-side** decision, not a schema fidelity one. It is a
+    deliberate, opt-in over-constraint, and the cost is measured rather than
+    assumed: across BFCL-Live, **exactly two** ground-truth answers are a
+    required string that the benchmark accepts as empty —
+    `live_multiple_507-149-4` (`origin_airport = ['']`) and
+    `live_multiple_834-178-9` (`track = ['', 'Borbena']`). Those two records
+    become unanswerable under `--nonempty`, so any results table using it must
+    say so (CLAUDE.md: never silently cap coverage). Since `minLength` is
+    genuinely enforced by outlines (contra SPEC §4.2), it is the right lever.
 
     Applied only to `required` properties, and only at the top level, so it
     cannot silently over-constrain optional or nested fields.
     """
     out = dict(schema)
+    if "properties" not in schema:
+        # Do NOT create one. `properties` outranks `type` in outlines'
+        # precedence, so writing an empty map onto `{"type": "object"}` turns a
+        # free-form object regex into `\{()?[ ]?\}` -- a grammar accepting only
+        # `{}`. Unreachable on BFCL (0/6,226 functions lack `properties`), but
+        # it is a language change, not a no-op.
+        return out
     props = dict(out.get("properties") or {})
     required = set(out.get("required") or [])
     for key in list(props):
@@ -289,11 +301,17 @@ def check_supported(
         if kw in node and kw not in allow:
             raise UnsupportedSchemaError(path, kw, why)
 
-    if node.get("additionalProperties") is False and "additionalProperties" not in allow:
-        raise UnsupportedSchemaError(
-            path, "additionalProperties",
-            "`false` is not honoured; the grammar will accept extra properties",
-        )
+    # `additionalProperties: false` is deliberately NOT flagged.
+    #
+    # This used to raise with "`false` is not honoured; the grammar will accept
+    # extra properties" — which is **inverted**. Measured against
+    # outlines-core 0.2.14, a schema with `properties` and no
+    # `additionalProperties` already rejects `{"a":"x","b":1}` and accepts
+    # `{"a":"x"}`: closedness is the default, so `false` is redundant, not
+    # dropped. Raising on it forced callers to put `additionalProperties` on the
+    # `allow` list, which then also silenced the `true` case below — exactly the
+    # desensitisation this module's docstring warns about ("never to silence a
+    # surprise").
 
     # First-match-wins: flag a schema whose later-precedence siblings will be
     # thrown away.

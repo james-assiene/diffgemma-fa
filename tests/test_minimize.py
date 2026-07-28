@@ -213,3 +213,38 @@ def test_state_map_agrees_with_simulation(seed: int):
             continue
         assert residual(old_tbl, old, dfa.finals, 4) == \
                residual(new_tbl, new, r.dfa.finals, 4)
+
+
+# ==========================================================================
+# Valmari's precondition, checked rather than assumed
+# ==========================================================================
+
+def test_a_duplicate_transition_raises_instead_of_changing_the_language():
+    """Valmari 2012's `mark()` has no re-mark guard — the port is faithful, and
+    the *precondition* is what was unchecked. Marking the same element twice
+    pushes `marked[s]` past the set size and corrupts the partition.
+
+    This exact instance was measured: it accepts `{(1,), (0,1)}` and used to
+    minimize to an infinite language, with no error. Silent language change is
+    strictly worse than a raise.
+    """
+    with pytest.raises(ValueError, match="duplicate transition"):
+        minimize(Dfa(3, ((0, 0, 1), (0, 0, 1), (1, 1, 2), (0, 1, 2)), 0,
+                     frozenset({2})))
+
+
+def test_a_nondeterministic_pair_raises_with_a_usable_message():
+    """Previously an `IndexError` from deep inside the refine loop, where the
+    cause is unrecoverable from the traceback."""
+    with pytest.raises(ValueError, match="nondeterministic"):
+        minimize(Dfa(3, ((0, 0, 1), (0, 0, 2)), 0, frozenset({1, 2})))
+
+
+def test_the_realistic_accident_is_a_union_of_two_transition_tuples():
+    """SPEC §3.8's `FA_grammar | FA_refusal` would naturally be built by
+    concatenating two transition tuples over a shared state space. That is what
+    makes this a realistic accident rather than a theoretical one."""
+    grammar = ((0, 0, 1), (1, 1, 2))
+    refusal = ((0, 0, 1), (1, 2, 2))        # shares (0, 0, 1)
+    with pytest.raises(ValueError):
+        minimize(Dfa(3, grammar + refusal, 0, frozenset({2})))

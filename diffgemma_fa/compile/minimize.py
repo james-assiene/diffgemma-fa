@@ -200,10 +200,51 @@ def _make_adjacent(n: int, m: int, key: Sequence[int]) -> tuple[list[int], list[
 def minimize(dfa: Dfa) -> MinimizationResult:
     """Minimize a partial DFA. Trims first, then refines.
 
-    Returns the minimized DFA plus the old->new state map. Determinism is
-    assumed, not checked — for an NFA (Spider, SPEC §4.6) this is not the right
-    algorithm and `minimize` must not be called.
+    Returns the minimized DFA plus the old->new state map.
+
+    Determinism is **checked here**, not assumed. Valmari 2012 requires at most
+    one transition per `(state, label)`: its `mark()` has no re-mark guard, so
+    marking the same element twice pushes `marked[s]` past the set size and
+    corrupts the partition. The port is faithful; the *precondition* was what
+    went unchecked.
+
+    Both failure modes are worse than a raise. An exact duplicate `(s, a, d)`
+    silently CHANGES THE LANGUAGE -- verified:
+    `Dfa(3, ((0,0,1),(0,0,1),(1,1,2),(0,1,2)), 0, {2})` accepts `{(1,), (0,1)}`
+    and minimizes to an infinite one. A genuine nondeterministic pair raises
+    `IndexError` from deep inside the refine loop, where the cause is
+    unrecoverable from the traceback.
+
+    Concatenating two transition tuples is exactly how one would build SPEC
+    §3.8's `FA_grammar | FA_refusal` union, which makes this a realistic
+    accident rather than a theoretical one. For a genuine NFA (Spider, SPEC
+    §4.6) this is not the right algorithm and `minimize` must not be called --
+    the check is what makes that a loud failure instead of a silent one.
+
+    The validation lives here rather than on `Dfa.__post_init__` because `Dfa`
+    doubles as the plain transition container `compile_automaton` accepts, and
+    that path legitimately carries NFAs (it computes `is_dfa` from them).
+
+    Raises:
+      ValueError: on a duplicate or nondeterministic transition.
     """
+    seen: dict[tuple[int, int], int] = {}
+    for s_, a_, d_ in dfa.transitions:
+        prev = seen.get((s_, a_))
+        if prev is None:
+            seen[(s_, a_)] = d_
+        elif prev == d_:
+            raise ValueError(
+                f"duplicate transition ({s_}, {a_}, {d_}); Valmari requires at "
+                "most one transition per (state, label) and silently corrupts "
+                "the partition otherwise"
+            )
+        else:
+            raise ValueError(
+                f"nondeterministic: ({s_}, {a_}) goes to both {prev} and {d_}. "
+                "This is a DFA minimizer; determinize first (SPEC §4.5)"
+            )
+
     n0, m0 = dfa.n_states, dfa.n_transitions
     if n0 == 0:
         return MinimizationResult(dfa, (), 0, 0, 0, 0)

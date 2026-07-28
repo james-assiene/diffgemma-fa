@@ -6,6 +6,8 @@ under-constrains. The whole point of the module is that these raise.
 
 from __future__ import annotations
 
+import re
+
 import pytest
 
 from diffgemma_fa.compile import schema
@@ -111,7 +113,7 @@ def test_min_length_really_forbids_the_empty_string():
 
     from diffgemma_fa.compile.schema import build_regex
 
-    rx = build_regex({"type": "object", "required": ["s"],
+    rx = schema.build_regex({"type": "object", "required": ["s"],
                       "properties": {"s": {"type": "string", "minLength": 1}}},
                      whitespace_pattern="")
     assert re.fullmatch(rx, '{"s":"a"}')
@@ -137,9 +139,34 @@ def test_require_nonempty_strings_targets_only_required_free_strings():
     assert "minLength" not in out["properties"]["d"]
 
 
-def test_additional_properties_false_raises():
+def test_additional_properties_false_is_redundant_not_dropped():
+    """A correction. This used to raise "`false` is not honoured; the grammar
+    will accept extra properties" — which is **inverted**.
+
+    Measured against outlines-core 0.2.14, a schema with `properties` and no
+    `additionalProperties` already accepts `{"a":"x"}` and rejects
+    `{"a":"x","b":1}`: closedness is the default, so `false` is redundant, not
+    dropped. The raise forced callers to `allow`-list `additionalProperties`,
+    which then also silenced the `true` case — exactly the desensitisation the
+    module docstring warns about.
+    """
+    check_supported({"type": "object",
+                     "properties": {"a": {"type": "string"}},
+                     "additionalProperties": False})     # must not raise
+
+    rx = schema.build_regex({"type": "object", "properties": {"a": {"type": "string"}}})
+    assert re.fullmatch(rx, '{"a": "x"}')
+    assert not re.fullmatch(rx, '{"a": "x", "b": 1}'), (
+        "outlines' object regex is closed by default — the old message claimed "
+        "the opposite"
+    )
+
+
+def test_additional_properties_true_still_raises_without_allow_wildcard():
+    """And the `true` case, which genuinely does expand to a 7-way alternation,
+    is still flagged — it was the collateral damage of the inverted rule."""
     with pytest.raises(UnsupportedSchemaError, match="additionalProperties"):
-        check_supported({"type": "object", "additionalProperties": False})
+        check_supported({"type": "object", "additionalProperties": True})
 
 
 def test_first_match_wins_sibling_drop_raises():
@@ -227,7 +254,7 @@ def test_any_still_refused_by_default_and_allowed_on_request():
 def test_any_compiles_end_to_end_to_the_seven_way_alternation():
     from diffgemma_fa.compile.schema import build_regex
 
-    rx = build_regex({"type": "dict", "required": ["p"],
+    rx = schema.build_regex({"type": "dict", "required": ["p"],
                       "properties": {"p": {"type": "any"}}},
                      from_bfcl=True, allow_wildcard=True, whitespace_pattern="")
     assert len(rx) > 5000, "the wildcard should expand to the big alternation"
