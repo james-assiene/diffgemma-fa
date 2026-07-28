@@ -159,3 +159,58 @@ built and unit-tested but not round-tripped. The Python-format grammar is not ro
 ground truth, and its `d=2` depth-bound coverage is unmeasured. Spider is not implemented (NFA,
 and §5.6 says dense is infeasible). xLAM/GSM-Symbolic/Countdown/Sudoku grammars exist but no
 dataset is downloaded. All listed in `docs/PHASE1_FINDINGS.md` §5.2.
+
+
+---
+
+## 2026-07-27/28 — Phases 2 and 3 (same session, autonomous)
+
+Full write-ups in `docs/PHASE2_FINDINGS.md` and `docs/PHASE3_FINDINGS.md`.
+**651 tests green in 2m33s.**
+
+### Phase 2 — `infer/reference.py` + the exactness harness
+
+SPEC §6.1's eleven tests, all green on DFAs **and** NFAs, **zero skips** (254 exactness cases + 18
+numerics). Fixed seeds, Bonferroni-corrected χ² (α = 0.001/200), documented re-run protocol.
+
+**One real bug, and it is the landmine SPEC warns about.** `is_dfa` in the conventional sense is
+the *wrong* gate for eq (8)'s cheap `∃` token draw. Two **parallel** edges to the **same**
+destination with overlapping labels are deterministic by every ordinary definition, yet give that
+token multiplicity 2 — so the `∃` form draws from the wrong distribution on an automaton every
+conventional check calls a DFA. `reference.py` now separates `is_deterministic` from
+`has_unit_multiplicity` and gates on the latter. Compiled artifacts are safe regardless, because
+`_group_edges` collapses to one edge per `(src,dst)` with the union of labels — but that is a
+property of the *grouping*, not of determinism.
+
+### Phase 3 — the JAX kernels
+
+**SPEC §0's central claim reproduced on an H100.** Counted on the optimized HLO: the tree emits
+**zero** `while` loops and **exactly `log₂ L`** matmuls (4,5,6,7,8 for L=16…256); the sequential
+`lax.scan` emits **one** `while` hiding all L products. Pinned in `tests/test_kernel_shape.py`,
+which asserts on compiled HLO rather than a profiler — deterministic and 5.5 s.
+
+**SPEC §0's FLOP table confirmed to two significant figures**: 385→2.85% (predicted 2.9%),
+512→6.71% (6.7%), 1024→53.69% (53.7%).
+
+**The finding that changes a design decision: the FLOP ratio is ~43× pessimistic as a latency
+proxy here.** Against the measured ~0.21 s denoising step, the tree costs 0.50% at |S|=385, 1.84%
+at 1024, and **9.95% at |S|=2048 where the FLOP ratio says 429%**. At B=1 the model forward is
+memory-bound (~50 GB of weights) while the tree is a compute-bound GEMM. **Set the §5.6 dispatch
+threshold from measured wall-clock, not FLOPs** — the tree path is viable across the whole usable
+|S| range on this hardware, and with BFCL's max |S|=595 the chain fallback is unreachable in
+practice. Caveat recorded: the 0.21 s baseline includes cache-append overhead, so these are lower
+bounds; Phase 5 §7.3 must re-derive them against an isolated forward.
+
+### Two coverage gaps closed rather than tolerated
+
+The complement-aware tests were skipping whenever a random instance had no negated class — and on
+DFAs that was *always*, because the generator scattered tokens too thinly for any state pair to
+reach `> V/2` labels. The complement path had zero DFA coverage. Generator fixed, skips replaced by
+assertions. Separately, the tree-vs-posterior test made 40,000 individual JAX dispatches and took
+19 minutes alone; `vmap` over the key batch makes it seconds.
+
+### Next
+
+Phase 4 — `model/`. J1 before J0 (SPEC §5.4). Note Phase 0's correction: `_sample_step` **must**
+be forked, because `sample_next_canvas` never receives `state` and `max_new_tokens` is not a field
+of `SamplingState`.
