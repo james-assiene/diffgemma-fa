@@ -17,6 +17,15 @@ three constructions the guarantee depends on:
    `_truncate_canvas_at_stop_tokens` overwrites everything after the first stop
    token anyway.
 
+   **That "literally unscored" argument is sum-product-specific.** Under
+   max-plus (`--emission=map`, SPEC §2.7) the tail contributes
+   `log max_v p_i(v)` per position, not 0. The construction is still correct in
+   both semirings — the tail is the cheapest available continuation either way,
+   which is the property that matters — but only the sum-product path gets it
+   for free. Worth remembering before reusing the identity elsewhere: it is
+   also why `require_x64` exists, since a node max pinned at exactly 1.0 makes
+   per-node normalization a no-op in the sampling path.
+
 2. **Budget-aware `d(s)`** (§3.1b). `d(s) = ` min tokens from `s` to an
    accepting state, by BFS on the **reversed** automaton, computed **after**
    stop augmentation and **after** any refusal-branch union — otherwise it is a
@@ -458,7 +467,17 @@ def save(automaton: CompiledAutomaton, path: str) -> None:
 
 
 def load(path: str) -> CompiledAutomaton:
-    """Inverse of `save`."""
+    """Inverse of `save`, with the structural invariants re-checked.
+
+    `_group_edges` guarantees **one edge per `(src, dst)`** carrying the union
+    of its labels, and eq (8)'s multiplicity is 0/1 as a consequence. That
+    guarantee holds at build time and was then never re-established: a hand-made
+    or stale `.npz` with a duplicated pair loaded silently, and the damage would
+    surface as a wrong *distribution* — valid strings drawn with the wrong
+    probabilities — which no acceptance check can see.
+
+    So the invariant is proved on the way in, before anything consumes it.
+    """
     z = np.load(path, allow_pickle=False)
     meta = json.loads(bytes(z["meta"]).decode())
     tables = ClassTables(
@@ -471,7 +490,7 @@ def load(path: str) -> CompiledAutomaton:
         max_indices=z["max_indices"],
         max_neg_size=meta["max_neg_size"],
     )
-    return CompiledAutomaton(
+    a = CompiledAutomaton(
         name=meta["name"], n_states=meta["n_states"],
         n_states_bucket=meta["n_states_bucket"], n_edges=meta["n_edges"],
         vocab_size=meta["vocab_size"], is_dfa=meta["is_dfa"],
@@ -482,14 +501,72 @@ def load(path: str) -> CompiledAutomaton:
         compiler_version=meta["compiler_version"],
         needs_chain_path=meta.get("needs_chain_path", False),
     )
+    _assert_structural_invariants(a, path)
+    return a
 
 
-def schema_fingerprint(schema: dict) -> str:
+def _assert_structural_invariants(a: CompiledAutomaton, path: str = "") -> None:
+    """Unit edge multiplicity per `(src, dst)`, and `is_dfa` as stored.
+
+    Raises:
+      ValueError: on a duplicated state pair, or on an `is_dfa` flag that
+        disagrees with the transition data.
+    """
+    where = f" in {path}" if path else ""
+    pairs = np.stack([np.asarray(a.edge_src), np.asarray(a.edge_dst)], axis=1)
+    uniq = np.unique(pairs, axis=0)
+    if uniq.shape[0] != pairs.shape[0]:
+        raise ValueError(
+            f"{pairs.shape[0] - uniq.shape[0]} duplicated (src, dst) pair(s)"
+            f"{where}. `_group_edges` emits one edge per pair carrying the "
+            "union of its labels, so eq (8)'s multiplicity is 0/1 by "
+            "construction; a duplicate silently changes the sampling "
+            "DISTRIBUTION, which no acceptance check can detect."
+        )
+    # `is_dfa` gates eq (8)'s cheap `∃` token draw (SPEC §2.6), so a flag that
+    # over-claims is a correctness bug, not a performance one.
+    if a.is_dfa:
+        by_src_class: dict[tuple[int, int], int] = {}
+        for e in range(len(a.edge_src)):
+            key = (int(a.edge_src[e]), int(a.edge_class[e]))
+            prev = by_src_class.get(key)
+            if prev is not None and prev != int(a.edge_dst[e]):
+                raise ValueError(
+                    f"is_dfa=True{where} but state {key[0]} has two "
+                    f"destinations for class {key[1]}"
+                )
+            by_src_class[key] = int(a.edge_dst[e])
+
+
+def schema_fingerprint(schema: dict, **options) -> str:
     """Stable hash for the compilation cache key. SPEC §4.7(3).
 
     Cache on `(schema_hash, tokenizer_hash, compiler_version)`. Do **not** reuse
     `~/.cache/outlines`: its key ignores the tokenizer.
+
+    **`options` is not optional in practice.** This used to hash the schema
+    alone, which is the mistake SPEC §4.7(3) warns about one level down: the
+    *same* schema compiles to materially different grammars under
+    `whitespace_pattern`, `nonempty_required_strings`, `channel_header`,
+    `allow` and `from_bfcl`. Two of those change the accepted language
+    outright. The key collided for them, so a cache hit would silently return
+    the wrong automaton — and since every returned automaton is internally
+    consistent, nothing downstream could tell.
+
+    Harmless while `tasks/bfcl.py` keys artifacts by filename, dangerous the
+    moment the key is actually used, which is why it is fixed before that
+    happens rather than after.
     """
+    payload = {
+        "schema": schema,
+        # `sorted` on the items, not on a set: `allow` is an iterable of
+        # keywords whose order must not affect the key, but whose *content*
+        # must.
+        "options": {k: (sorted(v) if isinstance(v, (set, frozenset, tuple, list))
+                        else v)
+                    for k, v in sorted(options.items())},
+    }
     return hashlib.sha256(
-        json.dumps(schema, sort_keys=True, separators=(",", ":")).encode()
+        json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                   default=str).encode()
     ).hexdigest()[:16]

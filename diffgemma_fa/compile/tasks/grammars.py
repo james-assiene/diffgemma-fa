@@ -28,11 +28,19 @@ __all__ = [
 def channel_header_regex(*, channel_name: str = r"[a-z]+") -> str:
     """The `<|channel>NAME\\n<channel|>` prefix. SPEC §3.6.
 
-    Phase 0 measured every long generation opening with exactly
-    `[100, 45518, 107, 101]`. The delimiters are single dedicated token ids, so
-    this is a literal prefix rather than the Aho-Corasick construction the
-    original spec feared. The channel *name* is left open — only `thought` was
-    observed, but `final`/`answer` tokenize fine and hardcoding would be
+    **NOT what production uses, and not interchangeable with it.** The prefix
+    the compiled grammars actually carry is built by
+    `compile.automaton.prepend_channel_header`, which prepends the **dedicated
+    token ids** `100 … 107 101` directly onto the automaton. This function
+    spells the same bytes as *ASCII text* — `<`, `|`, `c`, `h`, … — which the
+    tokenizer maps to a completely different id sequence. The two accept
+    different token strings for the same rendered characters.
+
+    Kept because it documents the shape and is exercised by
+    `tests/test_grammars.py`; do not reach for it when composing a real
+    grammar. Phase 0 measured every long generation opening with exactly
+    `[100, 45518, 107, 101]`. The channel *name* is left open — only `thought`
+    was observed, but `final`/`answer` tokenize fine and hardcoding would be
     fragile.
     """
     return rf"<\|channel>{channel_name}\n<channel\|>"

@@ -7,9 +7,12 @@ pipeline.
 
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pytest
 
+from diffgemma_fa.compile import automaton
 from diffgemma_fa.compile.automaton import (
     INF_DISTANCE,
     augment_with_stop_tokens,
@@ -318,3 +321,103 @@ def test_channel_header_accepts_one_to_max_name_tokens():
         "the name is Sigma_name PLUS, not star -- a zero-token name would let "
         "the header collapse to `<|channel>\\n<channel|>`"
     )
+
+
+# ==========================================================================
+# The structural invariants are re-proved on load, not just at build time
+# ==========================================================================
+
+def test_load_rejects_a_duplicated_state_pair(tmp_path):
+    """`_group_edges` emits one edge per `(src, dst)` carrying the union of its
+    labels, which is what makes eq (8)'s multiplicity 0/1 by construction. That
+    held at build time and was then never re-established — a hand-made or stale
+    `.npz` with a duplicated pair loaded silently.
+
+    The damage would be a wrong *distribution*: valid strings drawn with the
+    wrong probabilities. No acceptance check can see that, which is exactly why
+    it has to be an invariant rather than a test on outputs.
+    """
+    a = compile_automaton(line_dfa(3), name="t", end_tokens=(1,), vocab_size=V)
+    p = tmp_path / "a.npz"
+    automaton.save(a, str(p))
+
+    z = dict(np.load(p, allow_pickle=False))
+    z["edge_src"] = np.append(z["edge_src"], z["edge_src"][0])
+    z["edge_dst"] = np.append(z["edge_dst"], z["edge_dst"][0])
+    z["edge_class"] = np.append(z["edge_class"], z["edge_class"][0])
+    forged = tmp_path / "forged.npz"
+    np.savez(forged, **z)
+
+    with pytest.raises(ValueError, match="duplicated"):
+        automaton.load(str(forged))
+
+
+def test_load_rejects_an_is_dfa_flag_that_over_claims(tmp_path):
+    """`is_dfa` gates eq (8)'s cheap `∃` token draw (SPEC §2.6), so a flag that
+    over-claims is a correctness bug, not a performance one."""
+    nfa = Dfa(n_states=3, transitions=((0, 7, 1), (0, 8, 2), (1, 9, 2)),
+              start=0, finals=frozenset({2}))
+    a = compile_automaton(nfa, name="t", end_tokens=(1,), vocab_size=V)
+    p = tmp_path / "a.npz"
+    automaton.save(a, str(p))
+
+    z = dict(np.load(p, allow_pickle=False))
+    meta = json.loads(bytes(z["meta"]).decode())
+    # Force two destinations for one (src, class), then claim determinism.
+    z["edge_src"] = np.array([0, 0], np.int32)
+    z["edge_dst"] = np.array([1, 2], np.int32)
+    z["edge_class"] = np.array([0, 0], np.int32)
+    meta["is_dfa"] = True
+    z["meta"] = np.frombuffer(json.dumps(meta).encode(), dtype=np.uint8)
+    forged = tmp_path / "forged.npz"
+    np.savez(forged, **z)
+
+    with pytest.raises(ValueError, match="is_dfa"):
+        automaton.load(str(forged))
+
+
+def test_a_real_automaton_round_trips_through_the_new_checks(tmp_path):
+    a = compile_automaton(line_dfa(4), name="t", end_tokens=(1,), vocab_size=V)
+    p = tmp_path / "a.npz"
+    automaton.save(a, str(p))
+    b = automaton.load(str(p))
+    assert b.n_states == a.n_states and b.n_edges == a.n_edges
+
+
+def test_the_cache_key_separates_grammars_that_differ_only_by_options():
+    """SPEC §4.7(3)'s cache key used to hash the schema alone.
+
+    The *same* schema compiles to materially different grammars under
+    `whitespace_pattern`, `nonempty_required_strings`, `channel_header`,
+    `allow` and `from_bfcl` — two of those change the accepted language
+    outright. The key collided, so a cache hit would return the wrong
+    automaton, and since every returned automaton is internally consistent
+    nothing downstream could tell.
+    """
+    sch = {"type": "object", "properties": {"a": {"type": "string"}},
+           "required": ["a"]}
+    base = automaton.schema_fingerprint(sch)
+    assert automaton.schema_fingerprint(sch) == base, "must be stable"
+
+    differing = [
+        {"whitespace_pattern": None},
+        {"whitespace_pattern": ""},
+        {"nonempty_required_strings": True},
+        {"channel_header": False},
+        {"from_bfcl": True},
+        {"allow": ("minimum",)},
+    ]
+    keys = {automaton.schema_fingerprint(sch, **o) for o in differing}
+    assert len(keys) == len(differing), "two option sets share a cache key"
+    assert base not in keys
+
+
+def test_the_cache_key_ignores_the_order_of_the_allow_list():
+    """`allow` is a set of keywords: its order must not change the key, but its
+    content must."""
+    sch = {"type": "object", "properties": {"a": {"type": "string"}}}
+    k1 = automaton.schema_fingerprint(sch, allow=("minimum", "maximum"))
+    k2 = automaton.schema_fingerprint(sch, allow=("maximum", "minimum"))
+    k3 = automaton.schema_fingerprint(sch, allow=("minimum",))
+    assert k1 == k2
+    assert k1 != k3

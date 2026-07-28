@@ -177,6 +177,15 @@ def compile_json_schema(
 
     from diffgemma_fa.compile.automaton import schema_fingerprint
 
-    report = compile_regex(regex, name=name, channel_header=channel_header,
-                           schema_hash=schema_fingerprint(json_schema), **kwargs)
+    report = compile_regex(
+        regex, name=name, channel_header=channel_header,
+        # Every option that can change the compiled language goes into the key.
+        # Hashing the schema alone made two materially different grammars share
+        # a cache entry -- see `schema_fingerprint`.
+        schema_hash=schema_fingerprint(
+            json_schema, whitespace_pattern=whitespace_pattern,
+            nonempty_required_strings=nonempty_required_strings,
+            channel_header=channel_header, allow=allow,
+            allow_wildcard=allow_wildcard, from_bfcl=from_bfcl),
+        **kwargs)
     return dataclasses.replace(report, seconds_regex=seconds_regex)

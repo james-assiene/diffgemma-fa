@@ -417,3 +417,16 @@ log `logs/phase5_baselines_130.log`. Six arms x 130 records; ~34 s/record
 measured, so ~7.5 h. Stale artifacts moved to `artifacts/stale_pre_e559e31/` —
 they predate the schema fix, the J2 implementation and the cache bound, so they
 are not comparable and must not be merged into the table.
+
+**Sweep restarted (2026-07-28, ~18:15).** Killed 20 records into arm 1 and
+relaunched at commit `e5a0150`. Reason: the `unconstrained` arm reported
+`CS = 0.000`, which is partly an artifact — `cs_rate` scores the emitted token
+sequence against an automaton carrying SPEC §3.6's channel header, and the
+stock model has no reason to emit that header. Added `schema_valid_rate`
+(header- and tokenizer-independent) as the fair cross-arm column, and stopped
+truncating `rows[].text` at 220 chars. Better to lose 20 minutes than to spend
+7 hours producing a table with a known measurement artifact.
+
+Stock model on 6 records: CS 0.000, schema valid 0.500, arg accuracy 0.833. The
+claim under test is therefore "50% -> 100% schema validity at some accuracy
+cost", not "0% -> 100%".
