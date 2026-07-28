@@ -2,30 +2,35 @@
 
 Date: **2026-07-28**. SPEC §3.4's calibration, plus the diagnosis Phase 4 left open.
 
-**Headline: constraint satisfaction is 12/12 everywhere and is insensitive to every knob tried.
-Argument accuracy is 5–10% and the entropy bound does not explain it.** The cause is now
-characterised in three steps, only the first two of which are fixed.
+**Headline: constraint satisfaction is 12/12 everywhere and insensitive to every knob tried.
+Argument accuracy went 5% → 26–47% once the grammar stopped forbidding the model's own output
+format — and the entropy bound never explained any of it.**
 
 ---
 
-## 1. SPEC §3.4 calibration — a negative result
+## 1. SPEC §3.4 calibration — a negative result, re-run on the fixed grammar
 
 Sweep exactly as SPEC prescribes: `entropy_bound ∈ {0.003, 0.01, 0.03, 0.1, 0.3, 1.0}` (stock
-default `0.1`) at a fixed 48-step budget, `--variant=j1 --emission=sample`, `live_simple`.
+default `0.1`) at a fixed 48-step budget, `--variant=j1 --emission=sample`, `live_simple`,
+**after** §4.2's grammar fixes.
 
 | bound | CS | parsed | non-empty args | arg accuracy |
 |---|---|---|---|---|
-| 0.003 | **12/12** | 12/12 | 7/12 | 1/19 = 0.053 |
-| 0.01 | **12/12** | 12/12 | 6/12 | 1/19 = 0.053 |
-| 0.03 | **12/12** | 12/12 | 8/12 | 1/19 = 0.053 |
-| **0.1 (stock)** | **12/12** | 12/12 | 7/12 | 2/19 = 0.105 |
-| 0.3 | **12/12** | 12/12 | 4/12 | 1/19 = 0.053 |
-| 1.0 | **12/12** | 12/12 | 5/12 | 2/19 = 0.105 |
+| 0.003 | **12/12** | 12/12 | 12/12 | 9/19 = **0.474** |
+| 0.01 | **12/12** | 12/12 | 12/12 | 9/19 = **0.474** |
+| 0.03 | **12/12** | 12/12 | 12/12 | 5/19 = 0.263 |
+| **0.1 (stock)** | **12/12** | 12/12 | 12/12 | 7/19 = 0.368 |
+| 0.3 | **12/12** | 12/12 | 12/12 | 7/19 = 0.368 |
+| 1.0 | **12/12** | 12/12 | 12/12 | 5/19 = 0.263 |
 
-**Read this as "no effect", not as "0.1 and 1.0 are best".** The whole accuracy column is 1 or 2
-successes out of 19; the 95% interval on 1/19 is roughly [0.001, 0.26] and every row overlaps every
-other. The non-empty column moves between 4 and 8 with no monotone trend. At `n = 12` this table
-cannot distinguish the bounds and does not claim to.
+**Still read this as "no effect".** The column is **non-monotone** — 0.474, 0.474, 0.263, 0.368,
+0.368, 0.263 — which is the signature of noise, not of a trend with an optimum. A two-proportion
+test on the extremes (9/19 vs 5/19) gives `z ≈ 1.4, p ≈ 0.17`: not significant. The two lowest
+bounds are nominally best and that is worth a larger re-run, but nothing here selects a value.
+
+**This table supersedes the first version of it**, which was measured on the broken grammar and
+read 1–2 of 19 flat. The *conclusion* survived the fix — the bound has no reliable effect — but the
+absolute level moved from ~5% to 26–47%, so the earlier numbers should not be quoted.
 
 **What it does establish:**
 
@@ -33,7 +38,8 @@ cannot distinguish the bounds and does not claim to.
   want: the guarantee is structural, not statistical.
 - **SPEC §3.4's premise is not confirmed on this slice.** It warns the stock defaults "will
   silently produce garbage" under constrained marginals and that recalibration is *required*. The
-  stock `0.1` is as good as anything tried, and recalibration is **not** where the accuracy is.
+  stock `0.1` sits mid-range and no value is distinguishable from it; recalibration is **not** where
+  the accuracy was. The accuracy was in the grammar (§4.2).
 
 **Coverage, stated:** 12 records of one split, not SPEC's 100-example dev slice; one split, not a
 dev set spanning tasks; and `entropy_threshold` (the `EntropyEarlyStop` half of §3.4's 2-D grid)
