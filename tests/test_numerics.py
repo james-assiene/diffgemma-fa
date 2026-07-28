@@ -25,6 +25,7 @@ jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp  # noqa: E402
 
 from diffgemma_fa.infer import marginals  # noqa: E402
+from diffgemma_fa.infer import scans  # noqa: E402
 from diffgemma_fa.infer import reference as R  # noqa: E402
 
 V = 8
@@ -233,11 +234,30 @@ def test_finite_sentinel_not_neg_inf_for_masked_logits():
     """SPEC §2.4/§3.7: use `-1e30`, never `-inf`. An `-inf` logit propagates
     through `softmax → @ embedding` and poisons the self-conditioning matmul;
     a finite sentinel does not."""
+    # The constants are READ FROM THE SOURCE, not retyped. A mutation audit
+    # found this test hardcoding `-1e30` in its own body, so flipping
+    # `marginals.MASK_SENTINEL` to `-inf` left it green: it demonstrated the
+    # hazard without checking the code.
+    assert np.isfinite(marginals.MASK_SENTINEL), (
+        "MASK_SENTINEL must be finite (SPEC §2.4/§3.7); an -inf logit poisons "
+        "the self-conditioning matmul"
+    )
+    assert np.isfinite(scans.NEG_SENTINEL), (
+        "NEG_SENTINEL must be finite (SPEC §2.7); fused max-plus kernels turn "
+        "-inf + -inf into NaN"
+    )
+    # ...and it must have room to be halved without saturating, since
+    # `maxplus_combine` adds two of them and re-clamps.
+    assert scans.NEG_SENTINEL / 2.0 > np.finfo(np.float32).min, (
+        "NEG_SENTINEL is too close to the fp32 floor for the sum of two to be "
+        "distinguishable from -inf"
+    )
+
     logits = np.array([[1.0, 2.0, 3.0, 4.0]])
     support = np.array([[True, False, True, False]])
 
     inf_masked = np.where(support, logits, -np.inf)
-    finite_masked = np.where(support, logits, -1e30)
+    finite_masked = np.where(support, logits, marginals.MASK_SENTINEL)
 
     embed = np.ones((4, 3))
 

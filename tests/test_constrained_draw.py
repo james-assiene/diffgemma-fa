@@ -318,3 +318,50 @@ def test_a_different_state_bucket_does_recompile():
         C.joint_draw(p, automaton_for(n), jnp.int64(16),
                      jax.random.PRNGKey(0), n, C_CLASSES)
     assert C.joint_draw._cache_size() == 2
+
+
+# ==========================================================================
+# The root pair is drawn JOINTLY, not from two marginals (SPEC §2.6)
+# ==========================================================================
+
+def test_the_root_boundary_pair_is_drawn_from_the_joint():
+    """A mutation audit found that replacing the joint categorical over `|S|²`
+    with two independent marginal draws was **undetected** on the JAX side.
+
+    Constructed so the two differ maximally: the start set is `{0, 1}`, the
+    final set is `{2, 3}`, and the only edges are `0 --a--> 2` and
+    `1 --b--> 3`. The boundary pair is therefore perfectly correlated — the
+    joint puts mass only on `(0,2)` and `(1,3)` — while the product of the
+    marginals puts **half** its mass on `(0,3)` and `(1,2)`, which have no edge
+    between them at all.
+
+    So the detector is `ok`: an independent draw lands on an edgeless pair half
+    the time, and `sample_tokens` reports it.
+    """
+    V, n = 4, 4
+    aut = Automaton(
+        edge_src=jnp.asarray([0, 1], jnp.int32),
+        edge_dst=jnp.asarray([2, 3], jnp.int32),
+        edge_class=jnp.asarray([0, 1], jnp.int32),
+        edge_valid=jnp.ones(2, bool),
+        csr_indices=jnp.asarray([0, 1], jnp.int32),      # class 0 = {0}, 1 = {1}
+        csr_indptr=jnp.asarray([0, 1, 2], jnp.int32),
+        is_neg=jnp.zeros(2, bool),
+        d=jnp.asarray([1, 1, 0, 0], jnp.int32),
+        is_final=jnp.asarray([False, False, True, True]),
+        active=jnp.asarray([True, True, False, False]),
+    )
+    # Equal mass on the two tokens, so an independent draw is wrong 50% of the
+    # time rather than being rescued by a skewed marginal.
+    p = jnp.asarray([[0.5, 0.5, 0.0, 0.0]])              # [L=1, V]
+
+    n_bad = 0
+    for seed in range(60):
+        toks, ok = C.joint_draw(p, aut, jnp.int64(0), jax.random.PRNGKey(seed),
+                                n, 2)
+        n_bad += int(not bool(ok))
+        assert int(toks[0]) in (0, 1)
+    assert n_bad == 0, (
+        f"{n_bad}/60 draws landed on a state pair with no edge — the root pair "
+        "is coming from two marginals, not from the joint"
+    )

@@ -137,6 +137,14 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
                 "emission='map' is J0-only. With J1's flattened marginals a "
                 "joint MAP degenerates to the shortest string in the language."
             )
+        if self.emission == "sample":
+            # Called from a **production** path, not just documented. Asking
+            # for `constrained_dtype='float64'` is not the same as *getting*
+            # float64: without `jax_enable_x64` every `jnp.float64` silently
+            # becomes float32, `_matrices` builds the tree in fp32, and the root
+            # product underflows to exactly zero — a degenerate draw that still
+            # returns plausible-looking tokens. Fail at construction instead.
+            _constrained.require_x64()
         if self.emission == "sample" and self.constrained_dtype != "float64":
             raise ValueError(
                 "emission='sample' requires constrained_dtype='float64'; see "

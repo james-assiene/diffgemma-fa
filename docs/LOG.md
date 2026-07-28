@@ -381,3 +381,39 @@ desensitises the fail-loud signal.
 
 **No BFCL number should be quoted from this work until (3) is resolved.** Format is solved (12/12
 CS, parsed, non-empty); content is 5–10% and the reason is characterised, not fixed.
+
+## 2026-07-28 — review-driven fixes, then the Phase 5 baseline sweep at scale
+
+Three review agents (infer/, compile/, test-teeth) reported against the tree at
+721 tests. Everything below was verified by injecting the mutant and watching a
+new test go red, not by reading code.
+
+**Correctness-critical, fixed:**
+
+1. `Z == 0` was undetectable end to end. `categorical`/`argmax` are
+   shift-invariant, so an all-sentinel root gives a confident-looking draw from
+   a provably empty language (measured: `valid == True` on 200/200). Root-mass
+   predicate added, threaded out through `ConstrainedSamplingState.feasible`,
+   raised as `ZeroPartitionError` outside the jit.
+2. `advance_states` substituted a stale carry for an empty state set, making
+   SPEC §3.1b closure 2 **unsound**. Fixed together with (1) per the
+   researcher's sequencing ruling.
+3. `normalize_bfcl_schema` deleted any BFCL parameter named `description`,
+   `default` or `optional` — the keyword-drop was applied to the `properties`
+   map's *keys*. 11 top-level occurrences, 5 required.
+4. `minimize()` silently changed the language on a duplicate transition
+   (Valmari's `mark()` has no re-mark guard).
+5. `--variant=j2` was never implemented — it ran J0's emission, so the §7.2
+   baseline table had a duplicated row.
+6. Cache bound off by one: gemma's `is_full` is `end_index >= total - 1`.
+
+**Test gaps closed:** eq (8)'s multiplicity (both NFA generators had zero
+power), the vacuous `Σ_v q_i == 1` (replaced by the per-position `log Z`
+invariant), `terminal_budget` (called by no test), automaton-stays-traced
+(measured by XLA's compile counter).
+
+**Running:** `scripts/phase5_baselines.sh 130 bfcl_live_simple`, PID 277316,
+log `logs/phase5_baselines_130.log`. Six arms x 130 records; ~34 s/record
+measured, so ~7.5 h. Stale artifacts moved to `artifacts/stale_pre_e559e31/` —
+they predate the schema fix, the J2 implementation and the cache bound, so they
+are not comparable and must not be merged into the table.

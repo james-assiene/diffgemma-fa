@@ -145,10 +145,27 @@ def prefix_suffix(
     a_start: jnp.ndarray,
     b_final: jnp.ndarray,
 ) -> tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray, jnp.ndarray]:
-    """Down-sweep for the exclusive prefix/suffix vectors `a` and `b`.
+    """Exclusive prefix/suffix vectors `a` and `b`, over the tree's leaves.
 
-    **This is where `a` and `b` come from, and why the down-sweep is needed at
-    all** — SPEC is explicit that they must not come from a sequential loop.
+    **What this is not.** An earlier docstring claimed "the down-sweep is needed
+    at all — SPEC is explicit that they must not come from a sequential loop",
+    which does not describe the code below: the vector-matrix chain is a
+    **Python-unrolled sequential loop**, `O(L)` deep in the dataflow graph, not
+    a Blelloch down-sweep.
+
+    That is a deliberate trade, and SPEC's actual constraint is satisfied. The
+    rule (SPEC §0, §2.4) is about **kernel launch count**, not dataflow depth:
+    a `lax.scan` compiles to a device `while`, which is *not* in XLA's default
+    command-buffer capture set — precisely the paper's +114%. Python unrolling
+    emits straight-line code, so the whole chain is capturable. What it costs
+    is `L` dependent GEMVs of latency, which is small next to the `[S, S]`
+    matmuls the tree above already does log-depth.
+
+    It also is not on the constrained hot path. The J0/J1 emission goes through
+    `tree.sample_states_log` / `tree.map_states_and_tokens`; the only production
+    caller here is SPEC §2.8's `mask` baseline, which needs the per-position
+    support projection. If this ever moves onto the hot path, make it a genuine
+    down-sweep — do not reintroduce a `lax.scan`.
 
     Returns:
       `(a, b, log_scale_a, log_scale_b)` with `a`, `b` shaped `[L+1, S]`:
