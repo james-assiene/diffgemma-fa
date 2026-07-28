@@ -36,7 +36,7 @@ from gemma import diffusion, gm  # noqa: E402
 from gemma.diffusion import _sampler as ds  # noqa: E402
 from gemma.gm.text import _prefill  # noqa: E402
 
-from diffgemma_fa.compile import bfcl_data, pipeline  # noqa: E402
+from diffgemma_fa.compile import bfcl_data, pipeline, schema as _schema  # noqa: E402
 from diffgemma_fa.compile.validate import Simulator  # noqa: E402
 from diffgemma_fa.compile.vocab import END_TOKENS  # noqa: E402
 from diffgemma_fa.eval import metrics  # noqa: E402
@@ -114,6 +114,7 @@ def main() -> None:
     for idx, rec in enumerate(records):
         fn = rec.functions[0]
         try:
+            norm = _schema.normalize_bfcl_schema(fn["parameters"])
             a = pipeline.compile_json_schema(
                 fn["parameters"], name=fn.get("name", ""), from_bfcl=True,
                 allow=ALLOW, allow_wildcard=True,
@@ -162,17 +163,28 @@ def main() -> None:
 
         accepted = Simulator(a).accepts(toks)
         parsed = metrics.extract_json(text)
+        # SPEC §7.2: `cs_rate` is the guarantee the sampler enforces, but the
+        # automaton carries OUR channel header, so it scores the stock model at
+        # ~0 partly for a convention it was never asked to follow.
+        # `schema_valid_rate` is the header- and tokenizer-independent
+        # cross-arm question. Both are reported; neither substitutes.
+        schema_ok = metrics.schema_valid(parsed, norm)
         gt = truth.get(rec.id, [])
         want = (bfcl_data.materialize_ground_truth(
             gt[0].get(fn.get("name"), {}), fn["parameters"]) if gt else None)
 
-        sc.add(accepted=accepted, parsed_obj=parsed, want=want)
-        rows.append({"id": rec.id, "fn": fn.get("name"), "text": text[:220],
-                     "parsed": parsed, "accepted": accepted})
+        sc.add(accepted=accepted, parsed_obj=parsed, want=want,
+               schema_ok=schema_ok)
+        # Full text, not truncated: it is the evidence behind every column, and
+        # a 220-character cap silently discards the tail of a long call.
+        rows.append({"id": rec.id, "fn": fn.get("name"), "text": text,
+                     "parsed": parsed, "accepted": accepted,
+                     "schema_ok": schema_ok})
 
         if (idx + 1) % 10 == 0:
             d = sc.as_dict()
             print(f"  [{idx+1}/{len(records)}] CS={d['cs_rate']:.3f} "
+                  f"schema={d['schema_valid_rate']:.3f} "
                   f"acc={d['arg_accuracy']:.3f} "
                   f"nonempty={d['nonempty_rate']:.3f}", flush=True)
 
@@ -195,7 +207,8 @@ def main() -> None:
         json.dump(out, f, indent=2)
 
     print("\n===== RESULT =====")
-    for k in ("task", "variant", "emission", "n", "cs", "cs_rate", "parsed",
+    for k in ("task", "variant", "emission", "n", "cs", "cs_rate",
+              "schema_ok", "schema_valid_rate", "parsed",
               "nonempty", "nonempty_rate", "arg_correct", "arg_total",
               "arg_accuracy", "exact_calls", "exact_call_rate",
               "skipped_by_reason", "elapsed_seconds"):

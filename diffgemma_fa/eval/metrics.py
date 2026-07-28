@@ -23,7 +23,8 @@ from __future__ import annotations
 import dataclasses
 import json
 
-__all__ = ["Scores", "normalise", "extract_json", "score_arguments"]
+__all__ = ["Scores", "normalise", "extract_json", "score_arguments",
+           "schema_valid"]
 
 #: BFCL's value normalisation (SPEC §4.8): "scoring lowercases and strips
 #: `",./-_*^`".
@@ -76,12 +77,59 @@ def extract_json(text: str) -> dict | None:
     return None
 
 
+def schema_valid(obj: dict | None, normalised_schema: dict) -> bool:
+    """Does the parsed object validate against the schema? SPEC §7.2.
+
+    **Why this exists beside CS.** `cs_rate` asks whether the *emitted token
+    sequence* is accepted by the compiled automaton, and that automaton carries
+    SPEC §3.6's `<|channel>NAME\n<channel|>` header. The header is **our**
+    addition — the stock model has no reason to emit it — so `cs_rate` scores
+    the `unconstrained` and `mask` baselines at ~0 partly for a convention they
+    were never asked to follow. Reporting a 0% -> 100% CS jump on that basis
+    alone would overstate the result.
+
+    This column asks the question the benchmark actually cares about, in a form
+    every arm can be asked fairly: *is the argument object schema-conformant?*
+    It is tokenizer-independent (so a constrained arm cannot be penalised for
+    re-tokenisation ambiguity) and header-independent.
+
+    Both are reported. `cs_rate` is the guarantee the sampler enforces;
+    `schema_valid_rate` is the cross-arm comparison.
+
+    Args:
+      obj: the parsed object, or None if the output did not parse.
+      normalised_schema: the schema **after** `normalize_bfcl_schema` — the raw
+        BFCL dialect uses `dict`/`float`/`any`, which no JSON Schema validator
+        understands.
+    """
+    if obj is None:
+        return False
+    try:
+        import jsonschema
+    except ImportError:  # pragma: no cover - eval-only dependency
+        raise
+    schema = dict(normalised_schema)
+    # `__wildcard__` is our own marker for BFCL's `any`; JSON Schema spells that
+    # as an absent `type`, which is what `normalize_bfcl_schema` already did.
+    schema.pop("__wildcard__", None)
+    try:
+        jsonschema.validate(obj, schema)
+    except jsonschema.ValidationError:
+        return False
+    except jsonschema.SchemaError:
+        # A schema our compiler accepts but the validator rejects is a fact
+        # about the corpus, not about the sample. Surfaced, never swallowed.
+        raise
+    return True
+
+
 @dataclasses.dataclass
 class Scores:
     """Running totals for one configuration."""
 
     n: int = 0
     cs: int = 0                 # accepted by the independent simulator
+    schema_ok: int = 0          # parsed object validates against the schema
     parsed: int = 0
     nonempty: int = 0
     arg_correct: int = 0
@@ -90,9 +138,10 @@ class Scores:
     detail: list = dataclasses.field(default_factory=list)
 
     def add(self, *, accepted: bool, parsed_obj: dict | None,
-            want: dict | None) -> None:
+            want: dict | None, schema_ok: bool = False) -> None:
         self.n += 1
         self.cs += int(accepted)
+        self.schema_ok += int(schema_ok)
         if parsed_obj is None:
             return
         self.parsed += 1
@@ -111,6 +160,8 @@ class Scores:
             "n": self.n,
             "cs": self.cs,
             "cs_rate": round(self.cs / max(1, self.n), 4),
+            "schema_ok": self.schema_ok,
+            "schema_valid_rate": round(self.schema_ok / max(1, self.n), 4),
             "parsed": self.parsed,
             "nonempty": self.nonempty,
             "nonempty_rate": round(self.nonempty / max(1, self.n), 4),

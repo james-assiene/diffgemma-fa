@@ -12,6 +12,7 @@ from diffgemma_fa.eval.metrics import (
     extract_json,
     normalise,
     score_arguments,
+    schema_valid,
 )
 
 
@@ -142,3 +143,57 @@ def test_unparsable_output_counts_against_n():
     s.add(accepted=False, parsed_obj=None, want={"a": "x"})
     d = s.as_dict()
     assert d["n"] == 1 and d["parsed"] == 0 and d["cs"] == 0
+
+
+# --------------------------------------------------------------------------
+# Schema validity — the header-independent cross-arm column
+# --------------------------------------------------------------------------
+
+def test_schema_validity_is_independent_of_our_channel_header():
+    """`cs_rate` asks whether the emitted **token sequence** is accepted by the
+    compiled automaton, and that automaton carries SPEC §3.6's channel header —
+    which is *our* addition. The stock model has no reason to emit it, so
+    `cs_rate` scores the `unconstrained` and `mask` baselines at ~0 partly for a
+    convention they were never asked to follow. A 0% -> 100% CS jump reported on
+    that basis alone would overstate the result.
+
+    `schema_valid` asks the question the benchmark cares about, in a form every
+    arm can be asked fairly.
+    """
+    schema = {"type": "object",
+              "properties": {"city": {"type": "string"}},
+              "required": ["city"]}
+    with_header = '<|channel>thought\n<channel|>{"city": "Paris"}'
+    without = '{"city": "Paris"}'
+    assert schema_valid(extract_json(with_header), schema)
+    assert schema_valid(extract_json(without), schema)
+
+
+def test_schema_validity_actually_rejects():
+    schema = {"type": "object",
+              "properties": {"n": {"type": "integer"}},
+              "required": ["n"]}
+    assert not schema_valid({"n": "not an integer"}, schema)
+    assert not schema_valid({}, schema), "a missing required key must fail"
+    assert not schema_valid(None, schema), "unparsable output must fail"
+
+
+def test_schema_validity_understands_the_normalised_dialect():
+    """BFCL writes `dict`/`float`/`any`; no JSON Schema validator understands
+    those, which is why this consumes the schema **after**
+    `normalize_bfcl_schema`."""
+    from diffgemma_fa.compile.schema import normalize_bfcl_schema
+    norm = normalize_bfcl_schema(
+        {"type": "dict", "properties": {"x": {"type": "float"}},
+         "required": ["x"]})
+    assert schema_valid({"x": 1.5}, norm)
+    assert not schema_valid({"x": "a"}, norm)
+
+
+def test_cs_and_schema_validity_are_reported_together():
+    """Neither substitutes for the other, so `Scores` carries both."""
+    s = Scores()
+    s.add(accepted=False, parsed_obj={"a": "x"}, want={"a": "x"},
+          schema_ok=True)
+    d = s.as_dict()
+    assert d["cs_rate"] == 0.0 and d["schema_valid_rate"] == 1.0

@@ -24,7 +24,7 @@ run () {   # run <variant> <emission>
   python -m diffgemma_fa.eval.run --task "$TASK" --variant "$v" \
       --emission "$e" --n "$N" --out "$out" \
       > "logs/eval_${TASK}_${tag}.log" 2>&1
-  grep -E "^(cs_rate|arg_accuracy|nonempty_rate|exact_call_rate|n):" \
+  grep -E "^(cs_rate|schema_valid_rate|arg_accuracy|nonempty_rate|exact_call_rate|n):" \
       "logs/eval_${TASK}_${tag}.log" | sed 's/^/    /'
 }
 
@@ -41,11 +41,12 @@ echo "=== SUMMARY ==="
 python - "$TASK" <<'PY'
 import json, pathlib, sys
 task = sys.argv[1]
-print(f"{'variant':22} {'n':>4} {'CS':>7} {'parsed':>7} {'nonempty':>9} "
-      f"{'arg_acc':>8} {'exact':>7}")
+print(f"{'variant':22} {'n':>4} {'CS':>7} {'schema':>7} {'parsed':>7} "
+      f"{'nonempty':>9} {'arg_acc':>8} {'exact':>7}")
 for p in sorted(pathlib.Path("artifacts").glob(f"eval_{task}_*.json")):
     d = json.load(open(p))
     print(f"{d['variant'] + '-' + d['emission']:22} {d['n']:>4} "
-          f"{d['cs_rate']:>7.3f} {d['parsed']:>7} {d['nonempty_rate']:>9.3f} "
+          f"{d['cs_rate']:>7.3f} {d['schema_valid_rate']:>7.3f} "
+          f"{d['parsed']:>7} {d['nonempty_rate']:>9.3f} "
           f"{d['arg_accuracy']:>8.3f} {d['exact_call_rate']:>7.3f}")
 PY
