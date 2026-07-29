@@ -454,3 +454,47 @@ def test_log_matmul_two_band_is_still_exact_in_the_easy_regime():
     live = ref > scans.NEG_SENTINEL / 2
     assert np.allclose(got[live], ref[live], atol=1e-9)
     assert (got[~live] <= scans.NEG_SENTINEL / 2).all()
+
+
+def test_log_matmul_survives_per_position_sharp_marginals():
+    """The regime that killed the two-band form: per-position sharp `p` gives
+    a LOW band whose internal spread is itself thousands of nats, so terms
+    still underflowed against the band anchor. The streaming pairwise-max
+    anchor cannot underflow the dominant term of any entry by construction.
+
+    Chain automaton in log space with per-step costs drawn to span ~4000 nats
+    total — the shape real annealed marginals produce on `live_simple_106-63-0`.
+    """
+    from diffgemma_fa.infer import scans
+    import jax.numpy as jnp
+
+    rng = np.random.default_rng(9)
+    neg = scans.NEG_SENTINEL
+    S, L = 6, 64
+    # chain 0->1->...->5 with huge per-step costs, plus a free self-loop at 5
+    mats = np.full((L, S, S), neg)
+    for i in range(L):
+        for s in range(S - 1):
+            mats[i, s, s + 1] = -rng.uniform(20, 80)     # model hates these
+        mats[i, S - 1, S - 1] = 0.0                       # unscored tail
+    tr = scans.up_sweep_log(jnp.asarray(mats))
+    root = np.asarray(tr.root)
+    # reference: sequential logsumexp product
+    ref = mats[0]
+    for i in range(1, L):
+        Aexp = ref
+        out = np.full((S, S), neg)
+        for a_ in range(S):
+            for b_ in range(S):
+                terms = [Aexp[a_, k] + mats[i][k, b_] for k in range(S)
+                         if Aexp[a_, k] > neg / 2 and mats[i][k, b_] > neg / 2]
+                if terms:
+                    m = max(terms)
+                    out[a_, b_] = m + np.log(sum(np.exp(t - m) for t in terms))
+        ref = out
+    live = ref > neg / 2
+    assert (root[live] > neg / 2).all(), (
+        "tree lost entries the sequential product keeps — the anchor "
+        "underflow is back"
+    )
+    assert np.allclose(root[live], ref[live], rtol=0, atol=1e-8)

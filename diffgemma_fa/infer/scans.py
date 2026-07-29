@@ -52,10 +52,6 @@ __all__ = [
 #: fused kernels produce `NaN` from `-inf + -inf` (SPEC §2.7).
 NEG_SENTINEL = -3e38
 
-#: Band width for `log_matmul`'s two-band shift. Must satisfy `2 * _BAND` <
-#: 745 (where float64's `exp` underflows to zero); 350 leaves margin.
-_BAND = 350.0
-
 
 @dataclasses.dataclass(frozen=True)
 class TreeLevels:
@@ -257,76 +253,71 @@ def up_sweep_maxplus(M: jnp.ndarray) -> TreeLevels:
 # ---------------------------------------------------------------------------
 
 def log_matmul(A: jnp.ndarray, B: jnp.ndarray) -> jnp.ndarray:
-    """`C[i,j] = logsumexp_k (A[i,k] + B[k,j])`, **still as a GEMM**.
+    """`C[i,j] = logsumexp_k (A[i,k] + B[k,j])`, exact for ANY dynamic range.
 
-    Phase 4 measured that linear-space sum-product underflows at `L = 256` even
-    in float64: the unscored `ACC --Σ--> ACC` tail has emission mass exactly 1.0
-    and so pins every node's max at 1.0, while genuine grammar paths sit near
-    1e-49 and below. Per-node normalization cannot fix a dynamic range that
-    large *inside* one matrix. Log space can, and it is what SPEC §2.7 already
-    chose for MAP — "exact, no scaling discussion, no underflow".
+    **History of two wrong versions, both measured on real grammars.**
 
-    The naive form materialises `[n, k, m]`, which is `1e9` elements at
-    `|S| = 1024`. Shifting by the **row** max of `A` and the **column** max of
-    `B` instead leaves an ordinary matmul of matrices whose entries all lie in
-    `[0, 1]`, so cuBLAS still does the work and the `O(log L)` kernel-count
-    property is preserved:
+    1. Single row/col shift (`ra[i] + cb[j]`): the unscored `ACC --Σ--> ACC`
+       tail pins the shift at 0 while genuine grammar paths sit ~850 nats
+       below; their contributions fall under float64's subnormal floor and a
+       provably non-empty language came back Z == 0 (`live_simple_106-63-0`).
+    2. Two-band shift (4 GEMMs): fixed the bimodal tail-vs-grammar case but
+       not the realistic one — with per-position *sharp* model marginals the
+       low band's INTERNAL spread is itself thousands of nats, and terms
+       under the band anchor still underflow. Reproduced on the same record
+       with adversarial sharp `p` after the bands had "fixed" the uniform
+       case.
 
-        C[i,j] = ra[i] + cb[j] + log( Σ_k exp(A[i,k] − ra[i]) · exp(B[k,j] − cb[j]) )
+    The only anchor that is exact per entry is the **pairwise max**
+    `M[i,j] = max_k (A[i,k] + B[k,j])` — the max-plus product. Relative to it,
+    the dominant term of every entry is exp(0) = 1 by construction, so nothing
+    that matters can underflow at any dynamic range; terms more than ~745
+    nats below the max are dropped at relative weight < 1e-323, which is
+    negligible *relative to their own entry* rather than to a foreign anchor.
 
-    Impossible entries carry `NEG_SENTINEL`, whose exponential is exactly 0, so
-    they propagate correctly without ever producing `NaN` from `-inf + -inf`.
+    Cost: the pairwise max needs the `[n, k, m]` tensor the GEMM form was
+    designed to avoid, so this materialises it in **static-count chunks over
+    `k`** with a streaming logsumexp (running max + rescaled running sum).
+    The chunk loop is a Python loop over a shape-derived count — unrolled at
+    trace time, zero device `while` loops, capture-friendly. It is
+    bandwidth-bound rather than cuBLAS-bound; SPEC §0's kernel-count property
+    survives, its GEMM-throughput property does not on this path.
+    `tests/test_kernel_shape.py` pins the loop-freeness; the §7.3 timings
+    must be measured against THIS implementation, not the GEMM one.
+
+    Correctness before speed, always (CLAUDE.md). A GEMM fast path gated on a
+    proven-tight range bound can come back later if profiling demands it.
     """
-    ra = jnp.max(A, axis=-1, keepdims=True)
-    cb = jnp.max(B, axis=-2, keepdims=True)
-    ra = jnp.where(ra > NEG_SENTINEL / 2, ra, jnp.zeros_like(ra))
-    cb = jnp.where(cb > NEG_SENTINEL / 2, cb, jnp.zeros_like(cb))
+    n, k = A.shape[-2], A.shape[-1]
+    m = B.shape[-1]
+    # Chunk k so a slab is at most ~2^24 elements (128 MB in float64).
+    chunk = max(1, min(k, (1 << 24) // max(1, n * m)))
+    n_chunks = -(-k // chunk)
 
-    # TWO-BAND SHIFT — a single row/col shift is NOT enough. Measured on the
-    # real BFCL grammar of `live_simple_106-63-0` (403 states, L = 256): the
-    # unscored `ACC --Σ--> ACC` tail pins `ra` and `cb` at 0.0 while a genuine
-    # 73-token grammar path sits at log Z ≈ -846, so every one of its
-    # contributions is exp(-423)·exp(-423) ≈ 1e-368 — BELOW float64's smallest
-    # subnormal — and the whole (start, ACC) entry underflows to exactly 0,
-    # i.e. sentinel. The sequential reference gets -846 with ease because it
-    # folds into a running max and never multiplies two tiny halves together.
-    # The consequence was not hypothetical: `joint_draw` reported a provably
-    # non-empty language as Z == 0, and before the feasibility detector
-    # existed this emitted silent garbage. The same mechanism skews draws
-    # wherever an entry's true value sits > ~745 nats under `ra + cb`.
-    #
-    # Fix: split each operand into a high band (entries within `_BAND` of the
-    # row/col max, shifted by that max) and a low band (the rest, shifted by
-    # its own max), and combine the four shifted GEMMs with an exact
-    # logsumexp. Each pairwise band sum spans ≤ 2·_BAND < 745 nats, so no
-    # contribution underflows unless it is > ~1400 nats below the true entry —
-    # at which point it is genuinely negligible (relative weight < 1e-600).
-    # Cost: 4 GEMMs instead of 1; kernel count stays O(log L) and everything
-    # is still cuBLAS.
-    def _bands(X, m, axis):
-        hi = jnp.where(X > m - _BAND, X, NEG_SENTINEL)
-        lo = jnp.where(X <= m - _BAND, X, NEG_SENTINEL)
-        ml = jnp.max(lo, axis=axis, keepdims=True)
-        ml = jnp.where(ml > NEG_SENTINEL / 2, ml, jnp.zeros_like(ml))
-        return (jnp.exp(hi - m), m), (jnp.exp(lo - ml), ml)
+    neg = jnp.asarray(NEG_SENTINEL, dtype=A.dtype)
+    run_max = jnp.full(A.shape[:-2] + (n, m), NEG_SENTINEL, dtype=A.dtype)
+    run_sum = jnp.zeros(A.shape[:-2] + (n, m), dtype=A.dtype)
+    for c in range(n_chunks):          # static count — unrolled at trace time
+        lo = c * chunk
+        hi = min(k, lo + chunk)
+        # [.., n, |c|, m] slab of A[i,kc] + B[kc,j]
+        slab = A[..., :, lo:hi, None] + B[..., None, lo:hi, :]
+        # Sentinel + sentinel would wrap past -inf in fp32; re-clamp like
+        # maxplus_combine does. (Harmless in float64, load-bearing in fp32.)
+        slab = jnp.maximum(slab, neg)
+        slab_max = jnp.max(slab, axis=-2)
+        new_max = jnp.maximum(run_max, slab_max)
+        safe = jnp.where(new_max > NEG_SENTINEL / 2, new_max,
+                         jnp.zeros_like(new_max))
+        run_sum = (run_sum * jnp.exp(jnp.minimum(run_max - safe, 0.0))
+                   + jnp.sum(jnp.exp(slab - safe[..., None, :]), axis=-2))
+        run_max = new_max
 
-    (Ah, sa_h), (Al, sa_l) = _bands(A, ra, axis=-1)
-    (Bh, sb_h), (Bl, sb_l) = _bands(B, cb, axis=-2)
-
+    live = run_max > NEG_SENTINEL / 2
     tiny = jnp.asarray(jnp.finfo(A.dtype).tiny, dtype=A.dtype)
-    parts = []
-    for X, sx in ((Ah, sa_h), (Al, sa_l)):
-        for Y, sy in ((Bh, sb_h), (Bl, sb_l)):
-            p = X @ Y
-            v = sx + sy + jnp.log(jnp.maximum(p, tiny))
-            parts.append(jnp.where(p > 0, v, jnp.full_like(v, NEG_SENTINEL)))
-    stacked = jnp.stack(parts)
-    m = jnp.max(stacked, axis=0)
-    safe_m = jnp.where(m > NEG_SENTINEL / 2, m, jnp.zeros_like(m))
-    out = safe_m + jnp.log(
-        jnp.sum(jnp.exp(stacked - safe_m[None]), axis=0))
-    return jnp.where(m > NEG_SENTINEL / 2, out,
-                     jnp.full_like(out, NEG_SENTINEL))
+    out = jnp.where(live, run_max, jnp.zeros_like(run_max)) + jnp.log(
+        jnp.maximum(run_sum, tiny))
+    return jnp.where(live, out, jnp.full_like(out, NEG_SENTINEL))
 
 
 def up_sweep_log(logM: jnp.ndarray) -> TreeLevels:
