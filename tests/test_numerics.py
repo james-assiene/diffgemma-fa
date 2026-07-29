@@ -390,3 +390,67 @@ def test_that_partition_equals_the_brute_force_Z(nfa):
     _post, Z = R.enumerate_posterior(p, A)
     logZ_i = _log_partition_by_position(A, p)
     assert float(np.exp(logZ_i[0])) == pytest.approx(Z, rel=1e-9)
+
+
+# ==========================================================================
+# log_matmul's two-band shift (found live: live_simple_106-63-0)
+# ==========================================================================
+
+def test_log_matmul_survives_the_tail_vs_grammar_dynamic_range():
+    """A single row/col max shift underflows on the REAL structure.
+
+    The unscored `ACC --Σ--> ACC` tail pins the row/col maxes at 0.0 while a
+    genuine grammar path across L = 256 sits at log Z ≈ -846: each of its
+    contributions is exp(-423)·exp(-423) ≈ 1e-368, below float64's smallest
+    subnormal, so the whole (start, ACC) entry underflowed to sentinel.
+    Measured live on `live_simple_106-63-0` (403 states): `joint_draw`
+    reported a provably non-empty language as Z == 0, and before the
+    feasibility detector existed this emitted silent garbage. The sequential
+    reference gets -846 easily — it folds into a running max and never
+    multiplies two tiny halves together.
+
+    Minimal reproduction: two states, a self-loop at weight 1 (log 0) and a
+    start→ACC chain at log -423 per half.
+    """
+    from diffgemma_fa.infer import scans
+    import jax.numpy as jnp
+
+    neg = scans.NEG_SENTINEL
+    # A = B = one 128-length half-product: [[ -423 (start→start), -423 (start→acc)],
+    #                                       [ sentinel,            0 (acc→acc)  ]]
+    half = jnp.asarray([[-423.0, -423.0], [neg, 0.0]], dtype=jnp.float64)
+    root = scans.log_matmul(half, half)
+    got = float(root[0, 1])
+    # exact: logsumexp(-423 + -423, -423 + 0) = -423 + log1p(exp(-423)) ≈ -423
+    assert got == pytest.approx(-423.0, abs=1e-6), (
+        f"(start, acc) came back {got}; the single-shift form underflowed "
+        "this to sentinel"
+    )
+
+
+def test_log_matmul_two_band_is_still_exact_in_the_easy_regime():
+    """The 4-GEMM path must agree with brute-force logsumexp on ordinary
+    matrices, including mixed sentinel patterns."""
+    from diffgemma_fa.infer import scans
+    import jax.numpy as jnp
+
+    rng = np.random.default_rng(5)
+    A = jnp.asarray(rng.normal(size=(5, 7)) * 10, dtype=jnp.float64)
+    B = jnp.asarray(rng.normal(size=(7, 4)) * 10, dtype=jnp.float64)
+    A = A.at[2, :].set(scans.NEG_SENTINEL)          # dead row
+    B = B.at[:, 1].set(scans.NEG_SENTINEL)          # dead column
+    got = np.asarray(scans.log_matmul(A, B))
+    # brute force
+    ref = np.full((5, 4), scans.NEG_SENTINEL)
+    An, Bn = np.asarray(A), np.asarray(B)
+    for i in range(5):
+        for j in range(4):
+            terms = [An[i, k] + Bn[k, j] for k in range(7)
+                     if An[i, k] > scans.NEG_SENTINEL / 2
+                     and Bn[k, j] > scans.NEG_SENTINEL / 2]
+            if terms:
+                m = max(terms)
+                ref[i, j] = m + np.log(sum(np.exp(t - m) for t in terms))
+    live = ref > scans.NEG_SENTINEL / 2
+    assert np.allclose(got[live], ref[live], atol=1e-9)
+    assert (got[~live] <= scans.NEG_SENTINEL / 2).all()

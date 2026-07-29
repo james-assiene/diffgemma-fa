@@ -52,6 +52,10 @@ __all__ = [
 #: fused kernels produce `NaN` from `-inf + -inf` (SPEC §2.7).
 NEG_SENTINEL = -3e38
 
+#: Band width for `log_matmul`'s two-band shift. Must satisfy `2 * _BAND` <
+#: 745 (where float64's `exp` underflows to zero); 350 leaves margin.
+_BAND = 350.0
+
 
 @dataclasses.dataclass(frozen=True)
 class TreeLevels:
@@ -277,10 +281,52 @@ def log_matmul(A: jnp.ndarray, B: jnp.ndarray) -> jnp.ndarray:
     cb = jnp.max(B, axis=-2, keepdims=True)
     ra = jnp.where(ra > NEG_SENTINEL / 2, ra, jnp.zeros_like(ra))
     cb = jnp.where(cb > NEG_SENTINEL / 2, cb, jnp.zeros_like(cb))
-    prod = jnp.exp(A - ra) @ jnp.exp(B - cb)
+
+    # TWO-BAND SHIFT — a single row/col shift is NOT enough. Measured on the
+    # real BFCL grammar of `live_simple_106-63-0` (403 states, L = 256): the
+    # unscored `ACC --Σ--> ACC` tail pins `ra` and `cb` at 0.0 while a genuine
+    # 73-token grammar path sits at log Z ≈ -846, so every one of its
+    # contributions is exp(-423)·exp(-423) ≈ 1e-368 — BELOW float64's smallest
+    # subnormal — and the whole (start, ACC) entry underflows to exactly 0,
+    # i.e. sentinel. The sequential reference gets -846 with ease because it
+    # folds into a running max and never multiplies two tiny halves together.
+    # The consequence was not hypothetical: `joint_draw` reported a provably
+    # non-empty language as Z == 0, and before the feasibility detector
+    # existed this emitted silent garbage. The same mechanism skews draws
+    # wherever an entry's true value sits > ~745 nats under `ra + cb`.
+    #
+    # Fix: split each operand into a high band (entries within `_BAND` of the
+    # row/col max, shifted by that max) and a low band (the rest, shifted by
+    # its own max), and combine the four shifted GEMMs with an exact
+    # logsumexp. Each pairwise band sum spans ≤ 2·_BAND < 745 nats, so no
+    # contribution underflows unless it is > ~1400 nats below the true entry —
+    # at which point it is genuinely negligible (relative weight < 1e-600).
+    # Cost: 4 GEMMs instead of 1; kernel count stays O(log L) and everything
+    # is still cuBLAS.
+    def _bands(X, m, axis):
+        hi = jnp.where(X > m - _BAND, X, NEG_SENTINEL)
+        lo = jnp.where(X <= m - _BAND, X, NEG_SENTINEL)
+        ml = jnp.max(lo, axis=axis, keepdims=True)
+        ml = jnp.where(ml > NEG_SENTINEL / 2, ml, jnp.zeros_like(ml))
+        return (jnp.exp(hi - m), m), (jnp.exp(lo - ml), ml)
+
+    (Ah, sa_h), (Al, sa_l) = _bands(A, ra, axis=-1)
+    (Bh, sb_h), (Bl, sb_l) = _bands(B, cb, axis=-2)
+
     tiny = jnp.asarray(jnp.finfo(A.dtype).tiny, dtype=A.dtype)
-    out = ra + cb + jnp.log(jnp.maximum(prod, tiny))
-    return jnp.where(prod > 0, out, jnp.full_like(out, NEG_SENTINEL))
+    parts = []
+    for X, sx in ((Ah, sa_h), (Al, sa_l)):
+        for Y, sy in ((Bh, sb_h), (Bl, sb_l)):
+            p = X @ Y
+            v = sx + sy + jnp.log(jnp.maximum(p, tiny))
+            parts.append(jnp.where(p > 0, v, jnp.full_like(v, NEG_SENTINEL)))
+    stacked = jnp.stack(parts)
+    m = jnp.max(stacked, axis=0)
+    safe_m = jnp.where(m > NEG_SENTINEL / 2, m, jnp.zeros_like(m))
+    out = safe_m + jnp.log(
+        jnp.sum(jnp.exp(stacked - safe_m[None]), axis=0))
+    return jnp.where(m > NEG_SENTINEL / 2, out,
+                     jnp.full_like(out, NEG_SENTINEL))
 
 
 def up_sweep_log(logM: jnp.ndarray) -> TreeLevels:
