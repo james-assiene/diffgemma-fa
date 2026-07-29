@@ -430,3 +430,24 @@ truncating `rows[].text` at 220 chars. Better to lose 20 minutes than to spend
 Stock model on 6 records: CS 0.000, schema valid 0.500, arg accuracy 0.833. The
 claim under test is therefore "50% -> 100% schema validity at some accuracy
 cost", not "0% -> 100%".
+
+## 2026-07-29 — kernel underflow found via the Z==0 detector; constrained arms re-running
+
+`live_simple_106-63-0`'s Z==0 was neither cause (a) nor (b): the automaton is
+sound (d0=73, simulator accepts shortest+PAD*183) and the budget ample. Cause:
+`log_matmul`'s single row/col shift underflows when the unscored tail pins the
+shift at 0 while genuine paths sit ~850 nats below — contributions fall under
+float64's subnormal floor and the (start, ACC) entry becomes sentinel. Fixed
+with a two-band shift (4 GEMMs/combine), commit fe01dbb. All constrained n=130
+arms were measured with the buggy kernel → re-running j0/j1/j2 + j0-map from
+scratchpad/sweep2.sh, log logs/phase5_rerun_fixed_kernel.log. Old artifacts
+moved to artifacts/stale_underflow_pre_fe01dbb/. unconstrained + mask arms do
+not touch this kernel and stand.
+
+Researcher panel (3 agents) reports delivered; synthesis pending the grammar
+lens. Key adjudications so far: only 130 of 258 live_simple records ever
+evaluated (must be stated in every table); the "entropy_bound ruled out" claim
+retracted as underpowered (19 keys, <10% power); the 0.641→0.385 gap
+contradicts the paper's direction in all 40 of its cells → port-configuration
+effect until proven otherwise, prime suspects Mar (unwired) and the
+prompt/rendering contract.
