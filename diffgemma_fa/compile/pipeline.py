@@ -142,6 +142,7 @@ def compile_json_schema(
     whitespace_pattern: str | None = None,
     nonempty_required_strings: bool = False,
     channel_header: bool = True,
+    fence: bool = False,
     **kwargs: Any,
 ) -> CompileReport:
     """Compile a JSON Schema (or BFCL parameter block) end to end.
@@ -162,6 +163,15 @@ def compile_json_schema(
     The cost of allowing whitespace is 8 states on a representative BFCL schema
     (43 -> 51), against ~20 GB of measured tree headroom. Not a trade worth
     making.
+
+    `fence` (SPEC §3.6 extension, experiment E4/P2) wraps the object in an
+    **optional** ```` ```json ```` … ```` ``` ```` markdown fence. 126 of 130
+    unconstrained outputs are fenced, and with no slot for it the model writes
+    the fence into the channel-header name instead (measured: 82/130 junk
+    headers, all variants of ` ```json\n{ `) and its whole canvas plan is
+    shifted. Measured cost: +8 states. Whitespace and fence together take
+    verbatim acceptance of the unconstrained outputs from **0/130 to 74/130**;
+    neither does anything alone.
     """
     t0 = time.perf_counter()
     prepared = json_schema
@@ -173,6 +183,11 @@ def compile_json_schema(
         prepared, from_bfcl=from_bfcl, allow=allow,
         allow_wildcard=allow_wildcard, whitespace_pattern=whitespace_pattern,
     )
+    if fence:
+        # Wrapped at the REGEX level, i.e. before `lift_regex` and therefore
+        # before `augment_with_stop_tokens` and `distance_to_final` -- `d(s)`
+        # must see the fence or it is a different function (SPEC §3.5).
+        regex = r"(```json\n)?" + regex + r"(\n```)?"
     seconds_regex = time.perf_counter() - t0
 
     from diffgemma_fa.compile.automaton import schema_fingerprint
@@ -186,6 +201,6 @@ def compile_json_schema(
             json_schema, whitespace_pattern=whitespace_pattern,
             nonempty_required_strings=nonempty_required_strings,
             channel_header=channel_header, allow=allow,
-            allow_wildcard=allow_wildcard, from_bfcl=from_bfcl),
+            allow_wildcard=allow_wildcard, from_bfcl=from_bfcl, fence=fence),
         **kwargs)
     return dataclasses.replace(report, seconds_regex=seconds_regex)

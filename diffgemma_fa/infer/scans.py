@@ -275,48 +275,40 @@ def log_matmul(A: jnp.ndarray, B: jnp.ndarray) -> jnp.ndarray:
     nats below the max are dropped at relative weight < 1e-323, which is
     negligible *relative to their own entry* rather than to a foreign anchor.
 
-    Cost: the pairwise max needs the `[n, k, m]` tensor the GEMM form was
-    designed to avoid, so this materialises it in **static-count chunks over
-    `k`** with a streaming logsumexp (running max + rescaled running sum).
-    The chunk loop is a Python loop over a shape-derived count — unrolled at
-    trace time, zero device `while` loops, capture-friendly. It is
-    bandwidth-bound rather than cuBLAS-bound; SPEC §0's kernel-count property
-    survives, its GEMM-throughput property does not on this path.
-    `tests/test_kernel_shape.py` pins the loop-freeness; the §7.3 timings
-    must be measured against THIS implementation, not the GEMM one.
+    Cost: two fused reductions over the broadcast `A+B` instead of one GEMM —
+    the same shape and peak memory as `maxplus_combine`, which already runs in
+    production on the MAP path at these sizes. It is bandwidth-bound rather
+    than cuBLAS-bound; SPEC §0's kernel-count property survives, its
+    GEMM-throughput property does not on this path, and the §7.3 timings must
+    be measured against THIS implementation, not the GEMM one.
 
     Correctness before speed, always (CLAUDE.md). A GEMM fast path gated on a
     proven-tight range bound can come back later if profiling demands it.
     """
-    n, k = A.shape[-2], A.shape[-1]
-    m = B.shape[-1]
-    # Chunk k so a slab is at most ~2^24 elements (128 MB in float64).
-    chunk = max(1, min(k, (1 << 24) // max(1, n * m)))
-    n_chunks = -(-k // chunk)
-
+    # TWO FUSED REDUCTIONS, no chunk loop, no materialisation.
+    #
+    # A previous version chunked over `k` with a running max/sum. That OOM-ed
+    # the 221 GB host: the chunk size ignored the LEADING batch dim (at the
+    # leaf level A is `[L/2, S, S]`, so a "64-wide" slab is
+    # `[128, 512, 64, 512]` = 17 GB), and holding a slab across the running
+    # update defeats XLA's fusion so every unrolled chunk stays live.
+    #
+    # `maxplus_combine` proves the shape that works at these sizes: written as
+    # a single reduction over the broadcast sum, XLA fuses it and the `[n,k,m]`
+    # tensor is never materialised. So do exactly that twice — once for the
+    # max, once for the shifted sum, letting XLA recompute `A+B` in the second
+    # pass rather than store it. Peak memory is O(n·m) per node, the same as
+    # the MAP path that already runs in production.
     neg = jnp.asarray(NEG_SENTINEL, dtype=A.dtype)
-    run_max = jnp.full(A.shape[:-2] + (n, m), NEG_SENTINEL, dtype=A.dtype)
-    run_sum = jnp.zeros(A.shape[:-2] + (n, m), dtype=A.dtype)
-    for c in range(n_chunks):          # static count — unrolled at trace time
-        lo = c * chunk
-        hi = min(k, lo + chunk)
-        # [.., n, |c|, m] slab of A[i,kc] + B[kc,j]
-        slab = A[..., :, lo:hi, None] + B[..., None, lo:hi, :]
-        # Sentinel + sentinel would wrap past -inf in fp32; re-clamp like
-        # maxplus_combine does. (Harmless in float64, load-bearing in fp32.)
-        slab = jnp.maximum(slab, neg)
-        slab_max = jnp.max(slab, axis=-2)
-        new_max = jnp.maximum(run_max, slab_max)
-        safe = jnp.where(new_max > NEG_SENTINEL / 2, new_max,
-                         jnp.zeros_like(new_max))
-        run_sum = (run_sum * jnp.exp(jnp.minimum(run_max - safe, 0.0))
-                   + jnp.sum(jnp.exp(slab - safe[..., None, :]), axis=-2))
-        run_max = new_max
-
-    live = run_max > NEG_SENTINEL / 2
+    mx = jnp.maximum(jnp.max(A[..., :, :, None] + B[..., None, :, :], axis=-2),
+                     neg)
+    live = mx > NEG_SENTINEL / 2
+    safe = jnp.where(live, mx, jnp.zeros_like(mx))
+    sm = jnp.sum(
+        jnp.exp(A[..., :, :, None] + B[..., None, :, :] - safe[..., None, :]),
+        axis=-2)
     tiny = jnp.asarray(jnp.finfo(A.dtype).tiny, dtype=A.dtype)
-    out = jnp.where(live, run_max, jnp.zeros_like(run_max)) + jnp.log(
-        jnp.maximum(run_sum, tiny))
+    out = safe + jnp.log(jnp.maximum(sm, tiny))
     return jnp.where(live, out, jnp.full_like(out, NEG_SENTINEL))
 
 

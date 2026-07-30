@@ -48,6 +48,42 @@ CKPT = "/home/ubuntu/diffgemma_fa/artifacts/ckpt/diffusiongemma-26B-A4B-it"
 ALLOW = ("minimum", "maximum", "minItems", "maxItems", "minLength", "maxLength",
          "first_match_wins", "additionalProperties")
 
+#: E4/P1. The model's observed separators: indent-2 pretty printing to depth 3,
+#: whitespace runs of 1/3/5/7 characters across all 130 unconstrained outputs.
+#: Structured rather than `[ \n\t]{0,6}` so it cannot admit blank lines or bare
+#: 6-space runs; measured at near-identical state count.
+PRETTY_WS = r"( |\n {0,6})?"
+
+
+def _case_insensitive_enums(schema):
+    """E4/P4: expand each string enum literal to its case variants.
+
+    BFCL's scorer lowercases and strips, so every variant scores identically —
+    this cannot manufacture a wrong answer. Without it, a model that writes
+    `"pizza"` against an enum of `PIZZA` has its preferred spelling forbidden
+    and the renormalised draw lands on a *different* enum member (`SALAD`),
+    which is strictly worse than the unconstrained arm. Measured on 7/130.
+    """
+    if isinstance(schema, list):
+        return [_case_insensitive_enums(v) for v in schema]
+    if not isinstance(schema, dict):
+        return schema
+    out = {}
+    for k, v in schema.items():
+        if k == "enum" and isinstance(v, list):
+            seen, variants = set(), []
+            for e in v:
+                for cand in ((e, e.lower(), e.upper(), e.capitalize())
+                             if isinstance(e, str) else (e,)):
+                    if cand not in seen:
+                        seen.add(cand)
+                        variants.append(cand)
+            out[k] = variants
+        else:
+            out[k] = _case_insensitive_enums(v)
+    return out
+
+
 TASKS = {
     "bfcl_live": bfcl_data.LIVE_SPLITS,
     "bfcl_live_simple": ("BFCL_v4_live_simple.json",),
@@ -69,12 +105,30 @@ def to_traced(a, batch: int) -> Automaton:
     )
 
 
-def build_prompt(rec, fn) -> str:
+#: Experiment E2. The stock prompt says nothing about rendering, and the model
+#: fills the vacuum with fenced, pretty-printed multi-line JSON — 126/130 of the
+#: unconstrained outputs. The compiled grammar admits none of that (0/130
+#: verbatim acceptance), so every constrained decode is forced off the model's
+#: plan at each value boundary. `compact` tells the model to render the way the
+#: grammar reads, which is the zero-code test of that whole hypothesis; the
+#: "every key" clause additionally targets the shortest-member collapse, since
+#: the unconstrained arm already emits every key in 125/126 outputs.
+PROMPT_STYLES = {
+    "stock": "",
+    "compact": (
+        " Output compact single-line JSON with no newlines and no code "
+        "fences, and include every listed key."
+    ),
+}
+
+
+def build_prompt(rec, fn, style: str = "stock") -> str:
     question = (rec.question[0][0]["content"] if rec.question
                 else "Call the function.")
     props = list((fn.get("parameters") or {}).get("properties", {}))
     return (f"{question}\n\nRespond with a JSON object of arguments for "
-            f"`{fn.get('name')}`, keys in this order: {props}.")
+            f"`{fn.get('name')}`, keys in this order: {props}."
+            + PROMPT_STYLES[style])
 
 
 def main() -> None:
@@ -90,6 +144,23 @@ def main() -> None:
     ap.add_argument("--no-nonempty", dest="nonempty", action="store_false")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="")
+    ap.add_argument("--prompt-style", default="stock",
+                    choices=sorted(PROMPT_STYLES),
+                    help="E2: 'compact' asks for the rendering the grammar "
+                         "actually admits")
+    ap.add_argument("--whitespace", default="stock",
+                    choices=["stock", "pretty"],
+                    help="E4/P1: 'pretty' admits the model's newline+indent "
+                         "separators (measured: 0/130 -> 74/130 verbatim "
+                         "acceptance of unconstrained outputs, with --fence)")
+    ap.add_argument("--fence", action="store_true",
+                    help="E4/P2: allow an optional ```json fence around the "
+                         "object, which 126/130 unconstrained outputs use")
+    ap.add_argument("--ci-enums", action="store_true",
+                    help="E4/P4: accept enum literals in any case. BFCL's own "
+                         "scorer lowercases, so this cannot create a wrong "
+                         "answer; without it the grammar forces a DIFFERENT "
+                         "enum member (measured on 7/130)")
     args = ap.parse_args()
 
     model = diffusion.DiffusionGemma_26B_A4B()
@@ -116,9 +187,15 @@ def main() -> None:
         fn = rec.functions[0]
         try:
             norm = _schema.normalize_bfcl_schema(fn["parameters"])
+            params = fn["parameters"]
+            if args.ci_enums:
+                params = _case_insensitive_enums(params)
             a = pipeline.compile_json_schema(
-                fn["parameters"], name=fn.get("name", ""), from_bfcl=True,
+                params, name=fn.get("name", ""), from_bfcl=True,
                 allow=ALLOW, allow_wildcard=True,
+                whitespace_pattern=(PRETTY_WS if args.whitespace == "pretty"
+                                    else None),
+                fence=args.fence,
                 nonempty_required_strings=args.nonempty).automaton
         except Exception as e:  # noqa: BLE001
             k = f"compile:{type(e).__name__}"
@@ -141,7 +218,9 @@ def main() -> None:
                 text_vocab_size=tok.vocab_size),
         )
 
-        inputs = base._get_inputs(prompt=build_prompt(rec, fn), images=None,  # noqa: SLF001
+        inputs = base._get_inputs(prompt=build_prompt(rec, fn,  # noqa: SLF001
+                                                      args.prompt_style),
+                                  images=None,
                                   add_bos=True, has_batch_dim=False,
                                   sharding=None)
         init = _prefill.prefill(
@@ -214,6 +293,10 @@ def main() -> None:
         "task": args.task, "variant": args.variant, "emission": args.emission,
         "entropy_bound": args.entropy_bound, "nonempty_strings": args.nonempty,
         "seed": args.seed,
+        "prompt_style": args.prompt_style,
+        "whitespace": args.whitespace,
+        "fence": args.fence,
+        "ci_enums": args.ci_enums,
         "records_available": len(records),
         "skipped_by_reason": skipped,
         # SPEC §6.3 causes (a)/(b) hit at run time, per record. Reported, never
