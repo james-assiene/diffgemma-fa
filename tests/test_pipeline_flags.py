@@ -181,3 +181,31 @@ def test_the_fence_wrap_keeps_the_bare_rendering_reachable():
     assert run([2717, 3723, 107, 500, 501, 107, 2717]), "both fences"
     assert run([500, 501, 107, 2717]), "closing fence only"
     assert not run([2717, 500, 501]), "a partial opening fence must not pass"
+
+
+def test_the_eval_runner_does_not_shadow_the_model_params():
+    """A regression guard for a bug that cost a full overnight queue.
+
+    `eval/run.py` binds `params = gm.ckpts.load_params(CKPT)` once, then loops
+    over records. The `--ci-enums` change introduced a second `params = ...`
+    inside that loop holding the *schema's* parameters, so every subsequent
+    `_prefill.prefill(params=params, ...)` received a dict of schema strings
+    and died inside gemma's own `_dtype()` with "'str' object has no attribute
+    'dtype'". Six queued arms failed identically and the checkpoint looked
+    corrupt; it was fine.
+
+    Checked by source inspection because reproducing it needs the 51 GB model.
+    """
+    import inspect
+    import re
+    from diffgemma_fa.eval import run as R
+
+    src = inspect.getsource(R.main)
+    # `\s*=` would also catch the keyword argument `params=params`; require
+    # a space before `=` so only real assignments match.
+    binds = re.findall(r"^\s*params\s+=\s*(.+)$", src, re.M)
+    assert len(binds) == 1, (
+        f"`params` is bound {len(binds)} times in eval.run.main: {binds}. "
+        "It must name the model weights and nothing else."
+    )
+    assert "load_params" in binds[0]

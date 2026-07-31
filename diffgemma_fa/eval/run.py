@@ -187,11 +187,16 @@ def main() -> None:
         fn = rec.functions[0]
         try:
             norm = _schema.normalize_bfcl_schema(fn["parameters"])
-            params = fn["parameters"]
+            # NOT `params` -- that name holds the model weights in this scope,
+            # and shadowing it fed a schema dict to `_prefill.prefill`, which
+            # died in gemma's own `_dtype(params)` with "'str' object has no
+            # attribute 'dtype'". Every arm queued after that edit failed the
+            # same way; the checkpoint was fine all along.
+            schema_params = fn["parameters"]
             if args.ci_enums:
-                params = _case_insensitive_enums(params)
+                schema_params = _case_insensitive_enums(schema_params)
             a = pipeline.compile_json_schema(
-                params, name=fn.get("name", ""), from_bfcl=True,
+                schema_params, name=fn.get("name", ""), from_bfcl=True,
                 allow=ALLOW, allow_wildcard=True,
                 whitespace_pattern=(PRETTY_WS if args.whitespace == "pretty"
                                     else None),
