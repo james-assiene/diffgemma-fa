@@ -186,7 +186,13 @@ def main() -> None:
     for idx, rec in enumerate(records):
         fn = rec.functions[0]
         try:
-            norm = _schema.normalize_bfcl_schema(fn["parameters"])
+            # Normalise the schema the GRAMMAR was compiled from, not the raw
+            # one. With `--ci-enums` the grammar admits `"pizza"` for an enum
+            # of `PIZZA`; validating against the un-expanded schema then marks
+            # it invalid, while BFCL's own scorer (which lowercases) counts it
+            # CORRECT. Measured: 5 of E4's 7 "schema-invalid" records were
+            # exactly this, so the column was penalising the flag for doing
+            # what it was designed to do.
             # NOT `params` -- that name holds the model weights in this scope,
             # and shadowing it fed a schema dict to `_prefill.prefill`, which
             # died in gemma's own `_dtype(params)` with "'str' object has no
@@ -195,6 +201,7 @@ def main() -> None:
             schema_params = fn["parameters"]
             if args.ci_enums:
                 schema_params = _case_insensitive_enums(schema_params)
+            norm = _schema.normalize_bfcl_schema(schema_params)
             a = pipeline.compile_json_schema(
                 schema_params, name=fn.get("name", ""), from_bfcl=True,
                 allow=ALLOW, allow_wildcard=True,
