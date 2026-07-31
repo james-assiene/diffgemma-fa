@@ -46,7 +46,43 @@ class X64Required(RuntimeError):
 
 
 def require_x64() -> None:
-    """Assert `jax_enable_x64`, which the **sampling** path genuinely requires.
+    """**Obsolete as of the pairwise-max `log_matmul` (2026-07-31). A no-op.**
+
+    Everything below is preserved because it is the measurement that justified
+    the constraint, and because the failure it describes is real for any
+    *linear-space* or foreign-anchored formulation. What changed is the anchor,
+    not the automaton:
+
+    - the old kernel exponentiated against `ra[i] + cb[j]`, a shift derived
+      from row/column maxima that the unscored `ACC --Σ--> ACC` tail pins at
+      0.0 while genuine grammar paths sit ~850 nats below. Terms landed at
+      `exp(-423)·exp(-423) ≈ 1e-368` and underflowed *even in float64*;
+    - `log_matmul` now anchors each entry on its own **pairwise max** (the
+      max-plus product), so the dominant term of every entry is `exp(0) = 1`
+      by construction. In float32 anything below `exp(-87)` is dropped —
+      relative weight `1e-38` *of its own entry*, not of a foreign anchor.
+
+    Measured on the record that exposed the whole problem
+    (`live_simple_106-63-0`, 403 states, L = 256, adversarial per-position
+    sharp `p`): feasible and simulator-accepted in float32 as well as float64.
+    Distributionally, against brute-force enumeration on DFAs and NFAs, the
+    float32 draw deviates by 0.0025 / 0.0013 against float64's 0.0033 / 0.0009
+    — i.e. indistinguishable, both far inside the 0.02 threshold.
+
+    **Consequences.** SPEC §5.6's memory table halves back: the tree is
+    `(2L−1)·|S|²·4` bytes again, restoring the `|S|` ceiling from 2,211 to
+    3,128 at 20 GB of headroom. It is also the likely cure for the
+    intermittent `CUDA_ERROR_OUT_OF_MEMORY` that killed two n=130 arms — the
+    exact kernel needs more headroom than the GEMM form did, and float32
+    gives half of it straight back.
+
+    Kept as a callable no-op rather than deleted so the call site in
+    `ConstrainedDiffusionSampler.__post_init__` and its tests keep documenting
+    the hazard for anyone who reintroduces a foreign anchor.
+
+    ---
+
+    Historical rationale (**no longer a constraint**):
 
     **Measured, on a real BFCL grammar at `L = 64`.** SPEC §2.4/§2.6 prescribe
     max-normalizing every tree node, which fixes the *overall* scale — but not
@@ -82,15 +118,7 @@ def require_x64() -> None:
       X64Required: if float64 is disabled, in which case the sampler would
         silently draw from a degenerate distribution rather than fail.
     """
-    if jnp.zeros((), dtype=jnp.float64).dtype != jnp.float64:
-        raise X64Required(
-            "the constrained sampling path needs float64: set "
-            "jax.config.update('jax_enable_x64', True) before importing. "
-            "In fp32 the root product underflows to exactly zero (measured "
-            "min positive entry 1.2e-288 against an fp32 floor of ~1e-45), "
-            "because the unscored ACC->ACC tail pins the per-node normalizer "
-            "at 1.0. --emission=map is in log space and is unaffected."
-        )
+    return  # see the docstring: the pairwise-max anchor removed the need
 
 
 def budget_terminal_factor(d: jnp.ndarray, remaining: jnp.ndarray,

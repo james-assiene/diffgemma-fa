@@ -139,16 +139,30 @@ def test_an_unknown_variant_is_rejected():
         S.ConstrainedDiffusionSampler(**_kwargs(variant="j7"))
 
 
-def test_a_sampling_emission_demands_float64():
-    """`require_x64` is called from here, not merely documented. Asking for
-    `constrained_dtype='float64'` is not the same as getting float64: without
-    `jax_enable_x64` every `jnp.float64` silently becomes float32, the tree is
-    built in fp32, and the root product underflows to exactly zero — a
-    degenerate draw that still returns plausible-looking tokens."""
-    with pytest.raises(ValueError, match="float64"):
+def test_float32_is_admissible_now_that_the_anchor_is_per_entry():
+    """This test used to assert the opposite, and the reversal is the point.
+
+    The old ban existed because `log_matmul` exponentiated against a FOREIGN
+    anchor (`ra[i] + cb[j]`), which the unscored `ACC --Σ--> ACC` tail pins at
+    0.0 while genuine grammar paths sit ~850 nats below — so entries
+    underflowed *even in float64*. With each entry anchored on its own
+    pairwise max, float32 drops only what is 1e-38 below its own entry.
+
+    Measured on `live_simple_106-63-0` under adversarial sharp `p`: feasible
+    and simulator-accepted in float32. Distributionally against brute-force
+    enumeration: float32 deviates 0.0025 (DFA) / 0.0013 (NFA) versus float64's
+    0.0033 / 0.0009 — indistinguishable, both far inside the 0.02 threshold.
+    """
+    S.ConstrainedDiffusionSampler(
+        **_kwargs(variant="j0", emission="sample",
+                  constrained_dtype="float32"))
+
+
+def test_an_unknown_dtype_is_still_rejected():
+    with pytest.raises(ValueError, match="float32 or float64"):
         S.ConstrainedDiffusionSampler(
             **_kwargs(variant="j0", emission="sample",
-                      constrained_dtype="float32"))
+                      constrained_dtype="bfloat16"))
 
 
 def test_the_valid_configurations_construct():

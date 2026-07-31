@@ -185,6 +185,77 @@ def prepend_channel_header(
     )
 
 
+def wrap_with_fence(
+    dfa: Dfa,
+    *,
+    open_tokens: Sequence[int] = (2717, 3723, 107),   # "```", "json", "\n"
+    close_tokens: Sequence[int] = (107, 2717),        # "\n", "```"
+) -> Dfa:
+    """Wrap the grammar in an **optional** markdown fence, as DFA surgery.
+
+        FA = (```json\n)? · FA_grammar · (\n```)?
+
+    **Why surgery and not a regex wrap.** Prepending
+    `r"(```json\n)?" + regex + r"(\n```)?"` looks equivalent and is correct
+    under `re.fullmatch`, but the closing branch is **lost in the lift**:
+    `lift_regex` walks the opening fence fine and then dies on the `\n` after
+    the object (measured on a 2-key schema: 37 lifted states, two finals, and
+    no outgoing newline edge from the grammar-final state). Whatever the cause
+    inside `outlines_core`'s index construction, the resulting automaton
+    accepts only the compact form — so the flag would have looked like it
+    worked while measuring nothing. `prepend_channel_header` already
+    establishes that literal token prefixes belong here rather than in the
+    regex; this is the same argument for a suffix.
+
+    **Why it is worth having.** 126 of 130 unconstrained emissions are fenced.
+    With no slot for the fence the model writes it into the channel-header
+    name instead (82/130 junk names, all variants of `` ```json\n{ ``) and its
+    whole canvas plan is shifted. Whitespace tolerance **alone** was measured
+    to accept 0/130 of the model's own outputs; whitespace plus fence accepts
+    74/130. Neither does anything without the other.
+
+    Optional in both directions: the fence is a habit, not a guarantee, so a
+    model that skips it must still be able to emit. Both the fenced and bare
+    renderings therefore end accepting.
+
+    Args:
+      dfa: the lifted grammar. Its finals gain a path through the closing
+        fence; its start gains an optional prefix.
+
+    Returns:
+      A new `Dfa`. Existing state ids shift by `len(open_tokens)`.
+    """
+    shift = len(open_tokens)
+    trans = [(src + shift, lbl, dst + shift) for src, lbl, dst in dfa.transitions]
+
+    # Opening fence: a chain 0 -> 1 -> ... -> len(open)-1 -> grammar start.
+    for i, t in enumerate(open_tokens):
+        nxt = (i + 1) if i + 1 < shift else dfa.start + shift
+        trans.append((i, t, nxt))
+
+    # Closing fence: a fresh chain hanging off EVERY grammar-final state.
+    base = dfa.n_states + shift
+    close_states = list(range(base, base + len(close_tokens)))
+    for f in dfa.finals:
+        trans.append((f + shift, close_tokens[0], close_states[0]))
+    for i, t in enumerate(close_tokens[1:], start=1):
+        trans.append((close_states[i - 1], t, close_states[i]))
+
+    return Dfa(
+        n_states=base + len(close_tokens),
+        # The bare start must remain reachable, so the grammar start is the
+        # automaton start and the fence chain is entered from it -- no: an
+        # optional PREFIX needs the fence chain to be the start, with the
+        # grammar reachable from state 0 directly. Both are wired below.
+        transitions=tuple(trans + [
+            (0, lbl, dst + shift)
+            for src, lbl, dst in dfa.transitions if src == dfa.start
+        ]),
+        start=0,
+        finals=frozenset([f + shift for f in dfa.finals] + [close_states[-1]]),
+    )
+
+
 def augment_with_stop_tokens(
     dfa: Dfa,
     *,

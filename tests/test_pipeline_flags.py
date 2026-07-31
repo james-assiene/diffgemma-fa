@@ -103,17 +103,21 @@ def fenced():
     ).automaton
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "The fence branch is DROPPED between the regex and the automaton: "
-    "compile_regex on `(```json\\n)? + body + (\\n```)?` yields 34 states — "
-    "byte-identical to the unfenced count — and accepts only the compact "
-    "form. The regex itself is correct (verified with re.fullmatch), so the "
-    "loss is in lift_regex/minimize. Left strict-xfail rather than deleted "
-    "because P2 is a live proposal and this is exactly the bug that would "
-    "have made experiment E4 silently measure a no-op."))
 def test_the_fence_is_optional_and_both_branches_are_accepted(fenced):
     """P2. Optional, because the fence is a habit and not a guarantee; if it
-    were required, a model that skipped it would be unable to emit anything."""
+    were required, a model that skipped it would be unable to emit anything.
+
+    This test was a strict xfail for one commit. The regex-level wrap
+    (`r"(```json\n)?" + regex + r"(\n```)?"`) is correct under
+    `re.fullmatch` but its **closing** branch is lost in `lift_regex` — the
+    lifted DFA walks the opening fence and then has no outgoing newline edge
+    from the grammar-final state. `automaton.wrap_with_fence` does the same
+    thing as DFA surgery instead, the way `prepend_channel_header` already
+    handles literal token prefixes, and the branch survives.
+
+    Worth keeping in mind: whitespace tolerance alone accepts 0/130 of the
+    model's own outputs, whitespace + fence accepts 74/130. A silently
+    no-op fence would have made experiment E4 look like a null result."""
     assert _accepts(fenced, '{"city": "Paris"}'), "compact must survive"
     assert _accepts(fenced, '```json\n{"city": "Paris"}\n```'), (
         "the fenced rendering 126/130 unconstrained outputs use must be "
@@ -147,3 +151,33 @@ def test_the_bundle_is_a_superset_not_a_replacement(fenced):
         ids = tok.encode(s)
         if Simulator(stock).accepts(ids):
             assert Simulator(fenced).accepts(ids), f"bundle lost {s!r}"
+
+
+def test_the_fence_wrap_keeps_the_bare_rendering_reachable():
+    """`wrap_with_fence` makes the fence chain the automaton's start, so the
+    unfenced path has to be re-wired from state 0 explicitly. If that wiring is
+    dropped, the fence stops being optional and becomes mandatory — which would
+    make every model that omits it unable to emit anything at all."""
+    from diffgemma_fa.compile.automaton import wrap_with_fence
+    from diffgemma_fa.compile.minimize import Dfa
+    # `a b` accepted; fence tokens are 2717/3723/107.
+    g = Dfa(n_states=3, transitions=((0, 500, 1), (1, 501, 2)), start=0,
+            finals=frozenset({2}))
+    w = wrap_with_fence(g)
+    T = {}
+    for s, a, d in w.transitions:
+        T.setdefault((s, a), d)
+
+    def run(seq):
+        cur = w.start
+        for t in seq:
+            if (cur, t) not in T:
+                return False
+            cur = T[(cur, t)]
+        return cur in w.finals
+
+    assert run([500, 501]), "the bare rendering must stay accepted"
+    assert run([2717, 3723, 107, 500, 501]), "opening fence only"
+    assert run([2717, 3723, 107, 500, 501, 107, 2717]), "both fences"
+    assert run([500, 501, 107, 2717]), "closing fence only"
+    assert not run([2717, 500, 501]), "a partial opening fence must not pass"

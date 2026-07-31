@@ -83,6 +83,7 @@ def compile_regex(
     k_max: int | None = None,
     schema_hash: str = "",
     channel_header: bool = True,
+    fence: bool = False,
 ) -> CompileReport:
     """Compile an anchored byte-level regex into a `CompiledAutomaton`.
 
@@ -98,6 +99,12 @@ def compile_regex(
     lifted = lift_regex(regex, vocabulary, do_minimize=do_minimize)
 
     grammar = lifted.dfa
+    if fence:
+        # BEFORE the channel header (the fence is inside the channel body) and
+        # before stop augmentation, so `d(s)` sees it -- SPEC §3.5's ordering.
+        from diffgemma_fa.compile.automaton import wrap_with_fence
+
+        grammar = wrap_with_fence(grammar)
     if channel_header:
         from diffgemma_fa.compile.automaton import prepend_channel_header
 
@@ -183,17 +190,12 @@ def compile_json_schema(
         prepared, from_bfcl=from_bfcl, allow=allow,
         allow_wildcard=allow_wildcard, whitespace_pattern=whitespace_pattern,
     )
-    if fence:
-        # Wrapped at the REGEX level, i.e. before `lift_regex` and therefore
-        # before `augment_with_stop_tokens` and `distance_to_final` -- `d(s)`
-        # must see the fence or it is a different function (SPEC §3.5).
-        regex = r"(```json\n)?" + regex + r"(\n```)?"
     seconds_regex = time.perf_counter() - t0
 
     from diffgemma_fa.compile.automaton import schema_fingerprint
 
     report = compile_regex(
-        regex, name=name, channel_header=channel_header,
+        regex, name=name, channel_header=channel_header, fence=fence,
         # Every option that can change the compiled language goes into the key.
         # Hashing the schema alone made two materially different grammars share
         # a cache entry -- see `schema_fingerprint`.

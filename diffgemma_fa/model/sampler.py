@@ -145,12 +145,16 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
             # product underflows to exactly zero — a degenerate draw that still
             # returns plausible-looking tokens. Fail at construction instead.
             _constrained.require_x64()
-        if self.emission == "sample" and self.constrained_dtype != "float64":
+        if self.constrained_dtype not in ("float32", "float64"):
+            # float32 became admissible with the pairwise-max `log_matmul`
+            # (see `constrained.require_x64`): the old ban existed because the
+            # kernel exponentiated against a FOREIGN anchor, so entries
+            # underflowed even in float64. Anchored per entry, float32 is
+            # measured indistinguishable from float64 against brute-force
+            # enumeration, and halves the tree.
             raise ValueError(
-                "emission='sample' requires constrained_dtype='float64'; see "
-                "model.constrained.require_x64 — in fp32 the root product "
-                "underflows to exactly zero and the draw degenerates silently"
-            )
+                f"constrained_dtype must be float32 or float64, got "
+                f"{self.constrained_dtype!r}")
 
     # -- entry point: widen the prefilled state --------------------------
     @override
