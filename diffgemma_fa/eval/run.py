@@ -156,6 +156,14 @@ def main() -> None:
     ap.add_argument("--fence", action="store_true",
                     help="E4/P2: allow an optional ```json fence around the "
                          "object, which 126/130 unconstrained outputs use")
+    ap.add_argument("--dtype", default="float32",
+                    choices=["float32", "float64"],
+                    help="tree dtype for --emission=sample. float32 is the "
+                         "default since the pairwise-max log_matmul made it "
+                         "exact (deviation 0.0025/0.0013 vs float64's "
+                         "0.0033/0.0009 against brute-force enumeration); it "
+                         "halves the tree, which is what the E4 grammar's "
+                         "larger |S| needs to fit")
     ap.add_argument("--ci-enums", action="store_true",
                     help="E4/P4: accept enum literals in any case. BFCL's own "
                          "scorer lowercases, so this cannot create a wrong "
@@ -225,6 +233,7 @@ def main() -> None:
             sliding_window_size=getattr(model.config, "sliding_window_size", None),
             n_states_bucket=a.n_states_bucket, n_classes=a.tables.n_classes,
             variant=args.variant, emission=args.emission,
+            constrained_dtype=args.dtype,
             sample_from_predictions=ds.SampleFromPredictions(
                 entropy_bound=args.entropy_bound,
                 text_vocab_size=tok.vocab_size),
@@ -306,6 +315,7 @@ def main() -> None:
         "entropy_bound": args.entropy_bound, "nonempty_strings": args.nonempty,
         "seed": args.seed,
         "prompt_style": args.prompt_style,
+        "dtype": args.dtype,
         "whitespace": args.whitespace,
         "fence": args.fence,
         "ci_enums": args.ci_enums,
