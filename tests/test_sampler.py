@@ -139,23 +139,36 @@ def test_an_unknown_variant_is_rejected():
         S.ConstrainedDiffusionSampler(**_kwargs(variant="j7"))
 
 
-def test_float32_is_admissible_now_that_the_anchor_is_per_entry():
-    """This test used to assert the opposite, and the reversal is the point.
+def test_float32_constructs_but_is_not_the_default():
+    """float32 remains *constructible* — the API no longer bans it — but it is
+    not the default and must not become one without a production-scale
+    measurement.
 
-    The old ban existed because `log_matmul` exponentiated against a FOREIGN
-    anchor (`ra[i] + cb[j]`), which the unscored `ACC --Σ--> ACC` tail pins at
-    0.0 while genuine grammar paths sit ~850 nats below — so entries
-    underflowed *even in float64*. With each entry anchored on its own
-    pairwise max, float32 drops only what is 1e-38 below its own entry.
+    The history is the point. float32 was briefly declared safe on a toy check
+    (`L = 4`, `|S| <= 8`, deviation 0.0025/0.0013 against float64's
+    0.0033/0.0009 vs brute-force enumeration) and made the eval default. At
+    production scale on the E4 grammar at `L = 256` it drove the `Z == 0`
+    detector on 70/130 and 55/130 records across two seeds, against 0/130 in
+    float64 on the identical grammar. Eight tree levels of logsumexp in a
+    format whose `exp` underflows at 87 nats cannot hold a grammar whose real
+    paths span hundreds.
 
-    Measured on `live_simple_106-63-0` under adversarial sharp `p`: feasible
-    and simulator-accepted in float32. Distributionally against brute-force
-    enumeration: float32 deviates 0.0025 (DFA) / 0.0013 (NFA) versus float64's
-    0.0033 / 0.0009 — indistinguishable, both far inside the 0.02 threshold.
+    A numerical claim validated only on toy shapes is not validated.
     """
     S.ConstrainedDiffusionSampler(
         **_kwargs(variant="j0", emission="sample",
                   constrained_dtype="float32"))
+
+
+def test_the_eval_default_dtype_is_float64():
+    """Pins the correction: the CLI default must not drift back to float32."""
+    import inspect
+    from diffgemma_fa.eval import run as R
+    src = inspect.getsource(R.main)
+    assert '"--dtype", default="float64"' in src, (
+        "the sample path's tree dtype default must stay float64; float32 was "
+        "measured to cause spurious Z == 0 on >50% of records at L = 256"
+    )
 
 
 def test_an_unknown_dtype_is_still_rejected():

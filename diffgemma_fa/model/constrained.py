@@ -46,12 +46,39 @@ class X64Required(RuntimeError):
 
 
 def require_x64() -> None:
-    """**Obsolete as of the pairwise-max `log_matmul` (2026-07-31). A no-op.**
+    """**Still required for `--emission=sample`. A no-op only by API.**
 
-    Everything below is preserved because it is the measurement that justified
-    the constraint, and because the failure it describes is real for any
-    *linear-space* or foreign-anchored formulation. What changed is the anchor,
-    not the automaton:
+    **[Corrected 2026-08-01.]** This docstring previously declared float64
+    obsolete on the strength of a toy-scale check — `L = 4`, `|S| <= 8`, 20k
+    draws against brute-force enumeration, where float32 deviated 0.0025 /
+    0.0013 against float64's 0.0033 / 0.0009. That check was real but far too
+    small to generalise, and it did not.
+
+    Measured at production scale on the E4 grammar (whitespace-tolerant, so
+    roughly double `|S|`), `L = 256`, n = 130 records:
+
+        float64 : Z == 0 on   0/130   (CS 1.000)
+        float32 : Z == 0 on  70/130 and 55/130 across two seeds (CS 0.46/0.58)
+
+    So float32 does not silently corrupt the draw — the detector catches it, and
+    those records fail loudly rather than emitting garbage — but it makes the
+    kernel spuriously infeasible on more than half of them. Whatever margin
+    exists at `L = 4` is gone by `L = 256`: 8 tree levels of logsumexp in a
+    format whose `exp` underflows at 87 nats cannot hold a grammar whose real
+    paths span hundreds.
+
+    The lesson is about the test, not the arithmetic: a numerical claim
+    validated only on toy shapes is not validated. Any future attempt at
+    float32 must be measured on a real grammar at `L = 256` before it is
+    believed.
+
+    ---
+
+    Historical note on why the OLD failure was different:
+
+    The pre-2026-07-31 kernel failed for a *different* reason, which the
+    pairwise-max anchor did genuinely fix — it is worth keeping distinct from
+    the dtype question above:
 
     - the old kernel exponentiated against `ra[i] + cb[j]`, a shift derived
       from row/column maxima that the unscored `ACC --Σ--> ACC` tail pins at

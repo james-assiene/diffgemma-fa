@@ -156,14 +156,15 @@ def main() -> None:
     ap.add_argument("--fence", action="store_true",
                     help="E4/P2: allow an optional ```json fence around the "
                          "object, which 126/130 unconstrained outputs use")
-    ap.add_argument("--dtype", default="float32",
+    ap.add_argument("--dtype", default="float64",
                     choices=["float32", "float64"],
-                    help="tree dtype for --emission=sample. float32 is the "
-                         "default since the pairwise-max log_matmul made it "
-                         "exact (deviation 0.0025/0.0013 vs float64's "
-                         "0.0033/0.0009 against brute-force enumeration); it "
-                         "halves the tree, which is what the E4 grammar's "
-                         "larger |S| needs to fit")
+                    help="tree dtype for --emission=sample. **float64.** "
+                         "float32 was briefly the default on the strength of a "
+                         "toy-scale check (L=4, |S|<=8) and is WRONG at "
+                         "production scale: measured on the E4 grammar at "
+                         "L=256, it drives the Z==0 detector on 70/130 and "
+                         "55/130 records, against 0/130 in float64 on the same "
+                         "grammar. See model.constrained.require_x64")
     ap.add_argument("--ci-enums", action="store_true",
                     help="E4/P4: accept enum literals in any case. BFCL's own "
                          "scorer lowercases, so this cannot create a wrong "
