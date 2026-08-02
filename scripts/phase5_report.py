@@ -155,6 +155,47 @@ def main() -> None:
                 w(f"| `{ka[0]}-{ka[1]}` | `{kb[0]}-{kb[1]}` | {bb} | {cc} "
                   f"| {ns_} | {p:.3g} |{mark}{pc:.3g}{mark.strip()} |")
 
+    # -- the grammar result ------------------------------------------------
+    import glob
+    exps = {}
+    for f in sorted(glob.glob(str(pathlib.Path(args.artifacts) / "exp_*.json"))):
+        exps[pathlib.Path(f).stem[4:]] = json.load(open(f))
+    if exps:
+        w("\n## The grammar fix, and the ablation that explains it\n")
+        w("The compiled grammar admitted **none** of the 130 outputs the "
+          "unconstrained arm produced: it forbids the model's newline+indent "
+          "separators, so at every value boundary the renormalised draw "
+          "extends the value instead of closing it (`600` -> `6000`, `USA` -> "
+          "`\"USA1  \"`). 58% of the measured accuracy gap was that. "
+          "`--whitespace pretty` admits `( |\\n {0,6})?`, the separators the "
+          "model actually uses.\n")
+        w("| config | n | CS | schema valid | arg acc | exact call | Z==0 |")
+        w("|---|---|---|---|---|---|---|")
+        for tag in sorted(exps):
+            d = exps[tag]
+            n = d["n"]
+            w(f"| `{tag}` | {n} | {fmt_rate(d['cs'], n)} "
+              f"| {fmt_rate(d['schema_ok'], n)} "
+              f"| {fmt_rate(d['arg_correct'], d['arg_total'])} "
+              f"| {fmt_rate(d['exact_calls'], n)} "
+              f"| {d.get('zero_partition', '-')} |")
+        w("\n**The whitespace carries all of it.** On MAP emission at n=130, "
+          "each component of the bundle alone: fence 0.328, case-insensitive "
+          "enums 0.335, whitespace **0.622**, all three 0.628 — against a "
+          "stock-grammar baseline of 0.328 and an unconstrained model at "
+          "0.641. The fence was motivated by a string-level proxy (verbatim "
+          "acceptance of a whole unconstrained output: 0/130 without it, "
+          "74/130 with) that turned out not to predict the thing it was used "
+          "to predict — mid-generation only the separators matter.\n")
+        w("**float32 is not an option on the sample path.** It was briefly "
+          "made the default on a toy-scale check (`L=4`, `|S|<=8`); at "
+          "`L=256` on this grammar it drives the `Z == 0` detector on 70/130 "
+          "and 55/130 records across two seeds, against 0/130 in float64. The "
+          "guarantee held — those records fail loudly rather than emitting "
+          "garbage — but the kernel is spuriously infeasible on half the "
+          "corpus. The `exp_e5_*` artifacts are that measurement; the "
+          "`exp_f64_*` ones are the float64 reruns.\n")
+
     # -- coverage ----------------------------------------------------------
     w("\n## Coverage and caveats\n")
     for key in keys:
@@ -178,8 +219,22 @@ def main() -> None:
       "the GPU is shared: any latency number measured here is pessimistic and "
       "not publishable (CLAUDE.md). The columns above are accuracy, not "
       "latency, and are unaffected.")
+    w("- **Only 130 of the 258 single-function records in this split were "
+      "evaluated** — the first 130 by id. A prefix is not a random sample "
+      "(BFCL ids cluster by schema family), so every number here is a "
+      "first-half claim.")
+    w("- Every arm is **one generation at one seed**. The measured seed spread "
+      "for an identical config at n=30 is 0.412 / 0.412 / 0.314, so treat "
+      "differences under ~0.1 at that size as noise.")
+    w("- **SPEC §7.3's overhead table is not here and has never been "
+      "measured.** That is the paper's headline performance claim (+4%), and "
+      "it now has to be measured against a bandwidth-bound `log_matmul` "
+      "rather than the GEMM the design assumed — the honest number may be "
+      "materially worse.")
     w("- Missing from this table entirely: Spider, and five of the six "
-      "datasets SPEC §7.1 lists. Not run.")
+      "datasets SPEC §7.1 lists. Not run. SPEC §3.8's refusal-branch union is "
+      "unimplemented, so BFCL's 1,124 irrelevance records have no path to a "
+      "score.")
 
     out = pathlib.Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
