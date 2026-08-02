@@ -143,6 +143,10 @@ def main() -> None:
     ap.add_argument("--nonempty", action="store_true", default=True)
     ap.add_argument("--no-nonempty", dest="nonempty", action="store_false")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--offset", type=int, default=0,
+                    help="skip this many records before taking --n; lets the "
+                         "second half of a split be run without redoing the "
+                         "first")
     ap.add_argument("--out", default="")
     ap.add_argument("--prompt-style", default="stock",
                     choices=sorted(PROMPT_STYLES),
@@ -182,6 +186,11 @@ def main() -> None:
     splits = TASKS[args.task]
     records = [r for s in splits for r in bfcl_data.iter_split(s)
                if len(r.functions) == 1]
+    # `--offset` exists so the SECOND half of a split can be run without
+    # redoing the first. Every number reported so far is "the first 130 of
+    # 258 by id", and a prefix is not a random sample -- BFCL ids cluster by
+    # schema family, so the untouched half may not look like the measured one.
+    records = records[args.offset:]
     if args.n:
         records = records[: args.n]
     truth = {}
@@ -333,6 +342,7 @@ def main() -> None:
         "task": args.task, "variant": args.variant, "emission": args.emission,
         "entropy_bound": args.entropy_bound, "nonempty_strings": args.nonempty,
         "seed": args.seed,
+        "offset": args.offset,
         "prompt_style": args.prompt_style,
         "dtype": args.dtype,
         "whitespace": args.whitespace,

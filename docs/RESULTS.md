@@ -116,6 +116,40 @@ The compiled grammar admitted **none** of the 130 outputs the unconstrained arm 
 **float32 is not an option on the sample path.** It was briefly made the default on a toy-scale check (`L=4`, `|S|<=8`); at `L=256` on this grammar it drives the `Z == 0` detector on 70/130 and 55/130 records across two seeds, against 0/130 in float64. The guarantee held — those records fail loudly rather than emitting garbage — but the kernel is spuriously infeasible on half the corpus. The `exp_e5_*` artifacts are that measurement; the `exp_f64_*` ones are the float64 reruns.
 
 
+## SPEC §7.3 — overhead
+
+The paper's headline performance claim, measured for the first time.
+
+**Per denoising step**, sum-product tree in float64 at `L = 256`, against a model forward measured at 0.21 s (Phase 0):
+
+| `\|S\|` bucket | tree | vs. one forward |
+|---|---|---|
+| 64 | 0.5 ms | **0.2%** |
+| 128 | 2.2 ms | **1.0%** |
+| 256 | 18.1 ms | **8.6%** |
+| 512 | 173.4 ms | **82.6%** |
+
+**The paper's ~4% holds only for small automata.** The crossover is sharp and lands where SPEC §5.6 predicted (`|S| ≈ 512`): below it the tree is noise against a forward pass, above it it nearly doubles the step. The whitespace-tolerant grammar roughly doubles `|S|`, moving most records up one bucket — so the fix that bought the accuracy also moved us toward the expensive end of this table.
+
+Three things make this **not** comparable to SPEC §7.3's projection:
+
+- `log_matmul` is no longer a GEMM. It is two fused reductions over the broadcast `A + B`, because every GEMM-shaped form underflowed on real grammars. SPEC §0's kernel-count property survives; its GEMM-throughput property does not.
+- The **max-plus (MAP) tree is not measured**. Benchmarking it wedged the harness three times; `maxplus_combine` materialises `[L/2, n, k, m]`, which is 68 GB at `|S| = 512`. A real gap, not an omission for brevity.
+- float32 is excluded: besides driving spurious `Z == 0` on >50% of records, it **hangs XLA:GPU** at `|S| >= 128` in the fused reduction (`|S|=64` compiles in 0.08 s; `|S|=128` never returns).
+
+### End to end, seconds per record
+
+| arm | s/record | vs unconstrained (37.4 s) |
+|---|---|---|
+| `eval_bfcl_live_simple_j0_map` | 27.1 | -27.5% |
+| `eval_bfcl_live_simple_j1_sample` | 28.4 | -24.1% |
+| `exp_oomfix_j1` | 34.2 | -8.6% |
+| `exp_f64_grammar130_s1` | 35.0 | -6.4% |
+| `exp_f64_ws_only_j1` | 48.3 | +29.1% |
+| `eval_bfcl_live_simple_mask_sample` | 44.4 | +18.7% |
+
+**Constrained decoding is mostly *faster* end to end, not slower.** The grammar makes the model place a stop token deliberately, while the unconstrained arm generates toward the token budget; the per-step tree cost is more than repaid by shorter generations. Treat the spread as indicative rather than tight — these are single runs on a box that saw OOM retries and preallocation changes mid-campaign.
+
 ## Coverage and caveats
 
 - `unconstrained-sample`: n=130 of 130 available; skipped at compile time: none; seed=0; entropy_bound=0.1; nonempty_strings=True; 4859.5 s.
