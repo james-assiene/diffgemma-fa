@@ -189,7 +189,7 @@ def main() -> None:
         truth.update(bfcl_data.load_possible_answers(s))
 
     sc = metrics.Scores()
-    rows, skipped, zero_partition = [], {}, []
+    rows, skipped, zero_partition, oom = [], {}, [], []
     t_start = time.perf_counter()
 
     for idx, rec in enumerate(records):
@@ -256,6 +256,24 @@ def main() -> None:
                 params=params, init_state=init,
                 max_new_tokens=args.max_new_tokens,
                 automaton=to_traced(a, batch=init.predicted_tokens.shape[0]))
+        except jax.errors.JaxRuntimeError as e:
+            # RESOURCE_EXHAUSTED on ONE record must not destroy the other 129.
+            # Same lesson as the Z == 0 catch below: the library is right to
+            # fail loudly, but the harness owns the granularity. The
+            # whitespace-tolerant grammar roughly doubles |S|, and the
+            # sum-product tree is twice the size of MAP's max-plus tree, so a
+            # 1024-bucket record wants ~8 GiB on top of the model's 51 GB.
+            # Counted in its own column and the ids recorded -- never folded
+            # into the accuracy numbers as if the model had answered badly.
+            if "RESOURCE_EXHAUSTED" not in str(e):
+                raise
+            oom.append({"id": rec.id, "fn": fn.get("name"),
+                        "n_states_bucket": int(a.n_states_bucket)})
+            sc.add(accepted=False, parsed_obj=None, want=None, schema_ok=False)
+            rows.append({"id": rec.id, "fn": fn.get("name"), "text": "",
+                         "parsed": None, "accepted": False, "schema_ok": False,
+                         "oom": True})
+            continue
         except ZeroPartitionError as e:
             # SPEC §6.3 cause (a) or (b): no accepted string of the canvas
             # length exists from A_k within budget. The **library** must raise
@@ -325,6 +343,9 @@ def main() -> None:
         # SPEC §6.3 causes (a)/(b) hit at run time, per record. Reported, never
         # folded into the other columns.
         "zero_partition": len(zero_partition),
+        # Records the device could not fit. A capacity fact, not a model fact.
+        "oom": len(oom),
+        "oom_records": oom,
         "zero_partition_records": zero_partition,
         "elapsed_seconds": round(time.perf_counter() - t_start, 1),
         **sc.as_dict(),
@@ -343,7 +364,8 @@ def main() -> None:
               "schema_ok", "schema_valid_rate", "parsed",
               "nonempty", "nonempty_rate", "arg_correct", "arg_total",
               "arg_accuracy", "exact_calls", "exact_call_rate",
-              "skipped_by_reason", "zero_partition", "elapsed_seconds"):
+              "skipped_by_reason", "zero_partition", "oom",
+              "elapsed_seconds"):
         print(f"{k}: {out[k]}")
     print(f"\nwrote {path}")
 
