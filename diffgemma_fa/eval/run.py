@@ -169,6 +169,11 @@ def main() -> None:
                          "L=256, it drives the Z==0 detector on 70/130 and "
                          "55/130 records, against 0/130 in float64 on the same "
                          "grammar. See model.constrained.require_x64")
+    ap.add_argument("--confidence", default="mf", choices=["mf", "mar"],
+                    help="'mar' computes the accept rule's entropy from the "
+                         "CONSTRAINED marginal q_i instead of the raw logits "
+                         "(SPEC §3.4). The paper's ablation puts this at "
+                         "68.4 -> 76.4, the larger half of its accuracy gain")
     ap.add_argument("--ci-enums", action="store_true",
                     help="E4/P4: accept enum literals in any case. BFCL's own "
                          "scorer lowercases, so this cannot create a wrong "
@@ -243,6 +248,7 @@ def main() -> None:
             sliding_window_size=getattr(model.config, "sliding_window_size", None),
             n_states_bucket=a.n_states_bucket, n_classes=a.tables.n_classes,
             variant=args.variant, emission=args.emission,
+            confidence=args.confidence,
             constrained_dtype=args.dtype,
             sample_from_predictions=ds.SampleFromPredictions(
                 entropy_bound=args.entropy_bound,
@@ -344,6 +350,7 @@ def main() -> None:
         "seed": args.seed,
         "offset": args.offset,
         "prompt_style": args.prompt_style,
+        "confidence": args.confidence,
         "dtype": args.dtype,
         "whitespace": args.whitespace,
         "fence": args.fence,

@@ -297,3 +297,49 @@ def test_j2_is_not_flagged_infeasible_for_violating_the_grammar():
         "the advance_ok conjunct must be gated to the arms that actually "
         "promise the guarantee"
     )
+
+
+# --------------------------------------------------------------------------
+# Mar confidence (SPEC §3.4) — the paper's remasking signal
+# --------------------------------------------------------------------------
+
+def test_the_accept_rule_can_be_driven_by_a_precomputed_entropy():
+    """`--confidence=mar` swaps the entropy source, not the selection rule.
+    Splitting `_accept_mask` is what makes that possible, so the split must
+    preserve behaviour exactly."""
+    logits = _logits_with_entropies([0.9, 0.1, 0.7, 0.3])
+    direct = np.asarray(S._accept_mask(logits, 0.05))
+    via_h = np.asarray(S._accept_from_entropy(_entropies(logits)[None, :], 0.05))
+    assert (direct == via_h).all(), (
+        "the refactor changed the accept rule; mar would then be measuring two "
+        "things at once"
+    )
+
+
+def test_mar_is_rejected_if_misspelled():
+    with pytest.raises(ValueError, match="unknown confidence"):
+        S.ConstrainedDiffusionSampler(**_kwargs(variant="j1", emission="sample", confidence="Mar"))
+
+
+def test_both_confidence_modes_construct():
+    for c in ("mf", "mar"):
+        S.ConstrainedDiffusionSampler(**_kwargs(variant="j1", emission="sample", confidence=c))
+
+
+def test_mar_uses_the_constrained_marginal_not_the_logits():
+    """The whole point: `q_i` was built and reference-tested in
+    `infer/marginals.py` and never called on the production path. Pinned by
+    source inspection because exercising it needs the 51 GB model."""
+    import inspect
+    src = inspect.getsource(S.ConstrainedDiffusionSampler)
+    i = src.index('self.confidence == "mar"')
+    body = src[i:i + 1800]
+    assert "constrained_marginals" in body
+    assert "entropy_from_q" in body
+    assert "_accept_from_entropy" in body
+
+
+def test_mf_remains_the_default_so_prior_arms_stay_comparable():
+    s = S.ConstrainedDiffusionSampler(**_kwargs(variant="j1",
+                                               emission="sample"))
+    assert s.confidence == "mf"

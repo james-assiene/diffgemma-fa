@@ -118,6 +118,10 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
     variant: str = "j0"
     emission: str = "map"
     constrained_dtype: str = "float64"
+    #: `mf` = the stock rule, entropy of the **unconstrained** shaped logits.
+    #: `mar` = entropy of the **constrained** marginal `q_i` (SPEC §3.4, the
+    #: paper's remasking confidence). Static: it changes the traced graph.
+    confidence: str = "mf"
     #: Emit a per-step trace to `DIAGNOSTICS`. Static, so turning it on
     #: recompiles — which is fine, it is a debugging path.
     diagnose: bool = False
@@ -127,6 +131,8 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
             raise ValueError(f"unknown variant {self.variant!r}")
         if self.emission not in ("map", "sample"):
             raise ValueError(f"unknown emission {self.emission!r}")
+        if self.confidence not in ("mf", "mar"):
+            raise ValueError(f"unknown confidence {self.confidence!r}")
         # SPEC §3.9's flag table: `--emission={map,sample}` selects "MAP or
         # joint draw (**J0 only**; J1/J2 are always a draw)". J1/J2 define the
         # emission to *be* the draw, so a MAP emission is not one of their
@@ -308,8 +314,35 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
                 params=params, rng=sample_rng_)
 
             p_real = jax.nn.softmax(out.logits.astype(dt), axis=-1)  # [B, L, V]
-            accepted = _accept_mask(out.logits,
-                                    self.sample_from_predictions.entropy_bound)
+
+            if self.confidence == "mar":
+                # SPEC §3.4 / the paper's remasking confidence. `r_i(v)` is the
+                # same quantity the `mask` variant already builds; `q = p*r/Z`
+                # and its entropy then replace the unconstrained entropy in the
+                # accept rule. One forward-backward per step -- the cost the
+                # `mask` arm already pays and which measured at 44.4 s/record
+                # against 37.4 unconstrained.
+                def _q_entropy(pi, act):
+                    aut = automaton.with_active(act)
+                    p_vl, W_e, M = _constrained._matrices(  # noqa: SLF001
+                        pi, aut, self.n_states_bucket, self.n_classes)
+                    tr = scans.up_sweep(M)
+                    a_v, b_v, _, _ = scans.prefix_suffix(
+                        tr, aut.active.astype(pi.dtype),
+                        _constrained.budget_terminal_factor(
+                            aut.d, remaining, dtype=pi.dtype))
+                    q = _marginals.constrained_marginals(
+                        p_vl, a_v, b_v, aut.edge_src, aut.edge_dst,
+                        aut.edge_class, aut.csr_indices, aut.csr_indptr,
+                        aut.is_neg, self.n_classes)
+                    return _marginals.entropy_from_q(q)          # [L]
+                h_q = jax.vmap(_q_entropy)(p_real, automaton.active)
+                accepted = _accept_from_entropy(
+                    h_q.astype(jnp.float32),
+                    self.sample_from_predictions.entropy_bound)
+            else:
+                accepted = _accept_mask(
+                    out.logits, self.sample_from_predictions.entropy_bound)
 
             # The EMISSION always uses the model's real marginals. Only J1's
             # *trajectory* is flattened — that is the whole point of J0's
@@ -515,6 +548,18 @@ def _accept_mask(logits: jnp.ndarray, entropy_bound: float) -> jnp.ndarray:
     lp = jax.nn.log_softmax(logits.astype(jnp.float32))
     p = jnp.exp(lp)
     h = -jnp.sum(jnp.where(p == 0, 0.0, lp) * p, axis=-1)      # [B, L]
+    return _accept_from_entropy(h, entropy_bound)
+
+
+def _accept_from_entropy(h: jnp.ndarray, entropy_bound: float) -> jnp.ndarray:
+    """The accept rule's *selection*, given per-position entropy `[B, L]`.
+
+    Split out so `--confidence=mar` can feed it the entropy of the
+    **constrained** marginal `q_i` instead of the unconstrained `p_i`. The
+    paper's own ablation puts that swap at 68.4 -> 76.4, the larger half of its
+    accuracy gain; here it was built (`infer/marginals.py`) and then never
+    called on the production path.
+    """
     order = jnp.argsort(h, axis=-1)
     srt = jnp.take_along_axis(h, order, axis=-1)
     keep = (jnp.cumsum(srt, axis=-1) - srt) <= entropy_bound
