@@ -169,6 +169,13 @@ def main() -> None:
                          "L=256, it drives the Z==0 detector on 70/130 and "
                          "55/130 records, against 0/130 in float64 on the same "
                          "grammar. See model.constrained.require_x64")
+    ap.add_argument("--temp", default="stock", choices=["stock", "greedy"],
+                    help="'greedy' pins min=max=_MIN_TEMP (1e-12), the closest "
+                         "reachable analogue of the paper's T=0 column. The "
+                         "paper's headline 63.9 -> 71.5 is GREEDY; every arm "
+                         "here so far used the stock 0.8 -> 0.408 anneal, so "
+                         "we may be competing against a stronger baseline than "
+                         "the paper did. Never executed before")
     ap.add_argument("--confidence", default="mf", choices=["mf", "mar"],
                     help="'mar' computes the accept rule's entropy from the "
                          "CONSTRAINED marginal q_i instead of the raw logits "
@@ -250,6 +257,12 @@ def main() -> None:
             variant=args.variant, emission=args.emission,
             confidence=args.confidence,
             constrained_dtype=args.dtype,
+            logit_shaper=(
+                ds.AnnealingTemperatureShaper(
+                    ds.AnnealingTemperatureShaperConfig(
+                        exponent=1.0, min_temperature=1e-12,
+                        max_temperature=1e-12))
+                if args.temp == "greedy" else base.logit_shaper),
             sample_from_predictions=ds.SampleFromPredictions(
                 entropy_bound=args.entropy_bound,
                 text_vocab_size=tok.vocab_size),
@@ -351,6 +364,7 @@ def main() -> None:
         "offset": args.offset,
         "prompt_style": args.prompt_style,
         "confidence": args.confidence,
+        "temp": args.temp,
         "dtype": args.dtype,
         "whitespace": args.whitespace,
         "fence": args.fence,

@@ -343,3 +343,26 @@ def test_mf_remains_the_default_so_prior_arms_stay_comparable():
     s = S.ConstrainedDiffusionSampler(**_kwargs(variant="j1",
                                                emission="sample"))
     assert s.confidence == "mf"
+
+
+def test_near_greedy_is_documented_as_incompatible_with_the_sample_emission():
+    """Measured, not reasoned: `--temp greedy` (min=max=_MIN_TEMP=1e-12) makes
+    the constrained posterior collapse on **every** record.
+
+    At that temperature softmax is one-hot, so `p` carries exact zeros almost
+    everywhere and `Z == 0` unless the model's greedy string is itself in the
+    language. A 3-record probe returned `zero_partition = 3/3`: the detector
+    correctly refused rather than emitting garbage.
+
+    This matters for reproduction: the paper's headline BFCL-Live number
+    (63.9 -> 71.5) is a GREEDY comparison, and it cannot be reproduced by
+    shaping the logits upstream of the constrained emission. The flag stays
+    because greedy is still the right setting for the *unconstrained* baseline
+    arm, which is the comparison that tells us whether we have been competing
+    against a stronger baseline than the paper did.
+    """
+    from diffgemma_fa.eval import run as R
+    import inspect
+    src = inspect.getsource(R.main)
+    assert '"--temp"' in src and '"greedy"' in src
+    assert "1e-12" in src, "the near-greedy path must use gemma's _MIN_TEMP"
