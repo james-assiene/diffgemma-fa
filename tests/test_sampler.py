@@ -333,10 +333,19 @@ def test_mar_uses_the_constrained_marginal_not_the_logits():
     import inspect
     src = inspect.getsource(S.ConstrainedDiffusionSampler)
     i = src.index('self.confidence == "mar"')
-    body = src[i:i + 1800]
-    assert "constrained_marginals" in body
-    assert "entropy_from_q" in body
+    # Scope strictly to the mar branch: the `else:` that follows it is the mf
+    # path and legitimately uses `out.logits`.
+    body = src[i:src.index("            else:", i)]
+    # `constrained_entropy_streamed` replaced the
+    # `constrained_marginals` -> `entropy_from_q` pair: same number (verified
+    # to 8.9e-16) computed over the CSR instead of a dense [L, V] chain. What
+    # must hold is that the accept rule is driven by the CONSTRAINED marginal
+    # rather than the raw logits, whichever route computes it.
+    assert "constrained_entropy_streamed" in body
     assert "_accept_from_entropy" in body
+    assert "out.logits" not in body, (
+        "the mar branch must not fall back to unconstrained logits"
+    )
 
 
 def test_mf_remains_the_default_so_prior_arms_stay_comparable():
