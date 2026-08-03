@@ -451,3 +451,35 @@ retracted as underpowered (19 keys, <10% power); the 0.641→0.385 gap
 contradicts the paper's direction in all 40 of its cells → port-configuration
 effect until proven otherwise, prime suspects Mar (unwired) and the
 prompt/rendering contract.
+
+## 2026-08-03 — Countdown and Sudoku: the tight-grammar regime
+
+Added `compile/tasks/{countdown,sudoku}.py` and `eval/run_tasks.py`. The
+grammars already existed in `tasks/grammars.py`; what was missing was data,
+scorers and eval integration.
+
+**Why these two.** Every accuracy result so far is from BFCL, whose grammars
+are large permissive JSON schemas — |S| 128-1024, where §7.3 puts the tree at
+up to 82.6% of a model forward and the automaton barely narrows anything.
+Countdown and Sudoku compile to **|S| bucket 64**, where the tree is 0.2% of a
+forward and the constraint eliminates almost the whole output space. If the
+whitespace finding (0.328 -> 0.628 on BFCL) was an artifact of JSON rendering
+rather than something general about grammar-tokenizer alignment, it should
+fail to appear here.
+
+**Dependency added:** `datasets` 5.0.1, which CLAUDE.md already lists in the
+intended stack. Installed in the venv only. Countdown's test slice
+(TinyZero's `range(327680, 328704)`, 1,024 rows) is materialised to
+`data/countdown_test.jsonl` so a long run never depends on the network.
+Sudoku needs no download at all — SPEC records there is no canonical source,
+so puzzles are generated synthetically with uniqueness verified by exhaustive
+solve.
+
+**The scorers are not format checks.** A grammar guarantees an answer's shape
+and nothing about whether it is right: `countdown_regex` admits `1+1=3`, and a
+format-only Sudoku grammar would let a model overwrite the givens and solve a
+different puzzle. Both are re-derived and tested against exactly those two
+failure modes.
+
+Queued behind the seed-variance sweep: 4 arms (unconstrained + j0-map on each
+task) at n=250.

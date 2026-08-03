@@ -1,0 +1,215 @@
+"""Evaluation for Countdown and Sudoku. SPEC §7.1.
+
+    python -m diffgemma_fa.eval.run_tasks --task countdown --variant j0 \
+        --emission map --n 200
+
+**Why these two, separately from `eval/run.py`.** Every accuracy number in this
+project so far comes from BFCL, whose grammars are large permissive JSON
+schemas: `|S|` in the hundreds to 1,024, where §7.3 measures the constrained
+tree at up to 82.6% of a model forward, and where the automaton barely narrows
+the output space. Countdown and Sudoku are the opposite regime — tight
+combinatorial grammars over a handful of symbols, small `|S|`, where the
+constraint eliminates almost everything. SPEC §2.8 cites the paper measuring
+unconstrained constraint satisfaction at **7.6%** on Sudoku.
+
+That difference is the point. If the whitespace finding (the compiled grammar
+forbidding the model's own separators, worth 0.328 -> 0.628 on BFCL) was an
+artifact of JSON rendering rather than something general about
+grammar-tokenizer alignment, these tasks are where it fails to appear.
+
+The scorers are deliberately **not** format checks. A grammar guarantees the
+shape of an answer and says nothing about whether it is right: `countdown`
+admits `1+1=3`, and a format-only Sudoku grammar would let a model overwrite
+the givens and solve a different puzzle. Both are re-derived in
+`compile/tasks/{countdown,sudoku}.py`.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import pathlib
+import time
+
+import numpy as np
+
+import jax
+
+jax.config.update("jax_enable_x64", True)
+jax.config.update("jax_compilation_cache_dir", "/home/ubuntu/diffgemma_fa/.jax_cache")
+
+import jax.numpy as jnp  # noqa: E402
+from gemma import diffusion, gm  # noqa: E402
+from gemma.diffusion import _sampler as ds  # noqa: E402
+from gemma.gm.text import _prefill  # noqa: E402
+
+from diffgemma_fa.compile import pipeline  # noqa: E402
+from diffgemma_fa.compile.tasks import countdown as CD  # noqa: E402
+from diffgemma_fa.compile.tasks import sudoku as SD  # noqa: E402
+from diffgemma_fa.compile.tasks.grammars import (  # noqa: E402
+    countdown_regex, sudoku_regex)
+from diffgemma_fa.compile.validate import Simulator  # noqa: E402
+from diffgemma_fa.model.sampler import (  # noqa: E402
+    ConstrainedDiffusionSampler, ZeroPartitionError)
+from diffgemma_fa.model.state import Automaton  # noqa: E402
+
+CKPT = "/home/ubuntu/diffgemma_fa/artifacts/ckpt/diffusiongemma-26B-A4B-it"
+COUNTDOWN_DATA = "/home/ubuntu/diffgemma_fa/data/countdown_test.jsonl"
+
+
+def to_traced(a, batch: int) -> Automaton:
+    return Automaton(
+        edge_src=jnp.asarray(a.edge_src), edge_dst=jnp.asarray(a.edge_dst),
+        edge_class=jnp.asarray(a.edge_class),
+        edge_valid=jnp.ones(a.n_edges, bool),
+        csr_indices=jnp.asarray(a.tables.sum_indices),
+        csr_indptr=jnp.asarray(a.tables.sum_indptr),
+        is_neg=jnp.asarray(a.tables.sum_is_neg),
+        d=jnp.asarray(a.d), is_final=jnp.asarray(a.is_final),
+        active=jnp.broadcast_to(jnp.asarray(a.start_vector),
+                                (batch, a.n_states_bucket)),
+    )
+
+
+def load_task(task: str, n: int, seed: int):
+    """`[(record, prompt, regex, scorer)]`."""
+    if task == "countdown":
+        recs = list(CD.iter_records(COUNTDOWN_DATA, limit=n))
+        return [(r, CD.build_prompt(r),
+                 countdown_regex(max_steps=4, max_value=999,
+                                 step_separator=r"\n"),
+                 CD.score_solution) for r in recs]
+    recs = SD.generate(n or 100, seed=seed)
+    return [(r, SD.build_prompt(r),
+             sudoku_regex(r.puzzle, row_separator="\n"),
+             SD.score_solution) for r in recs]
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--task", default="countdown", choices=["countdown", "sudoku"])
+    ap.add_argument("--variant", default="j0",
+                    choices=["unconstrained", "mask", "j0", "j1", "j2"])
+    ap.add_argument("--emission", default="map", choices=["map", "sample"])
+    ap.add_argument("--entropy-bound", type=float, default=0.1)
+    ap.add_argument("--confidence", default="mf", choices=["mf", "mar"])
+    ap.add_argument("--n", type=int, default=100)
+    ap.add_argument("--max-new-tokens", type=int, default=256)
+    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--out", default="")
+    args = ap.parse_args()
+
+    model = diffusion.DiffusionGemma_26B_A4B()
+    params = gm.ckpts.load_params(CKPT)
+    base = diffusion.Sampler(model=model, params=params)
+    tok = base.tokenizer
+    print(f"[eval] task={args.task} variant={args.variant} "
+          f"emission={args.emission} n={args.n}", flush=True)
+
+    items = load_task(args.task, args.n, args.seed)
+    n_ok = n_cs = n_parsed = 0
+    rows, skipped, zero_partition, oom = [], {}, [], []
+    reasons: dict[str, int] = {}
+    t_start = time.perf_counter()
+
+    for idx, (rec, prompt, regex, scorer) in enumerate(items):
+        try:
+            a = pipeline.compile_regex(regex, name=args.task).automaton
+        except Exception as e:  # noqa: BLE001
+            k = f"compile:{type(e).__name__}"
+            skipped[k] = skipped.get(k, 0) + 1
+            continue
+
+        sampler = ConstrainedDiffusionSampler(
+            model=model,
+            end_tokens=(tok.special_tokens.EOS, tok.special_tokens.END_OF_TURN,
+                        tok.special_tokens.BEGIN_OF_TOOL_RESPONSE),
+            forbidden_tokens=None, sampling=base.sampling,
+            cache_length=base.cache_length, special_tokens=tok.special_tokens,
+            canvas_length=256, max_denoising_steps=48,
+            text_vocab_size=tok.vocab_size,
+            sliding_window_size=getattr(model.config, "sliding_window_size", None),
+            n_states_bucket=a.n_states_bucket, n_classes=a.tables.n_classes,
+            variant=args.variant, emission=args.emission,
+            confidence=args.confidence,
+            sample_from_predictions=ds.SampleFromPredictions(
+                entropy_bound=args.entropy_bound,
+                text_vocab_size=tok.vocab_size),
+        )
+
+        inputs = base._get_inputs(prompt=prompt, images=None, add_bos=True,  # noqa: SLF001
+                                  has_batch_dim=False, sharding=None)
+        init = _prefill.prefill(
+            model=model, params=params, input=inputs, last_state=None,
+            cache_length=base.cache_length, pad_length=base.pad_length,
+            rng=jax.random.PRNGKey(args.seed * 10_000 + idx), sharding=None,
+            max_out_length=base.max_out_length)
+
+        try:
+            state = sampler.sample_constrained(
+                params=params, init_state=init,
+                max_new_tokens=args.max_new_tokens,
+                automaton=to_traced(a, batch=init.predicted_tokens.shape[0]))
+        except jax.errors.JaxRuntimeError as e:
+            if "RESOURCE_EXHAUSTED" not in str(e):
+                raise
+            oom.append(rec.id)
+            rows.append({"id": rec.id, "text": "", "ok": False, "oom": True})
+            continue
+        except ZeroPartitionError:
+            zero_partition.append(rec.id)
+            rows.append({"id": rec.id, "text": "", "ok": False,
+                         "zero_partition": True})
+            continue
+        jax.block_until_ready(state.predicted_tokens)
+
+        toks = [int(x) for x in np.asarray(state.predicted_tokens)[0][
+            : args.max_new_tokens]]
+        while toks and toks[-1] == 0:
+            toks.pop()
+        text = tok.decode(toks)
+
+        accepted = Simulator(a).accepts(toks)
+        ok, why = scorer(text, rec)
+        n_cs += int(accepted)
+        n_ok += int(ok)
+        n_parsed += int(why != "empty")
+        reasons[why.split(":")[0]] = reasons.get(why.split(":")[0], 0) + 1
+        rows.append({"id": rec.id, "text": text[:300], "ok": ok,
+                     "why": why, "accepted": accepted})
+
+        if (idx + 1) % 10 == 0:
+            m = idx + 1
+            print(f"  [{m}/{len(items)}] CS={n_cs/m:.3f} solved={n_ok/m:.3f}",
+                  flush=True)
+
+    n = len(items)
+    out = {
+        "task": args.task, "variant": args.variant, "emission": args.emission,
+        "confidence": args.confidence, "entropy_bound": args.entropy_bound,
+        "seed": args.seed, "n": n,
+        "cs": n_cs, "cs_rate": round(n_cs / max(1, n), 4),
+        "solved": n_ok, "solve_rate": round(n_ok / max(1, n), 4),
+        "zero_partition": len(zero_partition), "oom": len(oom),
+        "skipped_by_reason": skipped,
+        # Why the unsolved ones failed -- a format failure and a wrong answer
+        # are different diagnoses and must not be merged.
+        "failure_reasons": reasons,
+        "elapsed_seconds": round(time.perf_counter() - t_start, 1),
+        "rows": rows,
+    }
+    path = args.out or (f"/home/ubuntu/diffgemma_fa/artifacts/"
+                        f"task_{args.task}_{args.variant}_{args.emission}.json")
+    pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(out, f, indent=2)
+
+    print("\n===== RESULT =====")
+    for k in ("task", "variant", "emission", "n", "cs_rate", "solve_rate",
+              "zero_partition", "oom", "failure_reasons", "elapsed_seconds"):
+        print(f"{k}: {out[k]}")
+    print(f"\nwrote {path}")
+
+
+if __name__ == "__main__":
+    main()
