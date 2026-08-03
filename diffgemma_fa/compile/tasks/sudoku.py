@@ -155,7 +155,20 @@ def score_solution(text: str, rec: SudokuRecord) -> tuple[bool, str]:
     overwrote a given and solved a *different* puzzle would silently score as
     correct.
     """
-    digits = [ch for ch in text if ch.isdigit()]
+    # Strip SPEC §3.6's channel header FIRST. The grammar carries
+    # `<|channel>NAME\n<channel|>` and the name is free text that routinely
+    # contains digits -- `<|channel>312\n<channel|>3124...`. Reading digits
+    # from the whole string therefore shifts the grid by however many digits
+    # the model put in the header, and every cell lands in the wrong place.
+    # Measured: this reported "overwrote the given" on 250/250 records while
+    # CS was 1.000, i.e. the automaton had ALREADY proved the givens intact.
+    # A scorer that contradicts a proof is the thing that is wrong.
+    body = text.split("<channel|>", 1)[1] if "<channel|>" in text else text
+    # With --think the answer follows a literal `ANSWER:` marker; everything
+    # before it is the model's scratchpad and must not be scored.
+    if "ANSWER:" in body:
+        body = body.split("ANSWER:", 1)[1]
+    digits = [ch for ch in body if ch.isdigit()]
     if len(digits) < N * N:
         return False, f"only {len(digits)} digits"
     g = [[int(digits[r * N + c]) for c in range(N)] for r in range(N)]

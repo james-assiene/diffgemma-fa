@@ -134,3 +134,37 @@ def test_sudoku_grammar_pins_the_givens_and_frees_the_blanks(puzzles):
         "the grammar let a prefilled cell be overwritten — a model could then "
         "solve a different puzzle and be scored correct"
     )
+
+
+# --------------------------------------------------------------------------
+# The channel header must not reach the scorers
+# --------------------------------------------------------------------------
+
+def test_sudoku_scorer_strips_the_channel_header(puzzles):
+    """A scorer bug that cost a 250-record arm.
+
+    The compiled grammar carries SPEC §3.6's `<|channel>NAME\\n<channel|>`
+    prefix, and the channel *name* is free text that routinely contains digits
+    — real emission: `<|channel>312\\n<channel|>3124\\n2411...`. Reading digits
+    from the whole string shifts the grid by however many digits the model put
+    in the header, so every cell lands in the wrong place.
+
+    The tell was that it reported "overwrote the given" on 250/250 records
+    while CS was 1.000 — the automaton had already *proved* the givens intact.
+    A scorer that contradicts a proof is the thing that is wrong.
+    """
+    r = puzzles[0]
+    grid = "\n".join("".join(str(c) for c in row) for row in r.solution)
+    assert SD.score_solution(grid, r)[0], "bare grid must score"
+    assert SD.score_solution(f"<|channel>312\n<channel|>{grid}", r)[0], (
+        "a digit-bearing channel name must not shift the grid"
+    )
+
+
+def test_countdown_scorer_strips_the_channel_header():
+    """Same bug: the header shares its line with the opening step, so every
+    record's first step was unparsable."""
+    r = _rec([3, 4, 5], 17)
+    body = "3*4=12\n12+5=17"
+    assert CD.score_solution(body, r)[0]
+    assert CD.score_solution(f"<|channel>thought\n<channel|>{body}", r)[0]

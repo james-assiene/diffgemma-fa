@@ -81,7 +81,15 @@ def score_solution(text: str, rec: CountdownRecord) -> tuple[bool, str]:
     and scoring format-only would report a solver that writes `1+1=3` as
     correct.
     """
-    lines = [ln for ln in text.strip().splitlines() if ln.strip()]
+    # Strip SPEC §3.6's channel header first -- see the note in
+    # `sudoku.score_solution`. Here it made the FIRST step unparsable on every
+    # record, because the header shares its line with the opening step.
+    body = text.split("<channel|>", 1)[1] if "<channel|>" in text else text
+    # With --think the answer follows a literal `ANSWER:` marker; everything
+    # before it is the model's scratchpad and must not be scored.
+    if "ANSWER:" in body:
+        body = body.split("ANSWER:", 1)[1]
+    lines = [ln for ln in body.strip().splitlines() if ln.strip()]
     if not lines:
         return False, "empty"
 

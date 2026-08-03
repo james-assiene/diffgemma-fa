@@ -71,17 +71,34 @@ def to_traced(a, batch: int) -> Automaton:
     )
 
 
-def load_task(task: str, n: int, seed: int):
+#: A bounded free-text region before the answer, terminated by a literal
+#: marker. SPEC §3.6's channel header gives the model only 8 tokens of free
+#: space, which is a *label*, not a scratchpad.
+#:
+#: The measurement that motivates this: unconstrained, the model solves 86.4%
+#: of 4x4 Sudokus (while never matching the grammar); constrained to emit only
+#: the grid, it solves 0.0% with CS 1.000. The grammar is provably correct --
+#: the failures are row/column violations, not overwritten givens -- so the
+#: constraint is not corrupting the answer, it is removing the space the model
+#: reasons in. `gsm_symbolic_regex` already uses this shape (free prose,
+#: constrained arithmetic); this applies it to the other two tasks.
+THINK_PREFIX = r"[^\n]{0,400}(?:\n[^\n]{0,400}){0,12}\nANSWER:\n"
+
+
+def load_task(task: str, n: int, seed: int, think: bool = False):
     """`[(record, prompt, regex, scorer)]`."""
+    pre = THINK_PREFIX if think else ""
+    hint = ("\nThink step by step first, then write `ANSWER:` on its own line "
+            "followed by the answer.") if think else ""
     if task == "countdown":
         recs = list(CD.iter_records(COUNTDOWN_DATA, limit=n))
-        return [(r, CD.build_prompt(r),
-                 countdown_regex(max_steps=4, max_value=999,
-                                 step_separator=r"\n"),
+        return [(r, CD.build_prompt(r) + hint,
+                 pre + countdown_regex(max_steps=4, max_value=999,
+                                       step_separator=r"\n"),
                  CD.score_solution) for r in recs]
     recs = SD.generate(n or 100, seed=seed)
-    return [(r, SD.build_prompt(r),
-             sudoku_regex(r.puzzle, row_separator="\n"),
+    return [(r, SD.build_prompt(r) + hint,
+             pre + sudoku_regex(r.puzzle, row_separator="\n"),
              SD.score_solution) for r in recs]
 
 
@@ -96,6 +113,11 @@ def main() -> None:
     ap.add_argument("--n", type=int, default=100)
     ap.add_argument("--max-new-tokens", type=int, default=256)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--think", action="store_true",
+                    help="admit a bounded free-text scratchpad before the "
+                         "answer, terminated by `ANSWER:`. Tests whether the "
+                         "constraint's cost on reasoning tasks is the loss of "
+                         "room to reason")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
 
@@ -106,7 +128,7 @@ def main() -> None:
     print(f"[eval] task={args.task} variant={args.variant} "
           f"emission={args.emission} n={args.n}", flush=True)
 
-    items = load_task(args.task, args.n, args.seed)
+    items = load_task(args.task, args.n, args.seed, args.think)
     n_ok = n_cs = n_parsed = 0
     rows, skipped, zero_partition, oom = [], {}, [], []
     reasons: dict[str, int] = {}
@@ -187,6 +209,7 @@ def main() -> None:
     out = {
         "task": args.task, "variant": args.variant, "emission": args.emission,
         "confidence": args.confidence, "entropy_bound": args.entropy_bound,
+        "think": args.think,
         "seed": args.seed, "n": n,
         "cs": n_cs, "cs_rate": round(n_cs / max(1, n), 4),
         "solved": n_ok, "solve_rate": round(n_ok / max(1, n), 4),
