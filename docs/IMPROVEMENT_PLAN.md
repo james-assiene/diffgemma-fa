@@ -105,3 +105,62 @@ recalibrate only after regrammaring).
 - Recalibrate entropy bounds *after* the grammar changes, not before.
 - The unconstrained-vs-constrained comparison conflates constraint cost with
   rendering cost — state both numbers, never merge them.
+
+---
+
+## Cross-task results (2026-08-03): the constraint is not free everywhere
+
+First evaluations outside BFCL, n=250 each. The picture BFCL alone gave was
+not general.
+
+| task | arm | CS | solved |
+|---|---|---|---|
+| countdown / unconstrained | | 0.004 | **0.048** |
+| countdown / constrained (MAP) | | 1.000 | **0.000** |
+| countdown / constrained + 64-token scratchpad | | 1.000 | **0.000** |
+| sudoku / unconstrained | | 0.000 | **0.864** |
+| sudoku / constrained (MAP) | | 1.000 | **0.000** |
+| sudoku / constrained + 64-token scratchpad | | 1.000 | **0.004** |
+
+**The constraint takes an 86%-accurate Sudoku solver to 0%.** On BFCL it cost
+nothing; here it costs everything. This is not a measurement artifact: the
+Sudoku failures are row and column violations, *not* overwritten givens, so
+the grammar is pinning the prefilled cells exactly as designed.
+
+### A hypothesis that was tested and died
+
+First guess: the grammar admits only the grid, so it removes the model's
+scratchpad. Wrong on two counts. The unconstrained model emits a correct grid
+**directly** (`2143|4321|3214|1432`) with no reasoning at all, so it was never
+using a scratchpad; and widening SPEC §3.6's channel header from 8 to 64 free
+tokens recovered nothing on either task (sudoku 0.000 -> 0.004, countdown
+0.004 -> 0.000). The model spent the space echoing partial grid rows.
+
+A regex-shaped scratchpad was tried first and **OOM-killed the host** — a
+near-Σ character class repeated thousands of times, lifted over a
+262,144-token vocabulary, which is exactly SPEC §4.2's "regex too large".
+The bounded token chain the channel header already uses is the mechanism that
+works.
+
+### The surviving explanation
+
+**The constraint is only worth having when the grammar captures the actual
+correctness condition.** `sudoku_regex` pins the givens and the digit alphabet
+and encodes *nothing* about rows, columns or boxes — so it adds no information
+about what makes an answer right, while the MAP emission replaces the model's
+own preferred output with the argmax of a product of per-position marginals
+over a much larger format-valid set. For BFCL the JSON schema largely *is* the
+correctness condition, which is why constraining there is free.
+
+That predicts `--emission sample`, which draws from the constrained posterior
+rather than maximising it, should sit closer to the unconstrained rate.
+Running.
+
+### What this changes about the project's claim
+
+The honest headline is no longer "the guarantee is free". It is: **the
+guarantee is free when the grammar encodes the task's correctness condition,
+and can be catastrophic when it only encodes the output's shape.** That is a
+more useful finding than the single-dataset version, and it would have been
+invisible without a second and third dataset.
+

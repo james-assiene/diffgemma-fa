@@ -84,6 +84,7 @@ def compile_regex(
     schema_hash: str = "",
     channel_header: bool = True,
     fence: bool = False,
+    header_tokens: int = 8,
 ) -> CompileReport:
     """Compile an anchored byte-level regex into a `CompiledAutomaton`.
 
@@ -109,7 +110,7 @@ def compile_regex(
         from diffgemma_fa.compile.automaton import prepend_channel_header
 
         grammar = prepend_channel_header(
-            grammar, vocab_size=vocab_size,
+            grammar, vocab_size=vocab_size, max_name_tokens=header_tokens,
             reserved=tuple(end_tokens) + (vocab_mod.PAD_TOKEN,))
 
     t0 = time.perf_counter()

@@ -82,23 +82,34 @@ def to_traced(a, batch: int) -> Automaton:
 #: constraint is not corrupting the answer, it is removing the space the model
 #: reasons in. `gsm_symbolic_regex` already uses this shape (free prose,
 #: constrained arithmetic); this applies it to the other two tasks.
-THINK_PREFIX = r"[^\n]{0,400}(?:\n[^\n]{0,400}){0,12}\nANSWER:\n"
+#: **A regex prefix does not work here and the failure is instructive.** The
+#: first attempt was `[^\n]{0,400}(?:\n[^\n]{0,400}){0,12}\nANSWER:\n`, which
+#: is a near-Σ character class repeated thousands of times; lifted over a
+#: 262,144-token vocabulary it OOM-killed the host on both tasks. That is
+#: exactly SPEC §4.2's "regex too large" explosion.
+#:
+#: The right mechanism already exists. SPEC §3.6's channel header is a
+#: **bounded token chain** — `100 · Σ_name{1,n} · 107 · 101` — deliberately not
+#: a Σ* self-loop, because a self-loop has emission mass ~1.0 and a joint
+#: decode sits in it forever. Widening `n` from 8 to `THINK_TOKENS` costs that
+#: many states and gives the model a real scratchpad, and the scorers already
+#: discard everything before `<channel|>`.
+THINK_TOKENS = 64
 
 
 def load_task(task: str, n: int, seed: int, think: bool = False):
     """`[(record, prompt, regex, scorer)]`."""
-    pre = THINK_PREFIX if think else ""
-    hint = ("\nThink step by step first, then write `ANSWER:` on its own line "
-            "followed by the answer.") if think else ""
+    hint = ("\nThink briefly in the channel header first, then give the "
+            "answer.") if think else ""
     if task == "countdown":
         recs = list(CD.iter_records(COUNTDOWN_DATA, limit=n))
         return [(r, CD.build_prompt(r) + hint,
-                 pre + countdown_regex(max_steps=4, max_value=999,
-                                       step_separator=r"\n"),
+                 countdown_regex(max_steps=4, max_value=999,
+                                 step_separator=r"\n"),
                  CD.score_solution) for r in recs]
     recs = SD.generate(n or 100, seed=seed)
     return [(r, SD.build_prompt(r) + hint,
-             pre + sudoku_regex(r.puzzle, row_separator="\n"),
+             sudoku_regex(r.puzzle, row_separator="\n"),
              SD.score_solution) for r in recs]
 
 
@@ -136,7 +147,9 @@ def main() -> None:
 
     for idx, (rec, prompt, regex, scorer) in enumerate(items):
         try:
-            a = pipeline.compile_regex(regex, name=args.task).automaton
+            a = pipeline.compile_regex(
+                regex, name=args.task,
+                header_tokens=THINK_TOKENS if args.think else 8).automaton
         except Exception as e:  # noqa: BLE001
             k = f"compile:{type(e).__name__}"
             skipped[k] = skipped.get(k, 0) + 1
