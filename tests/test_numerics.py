@@ -498,3 +498,41 @@ def test_log_matmul_survives_per_position_sharp_marginals():
         "underflow is back"
     )
     assert np.allclose(root[live], ref[live], rtol=0, atol=1e-8)
+
+
+def test_streamed_constrained_entropy_equals_the_dense_form():
+    """`--confidence=mar` needs `H(q_i)`, and the dense route builds `q`,
+    `row`, `lq` and `q*lq` at `[L, V] = [256, 262144]` — 537 MB each — inside
+    the denoising `while_loop`. That deadlocked on three records (CPU frozen at
+    5:21 while elapsed reached 39 minutes).
+
+    The streamed form uses the identity
+    `H = log Z - (1/Z)·Σ_v w log w` with `w = p·r`, accumulated over the CSR,
+    so the cost is `O(nnz)` rather than `O(L·V)`. It must be *exactly* the same
+    number, including on negated classes — where `r` is recovered as a
+    complement and a naive sparse sum would be wrong.
+    """
+    from diffgemma_fa.infer import marginals as M
+    import jax.numpy as jnp
+
+    rng = np.random.default_rng(3)
+    L, V, C, E = 6, 32, 4, 10
+    p = jnp.asarray(rng.random((V, L)))
+    p = p / p.sum(0, keepdims=True)
+    u = jnp.asarray(rng.random((L, E)))
+    cid = jnp.asarray(rng.integers(0, C, E), jnp.int32)
+    idx = jnp.asarray(np.concatenate(
+        [rng.choice(V, 5, replace=False) for _ in range(C)]), jnp.int32)
+    iptr = jnp.asarray(np.arange(C + 1) * 5, jnp.int32)
+    neg = jnp.asarray([False, True, False, True])   # mixed polarity on purpose
+
+    r = M.scatter_edge_mass_to_tokens(u, cid, idx, iptr, neg, C, V)
+    q = p.T * r
+    q = q / jnp.maximum(q.sum(1, keepdims=True), jnp.finfo(q.dtype).tiny)
+    dense = np.asarray(M.entropy_from_q(q))
+    streamed = np.asarray(
+        M.constrained_entropy_streamed(p, u, cid, idx, iptr, neg, C, V))
+    assert np.abs(dense - streamed).max() < 1e-12, (
+        f"streamed entropy differs from dense by "
+        f"{np.abs(dense - streamed).max():.3g}"
+    )

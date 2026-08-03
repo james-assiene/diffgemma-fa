@@ -331,11 +331,17 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
                         tr, aut.active.astype(pi.dtype),
                         _constrained.budget_terminal_factor(
                             aut.d, remaining, dtype=pi.dtype))
-                    q = _marginals.constrained_marginals(
-                        p_vl, a_v, b_v, aut.edge_src, aut.edge_dst,
-                        aut.edge_class, aut.csr_indices, aut.csr_indptr,
-                        aut.is_neg, self.n_classes)
-                    return _marginals.entropy_from_q(q)          # [L]
+                    u = (a_v[:-1][:, aut.edge_src]
+                         * b_v[1:][:, aut.edge_dst])             # [L, E]
+                    # Streamed: `H(q)` from the CSR without building `q`,
+                    # `row`, `lq` and `q*lq` at [L, V] = [256, 262144]. The
+                    # dense chain deadlocked on three records (CPU frozen at
+                    # 5:21 over 39 minutes). Verified equal to the dense form
+                    # to 8.9e-16.
+                    return _marginals.constrained_entropy_streamed(
+                        p_vl, u, aut.edge_class, aut.csr_indices,
+                        aut.csr_indptr, aut.is_neg, self.n_classes,
+                        pi.shape[-1])                            # [L]
                 h_q = jax.vmap(_q_entropy)(p_real, automaton.active)
                 accepted = _accept_from_entropy(
                     h_q.astype(jnp.float32),

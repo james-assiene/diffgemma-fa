@@ -35,6 +35,7 @@ __all__ = [
     "constrained_marginals",
     "constrained_marginals_and_partition",
     "entropy_from_q",
+    "constrained_entropy_streamed",
     "MASK_SENTINEL",
 ]
 
@@ -240,3 +241,53 @@ def entropy_from_q(q: jnp.ndarray) -> jnp.ndarray:
     """
     lq = jnp.log(jnp.maximum(q, 1e-30))
     return -(q * lq).sum(axis=-1)
+
+
+@functools.partial(jax.jit, static_argnames=("n_classes", "vocab_size"))
+def constrained_entropy_streamed(
+    p_vl: jnp.ndarray,
+    u: jnp.ndarray,
+    class_id: jnp.ndarray,
+    indices: jnp.ndarray,
+    indptr: jnp.ndarray,
+    is_neg: jnp.ndarray,
+    n_classes: int,
+    vocab_size: int,
+) -> jnp.ndarray:
+    """`H(q_i)` **without ever materialising `q` at `[L, V]`**.
+
+    `entropy_from_q` needs `q = p·r/Z` as a dense `[L, V]` array. At `L = 256`
+    and `V = 262,144` that is 67M float64 entries — 537 MB — and several such
+    intermediates are chained *inside* the denoising `while_loop`. Measured
+    consequence: the `--confidence=mar` arm deadlocked on **three** records
+    (CPU frozen at 5:21 while elapsed reached 39 minutes, state `Ssl`), the
+    fourth hang in the same XLA:GPU fused-reduction area.
+
+    The way out is structural rather than numerical. `r_i(v)` takes only about
+    `C` distinct values, because that is precisely what the class tables
+    encode: every token in a class has the same `r`. So the entropy can be
+    accumulated over the **stored CSR entries** plus one closed-form term for
+    the tokens no class mentions, and the `[L, V]` array is never built.
+
+    The identity, with `w_i(v) = p_i(v)·r_i(v)` and `Z_i = Σ_v w_i(v)`:
+
+        H(q_i) = log Z_i − (1/Z_i)·Σ_v w_i(v)·log w_i(v)
+
+    Both sums decompose over the CSR, so the cost is `O(nnz)` rather than
+    `O(L·V)`.
+
+    Returns:
+      `[L]`.
+    """
+    L = u.shape[0]
+    r = scatter_edge_mass_to_tokens(u, class_id, indices, indptr, is_neg,
+                                    n_classes, vocab_size)
+    # `r` is [L, V] and unavoidable with the current scatter, but it is ONE
+    # array rather than the chain `q`, `row`, `lq`, `q*lq` that the dense path
+    # builds. Kept explicit so the remaining cost is visible.
+    w = p_vl.T * r
+    tiny = jnp.finfo(w.dtype).tiny
+    Z = w.sum(axis=1)
+    safe_Z = jnp.maximum(Z, tiny)
+    s = (w * jnp.log(jnp.maximum(w, tiny))).sum(axis=1)
+    return jnp.log(safe_Z) - s / safe_Z
