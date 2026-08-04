@@ -147,8 +147,9 @@ def compile_json_schema(
     from_bfcl: bool = False,
     allow: Sequence[str] = (),
     allow_wildcard: bool = False,
-    whitespace_pattern: str | None = None,
+    whitespace_pattern: str | None = schema_mod.JSON_WS,
     nonempty_required_strings: bool = False,
+    verify_renderings: dict | None = None,
     channel_header: bool = True,
     fence: bool = False,
     **kwargs: Any,
@@ -191,6 +192,20 @@ def compile_json_schema(
         prepared, from_bfcl=from_bfcl, allow=allow,
         allow_wildcard=allow_wildcard, whitespace_pattern=whitespace_pattern,
     )
+    if verify_renderings is not None:
+        # THE GATE. Turns "the grammar must accept how the model writes" from
+        # advice into a build failure. Costs milliseconds and needs no model.
+        ok, bad = schema_mod.accepts_all_renderings(regex, verify_renderings)
+        if not ok:
+            raise ValueError(
+                f"grammar rejects {bad} rendering(s) of an instance it should "
+                f"accept. A grammar that forbids a rendering the model may "
+                f"choose does not fail loudly -- it silently corrupts values, "
+                f"because the renormalised draw extends a value when the "
+                f"separator it wants is inadmissible (measured: 600 -> 6000, "
+                f"and 0/130 real outputs accepted). Widen whitespace_pattern; "
+                f"schema.JSON_WS accepts all five standard renderings."
+            )
     seconds_regex = time.perf_counter() - t0
 
     from diffgemma_fa.compile.automaton import schema_fingerprint

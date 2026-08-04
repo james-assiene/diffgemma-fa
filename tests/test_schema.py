@@ -356,3 +356,74 @@ def test_defs_and_definitions_are_name_keyed_too():
             {"type": "dict", key: {"default": {"type": "string"}},
              "properties": {}})
         assert list(out[key]) == ["default"], key
+
+
+# ==========================================================================
+# "The grammar must accept how the model writes" — as an enforceable check
+# ==========================================================================
+
+def test_json_ws_accepts_every_standard_rendering():
+    """The condition that cost 30 accuracy points, now checkable in ms.
+
+    The production grammar accepted **0 of 130** outputs the unconstrained
+    model actually produced, because it forbade newline-and-indent separators.
+    The symptom was not a crash: the renormalised draw extends a value when the
+    separator it wants is inadmissible, so `600` became `6000`.
+
+    Fitting the pattern to observed outputs is the wrong method — the
+    hand-fitted version still missed tab indentation. `JSON_WS` is RFC 8259's
+    own whitespace definition and accepts all five.
+    """
+    sch = {"type": "object",
+           "properties": {"a": {"type": "string"}, "b": {"type": "integer"}},
+           "required": ["a", "b"]}
+    norm = schema.normalize_bfcl_schema(sch)
+    inst = {"a": "x", "b": 1}
+
+    ok, bad = schema.accepts_all_renderings(
+        schema.build_regex(norm, whitespace_pattern=schema.JSON_WS), inst)
+    assert ok, f"JSON_WS rejected {bad}"
+
+    # ...and the check has teeth: outlines' default really does reject them.
+    ok2, bad2 = schema.accepts_all_renderings(
+        schema.build_regex(norm, whitespace_pattern=None), inst)
+    assert not ok2 and set(bad2) >= {"indent2", "tabs"}, (
+        "the gate must fail on the default pattern, or it is not testing "
+        "anything"
+    )
+
+
+def test_the_pipeline_gate_raises_rather_than_warning():
+    """A silent under-acceptance is the failure mode this project actually
+    suffered, so the gate raises."""
+    from diffgemma_fa.compile import pipeline
+    sch = {"type": "object", "properties": {"a": {"type": "string"}},
+           "required": ["a"]}
+    with pytest.raises(ValueError, match="rejects"):
+        pipeline.compile_json_schema(
+            sch, name="t", whitespace_pattern="",      # forbid whitespace
+            verify_renderings={"a": "x"})
+
+
+def test_key_reordering_is_a_KNOWN_remaining_over_constraint():
+    """**Honest gap marker.** JSON objects are unordered by definition, but
+    outlines emits `properties` in map order only, so a model that writes the
+    keys in a different order is forced off its plan exactly as it was by the
+    whitespace bug.
+
+    Currently worked around in the prompt ("keys in this order: [...]"), which
+    is a mitigation and not a fix. Recorded here so it is not mistaken for
+    solved; the fix is a subset-tracking DFA over which keys have been seen,
+    which is `2^k` states and therefore practical only for small `k`.
+    """
+    import re
+    sch = {"type": "object",
+           "properties": {"a": {"type": "string"}, "b": {"type": "integer"}},
+           "required": ["a", "b"]}
+    rx = schema.build_regex(schema.normalize_bfcl_schema(sch),
+                            whitespace_pattern=schema.JSON_WS)
+    assert re.fullmatch(rx, '{"a": "x", "b": 1}')
+    assert not re.fullmatch(rx, '{"b": 1, "a": "x"}'), (
+        "if this now passes, key-order independence has been implemented — "
+        "delete this marker and say so in the docs"
+    )

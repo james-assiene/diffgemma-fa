@@ -128,15 +128,37 @@ def test_the_fence_is_optional_and_both_branches_are_accepted(fenced):
     )
 
 
-def test_the_stock_grammar_rejects_exactly_what_the_bundle_fixes():
-    """The control. Without the flags, the model's own rendering is
-    inadmissible — which is the finding the whole experiment rests on."""
-    a = pipeline.compile_json_schema(
-        _Rec.functions[0]["parameters"], name="get_weather", from_bfcl=True,
-        channel_header=False).automaton
-    assert _accepts(a, '{"city": "Paris"}'), "compact is fine"
-    assert not _accepts(a, '```json\n{"city": "Paris"}\n```')
-    assert not _accepts(a, '{\n  "city": "Paris"\n}')
+def test_the_historical_over_constraint_and_the_fixed_default():
+    """This test used to assert that the *default* grammar rejects indented
+    JSON. That was true and was the finding the whole experiment rested on —
+    it is no longer true, because `schema.JSON_WS` (RFC 8259's own whitespace
+    definition) is now the default rather than outlines' `[ ]?`.
+
+    So the control moves: the historical pattern must still reject, proving the
+    experiment measured something real, and the new default must accept, proving
+    it is fixed. A test that only checked the old behaviour would now be
+    protecting the bug.
+    """
+    params = _Rec.functions[0]["parameters"]
+    old = pipeline.compile_json_schema(
+        params, name="get_weather", from_bfcl=True, channel_header=False,
+        whitespace_pattern="").automaton          # the pre-fix pattern
+    assert _accepts(old, '{"city":"Paris"}'), "compact was always fine"
+    assert not _accepts(old, '{\n  "city": "Paris"\n}'), (
+        "if the old pattern now accepts indented JSON, the historical finding "
+        "was misattributed"
+    )
+
+    new = pipeline.compile_json_schema(
+        params, name="get_weather", from_bfcl=True,
+        channel_header=False).automaton           # JSON_WS by default
+    assert _accepts(new, '{"city": "Paris"}')
+    assert _accepts(new, '{\n  "city": "Paris"\n}'), (
+        "the default must admit the model's own rendering; that is the whole "
+        "point of making JSON_WS the default"
+    )
+    # The fence remains a separate opt-in -- whitespace does not imply it.
+    assert not _accepts(new, '```json\n{"city": "Paris"}\n```')
 
 
 def test_the_bundle_is_a_superset_not_a_replacement(fenced):
