@@ -166,3 +166,74 @@ Three things make this **not** comparable to SPEC §7.3's projection:
 - Every arm is **one generation at one seed**. The measured seed spread for an identical config at n=30 is 0.412 / 0.412 / 0.314, so treat differences under ~0.1 at that size as noise.
 - **SPEC §7.3's overhead table is not here and has never been measured.** That is the paper's headline performance claim (+4%), and it now has to be measured against a bandwidth-bound `log_matmul` rather than the GEMM the design assumed — the honest number may be materially worse.
 - Missing from this table entirely: Spider, and five of the six datasets SPEC §7.1 lists. Not run. SPEC §3.8's refusal-branch union is unimplemented, so BFCL's 1,124 irrelevance records have no path to a score.
+
+---
+
+# Cross-task results (2026-08-04)
+
+The single-dataset story was not general. Two further datasets, chosen because
+their grammars sit at the opposite end of the `|S|` scale from BFCL's JSON
+schemas (bucket 64 against 128-1024), invert the conclusion.
+
+## Sudoku 4x4, n=250, synthetic with uniqueness verified by exhaustive solve
+
+| arm | CS | solved |
+|---|---|---|
+| unconstrained | 0.000 | **0.864** |
+| `mask` — per-position, sampled independently | 0.004 | **0.204** |
+| `j1` + sample | 1.000 | **0.012** |
+| `j0` + sample | 1.000 | **0.000** |
+| `j0` + MAP | 1.000 | **0.000** |
+| `j2` | 1.000 | **0.000** |
+| `j0` + MAP + 64-token scratchpad | 1.000 | **0.004** |
+
+Seed replication (the whole finding rests on the baseline, so it was
+measured twice):
+
+| | seed 0 | seed 1 |
+|---|---|---|
+| unconstrained | 0.864 | 0.868 |
+| constrained (MAP) | 0.000 | 0.000 |
+
+## The gradient is the result
+
+Solve rate tracks **how far the decoder departs from the model's own decode**:
+unconstrained 0.864 -> per-position masking 0.204 -> any joint constrained
+emission ~0.000. Every joint variant collapses identically. Masking is ~20x
+better than the joint methods, which implicates the joint machinery; but it
+still loses three quarters of the accuracy, so constraining at all is
+expensive here.
+
+## What this is not
+
+Three hypotheses were tested and killed, in order:
+
+1. **The grammar removes the model's scratchpad.** No: the unconstrained model
+   emits a correct grid *directly* (`2143|4321|3214|1432`) with no reasoning,
+   and widening SPEC §3.6's channel header from 8 to 64 free tokens recovered
+   nothing (0.000 -> 0.004). The model spent the space echoing grid rows.
+2. **The grammar excludes the correct answer.** No: 45 of 58 unconstrained
+   emissions match the compiled grammar *exactly* at string level (54/58 with
+   trailing-whitespace slack). The right answer is in the language; the
+   decoder picks a different member.
+3. **MAP's product-of-marginals argmax is the damage.** No: `--emission
+   sample`, which draws from the constrained posterior rather than maximising
+   it, collapses identically (0.012 vs 0.000).
+
+Also note `CS = 0.000` for the unconstrained arm is the channel-header
+artifact documented for BFCL — the stock model has no reason to emit our
+header — not a coverage failure.
+
+## The revised claim
+
+**The guarantee is free when the grammar encodes the task's correctness
+condition, and can be catastrophic when it only encodes the output's shape.**
+`sudoku_regex` pins the givens and the digit alphabet and says nothing about
+rows, columns or boxes, so it adds no information about what makes an answer
+right. For BFCL the JSON schema largely *is* the correctness condition, which
+is why constraining there costs nothing (0.641 -> 0.628).
+
+This was invisible with one dataset and is the strongest argument in this
+report for evaluating constrained decoding across grammar *types*, not just
+across benchmarks.
+
