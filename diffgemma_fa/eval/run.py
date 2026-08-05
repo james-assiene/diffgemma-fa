@@ -115,6 +115,13 @@ def to_traced(a, batch: int) -> Automaton:
 #: the unconstrained arm already emits every key in 125/126 outputs.
 PROMPT_STYLES = {
     "stock": "",
+    #: Drops the key-order hint entirely. The stock prompt ends with "keys in
+    #: this order: [...]", and 98/98 unconstrained outputs obeyed it -- so the
+    #: grammar's key-order over-constraint currently costs nothing. But that
+    #: measurement cannot tell whether the model would reorder WITHOUT the
+    #: hint, and anyone reusing the grammar without it inherits the risk. This
+    #: style removes the hint so the question can be answered.
+    "noorder": "",
     "compact": (
         " Output compact single-line JSON with no newlines and no code "
         "fences, and include every listed key."
@@ -126,6 +133,9 @@ def build_prompt(rec, fn, style: str = "stock") -> str:
     question = (rec.question[0][0]["content"] if rec.question
                 else "Call the function.")
     props = list((fn.get("parameters") or {}).get("properties", {}))
+    if style == "noorder":
+        return (f"{question}\n\nRespond with a JSON object of arguments for "
+                f"`{fn.get('name')}` using these keys: {props}.")
     return (f"{question}\n\nRespond with a JSON object of arguments for "
             f"`{fn.get('name')}`, keys in this order: {props}."
             + PROMPT_STYLES[style])

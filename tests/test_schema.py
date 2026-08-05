@@ -382,7 +382,11 @@ def test_json_ws_accepts_every_standard_rendering():
 
     ok, bad = schema.accepts_all_renderings(
         schema.build_regex(norm, whitespace_pattern=schema.JSON_WS), inst)
-    assert ok, f"JSON_WS rejected {bad}"
+    # `reordered-keys` is expected on an ordered grammar and is reported rather
+    # than treated as a defect -- see
+    # `test_the_gate_reports_key_order_without_failing_the_build`.
+    assert [b for b in bad if b != "reordered-keys"] == [], (
+        f"JSON_WS rejected a whitespace rendering: {bad}")
 
     # ...and the check has teeth: outlines' default really does reject them.
     ok2, bad2 = schema.accepts_all_renderings(
@@ -427,3 +431,74 @@ def test_key_reordering_is_a_KNOWN_remaining_over_constraint():
         "if this now passes, key-order independence has been implemented — "
         "delete this marker and say so in the docs"
     )
+
+
+# ==========================================================================
+# Key-order independence: available, exact, and expensive
+# ==========================================================================
+
+def test_unordered_object_regex_accepts_any_key_order():
+    """The exact fix for the over-constraint. Any order, any whitespace."""
+    import re
+    sch = schema.normalize_bfcl_schema(
+        {"type": "object",
+         "properties": {"a": {"type": "string"}, "b": {"type": "integer"},
+                        "c": {"type": "string", "enum": ["x", "y"]}},
+         "required": ["a", "b"]})
+    rx = schema.unordered_object_regex(sch)
+    for good in ('{"a": "p", "b": 1}', '{"b": 1, "a": "p"}',
+                 '{"c":"x","b":1,"a":"p"}', '{\n  "b": 1,\n  "a": "p"\n}'):
+        assert re.fullmatch(rx, good), good
+
+
+def test_unordered_still_enforces_required_and_rejects_duplicates():
+    """It must be a *relaxation of order*, not of the schema. If it quietly
+    dropped the required-key guarantee it would reintroduce the shortest-member
+    collapse (the model emitting `{}`), which is a measured failure mode."""
+    import re
+    sch = schema.normalize_bfcl_schema(
+        {"type": "object",
+         "properties": {"a": {"type": "string"}, "b": {"type": "integer"}},
+         "required": ["a", "b"]})
+    rx = schema.unordered_object_regex(sch)
+    assert not re.fullmatch(rx, '{"a": "p"}'), "missing required key admitted"
+    assert not re.fullmatch(rx, '{"a":"p","a":"q","b":1}'), "duplicate admitted"
+
+
+def test_unordered_returns_None_rather_than_something_quietly_wrong():
+    """Above the branch cap it declines. Falling back to the ordered grammar is
+    a legitimate choice; making that choice *silently* is not."""
+    wide = schema.normalize_bfcl_schema(
+        {"type": "object",
+         "properties": {f"k{i}": {"type": "string"} for i in range(12)},
+         "required": [f"k{i}" for i in range(12)]})
+    assert schema.unordered_object_regex(wide) is None
+
+
+def test_the_gate_reports_key_order_without_failing_the_build():
+    """Whitespace and key order are different risks and are treated
+    differently, on measured grounds.
+
+    Whitespace independence is free (12 states) and the restriction DID bind —
+    the grammar accepted 0/130 real outputs. Key-order independence costs `2^k`
+    states (measured |S| 150/346/738/1522 at k=2/3/4/5, 579 s to compile at
+    k=5, against SPEC §7.3's cliff at |S|=512) and the restriction did NOT bind
+    — 190/190 unconstrained outputs used the declared order, with and without a
+    prompt hint stating it.
+
+    So the checker reports `reordered-keys` and the pipeline does not fail on
+    it. Anyone can run the check against their own model and decide.
+    """
+    sch = schema.normalize_bfcl_schema(
+        {"type": "object",
+         "properties": {"a": {"type": "string"}, "b": {"type": "integer"}},
+         "required": ["a", "b"]})
+    ok, bad = schema.accepts_all_renderings(
+        schema.build_regex(sch, whitespace_pattern=schema.JSON_WS),
+        {"a": "x", "b": 1})
+    assert bad == ["reordered-keys"], (
+        f"ordered grammar should fail ONLY on key order, got {bad}"
+    )
+    ok2, bad2 = schema.accepts_all_renderings(
+        schema.unordered_object_regex(sch), {"a": "x", "b": 1})
+    assert ok2 and not bad2, f"unordered grammar still rejects {bad2}"

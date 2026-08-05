@@ -196,7 +196,13 @@ def compile_json_schema(
         # THE GATE. Turns "the grammar must accept how the model writes" from
         # advice into a build failure. Costs milliseconds and needs no model.
         ok, bad = schema_mod.accepts_all_renderings(regex, verify_renderings)
-        if not ok:
+        # Key order is reported by the checker but is NOT a build failure on an
+        # ordered grammar: admitting it costs 2^k states, and the restriction
+        # was measured not to bind (190/190 unconstrained outputs used the
+        # declared order, with and without a prompt hint). Whitespace is a
+        # different matter -- free to admit, and it did bind.
+        bad = [b for b in bad if b != "reordered-keys"]
+        if bad:
             raise ValueError(
                 f"grammar rejects {bad} rendering(s) of an instance it should "
                 f"accept. A grammar that forbids a rendering the model may "

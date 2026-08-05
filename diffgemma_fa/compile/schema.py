@@ -31,6 +31,7 @@ __all__ = [
     "build_regex",
     "JSON_WS",
     "accepts_all_renderings",
+    "unordered_object_regex",
 ]
 
 
@@ -419,6 +420,10 @@ def accepts_all_renderings(regex: str, instance: dict) -> tuple[bool, list[str]]
     GPU: it renders one instance five ways that all mean the same thing and
     asserts the grammar takes all of them.
 
+    Whitespace failures are reported as a hard problem; `reordered-keys` is
+    reported too but is expected to fail on an ordered grammar — see
+    `unordered_object_regex` for when that matters.
+
     It exists because the failure it catches cost 30 accuracy points and was
     invisible for weeks. The production grammar accepted **0 of 130** outputs
     the unconstrained model actually produced — it forbade newline-and-indent
@@ -440,8 +445,108 @@ def accepts_all_renderings(regex: str, instance: dict) -> tuple[bool, list[str]]
         "indent4": _json.dumps(instance, indent=4),
         "tabs": _json.dumps(instance, indent="\t"),
     }
+    # Key ORDER is checked too, and reported separately, because it is a
+    # different kind of risk from whitespace. Whitespace variation is free to
+    # admit; key-order independence costs 2^k states (measured: |S| 150 / 346 /
+    # 738 / 1522 at k = 2/3/4/5, and 579 s to compile at k=5), which is past
+    # SPEC §7.3's performance cliff. So this reports rather than fails: the
+    # caller needs to know whether the restriction binds on THEIR model and
+    # data before paying for `unordered_object_regex`.
+    if len(instance) > 1:
+        rev = {k: instance[k] for k in reversed(list(instance))}
+        renderings["reordered-keys"] = _json.dumps(rev)
     bad = [k for k, v in renderings.items() if not _re.fullmatch(regex, v)]
     return (not bad), bad
+
+
+#: Hard ceiling on generated branches for `unordered_object_regex`. The number
+#: of valid key sequences is `sum over subsets S containing required of |S|!`,
+#: which grows fast enough that a cap is mandatory rather than tidy. 5,000
+#: branches is a few hundred KB of regex, which outlines compiles in seconds.
+MAX_PERMUTATION_BRANCHES = 5000
+
+
+def unordered_object_regex(
+    schema: dict,
+    *,
+    whitespace_pattern: str = JSON_WS,
+    max_branches: int = MAX_PERMUTATION_BRANCHES,
+) -> str | None:
+    """An object regex accepting the keys in **any order**. SPEC §4.2 gap.
+
+    **Why this exists.** `outlines_core` emits `properties` in map order only,
+    so `{"b":1,"a":"x"}` is rejected for a schema declaring `a` first — even
+    though JSON objects are unordered by definition (RFC 8259 §4: "An object is
+    an unordered collection"). That is the same class of over-constraint as the
+    whitespace bug, which cost 30 accuracy points by silently corrupting values
+    rather than failing: when the separator or key the model wants is
+    inadmissible, the renormalised draw extends whatever it is already writing.
+
+    Measured on BFCL v4, the risk had not fired — 98/98 unconstrained outputs
+    used the declared order — but the prompt *told* the model that order, so
+    that number measures the prompt, not the model. A grammar reused without
+    that sentence inherits the hazard. This removes it structurally.
+
+    **Construction.** Enumerate every valid key sequence: each subset of
+    properties that contains all `required` keys, in every order. Emit one
+    alternation branch per sequence. The resulting regex is large but the
+    *minimised* automaton is not — the DFA is the subset construction, `2^k`
+    states, and `minimize.py` finds it.
+
+    **Coverage.** 98.6% of BFCL v4's 6,226 schemas have <= 8 keys and 96.5%
+    have <= 6. Beyond `max_branches` this returns `None` rather than emitting
+    something quietly wrong, and the caller must decide — falling back to the
+    ordered grammar is legitimate, doing so *silently* is not.
+
+    Returns:
+      The regex, or `None` if the schema is not a plain object of scalar-ish
+      properties or the branch count exceeds `max_branches`.
+    """
+    import itertools
+    from outlines_core.json_schema import build_regex_from_schema
+
+    if schema.get("type") != "object":
+        return None
+    props = schema.get("properties") or {}
+    if not props or any(k in schema for k in ("allOf", "anyOf", "oneOf", "$ref")):
+        return None
+    required = [k for k in schema.get("required") or [] if k in props]
+
+    # Count first: building 40k branches to then discard them is the slow way
+    # to discover a schema is too wide.
+    n_opt = len(props) - len(required)
+    total = 0
+    for extra in range(n_opt + 1):
+        import math
+        total += (math.comb(n_opt, extra)
+                  * math.factorial(len(required) + extra))
+        if total > max_branches:
+            return None
+    if total == 0:
+        return None
+
+    ws = whitespace_pattern
+    pair: dict[str, str] = {}
+    for key, sub in props.items():
+        try:
+            val = build_regex_from_schema(json.dumps(sub),
+                                          whitespace_pattern=ws)
+        except Exception:  # noqa: BLE001
+            return None
+        pair[key] = f'{json.dumps(key)}{ws}:{ws}(?:{val})'
+
+    branches: list[str] = []
+    keys = list(props)
+    for size in range(len(required), len(keys) + 1):
+        for subset in itertools.combinations(keys, size):
+            if not set(required) <= set(subset):
+                continue
+            for order in itertools.permutations(subset):
+                branches.append(f"{ws},{ws}".join(pair[k] for k in order))
+    if not branches:
+        return None
+    body = "|".join(f"(?:{b})" for b in branches)
+    return rf"\{{{ws}(?:{body}){ws}\}}"
 
 
 def build_regex(
