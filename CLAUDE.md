@@ -118,6 +118,74 @@ stopping conjunct fed `emit_canvas` (not the trajectory canvas), and a `FREE` re
 
 If you find yourself weakening this test to make something pass, stop and write up why instead.
 
+## How to build a feature: tester → coder → reviewer
+
+**Mandatory for any new feature or non-trivial fix. Do not write implementation
+code first.** This exists because the expensive failures in this project were
+not hard bugs — they were plausible code that nobody checked against an
+independent expectation:
+
+- a Sudoku scorer that read digits straight out of the raw emission, so the
+  channel-header name shifted the grid and it reported *"overwrote the given"*
+  on **250/250** records **while CS was 1.000** — i.e. while the automaton had
+  already *proved* the givens intact. A scorer contradicting a proof is the
+  scorer's fault, and a whole 250-record arm was spent before anyone looked.
+- three successive wrong `log_matmul` kernels, each caught by the `Z == 0`
+  detector rather than by a test.
+- a variable that shadowed the model weights and killed six queued arms.
+- a `--think` regex that OOM-killed the host, after SPEC §4.2's "regex too
+  large" warning had been read and quoted.
+
+The fix is not "be more careful". It is to make something other than the
+implementer decide whether the implementation is right.
+
+### The loop
+
+1. **Tester agent** writes the tests **first**, from the specification and the
+   intended behaviour — never from the implementation, which does not exist
+   yet. It must include at least one test that fails for the *right reason* if
+   the feature is absent, and one adversarial case aimed at the failure mode
+   the feature is most likely to have.
+2. **Coding agent** implements against those tests. It may not edit the tests.
+   If a test looks wrong it says so to the reviewer; it does not silently
+   work around it.
+3. **Reviewing agent** reads the implementation, runs the tests, and gives
+   feedback to **both**:
+   - to the coder, on correctness, on whether the tests actually pass, and on
+     whether the code passes them for the right reason rather than by accident;
+   - to the tester, on tests that are vacuous, that assert the implementation
+     back to itself, or that would pass on a broken implementation. **Testers
+     make mistakes too** — `Σ_v q_i(v) == 1` was asserted for weeks and was
+     mathematically incapable of failing.
+
+**This is a multi-turn conversation, not one pass.** Relay the reviewer's
+feedback to the tester and coder, let them respond, iterate until the reviewer
+is satisfied. Use `SendMessage` to continue an agent with its context intact
+rather than re-spawning it.
+
+### The gate
+
+**Commit and launch an experiment only on the reviewer's explicit green light.**
+Not on "tests pass" — tests passing is the coder's claim, and the reviewer's job
+is to decide whether that claim means anything. If the reviewer withholds
+approval, the work is not done, however green the suite looks.
+
+Corollaries that have already cost time here:
+
+- A number that contradicts a proof means the *measurement* is wrong. Check the
+  scorer before you believe the result.
+- A hypothesis gets tested before an experiment is built on it. Verify the
+  baseline first.
+- A numerical claim validated only on toy shapes is not validated (float32 was
+  fine at `L=4`, `|S|<=8` and drove spurious `Z == 0` on >50% of records at
+  `L=256`).
+
+### When to skip it
+
+Typo fixes, comment and docstring edits, renaming, and mechanical refactors
+with no behavioural change. If you are unsure whether something qualifies, it
+does not.
+
 ## Working rules
 
 - **Correctness before speed, always.** `infer/reference.py` is plain float64 numpy with no
