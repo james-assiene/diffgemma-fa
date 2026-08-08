@@ -21,11 +21,26 @@ from diffgemma_fa.eval.metrics import (
 # --------------------------------------------------------------------------
 
 def test_normalise_matches_bfcls_own_rule():
-    """SPEC §4.8: "scoring lowercases and strips `",./-_*^`". Scoring more
-    strictly than the benchmark understates accuracy and is not comparable to
-    the leaderboard."""
+    r"""BFCL `ast_checker.py::standardize_string`:
+
+        regex_string = r"[ \,\.\/\-\_\*\^]"
+        return re.sub(regex_string, "", input_string).lower().replace("'", '"')
+
+    The set is SPACE plus `,./-_*^`. SPEC §4.8's `",./-_*^` is a quotation of
+    BFCL's docstring; the outer `"` is the delimiter, not a member.
+
+    **[AUDIT-A] This test previously asserted the opposite on both counts** —
+    that `"` is stripped and the space is not — and so blessed a rule that was
+    simultaneously more lenient than the leaderboard (a literal `"black"`
+    scored as `black`) and stricter than it (`NewYork` scored wrong against a
+    ground truth of `New York`). See
+    `tests/test_audit_measurement.py::test_normalise_agrees_with_bfcls_own_standardize_string`,
+    which differential-tests against the vendored BFCL source.
+    """
     assert normalise("Black") == normalise("black")
-    assert normalise('"black"') == normalise("black")      # quote IS stripped
+    assert normalise('"black"') != normalise("black")     # `"` is NOT stripped
+    assert normalise("New York") == normalise("newyork")  # space IS stripped
+    assert normalise("it's") == normalise('it"s')         # `'` folds to `"`
     assert normalise("Divinópolis, MG") == normalise("divinópolis mg")
     assert normalise(600) == "600"
 

@@ -141,6 +141,15 @@ recalibrate only after regrammaring).
 First evaluations outside BFCL, n=250 each. The picture BFCL alone gave was
 not general.
 
+> **Superseded 2026-08-08.** This table predates both the Countdown retraction
+> above and the scorer fixes of the measurement audit. Every Countdown row is
+> withdrawn (the grammar could not contain a multi-step answer), and the
+> unconstrained Countdown figure below is wrong for a second, independent
+> reason — the scorer charged the last step of every emission with "unparsable
+> step" because SPEC §3.5's unscored tail put `<turn|>` inside it; rescored it
+> is **0.236**, not 0.048. **`docs/RESULTS.md` is the current table.** Kept here
+> only because the argument that follows was built on it.
+
 | task | arm | CS | solved |
 |---|---|---|---|
 | countdown / unconstrained | | 0.004 | **0.048** |

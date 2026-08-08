@@ -26,6 +26,8 @@ import dataclasses
 import re
 from typing import Iterator, Sequence
 
+from diffgemma_fa.compile.tasks import answer_region
+
 __all__ = ["CountdownRecord", "iter_records", "score_solution", "build_prompt"]
 
 #: The test slice TinyZero uses. Stated rather than sampled, so the split is
@@ -81,15 +83,20 @@ def score_solution(text: str, rec: CountdownRecord) -> tuple[bool, str]:
     and scoring format-only would report a solver that writes `1+1=3` as
     correct.
     """
-    # Strip SPEC §3.6's channel header first -- see the note in
-    # `sudoku.score_solution`. Here it made the FIRST step unparsable on every
-    # record, because the header shares its line with the opening step.
-    body = text.split("<channel|>", 1)[1] if "<channel|>" in text else text
-    # With --think the answer follows a literal `ANSWER:` marker; everything
-    # before it is the model's scratchpad and must not be scored.
-    if "ANSWER:" in body:
-        body = body.split("ANSWER:", 1)[1]
-    lines = [ln for ln in body.strip().splitlines() if ln.strip()]
+    # SPEC §3.6's header off the front, SPEC §3.5's unscored tail off the back.
+    # The header made the FIRST step unparsable on every record (it shares its
+    # line with the opening step); the tail made the LAST step unparsable on
+    # every record, because `_STEP` is anchored `\s*$` and every recorded
+    # emission ends in `<turn|>` or `<|channel>`.
+    #
+    # [AUDIT-C] Measured: `<|channel>82-80=2\n<channel|>3*4=12<turn|>` is
+    # ACCEPTED by the simulator over the compiled automaton and was scored
+    # `unparsable step: '3*4=12<turn|>'` -- a format diagnosis on a string the
+    # grammar *proves* is well formed. `artifacts/task_countdown_think.json`
+    # attributes 111/250 records to "unparsable step" on that basis, which
+    # points the histogram at the grammar instead of at the model.
+    body = answer_region(text)
+    lines = [ln for ln in body.splitlines() if ln.strip()]
     if not lines:
         return False, "empty"
 

@@ -197,17 +197,31 @@ def wrap_with_fence(
 
         FA = (```json\n)? · FA_grammar · (\n```)?
 
-    **Why surgery and not a regex wrap.** Prepending
+    **Why surgery and not a regex wrap. [AUDIT-F: the original reason is fixed;
+    this is now belt-and-braces, and it stays.]** Prepending
     `r"(```json\n)?" + regex + r"(\n```)?"` looks equivalent and is correct
-    under `re.fullmatch`, but the closing branch is **lost in the lift**:
-    `lift_regex` walks the opening fence fine and then dies on the `\n` after
-    the object (measured on a 2-key schema: 37 lifted states, two finals, and
-    no outgoing newline edge from the grammar-final state). Whatever the cause
-    inside `outlines_core`'s index construction, the resulting automaton
-    accepts only the compact form — so the flag would have looked like it
-    worked while measuring nothing. `prepend_channel_header` already
-    establishes that literal token prefixes belong here rather than in the
-    regex; this is the same argument for a suffix.
+    under `re.fullmatch`, and the closing branch used to be **lost in the
+    lift**: `lift_regex` walked the opening fence fine and then had no outgoing
+    newline edge from the grammar-final state (measured on a 2-key schema: 37
+    lifted states, two finals, no such edge), so the automaton accepted only
+    the compact form and the flag would have looked like it worked while
+    measuring nothing.
+
+    That was never "whatever the cause inside `outlines_core`" — it was one
+    specific, now-identified bug, and it is fixed. `outlines_core` 0.2.14
+    `src/index.rs` records a token edge only if the destination is not a
+    delayed-match state **or** is itself a full match, which discards every
+    edge leaving an accepting state for a non-accepting one — exactly the
+    closing `\n`. `lift.anchor_at_eoi` appends `\\z` so no byte-reached state is
+    ever flagged, and the regex-level wrap now lifts correctly (verified:
+    ```` ```json\n{"city": "paris"}\n``` ```` goes from rejected to accepted
+    without this function).
+
+    The surgery is kept anyway, for reasons that do not depend on that bug:
+    it costs a fixed 5 states rather than a whole DFA product, `prepend_channel_
+    header` already establishes that literal token prefixes belong here rather
+    than in the regex, and it does not re-enter `outlines_core` at all. Do not
+    apply it *and* a regex-level wrap — that would admit a doubled fence.
 
     **Why it is worth having.** 126 of 130 unconstrained emissions are fenced.
     With no slot for the fence the model writes it into the channel-header

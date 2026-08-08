@@ -22,20 +22,76 @@ from __future__ import annotations
 
 import dataclasses
 import json
+import re
 
 __all__ = ["Scores", "normalise", "extract_json", "score_arguments",
-           "schema_valid"]
+           "schema_valid", "values_match"]
 
-#: BFCL's value normalisation (SPEC §4.8): "scoring lowercases and strips
-#: `",./-_*^`".
-_STRIP = '",./-_*^'
+#: BFCL's value normalisation, transcribed from
+#: `bfcl_eval/eval_checker/ast_eval/ast_checker.py::standardize_string`:
+#:
+#: ```python
+#: regex_string = r"[ \,\.\/\-\_\*\^]"
+#: return re.sub(regex_string, "", input_string).lower().replace("'", '"')
+#: ```
+#:
+#: **[AUDIT-A] This used to strip `"` and keep the space, which is neither half
+#: of BFCL's rule.** SPEC §4.8 quotes the docstring as "lowercases and strips
+#: `",./-_*^`" — the outer `"` there is the quotation delimiter, not a member of
+#: the set, and the set's *first* character is a space. The two errors point in
+#: opposite directions and neither is safe:
+#:
+#: - keeping the space scores `NewYork` against `New York` as **wrong** where
+#:   BFCL scores it right (an understatement `metrics.py` forbids);
+#: - stripping the quote scores a literal `"black"` — quotes inside the JSON
+#:   string value — as **right** where BFCL rejects it (manufactured accuracy).
+#:
+#: The single-quote fold (`'` -> `"`) was missing entirely.
+_BFCL_STRIP = re.compile(r"[ \,\.\/\-\_\*\^]")
 
 
 def normalise(value) -> str:
-    s = str(value).strip().lower()
-    for ch in _STRIP:
-        s = s.replace(ch, "")
-    return s
+    """BFCL's `standardize_string`. **Strings only** — see `values_match`."""
+    return _BFCL_STRIP.sub("", str(value)).lower().replace("'", '"')
+
+
+def values_match(got, want) -> bool:
+    """Is `got` the same argument value as `want`, the way BFCL decides it?
+
+    **[AUDIT-A] BFCL normalises only strings.**
+    `simple_function_checker` routes a parameter whose declared type is `str`
+    through `string_checker` (which standardises), and everything else through a
+    bare `value not in possible_answer[param]` — exact equality — after a
+    `type_checker` that rejects a type mismatch outright.
+
+    Applying the string rule to everything, as this module used to, deletes the
+    decimal point and the minus sign from `str(value)`: `1.0` and `10` become
+    the same answer, as do `-5` and `5`. And `str(True).lower() == "true"` makes
+    a model that emitted the *string* `"true"` indistinguishable from one that
+    emitted the boolean — which BFCL's type check rejects before it ever looks
+    at the value.
+
+    `bool` is handled before `int`/`float` deliberately: `True == 1` in Python,
+    so an `isinstance(x, int)` branch would silently accept a boolean for an
+    integer parameter.
+    """
+    if isinstance(want, str) and isinstance(got, str):
+        return normalise(got) == normalise(want)
+    if isinstance(want, bool) or isinstance(got, bool):
+        # `bool` only ever matches `bool`.
+        return isinstance(want, bool) and isinstance(got, bool) and want == got
+    if isinstance(want, (int, float)) and isinstance(got, (int, float)):
+        # BFCL's own "allow python auto conversion from int to float".
+        return want == got
+    if isinstance(want, list) and isinstance(got, list):
+        return len(want) == len(got) and all(
+            values_match(g, w) for g, w in zip(got, want))
+    if isinstance(want, dict) and isinstance(got, dict):
+        return (set(want) == set(got)
+                and all(values_match(got[k], want[k]) for k in want))
+    if want is None or got is None:
+        return want is None and got is None
+    return type(want) is type(got) and want == got
 
 
 def extract_json(text: str) -> dict | None:
@@ -139,17 +195,40 @@ class Scores:
 
     def add(self, *, accepted: bool, parsed_obj: dict | None,
             want: dict | None, schema_ok: bool = False) -> None:
+        """Record one benchmark record.
+
+        **[AUDIT-B] `arg_total` must not depend on the emission.** This method
+        used to `return` before touching `arg_total` when `parsed_obj is None`,
+        so records that produced nothing were dropped from the denominator while
+        staying in `n`. Measured over the same 130 `bfcl_live_simple` records:
+
+            arm             parsed  arg_total  arg_accuracy  exact_call_rate
+            mask               67       120       0.5083         0.2308
+            j1_sample         128       287       0.3798         0.2846
+            unconstrained     126       276       0.6413         0.4692
+
+        `mask` — the arm that failed to produce a parsable object 63 times out
+        of 130 — reported the **highest** accuracy and the lowest exact-call
+        rate in the same row, because its 63 silent records were removed from
+        its denominator and from nobody else's. Two arms were quoting the same
+        column over different populations.
+
+        The denominator is now `sum(len(want))` over every record that has a
+        ground truth, whatever the model did, so `arg_accuracy` and
+        `exact_call_rate` are over the same records. Records with `want=None`
+        (no ground truth available — including the compile-skip, OOM and
+        zero-partition rows the harnesses feed in) contribute to neither.
+        """
         self.n += 1
         self.cs += int(accepted)
         self.schema_ok += int(schema_ok)
-        if parsed_obj is None:
-            return
-        self.parsed += 1
-        if any(v not in ("", None, [], {}) for v in parsed_obj.values()):
-            self.nonempty += 1
+        if parsed_obj is not None:
+            self.parsed += 1
+            if any(v not in ("", None, [], {}) for v in parsed_obj.values()):
+                self.nonempty += 1
         if want is None:
             return
-        n_ok, n_tot, det = score_arguments(parsed_obj, want)
+        n_ok, n_tot, det = score_arguments(parsed_obj or {}, want)
         self.arg_correct += n_ok
         self.arg_total += n_tot
         self.exact_calls += int(n_tot > 0 and n_ok == n_tot)
@@ -174,11 +253,16 @@ class Scores:
 
 
 def score_arguments(pred: dict, want: dict) -> tuple[int, int, list]:
-    """`(n_correct, n_expected, per_key)` under BFCL's normalisation."""
+    """`(n_correct, n_expected, per_key)` under BFCL's own comparison.
+
+    `n_expected` is `len(want)` — a property of the **benchmark**, never of the
+    emission. `pred` may legitimately be `{}` (the record produced nothing);
+    every key is then a miss, which is the honest answer and not an exclusion.
+    """
     detail, n_ok = [], 0
     for key, value in want.items():
         got = pred.get(key)
-        ok = key in pred and normalise(got) == normalise(value)
+        ok = key in pred and values_match(got, value)
         n_ok += int(ok)
         detail.append({"key": key, "want": str(value)[:80],
                        "got": str(got)[:80], "ok": ok})

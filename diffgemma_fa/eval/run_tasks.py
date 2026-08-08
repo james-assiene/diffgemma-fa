@@ -44,6 +44,7 @@ from gemma.diffusion import _sampler as ds  # noqa: E402
 from gemma.gm.text import _prefill  # noqa: E402
 
 from diffgemma_fa.compile import pipeline  # noqa: E402
+from diffgemma_fa.compile import tasks as _tasks  # noqa: E402
 from diffgemma_fa.compile.tasks import countdown as CD  # noqa: E402
 from diffgemma_fa.compile.tasks import sudoku as SD  # noqa: E402
 from diffgemma_fa.compile.tasks.grammars import (  # noqa: E402
@@ -208,7 +209,12 @@ def main() -> None:
         ok, why = scorer(text, rec)
         n_cs += int(accepted)
         n_ok += int(ok)
-        n_parsed += int(why != "empty")
+        # [AUDIT-E] Was `int(why != "empty")`, and Sudoku's no-output reason was
+        # `"only 0 digits"` -- so the predicate was true for every Sudoku record
+        # including the empty ones and the column was 100% by construction. The
+        # two scorers now agree on `"empty"`, and the predicate is named
+        # (`tasks.produced_an_answer`) rather than open-coded here.
+        n_parsed += int(_tasks.produced_an_answer(why))
         reasons[why.split(":")[0]] = reasons.get(why.split(":")[0], 0) + 1
         rows.append({"id": rec.id, "text": text[:300], "ok": ok,
                      "why": why, "accepted": accepted})
@@ -218,14 +224,36 @@ def main() -> None:
             print(f"  [{m}/{len(items)}] CS={n_cs/m:.3f} solved={n_ok/m:.3f}",
                   flush=True)
 
-    n = len(items)
+    # THE DENOMINATOR, stated rather than implied. `eval/run.py` and this file
+    # used to disagree: `run.py` dropped a compile-skipped record out of `n`
+    # entirely, this file kept it in `n` and scored it as a failure, so the same
+    # column meant different things in two artifacts that get compared. They now
+    # agree on `run.py`'s rule, which is also the one every published BFCL
+    # number in docs/RESULTS.md was computed under:
+    #
+    #   `n` is the records the model was actually **asked**. A compile failure
+    #   happens before the model is invoked, so the record leaves `n` and is
+    #   reported in `skipped_by_reason`. An OOM or a zero-partition happens
+    #   during generation, so the record stays in `n` as a failure and is
+    #   reported in its own column beside it.
+    n_skipped = sum(skipped.values())
+    n = len(items) - n_skipped
     out = {
         "task": args.task, "variant": args.variant, "emission": args.emission,
         "confidence": args.confidence, "entropy_bound": args.entropy_bound,
         "think": args.think,
         "seed": args.seed, "n": n,
+        "records_available": len(items),
+        "denominator_policy": (
+            "n = records attempted: compile-skipped records are excluded from "
+            "n and reported in skipped_by_reason; oom and zero_partition "
+            "records stay in n as failures. Matches eval/run.py."
+        ),
         "cs": n_cs, "cs_rate": round(n_cs / max(1, n), 4),
         "solved": n_ok, "solve_rate": round(n_ok / max(1, n), 4),
+        # [AUDIT-E] Now actually written out. It was computed and dropped, which
+        # is the only reason the vacuous predicate above never reached a table.
+        "parsed": n_parsed, "parse_rate": round(n_parsed / max(1, n), 4),
         "zero_partition": len(zero_partition), "oom": len(oom),
         "skipped_by_reason": skipped,
         # Why the unsolved ones failed -- a format failure and a wrong answer
@@ -241,8 +269,10 @@ def main() -> None:
         json.dump(out, f, indent=2)
 
     print("\n===== RESULT =====")
-    for k in ("task", "variant", "emission", "n", "cs_rate", "solve_rate",
-              "zero_partition", "oom", "failure_reasons", "elapsed_seconds"):
+    for k in ("task", "variant", "emission", "n", "records_available",
+              "cs_rate", "solve_rate", "parsed", "parse_rate",
+              "zero_partition", "oom", "skipped_by_reason", "failure_reasons",
+              "elapsed_seconds"):
         print(f"{k}: {out[k]}")
     print(f"\nwrote {path}")
 

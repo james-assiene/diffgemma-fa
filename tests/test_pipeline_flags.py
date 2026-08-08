@@ -109,11 +109,20 @@ def test_the_fence_is_optional_and_both_branches_are_accepted(fenced):
 
     This test was a strict xfail for one commit. The regex-level wrap
     (`r"(```json\n)?" + regex + r"(\n```)?"`) is correct under
-    `re.fullmatch` but its **closing** branch is lost in `lift_regex` — the
-    lifted DFA walks the opening fence and then has no outgoing newline edge
+    `re.fullmatch` but its **closing** branch was lost in `lift_regex` — the
+    lifted DFA walked the opening fence and then had no outgoing newline edge
     from the grammar-final state. `automaton.wrap_with_fence` does the same
     thing as DFA surgery instead, the way `prepend_channel_header` already
     handles literal token prefixes, and the branch survives.
+
+    [AUDIT-F] **The causal claim above is stale and kept only as history.**
+    That loss was not a property of lifting; it was `outlines_core` 0.2.14
+    discarding every token edge that leaves an accepting state for a
+    non-accepting one (`src/index.rs`, the `is_intermediate_state ||
+    is_full_match_state` guard). `lift.anchor_at_eoi` fixes it, and the
+    regex-level wrap now lifts correctly on its own. This test still guards
+    `wrap_with_fence`, which is kept for independent reasons — see its
+    docstring — so the assertions below are unchanged and still meaningful.
 
     Worth keeping in mind: whitespace tolerance alone accepts 0/130 of the
     model's own outputs, whitespace + fence accepts 74/130. A silently

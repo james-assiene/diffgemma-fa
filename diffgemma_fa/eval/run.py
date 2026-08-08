@@ -52,7 +52,35 @@ ALLOW = ("minimum", "maximum", "minItems", "maxItems", "minLength", "maxLength",
 #: whitespace runs of 1/3/5/7 characters across all 130 unconstrained outputs.
 #: Structured rather than `[ \n\t]{0,6}` so it cannot admit blank lines or bare
 #: 6-space runs; measured at near-identical state count.
+#:
+#: **Historical. Accepts 4 of the 5 standard renderings — it misses tabs** —
+#: because it was reverse-engineered from observed outputs rather than from RFC
+#: 8259. Kept selectable only so the arms in `docs/RESULTS.md` that were
+#: measured with it can be reproduced; `--whitespace=json` (the default) is the
+#: one to use.
 PRETTY_WS = r"( |\n {0,6})?"
+
+#: **[AUDIT-D2] `--whitespace` -> the pattern actually handed to the compiler.**
+#:
+#: This mapping used to be inline as `PRETTY_WS if args.whitespace == "pretty"
+#: else None`, and `None` is **not** "use the pipeline default": `build_regex`
+#: omits the kwarg entirely, so outlines' own `[ ]?` is used, which accepts 2 of
+#: the 5 standard renderings. The repaired default (`schema.JSON_WS`) was
+#: therefore unreachable from the CLI, and every eval arm to date ran a grammar
+#: with a known over-constraint — the exact 0/130 failure family, whose symptom
+#: is not a crash but a silently extended value (`600` -> `6000`).
+#:
+#: `None` is left meaning "outlines' own" on purpose (`test_schema.py` pins that
+#: as the negative control), so the repair is made here, at the call site, where
+#: the choice is visible in the results JSON.
+WHITESPACE_PATTERNS: dict[str, str | None] = {
+    #: RFC 8259's own definition. 5/5 renderings at every nesting depth.
+    "json": _schema.JSON_WS,
+    #: outlines' default, `[ ]?`. 2/5. What every arm before this ran.
+    "stock": None,
+    #: the hand-fitted pattern of E4/P1. 4/5, misses tabs.
+    "pretty": PRETTY_WS,
+}
 
 
 def _case_insensitive_enums(schema):
@@ -162,11 +190,20 @@ def main() -> None:
                     choices=sorted(PROMPT_STYLES),
                     help="E2: 'compact' asks for the rendering the grammar "
                          "actually admits")
-    ap.add_argument("--whitespace", default="stock",
-                    choices=["stock", "pretty"],
-                    help="E4/P1: 'pretty' admits the model's newline+indent "
-                         "separators (measured: 0/130 -> 74/130 verbatim "
-                         "acceptance of unconstrained outputs, with --fence)")
+    ap.add_argument("--whitespace", default="json",
+                    choices=["json", "pretty", "stock"],
+                    help="whitespace policy for the grammar. 'json' is RFC "
+                         "8259's own definition and accepts all five standard "
+                         "renderings at every nesting depth -- use it. "
+                         "'pretty' (E4/P1, 4/5, misses tabs) and 'stock' "
+                         "(outlines' [ ]?, 2/5) are the historical patterns, "
+                         "kept only to reproduce the arms in docs/RESULTS.md "
+                         "that were measured with them. Under either, the "
+                         "build gate REPORTS the renderings the narrow pattern "
+                         "costs instead of refusing the compile -- and only "
+                         "those: a schema whose grammar is defective for any "
+                         "other reason is still refused, because the same "
+                         "schema is re-checked under the wide pattern first")
     ap.add_argument("--fence", action="store_true",
                     help="E4/P2: allow an optional ```json fence around the "
                          "object, which 126/130 unconstrained outputs use")
@@ -242,12 +279,25 @@ def main() -> None:
             if args.ci_enums:
                 schema_params = _case_insensitive_enums(schema_params)
             norm = _schema.normalize_bfcl_schema(schema_params)
+            # [AUDIT-D3] THE BUILD GATE, wired. An unwired gate is not a
+            # mitigation: `verify_renderings` existed and neither call site
+            # passed it, so the check that turns "the grammar must accept how
+            # the model writes" into a build failure sat unused beside the
+            # defect it was written for. The instance comes from the schema
+            # itself (no model, no data, milliseconds), so there is nothing to
+            # opt into.
+            gate_instance = _schema.synthesize_instance(norm)
             a = pipeline.compile_json_schema(
                 schema_params, name=fn.get("name", ""), from_bfcl=True,
                 allow=ALLOW, allow_wildcard=True,
-                whitespace_pattern=(PRETTY_WS if args.whitespace == "pretty"
-                                    else None),
+                whitespace_pattern=WHITESPACE_PATTERNS[args.whitespace],
                 fence=args.fence,
+                verify_renderings=gate_instance,
+                # The historical patterns are known-narrow by construction, so
+                # under them the gate reports instead of raising -- otherwise
+                # `--whitespace=pretty` could not reproduce its own arm at all.
+                # Never silent: it prints, and `whitespace` is in the output.
+                verify_strict=(args.whitespace == "json"),
                 nonempty_required_strings=args.nonempty).automaton
         except Exception as e:  # noqa: BLE001
             k = f"compile:{type(e).__name__}"
@@ -289,6 +339,25 @@ def main() -> None:
             rng=jax.random.PRNGKey(args.seed * 10_000 + idx), sharding=None,
             max_out_length=base.max_out_length)
 
+        # [AUDIT-B2] Hoisted ABOVE the generation `try` so the OOM and
+        # zero-partition handlers can pass it. It used to be computed only on
+        # the success path, and both handlers passed `want=None` -- which drops
+        # the record out of `arg_total` while leaving it in `n`. That is the
+        # same emission-dependent denominator as [AUDIT-B], one level up, and on
+        # this corpus it is *larger*: `exp_e5_grammar130_j0.json` has 70
+        # zero-partition records of 130 (54%) and `exp_e5_grammar130_s1.json`
+        # has 55 (42%), against `mask`'s 63 unparsed. Scored as shipped, the
+        # first reports arg_accuracy 0.7321 over a denominator of 112 -- best in
+        # the table, while having failed to generate on more than half its
+        # records. Over the full 291 it is 0.2818.
+        #
+        # The exception handlers' own comments already said this is what they
+        # meant: "the record scores as a failure", "never swallowed". `want=None`
+        # is reserved for a record with no ground truth at all.
+        gt = truth.get(rec.id, [])
+        want = (bfcl_data.materialize_ground_truth(
+            gt[0].get(fn.get("name"), {}), fn["parameters"]) if gt else None)
+
         try:
             state = sampler.sample_constrained(
                 params=params, init_state=init,
@@ -298,16 +367,28 @@ def main() -> None:
             # RESOURCE_EXHAUSTED on ONE record must not destroy the other 129.
             # Same lesson as the Z == 0 catch below: the library is right to
             # fail loudly, but the harness owns the granularity. The
-            # whitespace-tolerant grammar roughly doubles |S|, and the
             # sum-product tree is twice the size of MAP's max-plus tree, so a
             # 1024-bucket record wants ~8 GiB on top of the model's 51 GB.
             # Counted in its own column and the ids recorded -- never folded
             # into the accuracy numbers as if the model had answered badly.
+            #
+            # **[AUDIT-D1] This used to add "the whitespace-tolerant grammar
+            # roughly doubles |S|". That is now backwards.** It was true of
+            # `PRETTY_WS` and of the old `JSON_WS = [ \t\n\r]{0,8}`, both of
+            # which count a bounded whitespace run. `JSON_WS` is now RFC 8259's
+            # unbounded `[ \t\n\r]*`, one DFA state rather than an eight-state
+            # counter: measured 34/45/59 states on the flat / one-array / 3-key
+            # BFCL shapes against 42/55/71 for outlines' own `[ ]?`. The shipped
+            # default moves records DOWN a bucket, not up, so this path should
+            # be rarer than the numbers in docs/RESULTS.md suggest.
             if "RESOURCE_EXHAUSTED" not in str(e):
                 raise
             oom.append({"id": rec.id, "fn": fn.get("name"),
                         "n_states_bucket": int(a.n_states_bucket)})
-            sc.add(accepted=False, parsed_obj=None, want=None, schema_ok=False)
+            # `want`, not None -- see the hoist above. The record failed to
+            # produce a call; its arguments are still arguments the benchmark
+            # asked for, and `oom` beside it says *why* it failed.
+            sc.add(accepted=False, parsed_obj=None, want=want, schema_ok=False)
             rows.append({"id": rec.id, "fn": fn.get("name"), "text": "",
                          "parsed": None, "accepted": False, "schema_ok": False,
                          "oom": True})
@@ -327,7 +408,9 @@ def main() -> None:
             # rate and the offending ids are written to the artifact.
             zero_partition.append({"id": rec.id, "fn": fn.get("name"),
                                    "detail": str(e)[:200]})
-            sc.add(accepted=False, parsed_obj=None, want=None, schema_ok=False)
+            # `want`, not None -- see the hoist above. This is the handler the
+            # 70/130 artifact went through.
+            sc.add(accepted=False, parsed_obj=None, want=want, schema_ok=False)
             rows.append({"id": rec.id, "fn": fn.get("name"), "text": "",
                          "parsed": None, "accepted": False, "schema_ok": False,
                          "zero_partition": True})
@@ -348,9 +431,6 @@ def main() -> None:
         # `schema_valid_rate` is the header- and tokenizer-independent
         # cross-arm question. Both are reported; neither substitutes.
         schema_ok = metrics.schema_valid(parsed, norm)
-        gt = truth.get(rec.id, [])
-        want = (bfcl_data.materialize_ground_truth(
-            gt[0].get(fn.get("name"), {}), fn["parameters"]) if gt else None)
 
         sc.add(accepted=accepted, parsed_obj=parsed, want=want,
                schema_ok=schema_ok)
@@ -380,6 +460,30 @@ def main() -> None:
         "fence": args.fence,
         "ci_enums": args.ci_enums,
         "records_available": len(records),
+        # THE DENOMINATOR, stated rather than implied -- `eval/run_tasks.py`
+        # used to keep compile-skipped records in `n` while this file dropped
+        # them, so the same column meant different things in two artifacts that
+        # get compared. Both now use this rule.
+        #
+        # [AUDIT-B2] The previous wording of this string said "oom and
+        # zero_partition records stay in n as failures" while the code passed
+        # them `want=None`, so they left `arg_total`. An artifact asserting a
+        # policy it does not implement is worse than one that asserts nothing.
+        # The code now matches.
+        #
+        # NOT COVERED BY A TEST. `tests/test_audit_measurement.py` pins the
+        # denominator rule on `Scores.add`, which is where [AUDIT-B] lived; the
+        # three call sites in this loop are what [AUDIT-B2] was, and reaching
+        # them needs the model. If you touch them, re-check this string by hand.
+        "denominator_policy": (
+            "n = records attempted. Compile-skipped records never reached the "
+            "model: they are excluded from n and from arg_total, and reported "
+            "in skipped_by_reason. Oom and zero_partition records DID reach the "
+            "model and failed: they stay in n AND in arg_total as failures, and "
+            "are reported in their own columns. arg_total therefore depends "
+            "only on the benchmark, never on what the model emitted. Matches "
+            "eval/run_tasks.py."
+        ),
         "skipped_by_reason": skipped,
         # SPEC §6.3 causes (a)/(b) hit at run time, per record. Reported, never
         # folded into the other columns.

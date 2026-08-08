@@ -27,13 +27,25 @@ from __future__ import annotations
 
 import dataclasses
 import random
+import re
 from typing import Iterator, Sequence
 
+from diffgemma_fa.compile.tasks import answer_region
+
 __all__ = ["SudokuRecord", "generate", "solutions", "score_solution",
-           "build_prompt"]
+           "build_prompt", "locate_grid"]
 
 N = 4
 BOX = 2
+
+#: One row of the answer: exactly `N` digits on a line of its own, modulo
+#: surrounding whitespace. Anchored on both ends **on purpose** — `1234` is a
+#: row, `Check: 1234 in every row.` is not, and `4x4` is not.
+_ROW = re.compile(rf"^\s*([1-{N}]{{{N}}})\s*$")
+
+#: The degenerate rendering: the whole grid on one line, which is what
+#: `sudoku_regex(..., row_separator="")` compiles to.
+_FLAT = re.compile(rf"^\s*([1-{N}]{{{N * N}}})\s*$")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -147,6 +159,40 @@ def build_prompt(rec: SudokuRecord) -> str:
     )
 
 
+def locate_grid(text: str) -> list[list[int]] | None:
+    """Find the completed grid in an emission, **structurally**.
+
+    `N` consecutive lines of exactly `N` digits each, in the answer region — the
+    shape `build_prompt` asks for and the shape `grammars.sudoku_regex`
+    compiles. Falls back to a single line of `N*N` digits, which is what
+    `row_separator=""` produces.
+
+    **[AUDIT-D] Why not "the first N*N digits".** That rule is right only when
+    nothing precedes the grid. The earlier fix stripped the channel header,
+    which is the only source of stray digits on the *constrained* arms — but
+    `unconstrained` and `mask` have no header, they emit prose, and they are the
+    baseline the whole cross-task comparison is measured against. `"Here is the
+    completed 4x4 grid:\\n"` shifts the scan by one cell and the scorer reports
+    `overwrote the given at (0,0)` for a grid that is intact. `4x4` is not a
+    contrived example: it is the phrase the prompt itself uses.
+
+    Returns:
+      The grid, or `None` if the emission does not contain one.
+    """
+    lines = answer_region(text).splitlines()
+    rows = [_ROW.match(ln) for ln in lines]
+    for i in range(len(rows) - N + 1):
+        window = rows[i:i + N]
+        if all(m is not None for m in window):
+            return [[int(ch) for ch in m.group(1)] for m in window]
+    for ln in lines:
+        m = _FLAT.match(ln)
+        if m is not None:
+            return [[int(m.group(1)[r * N + c]) for c in range(N)]
+                    for r in range(N)]
+    return None
+
+
 def score_solution(text: str, rec: SudokuRecord) -> tuple[bool, str]:
     """`(correct, reason)`, re-checking the givens rather than trusting them.
 
@@ -154,24 +200,20 @@ def score_solution(text: str, rec: SudokuRecord) -> tuple[bool, str]:
     wrong place to assume that: if the grammar ever regressed, a model that
     overwrote a given and solved a *different* puzzle would silently score as
     correct.
+
+    The reason for an emission with no grid at all is `"empty"` — the same word
+    Countdown uses, so `eval/run_tasks.py`'s parse column means the same thing
+    for both tasks (`tasks.produced_an_answer`). It used to be
+    `"only 0 digits"`, which made that column 100% for Sudoku by construction.
     """
-    # Strip SPEC §3.6's channel header FIRST. The grammar carries
-    # `<|channel>NAME\n<channel|>` and the name is free text that routinely
-    # contains digits -- `<|channel>312\n<channel|>3124...`. Reading digits
-    # from the whole string therefore shifts the grid by however many digits
-    # the model put in the header, and every cell lands in the wrong place.
-    # Measured: this reported "overwrote the given" on 250/250 records while
-    # CS was 1.000, i.e. the automaton had ALREADY proved the givens intact.
-    # A scorer that contradicts a proof is the thing that is wrong.
-    body = text.split("<channel|>", 1)[1] if "<channel|>" in text else text
-    # With --think the answer follows a literal `ANSWER:` marker; everything
-    # before it is the model's scratchpad and must not be scored.
-    if "ANSWER:" in body:
-        body = body.split("ANSWER:", 1)[1]
-    digits = [ch for ch in body if ch.isdigit()]
-    if len(digits) < N * N:
-        return False, f"only {len(digits)} digits"
-    g = [[int(digits[r * N + c]) for c in range(N)] for r in range(N)]
+    if not answer_region(text):
+        return False, "empty"
+    g = locate_grid(text)
+    if g is None:
+        # Non-empty but no grid: a real model failure, and a *different*
+        # diagnosis from "emitted nothing". Both mean "no answer to score", so
+        # both are in `tasks.NO_ANSWER_REASONS`.
+        return False, "no grid"
 
     for r in range(N):
         for c in range(N):

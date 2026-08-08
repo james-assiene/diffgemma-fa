@@ -15,6 +15,9 @@ Traps handled here, all verified in Phase 0:
   **all** of its bytes.
 - `guide.advance(eos)` raises even though `T[final][eos]` exists, so stop tokens
   are handled out of band (SPEC §3.5) and never enter this table.
+- **`outlines_core` silently drops every token transition that leaves an
+  accepting state for a non-accepting one.** See `_EOI_ANCHOR` below; this is
+  the bug that made every repeated *group* lift as its minimum count.
 """
 
 from __future__ import annotations
@@ -25,7 +28,67 @@ from typing import Any
 
 from diffgemma_fa.compile.minimize import Dfa, minimize
 
-__all__ = ["LiftResult", "lift_regex"]
+__all__ = ["LiftResult", "lift_regex", "anchor_at_eoi"]
+
+#: The end-of-haystack anchor appended to every regex before it reaches
+#: `outlines_core.Index`. **Not cosmetic — it is a correctness fix.**
+#:
+#: `outlines_core` 0.2.14 `src/index.rs`, in the token loop:
+#:
+#: ```rust
+#: let is_intermediate_state = !dfa.is_match_state(next_state);
+#: let is_full_match_state = dfa.is_match_state(dfa.next_eoi_state(next_state));
+#: if is_intermediate_state || is_full_match_state { ...record the edge... }
+#: ```
+#:
+#: `regex-automata` reports matches one byte late: `is_match_state(s)` is true
+#: of a state entered by reading a byte *after* a match ended. So a token that
+#: leaves an accepting state and lands somewhere that is not itself accepting
+#: satisfies neither disjunct and **the edge is thrown away** — while the
+#: destination is still pushed onto the BFS frontier, so it appears in the table
+#: as a source with no incoming edge and nothing looks obviously broken.
+#:
+#: Consequences measured here: `1(?:x2)*` rejected `1x2x2`; `a(?:ba)*` rejected
+#: `ababa`; `countdown_regex(max_steps=4)` admitted exactly one step, so every
+#: Countdown arm was scored against a grammar that could not contain a
+#: multi-step answer (`cs_rate=1.000, solve_rate=0.000`). Character repetition
+#: (`x*`, `[0-9]{0,3}`, `[^"]*`) is unaffected, because the state after the
+#: repeated character is accepting too — which is why this survived for weeks.
+#: It is also the cause of the lost closing fence recorded in
+#: `tests/test_pipeline_flags.py`.
+#:
+#: With `\z` the pattern can only match at end-of-haystack, so no state reached
+#: by reading a byte is ever `is_match_state` and `is_intermediate_state` is
+#: universally true: every edge is recorded. Acceptance is unchanged, because
+#: the finality `outlines_core` reports is already `is_match_state(next_eoi_state
+#: (s))` — "would match if the input ended here" — which is exactly what `\z`
+#: asks.
+#:
+#: **Cost: `|S|` generally GROWS, and that is the fix working.** The dropped
+#: edges were the only thing making the mid-repetition states unreachable, so
+#: the minimizer was collapsing a language the grammar was supposed to have.
+#: Restoring them restores the states that distinguish it. Measured, post-
+#: `compile_automaton`: `1(?:x2)*` 3 -> 4, `(?:ab|a)(?:b|ba)*` 3 -> 4,
+#: `[1-4]{2}(?:\n[1-4]{2}){1,2}` 7 -> 10, `countdown_regex(max_steps=4,
+#: max_value=999)` **40 -> 124** (bucket 128). Grammars with no repeated group
+#: are untouched: `ab*`, `a(?:bc)*d`, `(?:ab)*c` are unchanged, and 15/15 BFCL
+#: `live_simple` schemas compile to an identical `|S|`, so no BFCL result moves.
+#:
+#: (An earlier revision of this comment claimed `|S|` was "equal or smaller,
+#: since the flagged and unflagged copies of a state merge (`ab*`: 3 -> 2)".
+#: That was a raw `outlines_core.Index` state count for one regex with no
+#: repeated group, generalised without checking; it is false of the compiled
+#: automaton and false in direction.)
+_EOI_ANCHOR = r"\z"
+
+
+def anchor_at_eoi(regex: str) -> str:
+    """Wrap `regex` so it can only match at end-of-haystack. See `_EOI_ANCHOR`.
+
+    Non-capturing so that top-level alternation binds correctly: `a|b` must
+    become `(?:a|b)\\z`, never `a|b\\z`.
+    """
+    return f"(?:{regex}){_EOI_ANCHOR}"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -94,7 +157,7 @@ def lift_regex(
         drop_labels = RESERVED_TOKENS
 
     t0 = time.perf_counter()
-    index = oc.Index(regex, vocabulary)
+    index = oc.Index(anchor_at_eoi(regex), vocabulary)
     seconds_index = time.perf_counter() - t0
 
     t0 = time.perf_counter()
