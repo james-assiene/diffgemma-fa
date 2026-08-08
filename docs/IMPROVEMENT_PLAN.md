@@ -108,6 +108,34 @@ recalibrate only after regrammaring).
 
 ---
 
+
+> ## ⚠️ RETRACTION (2026-08-08): the Countdown result is a measurement artifact
+>
+> **The Countdown rows below are withdrawn.** `pipeline.compile_regex` mis-lifts
+> an unbounded repeated *group*: `countdown_regex` is
+> `step(?:\n step){0,3}`, and the string `3*4=12\n12+5=17` **matches the regex
+> while the compiled automaton rejects it**. The grammar admits only
+> **single-step** solutions; most Countdown problems need two or three.
+>
+> So `CS = 1.000, solved = 0.004` did not measure "constrained decoding fails at
+> reasoning". It measured a grammar that could not contain the answer — which is
+> also why all 250 emissions are single-step.
+>
+> Verified independently by regex-vs-DFA acceptance on the real compiled
+> automaton. Blast radius checked rather than assumed:
+>
+> | grammar | affected |
+> |---|---|
+> | Countdown `step(?:\n step){0,3}` | **BROKEN** |
+> | JSON arrays `(,item)*` | no — accepted at every length |
+> | Sudoku (explicit 4-row concatenation) | no |
+>
+> **The BFCL and Sudoku conclusions stand.** Countdown must be re-run after the
+> lift is fixed; until then it supports no claim in either direction.
+>
+> Found by the tester→coder→reviewer audit (CLAUDE.md), by a tester that was
+> told to check the compiled automaton rather than the regex.
+
 ## Cross-task results (2026-08-03): the constraint is not free everywhere
 
 First evaluations outside BFCL, n=250 each. The picture BFCL alone gave was
