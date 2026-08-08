@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import dataclasses
 import functools
+import warnings
 from typing import override
 
 import flax.struct
@@ -111,6 +112,10 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
       constrained_dtype: the sampling path needs float64
         (`constrained.require_x64` explains why in detail); MAP is fine in
         float32 because §2.7 puts it in log space.
+      allow_unsafe_float32: waive the `constrained_dtype='float32'` refusal on
+        the sample path. For ablations that mean to *measure* float32 — which
+        is how the claim was found wrong the first time — never for production.
+        It waives the dtype check only, **not** `require_x64`.
     """
 
     n_states_bucket: int
@@ -118,6 +123,10 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
     variant: str = "j0"
     emission: str = "map"
     constrained_dtype: str = "float64"
+    #: Explicit opt-out for the float32 sample-path refusal below. Separate
+    #: from `constrained_dtype` on purpose: no existing call site can acquire
+    #: it by accident, and it is greppable in a diff.
+    allow_unsafe_float32: bool = False
     #: `mf` = the stock rule, entropy of the **unconstrained** shaped logits.
     #: `mar` = entropy of the **constrained** marginal `q_i` (SPEC §3.4, the
     #: paper's remasking confidence). Static: it changes the traced graph.
@@ -152,15 +161,66 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
             # returns plausible-looking tokens. Fail at construction instead.
             _constrained.require_x64()
         if self.constrained_dtype not in ("float32", "float64"):
-            # float32 became admissible with the pairwise-max `log_matmul`
-            # (see `constrained.require_x64`): the old ban existed because the
-            # kernel exponentiated against a FOREIGN anchor, so entries
-            # underflowed even in float64. Anchored per entry, float32 is
-            # measured indistinguishable from float64 against brute-force
-            # enumeration, and halves the tree.
             raise ValueError(
                 f"constrained_dtype must be float32 or float64, got "
                 f"{self.constrained_dtype!r}")
+        # [Added 2026-08-08.] `require_x64` above checks the *flag*; this
+        # checks the *knob*, and until now nothing did. `--dtype float32`
+        # (eval/run.py) reaches here with `jax_enable_x64` ON and produces
+        # arithmetic identical to the configuration `require_x64` refuses —
+        # the same inconsistency, inside one `__post_init__`.
+        #
+        # This comment used to claim float32 was "measured indistinguishable
+        # from float64" and therefore admissible. That was a toy-scale result
+        # (`L = 4`, `|S| <= 8`). Measured at the PRODUCTION temperature — the
+        # logit softcap `30·tanh(x/30)` of `gemma/diffusion/_transformer.py`
+        # divided by the sampler's own `min_temperature = 0.4` — on
+        # `BFCL_v4_live_simple`, 50 states, about as small as a real grammar
+        # gets:
+        #
+        #     T = 1.0 : lossless
+        #     T = 0.4 : live edges gone 1,315 / 1,399 / 1,374 of 30,976
+        #               live root entries gone  67 /  38 /   47 of 1,168
+        #               survivor error        27.6 / 27.7 / 77.8 nats
+        #
+        # — three seeds, because every one of those figures is draw-dependent.
+        # Do not quote a single point: an earlier version of this comment cited
+        # 67/1,168 and 27.6 nats as if canonical, on the strength of two runs
+        # that turned out to share a seed. The ranges are 38-67 root entries
+        # and 27-78 nats. (The 1,141-edge figure sometimes quoted alongside is
+        # the same seed at T = 0.408, the schedule's true final temperature,
+        # not a second draw.)
+        #
+        # The lost entries surface as a spurious `Z == 0`; the misvalued ones
+        # trip **nothing** — the draw is simply from the wrong distribution and
+        # returns plausible tokens. "Small grammar" is therefore not a defence,
+        # and neither is the pairwise-max anchor: the loss is upstream of the
+        # tree, in the float32 `p_real` softmax below and in `_matrices`.
+        if (self.emission == "sample"
+                and self.constrained_dtype == "float32"
+                and not self.allow_unsafe_float32):
+            raise ValueError(
+                "constrained_dtype='float32' is refused on the sample path: "
+                "at the production temperature it drops live root entries "
+                "(38-67 of 1,168 across three draws) and misvalues the "
+                "survivors by tens of nats (27-78) on a 50-state BFCL "
+                "grammar, and the survivor error trips no "
+                "detector. Use constrained_dtype='float64', or "
+                "emission='map', which SPEC §2.7 puts in log space and which "
+                "float32 is fine for. To measure float32 deliberately, pass "
+                "allow_unsafe_float32=True."
+            )
+        if self.emission == "sample" and self.constrained_dtype == "float32":
+            # Opted in. Loud rather than silent: this is an ablation knob and a
+            # run that reaches it must say so in its own log.
+            warnings.warn(
+                "allow_unsafe_float32=True: the constrained sample path is "
+                "running in float32, which is measured to lose live root "
+                "entries and to misvalue the survivors by tens of nats at "
+                "L = 256. Results from this run are not comparable to float64.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
 
     # -- entry point: widen the prefilled state --------------------------
     @override

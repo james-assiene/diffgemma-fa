@@ -46,13 +46,104 @@ class X64Required(RuntimeError):
 
 
 def require_x64() -> None:
-    """**Still required for `--emission=sample`. A no-op only by API.**
+    """**Required for `--emission=sample`. Raises when `jax_enable_x64` is off.**
 
-    **[Corrected 2026-08-01.]** This docstring previously declared float64
-    obsolete on the strength of a toy-scale check — `L = 4`, `|S| <= 8`, 20k
-    draws against brute-force enumeration, where float32 deviated 0.0025 /
-    0.0013 against float64's 0.0033 / 0.0009. That check was real but far too
-    small to generalise, and it did not.
+    **[Corrected 2026-08-08 — the no-op is retracted.]** Between 2026-08-01 and
+    now the body was `return`, on the rationale (kept below) that
+    `log_matmul`'s pairwise-max anchor "removed the need" for float64. That
+    rationale is true of the **tree** and false of everything **upstream** of
+    it, so the function was silently permitting exactly the configuration its
+    own docstring records as failing on 70/130 records.
+
+    **Measured at production shapes**, `L = 256`, on the real compiled
+    `BFCL_v4_live_simple` grammar (50 states, 83 classes, `V = 262,144`,
+    30,976 live `M_i` entries, 1,168 live root entries). `M_lost32` is the
+    float32 loss; `M_lostup` is the same run with `W`/`M` built in float64 —
+    the fix this guard was proposed as an alternative to. Every row is a
+    **single draw at seed 1**; see point 2 for how much they move across seeds:
+
+        p regime                     M_lost32   M_lostup   root lost   err
+        iid Gaussian x 8                    0          0     0/1168   8e-4
+        iid Gaussian x 12                  76         76     0/1168   6e-4
+        iid Gaussian x 16               2,761      2,761   168/1168    113
+        iid Gaussian x 20               9,903      9,903   795/1168    556
+        iid Gaussian x 30              20,660     20,660  1107/1168    6.2
+        iid Gaussian x 40              25,118     25,118  1158/1168   3e-5
+        softcap 30*tanh, T = 1.0            0          0     0/1168   4e-4
+        softcap 30*tanh, T = 0.4        1,315      1,315    67/1168   27.6
+
+    Three things follow, and none of them rests on a single point:
+
+    1. **`M_lostup == M_lost32` at every scale.** The float64 upcast inside
+       `_matrices` recovers *exactly zero* entries wherever anything is lost.
+    2. **The driver is `p` sharpness × temperature, not grammar size.** The
+       last two rows are a Gemma-shaped logit distribution: the softcap
+       `30·tanh(x/30)` of `gemma/diffusion/_transformer.py:182`, divided by the
+       sampler's own `min_temperature = 0.4` (`gemma/diffusion/_sampler.py:236`).
+       At `T = 1.0` float32 is lossless; the production temperature alone takes
+       it to 67 lost root entries and 27.6 nats of survivor error. The
+       survivor error is the dangerous half: lost entries look like `Z == 0`,
+       misvalued ones trip nothing at all.
+
+       **Every figure in that row is one draw, and all of them move.** Across
+       three seeds at `T = 0.4`: root loss 67 / 38 / 47 of 1,168, edge loss
+       1,315 / 1,399 / 1,374 of 30,976, survivor error 27.6 / 27.7 / **77.8**
+       nats. The honest ranges are **38–67 root entries, ~1,140–1,400 edges,
+       and 27–78 nats** — quote those, not a single point. The `T = 0.408` run
+       recorded elsewhere is *not* an independent replication: it is seed 1
+       again at the schedule's true final temperature, and the 1,315-vs-1,141
+       edge gap is that temperature difference, not a second sample.
+
+       An earlier revision of this docstring read the matching 67/1,168 in two
+       runs as "the root count is a property of the grammar". It is not — those
+       two runs merely shared seed 1, and the count is 67/38/47 across seeds.
+       That was an invariant inferred from n = 2 and written down as measured
+       fact, inside the rewrite meant to remove exactly that failure. What *is*
+       stable at a fixed seed is the root count across **temperature** (67 at
+       both `T = 0.4` and `T = 0.408`), which is nearly the opposite claim.
+    3. The iid-Gaussian rows are not a real logit distribution (a 458-nat span
+       at scale 40) and should not be leaned on alone — but on *sharpness* they
+       are conservative. Scale 40's mean entropy is 0.196 nats, while Phase 0
+       measured real final-step entropies of 5e-5 – 4e-4 nats, i.e. sharper.
+
+    **Why the upcast is not the fix, structurally.** Three reasons, in
+    increasing order of finality:
+
+    - *The loss is upstream of `_matrices`.* On the real grammar the float32
+      `softmax` that produces `p` (`sampler.py`'s `p_real`) is where the
+      entries die: at `T = 0.4` it flushes 7.6M of 67.1M entries to zero, and
+      `W_lost32 == W_lostup` in every row above, so `class_weights` contributes
+      nothing beyond it. A dtype patch inside `_matrices` cannot restore a zero
+      it was handed.
+    - *The synthetic fixture is the unrepresentative one.* On a `|S| = 64`,
+      `V = 4096` toy the upcast **does** work (leaf loss 32 → 0, root loss
+      32 → 0, error 7.6e-3 → 3.8e-5 nats) — because its two classes are 2,048
+      tokens wide, so a class's mass is a sum over thousands of `p` entries and
+      survives even when individual entries flush. The real grammar's 83
+      classes over a 262k vocab have a **median of 2 true members** (min 1;
+      62 of 83 have ≤ 8), so a class's whole mass *is* a handful of `p` entries
+      and dies with them. The toy is where the patch looks like a fix.
+    - *And it cannot work at all in the configuration this guard covers.* With
+      `jax_enable_x64` **off**, `p.astype(jnp.float64)` is a silent no-op: JAX
+      emits a truncation `UserWarning` and returns a float32 array (verified —
+      `jnp.zeros(1, jnp.float64).dtype == float32`). The proposed fix is
+      structurally incapable of addressing the guarded configuration, at any
+      scale, on any fixture. That is the end of the argument.
+
+    Taking the upcast instead of this guard would therefore have bought a green
+    synthetic fixture and an unchanged production failure — the precise shape of
+    mistake this file already made once.
+
+    ---
+
+    Historical note (**2026-08-01**), retained because the *measurement* stands
+    even though the conclusion drawn from it did not:
+
+    This docstring previously declared float64 obsolete on the strength of a
+    toy-scale check — `L = 4`, `|S| <= 8`, 20k draws against brute-force
+    enumeration, where float32 deviated 0.0025 / 0.0013 against float64's
+    0.0033 / 0.0009. That check was real but far too small to generalise, and
+    it did not.
 
     Measured at production scale on the E4 grammar (whitespace-tolerant, so
     roughly double `|S|`), `L = 256`, n = 130 records:
@@ -103,13 +194,15 @@ def require_x64() -> None:
     exact kernel needs more headroom than the GEMM form did, and float32
     gives half of it straight back.
 
-    Kept as a callable no-op rather than deleted so the call site in
-    `ConstrainedDiffusionSampler.__post_init__` and its tests keep documenting
-    the hazard for anyone who reintroduces a foreign anchor.
+    That paragraph is what turned this function into a no-op. It is a claim
+    about the *anchor*, and the anchor was never the only thing that underflows:
+    it says nothing about `softmax`, `class_weights` or `transition_matrices`,
+    all of which run before the first `log_matmul` and all of which lose entries
+    in float32 at `L = 256` (numbers at the top).
 
     ---
 
-    Historical rationale (**no longer a constraint**):
+    Historical rationale (**and it is again the operative one**):
 
     **Measured, on a real BFCL grammar at `L = 64`.** SPEC §2.4/§2.6 prescribe
     max-normalizing every tree node, which fixes the *overall* scale — but not
@@ -145,7 +238,24 @@ def require_x64() -> None:
       X64Required: if float64 is disabled, in which case the sampler would
         silently draw from a degenerate distribution rather than fail.
     """
-    return  # see the docstring: the pairwise-max anchor removed the need
+    # Read the flag off the live config, not off a cached value: the eval
+    # entry points call `jax.config.update` at import time, and tests toggle it
+    # inside a single process.
+    if not jax.config.read("jax_enable_x64"):
+        raise X64Required(
+            "the constrained sum-product draw (`--emission=sample`) needs "
+            "float64, but `jax_enable_x64` is off, so every `jnp.float64` "
+            "here silently becomes float32. Measured at L = 256: float32 "
+            "loses 32 of 64 live root entries on a synthetic |S|=64 grammar "
+            "(deterministic, fixed-seed fixture) and the large majority of "
+            "the live M_i entries on a real BFCL grammar with sharp p — 81% "
+            "on one draw, but see the docstring: every such figure is "
+            "draw-dependent and none of them is a bare fact. Either way it "
+            "is a spurious `Z == 0` rather than a draw. Call "
+            "`jax.config.update('jax_enable_x64', True)` before constructing "
+            "the sampler, or use `--emission=map`, which SPEC §2.7 puts in "
+            "log space and is unaffected."
+        )
 
 
 def budget_terminal_factor(d: jnp.ndarray, remaining: jnp.ndarray,

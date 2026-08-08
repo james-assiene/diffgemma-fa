@@ -400,31 +400,52 @@ def test_log_matmul_survives_the_tail_vs_grammar_dynamic_range():
     """A single row/col max shift underflows on the REAL structure.
 
     The unscored `ACC --Σ--> ACC` tail pins the row/col maxes at 0.0 while a
-    genuine grammar path across L = 256 sits at log Z ≈ -846: each of its
-    contributions is exp(-423)·exp(-423) ≈ 1e-368, below float64's smallest
-    subnormal, so the whole (start, ACC) entry underflowed to sentinel.
-    Measured live on `live_simple_106-63-0` (403 states): `joint_draw`
-    reported a provably non-empty language as Z == 0, and before the
-    feasibility detector existed this emitted silent garbage. The sequential
-    reference gets -846 easily — it folds into a running max and never
-    multiplies two tiny halves together.
+    genuine grammar path across L = 256 sits at log Z ≈ -846. Measured live on
+    `live_simple_106-63-0` (403 states): `joint_draw` reported a provably
+    non-empty language as Z == 0, and before the feasibility detector existed
+    this emitted silent garbage. The sequential reference gets -846 easily — it
+    folds into a running max and never multiplies two tiny halves together.
 
-    Minimal reproduction: two states, a self-loop at weight 1 (log 0) and a
-    start→ACC chain at log -423 per half.
+    **[Rewritten 2026-08-08. The previous witness could not fail.]** It used
+    `A = B = [[-423, -423], [NEG, 0]]` and checked entry `(0, 1)`. On that
+    matrix the single-shift kernel is *exact* — and not only at `(0, 1)`: it
+    agrees with the current kernel on all four entries. `ra[0] = -423` and
+    `cb[1] = 0`, so the foreign anchor `ra[i] + cb[j]` lands exactly on the
+    dominant term `A[0,1] + B[1,1] = -423`, which is then exponentiated at
+    `exp(0) = 1`. Nothing underflows, so the old docstring's claim that this
+    entry "underflowed to sentinel" was simply false and has been removed.
+    Under a single-shift mutation the whole of `tests/test_audit_numerics.py`
+    goes red — 8 tests — while this one stayed green.
+
+    **What the witness has to have.** The anchor is only foreign when the row
+    max of `A` and the column max of `B` are attained at *different* `k` than
+    the one that actually connects `i` to `j`. Below, `A[0,0] = 0` (a cheap
+    branch to a state that cannot reach `j`) sets `ra[0] = 0`, and `B[1,0] = 0`
+    sets `cb[0] = 0`, so the shift is `0` — while the only surviving path runs
+    `A[0,1] + B[1,0] = -900`. `exp(-900)` is zero in float64 (subnormal floor
+    ~`exp(-745)`), so a shifted kernel returns the sentinel for an entry whose
+    true value is `-900`: a spurious `Z == 0` on a non-empty language. The
+    pairwise-max anchor makes the dominant term `exp(0)` by construction and
+    cannot do this at any dynamic range.
     """
     from diffgemma_fa.infer import scans
     import jax.numpy as jnp
 
     neg = scans.NEG_SENTINEL
-    # A = B = one 128-length half-product: [[ -423 (start→start), -423 (start→acc)],
-    #                                       [ sentinel,            0 (acc→acc)  ]]
-    half = jnp.asarray([[-423.0, -423.0], [neg, 0.0]], dtype=jnp.float64)
-    root = scans.log_matmul(half, half)
-    got = float(root[0, 1])
-    # exact: logsumexp(-423 + -423, -423 + 0) = -423 + log1p(exp(-423)) ≈ -423
-    assert got == pytest.approx(-423.0, abs=1e-6), (
-        f"(start, acc) came back {got}; the single-shift form underflowed "
-        "this to sentinel"
+    A = jnp.asarray([[0.0, -900.0], [neg, neg]], dtype=jnp.float64)
+    B = jnp.asarray([[neg, neg], [0.0, neg]], dtype=jnp.float64)
+    got = float(scans.log_matmul(A, B)[0, 0])
+    # Only k = 1 is live: A[0,1] + B[1,0] = -900 + 0.
+    assert got == pytest.approx(-900.0, abs=1e-9), (
+        f"(0, 0) came back {got}, expected -900. A row/column-anchored shift "
+        f"returns the sentinel here ({neg:.3g}) because the anchor sits 900 "
+        f"nats above the only surviving term."
+    )
+    # And the entries with no live k must stay at the sentinel, not become 0.
+    out = np.asarray(scans.log_matmul(A, B))
+    dead = np.array([[False, True], [True, True]])
+    assert (out[dead] <= neg / 2).all(), (
+        "an entry with no live contraction index came back live"
     )
 
 

@@ -16,6 +16,8 @@ between them is the library's, not ours.
 
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 import pytest
 
@@ -139,25 +141,149 @@ def test_an_unknown_variant_is_rejected():
         S.ConstrainedDiffusionSampler(**_kwargs(variant="j7"))
 
 
-def test_float32_constructs_but_is_not_the_default():
-    """float32 remains *constructible* — the API no longer bans it — but it is
-    not the default and must not become one without a production-scale
-    measurement.
+def test_float32_is_refused_on_the_sample_path():
+    """**[Rewritten 2026-08-08.]** `constrained_dtype='float32'` must **raise**
+    when `emission='sample'`.
 
-    The history is the point. float32 was briefly declared safe on a toy check
-    (`L = 4`, `|S| <= 8`, deviation 0.0025/0.0013 against float64's
-    0.0033/0.0009 vs brute-force enumeration) and made the eval default. At
-    production scale on the E4 grammar at `L = 256` it drove the `Z == 0`
-    detector on 70/130 and 55/130 records across two seeds, against 0/130 in
-    float64 on the identical grammar. Eight tree levels of logsumexp in a
-    format whose `exp` underflows at 87 nats cannot hold a grammar whose real
-    paths span hundreds.
+    The test this replaces asserted the opposite — that the combination stays
+    constructible — and by doing so pinned the hazard open. Its stated
+    rationale was already self-defeating: it recited that float32 drove the
+    `Z == 0` detector on 70/130 and 55/130 records at `L = 256` against 0/130
+    in float64, and then asserted that the API must let you ask for it.
 
-    A numerical claim validated only on toy shapes is not validated.
+    A construction-time refusal is the right place because the failure is
+    **silent at run time**. Measured at the *production* temperature (logit
+    softcap `30·tanh`, `min_temperature ≈ 0.4`) on a 50-state grammar — about
+    as small as real grammars get — float32 drops tens of live root entries
+    and misvalues the survivors by tens of nats. The lost entries look like a
+    spurious `Z == 0`; the misvalued ones do not trip any detector at all, so
+    the draw simply comes from the wrong distribution and returns plausible
+    tokens.
+
+    **Why no figure above is asserted.** Every one of them is draw-dependent —
+    including the root count, which an earlier version of this docstring called
+    a reproducible property of the grammar. It is not. Across the measured
+    cross-product:
+
+        T=0.4    seed=1   M_lost 1315   root_lost 67/1168   err 27.57
+        T=0.4    seed=2   M_lost 1399   root_lost 38/1168   err 27.73
+        T=0.4    seed=3   M_lost 1374   root_lost 47/1168   err 77.77
+        T=0.408  seed=1   M_lost 1141   root_lost 67/1168   err 26.94
+
+    the root loss is 67, 38, 47 across seeds; two independent replications
+    agreed on 67/1168 only because they shared seed 1, and the 1,315-vs-1,141
+    gap was temperature at a fixed seed, not two draws. The survivor error
+    spans 27–78 nats, not "about 27".
+
+    So the figures are here as *evidence of a hazard*, never as an assertion.
+    Pinning any of them would put the suite one unrelated seed change away from
+    red, and the obvious repair would be to weaken the assertion — which is the
+    precise failure this audit exists to stop. What is asserted is only the
+    behaviour: the refusal fires.
+
+    The loss is upstream of `log_matmul`'s pairwise-max anchor: `p` entries
+    below float32's smallest normal (1.18e-38) flush to zero in the softmax and
+    in `_matrices`, taking their edges out of `M` before the tree ever runs.
+    So "the anchor made float32 safe" does not apply, and neither does a wider
+    accumulator.
     """
+    with pytest.raises(ValueError, match="float32"):
+        S.ConstrainedDiffusionSampler(
+            **_kwargs(variant="j0", emission="sample",
+                      constrained_dtype="float32"))
+
+
+@pytest.mark.parametrize("x64", [True, False])
+def test_float32_is_still_allowed_for_a_map_emission(x64):
+    """MAP is unaffected: SPEC §2.7 puts it in the `(max, +)` semiring in log
+    space, where there is no summation to underflow — "exact, no scaling
+    discussion, no underflow". The refusal above must therefore be scoped to
+    `emission='sample'` and must not become a blanket ban, which would cost
+    the MAP path half its memory headroom for nothing.
+
+    Checked with x64 both on **and off**, because that is the claim: the MAP
+    path does not depend on float64 at all, so neither guard may fire on it.
+    """
+    jax.config.update("jax_enable_x64", x64)
+    try:
+        S.ConstrainedDiffusionSampler(
+            **_kwargs(variant="j0", emission="map",
+                      constrained_dtype="float32"))
+    finally:
+        jax.config.update("jax_enable_x64", True)
+
+
+def test_float32_on_the_sample_path_has_an_explicit_opt_out_and_warns():
+    """The refusal is a guard rail, not a wall: an ablation that *wants* to
+    measure float32 at `L = 256` must be able to, since re-measuring the claim
+    is exactly how it was found wrong the first time.
+
+    The opt-out has to be explicit and separate from `constrained_dtype`, so
+    that no existing call site acquires it by accident and it is greppable in
+    a diff.
+
+    **And it must be loud.** The whole hazard is that float32 fails silently —
+    the misvalued survivors trip no detector — so a run that opts in has to say
+    so in its own log or the resulting numbers get compared against float64
+    runs by someone who never knew. Asserting the warning is what keeps
+    "loud rather than silent" a contract instead of a comment; without this the
+    warning is an unasserted side effect that a future refactor drops for free.
+    """
+    with pytest.warns(RuntimeWarning, match="float32"):
+        S.ConstrainedDiffusionSampler(
+            **_kwargs(variant="j0", emission="sample",
+                      constrained_dtype="float32",
+                      allow_unsafe_float32=True))
+
+
+def test_the_supported_configuration_warns_about_nothing():
+    """Guard against the warning being emitted too broadly. If float64 on the
+    sample path also warned, the signal would be noise within a week and the
+    test above would be pinning a message nobody reads.
+
+    **Scoped to `RuntimeWarning` on purpose.** A bare `simplefilter("error")`
+    promotes *any* warning raised anywhere during construction — including an
+    unrelated `DeprecationWarning` from a third-party import — so the test
+    would one day fail for a reason it is not about, and the cheapest repair
+    would be to delete it. Narrowing it to the category actually under test
+    means a red here can only mean "the float32 warning leaked onto the
+    supported path".
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        S.ConstrainedDiffusionSampler(
+            **_kwargs(variant="j0", emission="sample",
+                      constrained_dtype="float64"))
+
+
+def test_the_opt_out_does_not_weaken_the_x64_guard():
+    """`allow_unsafe_float32` waives the *dtype* check only. It must not waive
+    `require_x64`, which covers a different failure: with `jax_enable_x64` off
+    every `jnp.float64` silently becomes float32, so a caller asking for
+    float64 does not get it. Waiving both on one flag would let
+    `constrained_dtype='float64'` run in float32 unannounced.
+    """
+    from diffgemma_fa.model import constrained as _C
+
+    jax.config.update("jax_enable_x64", False)
+    try:
+        # `X64Required` specifically — not a bare `Exception`, which a typo in
+        # the field name would satisfy with a `TypeError`.
+        with pytest.raises(_C.X64Required):
+            S.ConstrainedDiffusionSampler(
+                **_kwargs(variant="j0", emission="sample",
+                          constrained_dtype="float64",
+                          allow_unsafe_float32=True))
+    finally:
+        jax.config.update("jax_enable_x64", True)
+
+
+def test_float64_on_the_sample_path_still_constructs():
+    """Guard against the refusal being written too broadly — the supported
+    configuration must keep working."""
     S.ConstrainedDiffusionSampler(
         **_kwargs(variant="j0", emission="sample",
-                  constrained_dtype="float32"))
+                  constrained_dtype="float64"))
 
 
 def test_the_eval_default_dtype_is_float64():
