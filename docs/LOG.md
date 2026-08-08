@@ -875,3 +875,51 @@ and the earlier conclusion was an artifact throughout.
 
 Do **not** compare against the withdrawn rows; compare against the rescored
 unconstrained arm only.
+
+### Result (PID 2251286): the grammar fix works; the residual is length economics
+
+`CS 1.000, solved 0.036, n=250, 0 zero-partition, 0 OOM, 46.2 min.`
+Artifact `artifacts/task_countdown_j0map_refixed.json`.
+
+**The retraction is confirmed on its own terms and then superseded.** Before the
+lift fix every one of 250 emissions was single-step, because the automaton could
+not express anything else. Now:
+
+| steps emitted | n | solved | rate |
+|---|---|---|---|
+| 1 | 189 | 2 | 0.011 |
+| 2 | 50 | 5 | 0.100 |
+| 3 | 10 | 2 | 0.200 |
+| 4 | 1 | 0 | — |
+
+So multi-step solutions are expressible and, when emitted, they solve at
+10-20%. The grammar excuse is genuinely exhausted: `96-19=77\n77-1=76` is a real
+constrained multi-step decode.
+
+**But 0.036 is still far below the rescored unconstrained 0.236**, and the
+mechanism is visible rather than inferred. **84 of 250 emissions (33.6%) are
+degenerate** — `1 -0=1`, `1 -1=1` — and **none of them solve**. The
+`failure_reasons` histogram reads `operand 1 not available: 101`, which looks
+like the model using numbers it was not given and is nothing of the kind: it is
+the shortest string the grammar admits, chosen by the MAP argmax.
+
+That is **not** a reasoning failure and it is **not** new. It is the same
+length-economics mode already measured as 39% of the BFCL gap — grammar-optional
+structure collapsing to its shortest member (`{"body": {}}`, `[]`, wildcard
+`any` -> literal `1`) — because closing early is admissible and, with the
+post-stop tail unscored (SPEC §3.5), free.
+
+**Hypothesis, and the test now running.** If the residual is length economics
+rather than capability, `--emission sample` — which draws from the constrained
+posterior instead of maximising it — should not collapse to the argmax short
+string, and the degenerate fraction should fall. PID 2278246, log
+`logs/countdown_sample.log`, out `artifacts/task_countdown_j0sample_refixed.json`.
+
+If the degenerate fraction stays near 34% under sampling, length economics is
+the wrong diagnosis and the emission rule is not the lever — in which case the
+next candidate is SPEC's tail-weight prior γ (S2), which is declared-exact for
+the modified target and is currently unimplemented.
+
+**Do not restate the old Countdown rows.** They are withdrawn, and the scorer
+fixes moved the unconstrained baseline independently (0.048 -> 0.236), so the
+original comparison was wrong on both sides.
