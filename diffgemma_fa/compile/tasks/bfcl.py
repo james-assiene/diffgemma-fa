@@ -23,6 +23,7 @@ from typing import Any
 
 from diffgemma_fa.compile import automaton as automaton_mod
 from diffgemma_fa.compile import bfcl_data, pipeline
+from diffgemma_fa.compile import schema as schema_mod
 
 #: Keywords outlines silently drops. Tolerated here so the benchmark compiles,
 #: but counted and reported — never silently.
@@ -39,9 +40,18 @@ def _job(task: tuple[str, str, int, dict, str]) -> dict[str, Any]:
     rec_id, fn_name, fn_index, params, out_dir = task
     t0 = time.perf_counter()
     try:
+        # [AUDIT-D3] THE BUILD GATE, wired. It was written for the failure that
+        # cost 30 accuracy points (a grammar accepting 0/130 real outputs) and
+        # neither call site ever passed it an instance. The instance is
+        # synthesized from the schema, so gating is unconditional: no model, no
+        # data, milliseconds. A schema whose grammar rejects a standard
+        # rendering of its own instance now shows up in this report's error
+        # counts instead of being written to `--out` as if it were fine.
         rep = pipeline.compile_json_schema(
             params, name=fn_name, from_bfcl=True,
             allow=ALLOW, allow_wildcard=True,
+            verify_renderings=schema_mod.synthesize_instance(
+                schema_mod.normalize_bfcl_schema(params)),
         )
     except Exception as e:  # noqa: BLE001
         return {"id": rec_id, "fn": fn_name, "fn_index": fn_index,

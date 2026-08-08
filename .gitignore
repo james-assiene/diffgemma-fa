@@ -13,3 +13,6 @@ __pycache__/
 *.pyc
 # BFCL / benchmark checkouts live under artifacts/data (large, upstream-owned)
 artifacts/data/
+
+# Coordinator snapshots of uncommitted multi-agent work (see docs/LOG.md)
+.audit_backup/

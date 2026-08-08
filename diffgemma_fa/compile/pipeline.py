@@ -150,13 +150,30 @@ def compile_json_schema(
     whitespace_pattern: str | None = schema_mod.JSON_WS,
     nonempty_required_strings: bool = False,
     verify_renderings: dict | None = None,
+    verify_strict: bool = True,
     channel_header: bool = True,
     fence: bool = False,
     **kwargs: Any,
 ) -> CompileReport:
     """Compile a JSON Schema (or BFCL parameter block) end to end.
 
-    `whitespace_pattern` defaults to outlines' own (optional whitespace).
+    `whitespace_pattern` defaults to `schema.JSON_WS`, RFC 8259's own whitespace
+    definition. (This docstring used to say "defaults to outlines' own", which
+    has been false since the default was repaired — and *was* still true of
+    `schema.build_regex`, whose `None` really does mean "let outlines choose".
+    `eval/run.py` passed that `None` through, so the repaired default was
+    unreachable from the CLI: see `WHITESPACE_PATTERNS` there.)
+
+    `verify_renderings` is the build gate — pass an instance the schema permits
+    and the compile fails unless the grammar accepts all five standard
+    renderings of it. `schema.synthesize_instance` produces one from the schema,
+    so there is no excuse for a call site not to gate.
+
+    `verify_strict=False` downgrades a rejection to a printed report **only when
+    the declared-narrow `whitespace_pattern` is the entire cause** — the same
+    schema is recompiled under `schema.JSON_WS` and must pass. Any other defect
+    still raises. The gate may be lenient about a narrowness the caller
+    declared; it may not be lenient about one nobody declared.
 
     **[V-P5] It used to default to `""` — forbidding whitespace — on the
     reasoning that this "shrinks the automaton and costs nothing the benchmark
@@ -202,6 +219,41 @@ def compile_json_schema(
         # declared order, with and without a prompt hint). Whitespace is a
         # different matter -- free to admit, and it did bind.
         bad = [b for b in bad if b != "reordered-keys"]
+        if bad and not verify_strict:
+            # The hatch exists so `eval/run.py`'s historical
+            # `--whitespace=stock|pretty` can reproduce arms already in
+            # docs/RESULTS.md. **It is scoped to the narrowness the caller
+            # DECLARED, and to nothing else.**
+            #
+            # Unscoped it was a hole, demonstrated in review: under
+            # `--whitespace=pretty` it also swallowed `live_simple_117-73-0`,
+            # whose grammar rejects ALL FIVE renderings because a BFCL `any`
+            # property compiles to an unparenthesised top-level alternation
+            # (the object regex becomes one branch of seven, so the grammar
+            # accepts a bare `null` as a whole answer). That has nothing to do
+            # with whitespace and nobody declared it.
+            #
+            # So: rebuild the SAME schema with `JSON_WS` and re-run the check.
+            # If the wide grammar passes, the only thing wrong was the declared
+            # whitespace policy -- downgrade to a report. If it still fails, the
+            # defect is something else and the gate raises as usual.
+            _, wide_bad = schema_mod.accepts_all_renderings(
+                schema_mod.build_regex(
+                    prepared, from_bfcl=from_bfcl, allow=allow,
+                    allow_wildcard=allow_wildcard,
+                    whitespace_pattern=schema_mod.JSON_WS),
+                verify_renderings)
+            wide_bad = [b for b in wide_bad if b != "reordered-keys"]
+            if not wide_bad:
+                print(f"[gate] {name}: grammar rejects {bad} rendering(s) "
+                      f"(verify_strict=False; the declared-narrow whitespace "
+                      f"policy is the whole cause -- the same schema under "
+                      f"JSON_WS accepts all five)", flush=True)
+                bad = []
+            else:
+                # Report both sets, so the raise below cannot be mistaken for
+                # the whitespace policy the caller chose.
+                bad = wide_bad
         if bad:
             raise ValueError(
                 f"grammar rejects {bad} rendering(s) of an instance it should "

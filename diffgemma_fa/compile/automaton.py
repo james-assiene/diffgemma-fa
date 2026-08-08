@@ -38,8 +38,10 @@ three constructions the guarantee depends on:
 
 from __future__ import annotations
 
+import collections
 import dataclasses
 import hashlib
+import itertools
 import json
 from typing import Iterable, Sequence
 
@@ -607,6 +609,80 @@ def _assert_structural_invariants(a: CompiledAutomaton, path: str = "") -> None:
                     f"destinations for class {key[1]}"
                 )
             by_src_class[key] = int(a.edge_dst[e])
+        _assert_outgoing_labels_are_disjoint(a, where)
+
+
+def _class_tokens(a: CompiledAutomaton, c: int) -> tuple[np.ndarray, bool]:
+    """The **stored** member ids of class `c` and whether they are its
+    complement. `[nnz_c] int64`, sorted, plus the polarity flag."""
+    t = a.tables
+    lo, hi = int(t.sum_indptr[c]), int(t.sum_indptr[c + 1])
+    return np.sort(np.asarray(t.sum_indices[lo:hi], dtype=np.int64)), \
+        bool(t.sum_is_neg[c])
+
+
+def _assert_outgoing_labels_are_disjoint(
+    a: CompiledAutomaton, where: str = ""
+) -> None:
+    """Determinism, checked on **tokens** rather than on interned class ids.
+
+    **[AUDIT-D4]** The `(src, edge_class)` check above can only see a conflict
+    between two edges that interned to the *same* class. Two edges out of one
+    state whose label sets **overlap but are not identical** get different class
+    ids, so a stale or hand-made artifact claiming `is_dfa=True` used to load
+    clean — silently licensing eq (8)'s `∃` fast path on an NFA, where it is off
+    by ~1.7e-2 against the exact posterior (SPEC §2.6). `_group_edges` derives
+    `is_dfa` from the raw token-level transitions, so a freshly compiled
+    automaton always passes; this closes the gap on everything that arrives from
+    disk.
+
+    The stored side of every class is small — that is the whole point of the
+    polarity rule in `classes.py` — so each comparison is over `nnz`, never over
+    `V = 262,144`.
+    """
+    V = int(a.vocab_size)
+    by_src: dict[int, list[int]] = collections.defaultdict(list)
+    for e in range(len(a.edge_src)):
+        by_src[int(a.edge_src[e])].append(e)
+
+    def fail(e1: int, e2: int, n: int) -> None:
+        raise ValueError(
+            f"is_dfa=True{where} but state {int(a.edge_src[e1])} sends {n} "
+            f"token(s) to both {int(a.edge_dst[e1])} (class "
+            f"{int(a.edge_class[e1])}) and {int(a.edge_dst[e2])} (class "
+            f"{int(a.edge_class[e2])}). Their label sets OVERLAP without being "
+            "identical, so the `(src, class)` check cannot see it; eq (8)'s "
+            "`∃` token draw would be applied to an NFA."
+        )
+
+    for src, edges in by_src.items():
+        if len(edges) < 2:
+            continue
+        pos: list[tuple[int, np.ndarray]] = []
+        neg: list[tuple[int, np.ndarray]] = []
+        for e in edges:
+            idx, is_neg = _class_tokens(a, int(a.edge_class[e]))
+            (neg if is_neg else pos).append((e, idx))
+
+        # positive x positive: a token listed twice across the stored sets.
+        if len(pos) > 1:
+            stacked = np.concatenate([i for _, i in pos])
+            if np.unique(stacked).size != stacked.size:
+                for (e1, i1), (e2, i2) in itertools.combinations(pos, 2):
+                    n = int(np.intersect1d(i1, i2, assume_unique=True).size)
+                    if n:
+                        fail(e1, e2, n)
+        # positive x negative: `P ∩ ~N = P \ N`.
+        for e1, p in pos:
+            for e2, n_idx in neg:
+                extra = int(p.size - np.isin(p, n_idx).sum())
+                if extra:
+                    fail(e1, e2, extra)
+        # negative x negative: `~N1 ∩ ~N2 = ~(N1 ∪ N2)`.
+        for (e1, n1), (e2, n2) in itertools.combinations(neg, 2):
+            n = V - int(np.union1d(n1, n2).size)
+            if n:
+                fail(e1, e2, n)
 
 
 def schema_fingerprint(schema: dict, **options) -> str:

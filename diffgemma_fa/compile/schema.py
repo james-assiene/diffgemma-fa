@@ -31,6 +31,7 @@ __all__ = [
     "build_regex",
     "JSON_WS",
     "accepts_all_renderings",
+    "synthesize_instance",
     "unordered_object_regex",
 ]
 
@@ -95,23 +96,51 @@ _NAME_KEYED = frozenset({"properties", "$defs", "definitions"})
 #: property that matters, because a grammar that rejects the model's own
 #: rendering forces it off its plan at every value boundary.
 #:
-#: Measured on a 3-key schema, against five renderings that all mean the same
-#: thing (compact, spaced, indent-2, indent-4, tab-indented):
+#: RFC 8259 §2: `ws = *( %x20 / %x09 / %x0A / %x0D )`. **Unbounded**, and that
+#: is deliberate — see below.
+#:
+#: **[AUDIT-D1] This was `[ \t\n\r]{0,8}`, and the `{0,8}` was silently a
+#: nesting-depth bound.** A pretty-printer emits `newline + indent*depth`, so a
+#: bound on the whitespace *run* binds at `indent*depth >= 8` — and nothing in
+#: the compiler ever related that constant to the schema's depth, so when it
+#: bound, it bound silently. Measured against `{0,8}`:
+#:
+#:     flat 2-key object        5/5 renderings
+#:     object with one array    4/5   (rejects indent-4: elements sit at depth 2)
+#:     nesting depth 2          4/5   (rejects indent-4)
+#:     nesting depth 4          3/5   (rejects indent-2 AND indent-4)
+#:
+#: BFCL v4 carries 959 `array` and 9,464 `dict` occurrences, so neither shape is
+#: exotic: the original 5/5 measurement was taken on a *flat* schema and did not
+#: generalise. This is the same failure family as the 0/130 whitespace bug (the
+#: grammar rejects a rendering the model may choose, and the renormalised draw
+#: then silently EXTENDS the value instead of failing: `600` -> `6000`).
+#:
+#: **The bound was not buying finiteness.** A Kleene star over a 4-character
+#: class is one DFA state; `{0,8}` is a counter and costs eight. Measured
+#: end-to-end through the token lift + Valmari minimisation (`|S|` after
+#: minimisation, `channel_header=False`):
+#:
+#:     pattern        flat        one array     3-key BFCL     tree @L=256
+#:     [ \t\n\r]{0,8}  98 (b128)  132 (b256)    155 (b256)     0.033-0.134 GB
+#:     [ \t\n\r]{0,24} 226 (b256) 308 (b512)    347 (b512)     0.134-0.536 GB
+#:     [ \t\n\r]*      34 (b64)    45 (b64)      59 (b64)      0.008 GB
+#:
+#: So the correct pattern is also the cheapest by a factor of ~3 in `|S|` and
+#: ~4-16x in tree bytes — the widened *constant* (`{0,24}`, which would have
+#: covered indent-4 to depth 5 and still failed at depth 6) is the one that
+#: walks toward SPEC §7.3's `|S| ~ 512` cliff. Deriving the bound from the
+#: schema's depth was considered and rejected for the same reason: it is more
+#: machinery, it still has an edge, and it is strictly larger than `*`.
+#:
+#: For the record, on the flat 3-key schema this docstring was originally
+#: measured on:
 #:
 #:     outlines' default   53 states, accepts 2/5
-#:     hand-fitted         125 states, accepts 4/5   (misses tabs)
-#:     THIS                137 states, accepts 5/5
-#:     {0,20} instead      281 states, accepts 5/5   (no gain)
-#:
-#: The hand-fitted pattern was reverse-engineered from 130 observed outputs and
-#: still missed a standard rendering. Fitting the model's habits is the wrong
-#: method; accepting the format's own definition is the right one, and here it
-#: costs 12 states.
-#:
-#: The bound of 8 keeps the automaton finite. Indentation deeper than 8 spaces
-#: at one level would be rejected — raise it if you nest that far, at ~18
-#: states per extra unit.
-JSON_WS = r"[ \t\n\r]{0,8}"
+#:     hand-fitted        125 states, accepts 4/5   (misses tabs)
+#:     {0,8}              137 states, accepts 5/5 FLAT ONLY (4/5 with an array)
+#:     THIS (`*`)          <- fewer states than any of them, 5/5 at every depth
+JSON_WS = r"[ \t\n\r]*"
 
 #: Keywords `outlines_core` genuinely ignores.
 #:
@@ -438,12 +467,21 @@ def accepts_all_renderings(regex: str, instance: dict) -> tuple[bool, list[str]]
     import json as _json
     import re as _re
 
+    # `ensure_ascii=False`: the grammar is a byte-level regex over the text the
+    # model emits, and a tokenizer emits `실행`, not `실행`. Python's
+    # default would spell a non-ASCII enum literal as an escape the regex has
+    # never heard of and report a grammar defect that is really a renderer
+    # artifact (it fired on 17 of BFCL-Live's 4,549 schemas). Identical output
+    # for any ASCII instance, which is every instance in the test suite.
+    def _dumps(**kw) -> str:
+        return _json.dumps(instance, ensure_ascii=False, **kw)
+
     renderings = {
-        "compact": _json.dumps(instance, separators=(",", ":")),
-        "spaced": _json.dumps(instance),
-        "indent2": _json.dumps(instance, indent=2),
-        "indent4": _json.dumps(instance, indent=4),
-        "tabs": _json.dumps(instance, indent="\t"),
+        "compact": _dumps(separators=(",", ":")),
+        "spaced": _dumps(),
+        "indent2": _dumps(indent=2),
+        "indent4": _dumps(indent=4),
+        "tabs": _dumps(indent="\t"),
     }
     # Key ORDER is checked too, and reported separately, because it is a
     # different kind of risk from whitespace. Whitespace variation is free to
@@ -454,9 +492,191 @@ def accepts_all_renderings(regex: str, instance: dict) -> tuple[bool, list[str]]
     # data before paying for `unordered_object_regex`.
     if len(instance) > 1:
         rev = {k: instance[k] for k in reversed(list(instance))}
-        renderings["reordered-keys"] = _json.dumps(rev)
+        renderings["reordered-keys"] = _json.dumps(rev, ensure_ascii=False)
     bad = [k for k, v in renderings.items() if not _re.fullmatch(regex, v)]
     return (not bad), bad
+
+
+#: Ceiling on `synthesize_instance` recursion. Bounded because a `$ref` cycle
+#: would otherwise be an infinite descent; `$ref` is refused outright, so this is
+#: belt-and-braces.
+_SYNTH_MAX_DEPTH = 16
+
+#: Keywords `synthesize_instance` cannot honour. It must produce an instance the
+#: **grammar** accepts, so guessing past any of these would make the build gate
+#: fire on a correct grammar — the one failure mode a gate must not have.
+_SYNTH_UNSUPPORTED = ("$ref", "pattern", "format", "prefixItems", "allOf")
+
+
+#: JSON type name -> the Python types `json.dumps` renders as it. `bool` is
+#: excluded from the numeric rows deliberately: it is a subclass of `int` in
+#: Python but `true` in JSON.
+_JSON_PY_TYPES: dict[str, tuple[type, ...]] = {
+    "string": (str,),
+    "integer": (int,),
+    "number": (int, float),
+    "boolean": (bool,),
+    "array": (list,),
+    "object": (dict,),
+    "null": (type(None),),
+}
+
+
+def _declared_type(node: dict[str, Any]) -> str | None:
+    """The node's declared JSON type, first entry of a union, `None` if absent."""
+    t = node.get("type")
+    if isinstance(t, list):
+        return t[0] if t else None
+    return t if isinstance(t, str) else None
+
+
+def _json_type_matches(value: Any, type_name: str | None) -> bool:
+    """Would `value` satisfy a bare `{"type": type_name}`? `True` if unknown."""
+    if type_name is None or type_name not in _JSON_PY_TYPES:
+        return True
+    if type_name in ("integer", "number") and isinstance(value, bool):
+        return False
+    return isinstance(value, _JSON_PY_TYPES[type_name])
+
+
+def _synth(node: Any, *, path: str, depth: int) -> Any:
+    if depth > _SYNTH_MAX_DEPTH:
+        raise UnsupportedSchemaError(path, "$depth", "schema nests too deeply "
+                                     "to synthesize a gate instance")
+    if not isinstance(node, dict):
+        raise UnsupportedSchemaError(path, "<node>", f"not a schema: {node!r}")
+
+    for kw in _SYNTH_UNSUPPORTED:
+        if kw in node:
+            raise UnsupportedSchemaError(
+                path, kw, "cannot synthesize an instance the grammar is known "
+                          "to accept; the rendering gate would fire on a "
+                          "correct grammar")
+
+    if "const" in node:
+        return node["const"]
+    if isinstance(node.get("enum"), list) and node["enum"]:
+        # `enum` outranks `type` in outlines' precedence, so the enum is what
+        # the grammar admits and the enum is what the gate must render. Two
+        # preferences, in order, neither of them a requirement:
+        #
+        #  * **type-consistent**, where the schema declares a `type` its own
+        #    enum contradicts. Measured in review: 16 of BFCL-Live's 4,549
+        #    schemas do (`{"type": "boolean", "enum": ["True", "False"]}`), and
+        #    for those NO member is consistent -- the enum wins anyway, which is
+        #    correct against the grammar and is stated in `synthesize_instance`.
+        #  * **ASCII**. `json.dumps` defaults to `ensure_ascii=True`, which
+        #    spells a non-ASCII literal as `\uXXXX` while outlines' regex
+        #    carries the character itself. `accepts_all_renderings` renders with
+        #    `ensure_ascii=False` for exactly that reason, but staying ASCII
+        #    keeps the gate independent of that choice where it can. 17 schemas
+        #    have an enum with no ASCII member at all (Korean `command`).
+        members = node["enum"]
+        typed = [c for c in members if _json_type_matches(c, _declared_type(node))]
+        for pool in (typed, members):
+            for cand in pool:
+                if not isinstance(cand, str) or cand.isascii():
+                    return cand
+        return (typed or members)[0]
+    for key in ("anyOf", "oneOf"):
+        if isinstance(node.get(key), list) and node[key]:
+            return _synth(node[key][0], path=f"{path}.{key}[0]", depth=depth + 1)
+
+    t = _declared_type(node)
+
+    # `properties` outranks `type` in outlines' precedence, so an object is an
+    # object whatever `type` says.
+    props = node.get("properties")
+    if (isinstance(props, dict) and props) or t == "object":
+        props = props if isinstance(props, dict) else {}
+        required = {k for k in (node.get("required") or []) if k in props}
+        keep = set(required)
+        # Pad to two keys where possible: with a single key the rendering never
+        # contains a `,` separator, and the separator is exactly where the
+        # whitespace defect bites.
+        for k in props:
+            if len(keep) >= 2:
+                break
+            keep.add(k)
+        return {k: _synth(props[k], path=f"{path}.{k}", depth=depth + 1)
+                for k in props if k in keep}          # declared order: the
+                                                      # grammar is ordered.
+    if t == "array":
+        items = node.get("items")
+        n = max(int(node.get("minItems") or 0), 1)
+        if node.get("maxItems") is not None:
+            n = min(n, int(node["maxItems"]))
+        if items is None:
+            return [1] * n
+        return [_synth(items, path=f"{path}[]", depth=depth + 1) for _ in range(n)]
+    if t == "string":
+        n = max(int(node.get("minLength") or 0), 1)
+        if node.get("maxLength") is not None:
+            n = min(n, int(node["maxLength"]))
+        return "a" * n
+    if t == "integer":
+        return 1
+    if t == "number":
+        return 1
+    if t == "boolean":
+        return True
+    if t == "null":
+        return None
+    if t is None or node.get("__wildcard__"):
+        # The 7-way alternation over every JSON type; a number is in it.
+        return 1
+    raise UnsupportedSchemaError(path, "type", f"cannot synthesize {t!r}")
+
+
+def synthesize_instance(
+    schema: dict[str, Any], *, from_bfcl: bool = False
+) -> dict:
+    """A minimal instance the **grammar** should accept, for the build gate.
+
+    **Not, in general, an instance `jsonschema` would validate.** The gate's job
+    is to prove the compiled grammar admits a value the schema means to allow,
+    and the grammar is outlines' first-match-wins reading of the schema, not the
+    schema itself. Where the two disagree this follows outlines — otherwise the
+    gate would report a defect the grammar does not have. Measured in review
+    against `jsonschema`: **16 of BFCL-Live's 4,549** synthesized instances fail
+    strict validation, every one of them a schema whose own `enum` contradicts
+    its own `type` (`{"type": "boolean", "enum": ["True", "False"]}` yields
+    `"True"`). `enum` outranks `type` in outlines' precedence, so `"True"` is
+    exactly what that grammar accepts, and none of the 16 produced a gate
+    failure. A type-consistent member is preferred where one exists; in these 16
+    none does.
+
+    `accepts_all_renderings` needs one concrete instance to render five ways.
+    Producing it from the schema — rather than from an observed output — is what
+    lets every production call site gate unconditionally (SPEC §4.2's fail-loud,
+    CLAUDE.md's "an unwired gate is not a mitigation"). It needs no model, no
+    data set and no GPU.
+
+    Every required property is present, plus optionals up to two keys total so
+    that the rendering contains a `,` separator; strings honour `minLength` /
+    `maxLength`, arrays `minItems` / `maxItems`, and an `enum` contributes its
+    first member that is type-consistent and ASCII, relaxing each of those two
+    preferences in turn if no member satisfies them.
+
+    Measured over all 4,549 BFCL-Live schemas: 0 failures to synthesize, and 11
+    schemas whose grammar then rejects **all five** renderings of their own
+    instance — a real defect the gate had never been given the chance to see.
+
+    Raises:
+      UnsupportedSchemaError: when no instance can be produced that the grammar
+        is *known* to accept (`$ref`, `pattern`, `format`, `prefixItems`,
+        `allOf`). Raising is deliberate: silently returning `None` would turn
+        the gate off for exactly the schemas whose grammars are hardest to
+        reason about, which is how the original defect survived.
+    """
+    if from_bfcl:
+        schema = normalize_bfcl_schema(schema)
+    value = _synth(schema, path="", depth=0)
+    if not isinstance(value, dict):
+        raise UnsupportedSchemaError(
+            "", "type", "the gate needs an object instance; this schema's root "
+                        f"synthesizes to {type(value).__name__}")
+    return value
 
 
 #: Hard ceiling on generated branches for `unordered_object_regex`. The number
