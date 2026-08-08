@@ -842,3 +842,36 @@ real data.
 where BFCL's `list_checker` standardises only top-level strings and compares the
 rest with `==` (so `True == 1` matches for it and not for us). No record in this
 corpus distinguishes the two. Not fixed; noted so it is not rediscovered.
+
+## 2026-08-08 — Countdown re-run on the fixed grammar (in flight)
+
+First GPU run since the four-slice audit and the launch-gate fix (`012660c`).
+
+- **PID 2251286**, log `logs/countdown_refixed.log`, out
+  `artifacts/task_countdown_j0map_refixed.json`.
+- `--task countdown --variant j0 --emission map --n 250`. Prior run of the same
+  shape took 46.2 min.
+
+**Why it is being re-run rather than re-scored.** The Countdown rows were
+retracted (`1c0aa77`, and the block in `docs/IMPROVEMENT_PLAN.md`) because
+`pipeline.compile_regex` lifted a repeated *group* as its minimum count, so the
+compiled automaton admitted only **single-step** solutions while
+`countdown_regex` matched multi-step ones. Root-caused in `e2be58c` to
+`outlines_core` 0.2.14 `src/index.rs` and fixed by anchoring at `\z`;
+`|S|` 40 -> 124, and a differential test over 2,074 strings now shows 0 false
+negatives and 0 false positives against `re.fullmatch`.
+
+The emissions on disk were generated under the broken grammar, so re-scoring
+them proves nothing — this needs real decodes. Note the *scorer* fixes moved
+the unconstrained baseline independently (0.048 -> 0.236, `[C]` in `e2be58c`),
+so the old comparison was wrong on both sides.
+
+**What would falsify what.** The retraction says the grammar could not contain
+the answer, not that constrained decoding fails at reasoning. If the solve rate
+stays at ~0.00 with CS 1.000 *and* the emissions are now multi-step, the
+grammar excuse is exhausted and the original finding stands on better evidence.
+If it rises toward the rescored unconstrained 0.236, the retraction was right
+and the earlier conclusion was an artifact throughout.
+
+Do **not** compare against the withdrawn rows; compare against the rescored
+unconstrained arm only.
