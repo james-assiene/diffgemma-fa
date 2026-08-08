@@ -43,7 +43,8 @@ import jax.numpy as jnp  # noqa: E402
 from diffgemma_fa.compile import pipeline  # noqa: E402
 from diffgemma_fa.compile.automaton import INF_DISTANCE  # noqa: E402
 from diffgemma_fa.compile.validate import Simulator  # noqa: E402
-from diffgemma_fa.compile.vocab import END_TOKENS  # noqa: E402
+from diffgemma_fa.compile.vocab import END_TOKENS, PAD_TOKEN  # noqa: E402
+from gemma.diffusion import _sampler as _diffusion_sampler  # noqa: E402
 from diffgemma_fa.model import constrained as C  # noqa: E402
 from diffgemma_fa.model.state import Automaton  # noqa: E402
 
@@ -66,13 +67,12 @@ def traced(a) -> Automaton:
 # beside their value (SPEC §6.3's Z == 0 detector). These wrappers keep the
 # existing assertions readable AND assert the flag, so a silent Z == 0 fails
 # the test rather than sliding past it.
-
-def _map_tokens(fn):
-    def go(*a, **kw):
-        toks, feasible = fn(*a, **kw)
-        assert bool(feasible), "Z == 0: constrained MAP has no support"
-        return toks
-    return go
+#
+# A `_map_tokens` wrapper used to sit here and was called by nothing: every
+# multi-block assertion in this file went through `joint_draw`, so
+# `--emission=map` — the DEFAULT of SPEC §3.9's flag table — was never run
+# against the proposition it relies on, while a dead MAP helper implied it was.
+# The emission is a parameter of the two multi-block tests now.
 
 
 def _adv(fn):
@@ -107,30 +107,105 @@ def marginals(L, V, seed):
         jnp.asarray(rng.standard_normal((L, V)) * 2.0, dtype=jnp.float64), axis=-1)
 
 
-def truncate_at_stop(tokens: list[int]) -> tuple[list[int], bool]:
-    """`_truncate_canvas_at_stop_tokens`, in Python.
+def emit(emission, p, aut, terminal, key, a):
+    """One canvas from whichever emission mode is under test (SPEC §3.9).
 
-    Keeps the first stop token and PADs after it — and the PAD-truncated canvas
-    is what enters the KV cache and what `δ*` must be recomputed from
-    (SPEC §3.5 trap 2).
+    `map` is the **default**; `sample` is `--emission=sample`. Both must satisfy
+    the proposition of §3.1b — the argument uses only the *support* of the
+    constrained posterior, not maximality, which is exactly why it covers both.
     """
+    if emission == "map":
+        toks, ok = C.joint_map(p, aut, terminal, a.n_states_bucket,
+                               a.tables.n_classes)
+    else:
+        toks, ok = C.joint_draw(p, aut, terminal, key, a.n_states_bucket,
+                                a.tables.n_classes)
+    assert bool(ok), f"Z == 0: the {emission} emission has no support"
+    return [int(x) for x in toks]
+
+
+def truncate_at_stop(tokens: list[int], *, canvas_length: int | None = None,
+                     done: bool = False) -> tuple[list[int], bool]:
+    """`_truncate_canvas_at_stop_tokens`, in Python — **production semantics**.
+
+    This used to truncate the Python *list*, which is not what production does
+    and meant the PAD tail was never fed to `advance_states` from this file.
+    gemma keeps the first stop token, rewrites everything after it to
+    `PAD_TOKEN`, and **keeps the canvas at full length**; that PAD-padded canvas
+    is what enters the KV cache, what `predicted_tokens` records, and what `δ*`
+    must be recomputed from (SPEC §3.5 trap 2). It therefore only works because
+    the unscored `ACC --Σ--> ACC` tail of trap 4 absorbs PAD.
+
+    `done` reproduces gemma's `keep_mask &= ~done`: an already-finished element
+    emits an **all-PAD** canvas. `test_the_python_truncation_matches_gemmas`
+    pins this against the real function rather than trusting the reimplementation.
+    """
+    L = len(tokens) if canvas_length is None else canvas_length
+    if done:
+        return [PAD_TOKEN] * L, False
     for i, t in enumerate(tokens):
         if t in END_TOKENS:
-            return tokens[: i + 1], True
-    return tokens, False
+            return tokens[: i + 1] + [PAD_TOKEN] * (L - i - 1), True
+    return list(tokens), False
+
+
+def test_the_python_truncation_matches_gemmas():
+    """The helper above is a reimplementation, so it is differential-tested
+    against `gemma.diffusion._sampler._truncate_canvas_at_stop_tokens` itself —
+    including the `done` row, which emits an all-PAD canvas."""
+    L = 8
+    canvas = jnp.asarray([
+        [9, 9, END_TOKENS[0], 7, 7, 7, 7, 7],     # stops at index 2
+        [9, 9, 9, 9, 9, 9, 9, 9],                 # never stops
+        [9, END_TOKENS[1], 5, 5, 5, 5, 5, 5],     # stops, but already done
+    ], jnp.int32)
+    done = jnp.asarray([False, False, True])
+    got, has_stop = _diffusion_sampler._truncate_canvas_at_stop_tokens(  # noqa: SLF001
+        canvas, end_tokens=tuple(END_TOKENS), canvas_length=L, done=done)
+    for row in range(3):
+        mine, stopped = truncate_at_stop(
+            [int(x) for x in canvas[row]], canvas_length=L, done=bool(done[row]))
+        assert mine == [int(x) for x in got[row]], f"row {row}"
+        if not bool(done[row]):
+            assert stopped == bool(has_stop[row]), f"row {row}"
+    assert list(np.asarray(got[2])) == [PAD_TOKEN] * L, (
+        "gemma's `keep_mask &= ~done` makes a finished element emit an all-PAD "
+        "canvas; the guarantee must survive a block that is entirely PAD"
+    )
 
 
 # ===========================================================================
 # Assertion 1 — the per-block viable-prefix property
 # ===========================================================================
 
+@pytest.mark.parametrize("emission", ["map", "sample"])
 @pytest.mark.parametrize("seed", range(6))
-def test_per_block_state_set_is_non_empty_and_within_budget(long_grammar, seed):
+def test_per_block_state_set_is_non_empty_and_within_budget(long_grammar, seed,
+                                                            emission):
     """`δ*(A_k, canvas_k) ≠ ∅` **and** `⊆ {s : d(s) ≤ R}`.
 
     Both halves matter. Non-emptiness alone is the *unbounded-horizon* predicate
     `Live = {s : d(s) < ∞}`, which SPEC §3.1b says explicitly does **not** close
     the budget-truncation failure.
+
+    Run for **both** emissions. `map` is the default of SPEC §3.9's flag table
+    and used to be absent from this file entirely; §3.1b's proposition is stated
+    over the *support* of the constrained posterior, so it makes exactly the
+    same claim for MAP as for the joint draw and must be tested that way.
+
+    **If this ever goes red on an NFA grammar, correct it in this direction and
+    no other.** The subset half is asserted over the *whole* reached set, which
+    is §3.1b's proposition verbatim and is correct on the compiled minimized
+    DFAs this fixture uses. But `b_L` constrains the **drawn path**, not every
+    state in `δ*` — so a genuine NFA with two live branches, one of which
+    exceeds the budget, can fail this assertion while the guarantee holds
+    perfectly. In that case the *assertion* is over-strong and the fix is to
+    restrict it to the states reachable along the drawn path. It is **never**
+    to relax `d(s) ≤ R`, drop the subset half, or assert non-emptiness alone —
+    that is `Live = {d < ∞}`, the unbounded-horizon predicate §3.1b exists to
+    reject, and the `b_l_unbounded` mutant in `tests/test_audit_sampler.py`
+    exists to catch. CLAUDE.md: if you find yourself weakening this test to make
+    something pass, stop and write up why instead.
     """
     a, aut = long_grammar
     L, blocks = 64, 4
@@ -144,17 +219,17 @@ def test_per_block_state_set_is_non_empty_and_within_budget(long_grammar, seed):
         remaining = max_new - k * L
         terminal = remaining - L
         p = marginals(L, a.vocab_size, seed * 100 + k)
-        toks, valid = C.joint_draw(p, aut.with_active(active), jnp.int64(terminal),
-                                   jax.random.PRNGKey(seed * 100 + k),
-                                   a.n_states_bucket, a.tables.n_classes)
-        assert bool(valid), f"block {k}: the boundary draw degenerated"
-        canvas, stopped = truncate_at_stop([int(x) for x in toks])
+        toks = emit(emission, p, aut.with_active(active), jnp.int64(terminal),
+                    jax.random.PRNGKey(seed * 100 + k), a)
+        canvas, stopped = truncate_at_stop(toks, canvas_length=L)
 
         reached = sim.run(canvas, states={int(i) for i in np.nonzero(np.asarray(active))[0]})
         assert reached, f"block {k}: delta*(A_k, canvas_k) is EMPTY"
 
         d = np.asarray(a.d)
-        rem_after = remaining - len(canvas)
+        # The whole canvas is committed, PAD tail included: `_sample_step`
+        # advances `step += canvas_length` regardless of where the stop landed.
+        rem_after = remaining - L
         assert all(d[s] <= max(rem_after, 0) for s in reached), (
             f"block {k}: a reached state cannot finish within the remaining "
             f"budget {rem_after} (d = {[int(d[s]) for s in reached]})"
@@ -186,7 +261,7 @@ def test_a_non_final_canvas_is_NOT_accepted_on_its_own(long_grammar):
                                jax.random.PRNGKey(7),
                                a.n_states_bucket, a.tables.n_classes)
     assert bool(valid)
-    canvas, stopped = truncate_at_stop([int(x) for x in toks])
+    canvas, stopped = truncate_at_stop([int(x) for x in toks], canvas_length=L)
     assert not stopped, "this grammar should not be finishable in 32 tokens"
 
     reached = sim.run(canvas)
@@ -201,14 +276,20 @@ def test_a_non_final_canvas_is_NOT_accepted_on_its_own(long_grammar):
 # Assertion 2 — constraint satisfaction, on the CONCATENATION
 # ===========================================================================
 
+@pytest.mark.parametrize("emission", ["map", "sample"])
 @pytest.mark.parametrize("seed", range(4))
-def test_concatenation_of_all_blocks_is_accepted(long_grammar, seed):
+def test_concatenation_of_all_blocks_is_accepted(long_grammar, seed, emission):
     """`simulator.accepts(concat(canvas_0 .. canvas_K))` — **this is CS.**
 
     Membership in `L(M)` is *not* implied by a constrained emission alone
     (SPEC §3.1b); it holds **iff** generation terminates at a block boundary
     with `A_{k+1} ∩ F ≠ ∅`, which is what the loop below checks before
     asserting.
+
+    Run for both emissions, and on the **PAD-padded** canvases production
+    actually commits — so the concatenation contains the PAD tails too, and
+    acceptance of it is a statement about the unscored `ACC --Σ--> ACC` tail as
+    much as about the emission.
     """
     a, aut = long_grammar
     L, blocks = 64, 8
@@ -222,11 +303,9 @@ def test_concatenation_of_all_blocks_is_accepted(long_grammar, seed):
         remaining = max_new - k * L
         terminal = remaining - L
         p = marginals(L, a.vocab_size, seed * 50 + k)
-        toks, valid = C.joint_draw(p, aut.with_active(active), jnp.int64(terminal),
-                                   jax.random.PRNGKey(seed * 50 + k),
-                                   a.n_states_bucket, a.tables.n_classes)
-        assert bool(valid)
-        canvas, stopped = truncate_at_stop([int(x) for x in toks])
+        toks = emit(emission, p, aut.with_active(active), jnp.int64(terminal),
+                    jax.random.PRNGKey(seed * 50 + k), a)
+        canvas, stopped = truncate_at_stop(toks, canvas_length=L)
         whole.extend(canvas)
         active = _adv(C.advance_states)(aut.with_active(active), jnp.asarray(canvas),
                                   a.n_states_bucket, a.tables.n_classes,
@@ -329,7 +408,7 @@ def test_closure_2_is_not_yet_enforced_in_the_sampler(long_grammar):
     toks, valid = C.joint_draw(p, aut, jnp.int64(L * 8), jax.random.PRNGKey(3),
                                a.n_states_bucket, a.tables.n_classes)
     assert bool(valid)
-    canvas, stopped = truncate_at_stop([int(x) for x in toks])
+    canvas, stopped = truncate_at_stop([int(x) for x in toks], canvas_length=L)
     nxt = np.asarray(_adv(C.advance_states)(aut, jnp.asarray(canvas),
                                       a.n_states_bucket, a.tables.n_classes,
                                       a.vocab_size))

@@ -390,26 +390,18 @@ def test_the_carry_is_a_pytree_so_it_threads_through_while_loop():
 # J2's emission composition (SPEC §7.2 baseline 3)
 # --------------------------------------------------------------------------
 
-def test_j2_keeps_the_constrained_draw_only_where_accepted():
-    """J2 was previously *not implemented* — it ran J0's fully constrained
-    emission, so the baseline table had a duplicated row under two names.
-
-    The composition is the whole content of the baseline: keep the constrained
-    draw at accepted positions, leave the rest as the stock uniform renoise.
-    That is SPEC §3.1's finding — the emitted canvas *is* the sample, so
-    non-accepted positions reach the output as random tokens — and its CS
-    column is the evidence that constraining the sampler alone is necessary but
-    not sufficient.
-    """
-    accepted = jnp.asarray([[True, False, True, False]])
-    constrained = jnp.asarray([[10, 11, 12, 13]], jnp.int32)
-    noise = jnp.asarray([[90, 91, 92, 93]], jnp.int32)
-    got = np.asarray(jnp.where(accepted, constrained, noise))[0]
-    assert list(got) == [10, 91, 12, 93]
-    assert not np.array_equal(got, np.asarray(constrained)[0]), (
-        "if J2 equals the constrained draw it is measuring J0 under another "
-        "name"
-    )
+# `test_j2_keeps_the_constrained_draw_only_where_accepted` used to sit here and
+# was **vacuous**: it built three literal arrays, called `jnp.where` on them in
+# the test body, and asserted the result. It executed no line of
+# `diffgemma_fa`, so the regression it claimed to guard — J2 silently running
+# J0's fully constrained emission, i.e. the baseline table carrying a duplicated
+# row under two names — could not make it fail.
+#
+# The property is covered functionally by
+# `tests/test_audit_sampler.py::test_the_j2_baseline_does_leak_random_tokens`,
+# which drives the real denoising loop with the accept prefix pinned to one
+# position and asserts J2's emission can leave the language. Leaving a test that
+# cannot fail beside one that can is worse than having neither.
 
 
 def test_j2_is_not_flagged_infeasible_for_violating_the_grammar():
