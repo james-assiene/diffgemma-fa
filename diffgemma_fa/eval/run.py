@@ -258,6 +258,12 @@ def main() -> None:
 
     sc = metrics.Scores()
     rows, skipped, zero_partition, oom = [], {}, [], []
+    # The compile-skip path's `oom_records` twin. `skipped_by_reason` keeps its
+    # reason->count shape (two live consumers depend on it: this file's twin
+    # `eval/run_tasks.py` derives `n` from `sum(skipped.values())`, and
+    # `scripts/phase5_report.py` prints it verbatim into docs/RESULTS.md), so
+    # the identities go in an ADDITIONAL field rather than into the histogram.
+    skipped_records: list[dict] = []
     t_start = time.perf_counter()
 
     for idx, rec in enumerate(records):
@@ -302,6 +308,22 @@ def main() -> None:
         except Exception as e:  # noqa: BLE001
             k = f"compile:{type(e).__name__}"
             skipped[k] = skipped.get(k, 0) + 1
+            # ADDITIVE ONLY: no `sc.add`, no `rows.append`, no counter. The
+            # record never reached the model, so it stays out of `n` exactly as
+            # `denominator_policy` says. What was missing was its *identity*.
+            # `{"compile:ValueError": 2}` says two records left and not WHICH,
+            # so a reader holding this artifact and one of the published n=130
+            # rows in docs/RESULTS.md cannot compute the difference set -- and
+            # the [AUDIT-D3] build gate refuses `live_simple_117-73-0` and
+            # `live_simple_122-78-0`, both inside that cut, so the next arm is
+            # an n=128 that must be shown to be comparable. Same shape as
+            # `oom.append` / `zero_partition.append` below.
+            #
+            # Strings and plain dicts only: `e` itself and a `set` of ids both
+            # raise in `json.dump` at the END of the run, after the GPU time is
+            # spent.
+            skipped_records.append({"id": rec.id, "fn": fn.get("name"),
+                                    "reason": k, "detail": str(e)[:200]})
             continue
 
         sampler = ConstrainedDiffusionSampler(
@@ -482,9 +504,14 @@ def main() -> None:
             "model and failed: they stay in n AND in arg_total as failures, and "
             "are reported in their own columns. arg_total therefore depends "
             "only on the benchmark, never on what the model emitted. Matches "
-            "eval/run_tasks.py."
+            "eval/run_tasks.py. The skipped records are named individually in "
+            "skipped_records, so the difference set against another arm's n is "
+            "computable from this file alone."
         ),
         "skipped_by_reason": skipped,
+        # Which records left n, and why. `skipped_by_reason` counts them;
+        # this names them. Additive -- see the handler.
+        "skipped_records": skipped_records,
         # SPEC §6.3 causes (a)/(b) hit at run time, per record. Reported, never
         # folded into the other columns.
         "zero_partition": len(zero_partition),
@@ -512,6 +539,11 @@ def main() -> None:
               "skipped_by_reason", "zero_partition", "oom",
               "elapsed_seconds"):
         print(f"{k}: {out[k]}")
+    # Ids only -- an operator watching an 80-minute log should be able to name
+    # the records that left `n` without opening the JSON, and the `detail`
+    # strings are 200 chars each. The full entries are in the artifact.
+    if skipped_records:
+        print(f"skipped_records: {[r['id'] for r in skipped_records]}")
     print(f"\nwrote {path}")
 
 

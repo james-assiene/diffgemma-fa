@@ -143,6 +143,11 @@ def main() -> None:
     items = load_task(args.task, args.n, args.seed, args.think)
     n_ok = n_cs = n_parsed = 0
     rows, skipped, zero_partition, oom = [], {}, [], []
+    # Which records the compile-skip path removed from `n`. `skipped_by_reason`
+    # stays a reason->count histogram because `n` below is literally
+    # `len(items) - sum(skipped.values())` and because phase5_report prints it
+    # into docs/RESULTS.md; the identities go in this ADDITIONAL field.
+    skipped_records: list[dict] = []
     reasons: dict[str, int] = {}
     t_start = time.perf_counter()
 
@@ -154,6 +159,16 @@ def main() -> None:
         except Exception as e:  # noqa: BLE001
             k = f"compile:{type(e).__name__}"
             skipped[k] = skipped.get(k, 0) + 1
+            # ADDITIVE ONLY: nothing is scored, nothing is appended to `rows`
+            # (phase5_report pairs arms on the ids it finds there), no counter
+            # moves. The record leaves `n` exactly as before -- it is now
+            # merely NAMED, so the difference set against an arm with a
+            # different `n` is computable from the artifact alone. It matters
+            # more here than in eval/run.py, because `n` below is derived from
+            # the histogram. Strings only: `e` and a `set` both die in
+            # `json.dump` at the end of the run.
+            skipped_records.append({"id": rec.id, "reason": k,
+                                    "detail": str(e)[:200]})
             continue
 
         sampler = ConstrainedDiffusionSampler(
@@ -247,7 +262,10 @@ def main() -> None:
         "denominator_policy": (
             "n = records attempted: compile-skipped records are excluded from "
             "n and reported in skipped_by_reason; oom and zero_partition "
-            "records stay in n as failures. Matches eval/run.py."
+            "records stay in n as failures. Matches eval/run.py. The "
+            "compile-skipped records are named individually in "
+            "skipped_records, so the difference set against another arm's n "
+            "is computable from this file alone."
         ),
         "cs": n_cs, "cs_rate": round(n_cs / max(1, n), 4),
         "solved": n_ok, "solve_rate": round(n_ok / max(1, n), 4),
@@ -256,6 +274,9 @@ def main() -> None:
         "parsed": n_parsed, "parse_rate": round(n_parsed / max(1, n), 4),
         "zero_partition": len(zero_partition), "oom": len(oom),
         "skipped_by_reason": skipped,
+        # Which records left n, and why. The histogram counts them; this
+        # names them. Additive -- see the handler.
+        "skipped_records": skipped_records,
         # Why the unsolved ones failed -- a format failure and a wrong answer
         # are different diagnoses and must not be merged.
         "failure_reasons": reasons,
@@ -274,6 +295,10 @@ def main() -> None:
               "zero_partition", "oom", "skipped_by_reason", "failure_reasons",
               "elapsed_seconds"):
         print(f"{k}: {out[k]}")
+    # Ids only -- see eval/run.py. `n` here is derived from the histogram, so
+    # the operator seeing `n` shrink should see which records did it.
+    if skipped_records:
+        print(f"skipped_records: {[r['id'] for r in skipped_records]}")
     print(f"\nwrote {path}")
 
 

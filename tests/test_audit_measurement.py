@@ -37,8 +37,12 @@ Rules this file follows, because (4) is what happens when they are not:
 
 from __future__ import annotations
 
+import ast
+import copy
+import json
 import pathlib
 import re
+import types
 
 import pytest
 
@@ -943,3 +947,1003 @@ def test_extract_json_does_not_report_an_empty_object_as_content():
     assert d["parsed"] == 1
     assert d["nonempty_rate"] == 0.0
     assert d["arg_accuracy"] == 0.0
+
+
+# ==========================================================================
+# Oracle 6 — the records that left the denominator, by name
+# ==========================================================================
+#
+# `n` is "the records the model was actually asked", so a record whose grammar
+# fails to compile leaves `n` and is reported in `skipped_by_reason`. That rule
+# is right and is not what this section is about. What this section is about is
+# that `skipped_by_reason` is a **histogram**:
+#
+#     skipped[k] = skipped.get(k, 0) + 1        # k = f"compile:{type(e).__name__}"
+#
+# so the artifact records *how many* records left and *what kind of exception*
+# took them, and nothing whatsoever about **which**. Four lines away, the OOM
+# and zero-partition handlers already append `{"id": ..., "fn": ...}` and the
+# artifact ships `oom_records` / `zero_partition_records`. The skip path is the
+# one failure mode whose records cannot be named.
+#
+# This is not hypothetical and it is the launch gate on the next arm. The build
+# gate wired by [AUDIT-D3] legitimately refuses `live_simple_117-73-0` and
+# `live_simple_122-78-0` (indices 117 and 122 of the 258 single-function
+# records), so the next `bfcl_live_simple` run reports **n = 128** against the
+# **n = 130** of every row in `docs/RESULTS.md`. Without the ids in the
+# artifact, a reader holding the two files cannot compute the difference set,
+# and therefore cannot say whether the new number is comparable to the old one
+# — which is the entire purpose of `records_available`, `denominator_policy`
+# and the coverage section of `docs/RESULTS.md`.
+#
+# What the artifact must satisfy, stated before any implementation exists:
+#
+#   R1  a reader with only the JSON can recover exactly WHICH records were
+#       compile-skipped, and for each of them WHY;
+#   R2  nothing else moves: the skipped record does not reach `Scores`, does
+#       not appear in `rows`, and touches no accumulator that is published
+#       under a field a reader compares — this is additive reporting, not a
+#       denominator change;
+#   R3  `skipped_by_reason` keeps its current reason->count shape, because it
+#       has live consumers (below). The fix is an ADDITIONAL field;
+#   R4  whatever is recorded survives `json.dump` — no sets, no exception
+#       objects, no tuples-as-keys.
+#
+# HOW THESE ARE TESTED. Reaching the handler through `main()` needs a 51 GB
+# checkpoint, and `import diffgemma_fa.eval.run` alone costs ~4.4 GB. So the
+# handler is **replayed**: its own AST, lifted verbatim out of the shipped
+# source and executed against fake records, with the accumulators initialised
+# from the same `main()` and `Scores` replaced by a recorder. Nothing is
+# re-implemented and nothing is read back from the implementation — the
+# expectations below are R1-R4.
+#
+# TWO PROPERTIES KEEP THE REPLAY HONEST, because a replay that silently stops
+# finding the handler would turn every guard here green:
+#
+#   * **the R3 interlock.** R3 asserts, against the *real* source, that the
+#     replay produced `{"compile:ValueError": 2, "compile:KeyError": 1}`. A
+#     zero-iteration or misdirected replay fails R3, so a green R3 is proof the
+#     shipped handler was located and executed three times.
+#   * **scope fidelity.** Only the names actually in scope at the handler are
+#     seeded (`eval/run.py` has `fn`, `eval/run_tasks.py` does not — it has no
+#     `fn` anywhere in the file). Seeding a name the harness cannot see would
+#     bless a fix that raises `NameError` after the GPU time is spent.
+
+_RUN_TASKS_PY = pathlib.Path(
+    "/home/ubuntu/diffgemma_fa/diffgemma_fa/eval/run_tasks.py")
+_PHASE5_REPORT = pathlib.Path("/home/ubuntu/diffgemma_fa/scripts/phase5_report.py")
+
+#: The two harnesses compile a grammar per record through one of these.
+_COMPILE_CALLS = ("compile_json_schema", "compile_regex")
+
+#: Keys a per-record entry may use for the record identifier. Deliberately a
+#: family rather than one spelling: the tester does not get to dictate the
+#: coder's field names, only that the id and the reason are both there and are
+#: attached to each other.
+_ID_KEYS = ("id", "record_id", "rec_id")
+
+#: The three fake failures every replay is driven with. Two share an exception
+#: type on purpose — with only a histogram, `{"compile:ValueError": 2}` cannot
+#: distinguish them, and that is precisely the information being lost. The ids
+#: are the real ones the build gate refuses.
+_FAKE_SKIPS = (
+    ("live_simple_117-73-0", "get_movie_rating", ValueError("grammar rejects")),
+    ("live_simple_122-78-0", "predict", ValueError("grammar rejects")),
+    ("live_simple_9-9-9", "sink", KeyError("properties")),
+)
+_FAKE_IDS = {rid for rid, _, _ in _FAKE_SKIPS}
+
+#: R2's oracle: the top-level fields of an artifact that has already been
+#: **published**, i.e. the things a reader compares between two runs. An
+#: accumulator reached by the skip handler and published under one of these has
+#: moved a number, whatever the change was called. Transcribed from
+#: `artifacts/eval_bfcl_live_simple_j0_map.json` and
+#: `artifacts/task_countdown_j0map.json`; `test_the_published_field_oracle_is_a
+#: _faithful_transcription` re-reads both so it cannot rot. Fields added *by*
+#: the fix are deliberately absent — a new field is exactly what R3 asks for
+#: and cannot invalidate an old comparison.
+_RUN_PUBLISHED = frozenset({
+    "arg_accuracy", "arg_correct", "arg_total", "cs", "cs_rate",
+    "elapsed_seconds", "emission", "entropy_bound", "exact_call_rate",
+    "exact_calls", "n", "nonempty", "nonempty_rate", "nonempty_strings",
+    "parsed", "per_key", "records_available", "rows", "schema_ok",
+    "schema_valid_rate", "seed", "skipped_by_reason", "task", "variant",
+    "zero_partition", "zero_partition_records", "oom", "oom_records"})
+_TASKS_PUBLISHED = frozenset({
+    "confidence", "cs", "cs_rate", "elapsed_seconds", "emission",
+    "entropy_bound", "failure_reasons", "n", "oom", "rows", "seed",
+    "skipped_by_reason", "solve_rate", "solved", "task", "variant",
+    "zero_partition", "parsed", "parse_rate"})
+
+_HARNESSES = [
+    pytest.param(_RUN_PY, _RUN_PUBLISHED, id="eval/run.py"),
+    pytest.param(_RUN_TASKS_PY, _TASKS_PUBLISHED, id="eval/run_tasks.py"),
+]
+
+
+def test_the_published_field_oracle_is_a_faithful_transcription():
+    """Guard on R2's oracle, so a stale field list cannot bless a moved number.
+
+    Skips per artifact rather than failing when one is absent: `artifacts/` is
+    only partly tracked, and a fresh clone may have neither.
+    """
+    seen = 0
+    for path, transcribed in (
+            ("artifacts/eval_bfcl_live_simple_j0_map.json", _RUN_PUBLISHED),
+            ("artifacts/task_countdown_j0map.json", _TASKS_PUBLISHED)):
+        p = pathlib.Path("/home/ubuntu/diffgemma_fa") / path
+        if not p.exists():
+            continue
+        seen += 1
+        shipped = set(json.load(open(p)))
+        assert shipped <= set(transcribed), (
+            f"{path} publishes {sorted(shipped - set(transcribed))}, which R2 "
+            f"does not know about and would let the skip handler move")
+    if not seen:
+        pytest.skip("no published arm artifact on disk to check against")
+
+
+class _RecordingScores:
+    """Stands in for `metrics.Scores` and records rather than accumulates.
+
+    R2: a compile-skipped record must never reach `Scores.add`. If it did it
+    would enter `n`, `cs_rate`, `schema_valid_rate` and `exact_call_rate`, and
+    the published `denominator_policy` would become false.
+    """
+
+    def __init__(self) -> None:
+        self.calls: list[dict] = []
+
+    def add(self, **kw):
+        self.calls.append(kw)
+
+    def as_dict(self):
+        return {}
+
+
+class _AnyArgs:
+    """`argparse` namespace stand-in: every flag exists and is falsy."""
+
+    def __getattr__(self, name):
+        return None
+
+
+def _main_of(source: str) -> ast.FunctionDef:
+    for node in ast.parse(source).body:
+        if isinstance(node, ast.FunctionDef) and node.name == "main":
+            return node
+    raise AssertionError("no `main()` in this harness")
+
+
+def _called_names(nodes) -> set[str]:
+    out = set()
+    for n in nodes:
+        for c in ast.walk(n):
+            if isinstance(c, ast.Call):
+                out.add(getattr(c.func, "attr", None)
+                        or getattr(c.func, "id", ""))
+    return out
+
+
+def _compile_try(main_fn: ast.FunctionDef):
+    """`(the record loop, the compile Try, its handler)`.
+
+    Located by the grammar-compilation call in the `try` body rather than by
+    line number or by the `"compile:"` string, so a rename of the reason key
+    cannot make this stop finding the handler it is written about.
+    """
+    for stmt in main_fn.body:
+        if not isinstance(stmt, ast.For):
+            continue
+        for node in stmt.body:
+            if not isinstance(node, ast.Try):
+                continue
+            if _called_names(node.body) & set(_COMPILE_CALLS):
+                assert len(node.handlers) == 1, (
+                    "the compile `try` grew a second handler; this replay "
+                    "assumes one")
+                return stmt, node, node.handlers[0]
+    raise AssertionError(
+        f"no `for` loop with a `try` around {_COMPILE_CALLS} directly in "
+        f"main(); the replay no longer models this harness and every guard "
+        f"below would be vacuous")
+
+
+def _out_dict_items(main_fn: ast.FunctionDef):
+    """`[(key, value_node)]` of the artifact dict `out = {...}`."""
+    for stmt in main_fn.body:
+        if (isinstance(stmt, ast.Assign)
+                and any(isinstance(t, ast.Name) and t.id == "out"
+                        for t in stmt.targets)
+                and isinstance(stmt.value, ast.Dict)):
+            return [(k.value, v) for k, v in zip(stmt.value.keys,
+                                                 stmt.value.values)
+                    if isinstance(k, ast.Constant)]
+    raise AssertionError("main() no longer assembles an `out` dict")
+
+
+def _assign_targets(stmt) -> list[str]:
+    if isinstance(stmt, ast.AnnAssign):
+        return [stmt.target.id] if isinstance(stmt.target, ast.Name) else []
+    out = []
+    for t in stmt.targets:
+        for n in ast.walk(t):
+            if isinstance(n, ast.Name):
+                out.append(n.id)
+    return out
+
+
+def _names_in_scope(main_fn, loop, try_stmt, handler) -> set[str]:
+    """Every local name bound *before* control can reach the skip handler.
+
+    Anything else the handler touches is a runtime `NameError` (a name that
+    exists nowhere — `fn` in `eval/run_tasks.py`) or an `UnboundLocalError` (a
+    name bound only on the success path — `want`, `state`, `a`). Both surface
+    130 records into an 80-minute run, so the replay must not paper over them
+    by seeding a generous namespace.
+    """
+    scope: set[str] = {handler.name} if handler.name else set()
+    for stmt in main_fn.body:                      # before the record loop
+        if stmt is loop:
+            break
+        if isinstance(stmt, (ast.Assign, ast.AnnAssign)):
+            scope |= set(_assign_targets(stmt))
+    scope |= {n.id for n in ast.walk(loop.target) if isinstance(n, ast.Name)}
+    for stmt in loop.body:                         # before the compile `try`
+        if stmt is try_stmt:
+            break
+        if isinstance(stmt, (ast.Assign, ast.AnnAssign)):
+            scope |= set(_assign_targets(stmt))
+    return scope
+
+
+def _replay_compile_skips(source: str, failures=_FAKE_SKIPS):
+    """Execute the harness's own compile-failure handler against fake records.
+
+    Returns `(before, after, scores, main_fn)` where `before`/`after` are the
+    accumulator namespace either side of the replay. The accumulators are the
+    ones `main()` itself initialises before the record loop — executed from the
+    shipped source, so a new list added by the fix is picked up without this
+    helper being told about it.
+    """
+    main_fn = _main_of(source)
+    loop, try_stmt, handler = _compile_try(main_fn)
+    scope = _names_in_scope(main_fn, loop, try_stmt, handler)
+
+    ns: dict = {"__builtins__": __builtins__}
+    accum: list[str] = []
+    for stmt in main_fn.body:
+        if stmt is loop:
+            break
+        if not isinstance(stmt, (ast.Assign, ast.AnnAssign)):
+            continue
+        mod = ast.Module(body=[stmt], type_ignores=[])
+        ast.fix_missing_locations(mod)
+        try:
+            exec(compile(mod, "<harness-init>", "exec"), ns)   # noqa: S102
+        except Exception:      # noqa: BLE001 - `sc = Scores()`, model loads...
+            continue
+        accum += [t for t in _assign_targets(stmt) if t in ns]
+
+    scores = _RecordingScores()
+    before = {k: copy.deepcopy(ns[k]) for k in accum}
+
+    # `continue` is a syntax error outside a loop, so the handler body is
+    # wrapped in a one-iteration `for`. Everything else is the shipped AST.
+    wrapped = ast.Module(body=[ast.For(
+        target=ast.Name(id="_replay_i", ctx=ast.Store()),
+        iter=ast.List(elts=[ast.Constant(0)], ctx=ast.Load()),
+        body=list(handler.body), orelse=[])], type_ignores=[])
+    ast.fix_missing_locations(wrapped)
+    code = compile(wrapped, "<compile-skip-handler>", "exec")
+
+    for i, (rid, fname, exc) in enumerate(failures):
+        fn = {"name": fname, "parameters": {"type": "dict", "properties": {}}}
+        pool = {
+            handler.name or "e": exc,
+            "rec": types.SimpleNamespace(id=rid, functions=(fn,), split="s"),
+            "fn": fn, "idx": i, "sc": scores, "args": _AnyArgs(),
+            "prompt": "", "regex": "", "scorer": None,
+        }
+        # SCOPE FIDELITY: seed only what this harness can actually see, and
+        # remove anything a previous iteration or the init sweep left behind.
+        for name, value in pool.items():
+            if name in scope:
+                ns[name] = value
+            else:
+                ns.pop(name, None)
+        try:
+            exec(code, ns)                                     # noqa: S102
+        except NameError as exc_:
+            missing = getattr(exc_, "name", None) or str(exc_)
+            if missing in scope:
+                pytest.fail(
+                    f"the compile-skip handler uses `{missing}`, which is in "
+                    f"scope in the harness but not modelled by this replay. "
+                    f"Add it to `pool` above.")
+            pytest.fail(
+                f"the compile-skip handler uses `{missing}`, which is NOT in "
+                f"scope where it is used: the names available there are "
+                f"{sorted(scope)}. This raises NameError on the first "
+                f"compile failure — i.e. after the arm has been running for "
+                f"an hour. (`eval/run_tasks.py` has no `fn`; its loop unpacks "
+                f"`(rec, prompt, regex, scorer)`.)")
+
+    after = {k: ns[k] for k in accum}
+    return before, after, scores, main_fn
+
+
+def reconstruct_skipped(published: dict) -> dict[str, set[str]]:
+    """`{record_id: every string recorded beside it}`, from JSON alone.
+
+    The oracle for R1, and deliberately tolerant about shape — a reader of the
+    artifact does not care whether the fix ships
+    `[{"id": ..., "reason": ...}, ...]` or `{reason: [id, ...]}`, only that
+    both halves are there and are attached to each other. It is *not* tolerant
+    about content: an id with nothing beside it comes back with an empty set
+    and fails the "why" half of R1 rather than the "which" half, so the
+    failure message points at what is actually missing.
+    """
+    out: dict[str, set[str]] = {}
+    for value in published.values():
+        if isinstance(value, list):
+            for item in value:
+                if isinstance(item, str):
+                    out.setdefault(item, set())
+                elif isinstance(item, dict):
+                    ids = [v for k, v in item.items()
+                           if k in _ID_KEYS and isinstance(v, str)]
+                    if not ids:
+                        continue
+                    out.setdefault(ids[0], set()).update(
+                        v for k, v in item.items()
+                        if k not in _ID_KEYS and isinstance(v, str))
+        elif isinstance(value, dict):
+            for reason, ids in value.items():
+                if not isinstance(ids, list):
+                    continue
+                for item in ids:
+                    if isinstance(item, str):
+                        out.setdefault(item, set()).add(str(reason))
+                    elif isinstance(item, dict):
+                        got = [v for k, v in item.items()
+                               if k in _ID_KEYS and isinstance(v, str)]
+                        if got:
+                            out.setdefault(got[0], set()).add(str(reason))
+    return out
+
+
+def _publishes_whole(value: ast.expr, carriers: set[str]) -> set[str]:
+    """The carriers this `out` value expression actually puts in the file.
+
+    `"skipped_records": skipped_records` publishes them; `list(...)` and
+    `sorted(...)` of one still do; `len(skipped_records)` mentions the name and
+    publishes a **number**, from which no id can be recovered. The distinction
+    is the whole of R1's third half, so it is made structurally rather than by
+    "the name appears somewhere in the expression".
+    """
+    if isinstance(value, ast.Name):
+        return {value.id} & carriers
+    if (isinstance(value, ast.Call) and isinstance(value.func, ast.Name)
+            and value.func.id in ("list", "sorted", "tuple") and value.args):
+        return _publishes_whole(value.args[0], carriers)
+    return set()
+
+
+def _skip_report(source: str, published_fields: frozenset) -> dict:
+    """Everything R1-R4 needs to be decided, for one harness source."""
+    before, after, scores, main_fn = _replay_compile_skips(source)
+    out_items = _out_dict_items(main_fn)
+
+    # R4 first: a set or an exception object never reaches a reader at all, so
+    # everything downstream is judged on what actually survives to the file.
+    json_error = None
+    survived: dict = {}
+    try:
+        survived = json.loads(json.dumps(after))
+    except TypeError as exc:
+        json_error = str(exc)
+
+    # `rows` is the measured population: `scripts/phase5_report.py::per_record`
+    # turns it into `{id: bool}` and pairs arms on the shared ids, so an entry
+    # there is a scored record whatever it is labelled. Excluded from the
+    # reconstruction, and checked separately by R2.
+    rows_name = next((v.id for k, v in out_items
+                      if k == "rows" and isinstance(v, ast.Name)), "rows")
+    reconstructable = {k: v for k, v in survived.items() if k != rows_name}
+
+    carriers = {name for name, value in reconstructable.items()
+                if reconstruct_skipped({name: value})}
+    published_carriers: set[str] = set()
+    out_keys_of: dict[str, set[str]] = {}
+    for key, value in out_items:
+        published_carriers |= _publishes_whole(value, carriers)
+        for node in ast.walk(value):
+            if isinstance(node, ast.Name):
+                out_keys_of.setdefault(node.id, set()).add(key)
+
+    counts_name = next((v.id for k, v in out_items
+                        if k == "skipped_by_reason" and isinstance(v, ast.Name)),
+                       None)
+    # EVERY accumulator that moved, not only the integer ones: `oom`,
+    # `zero_partition` and `reasons` are lists and dicts, and they are
+    # published as `len(oom)`, `len(zero_partition)` and `failure_reasons`.
+    changed = {k: (before[k], after[k]) for k in after if before[k] != after[k]}
+    return {
+        "recovered": reconstruct_skipped(reconstructable),
+        "json_error": json_error,
+        "carriers": carriers,
+        "published_carriers": published_carriers,
+        "counts_name": counts_name,
+        "counts": after.get(counts_name) if counts_name else None,
+        "rows": after.get(rows_name),
+        "scored": scores.calls,
+        "changed": changed,
+        "moved_published_fields": {
+            name: sorted(out_keys_of.get(name, set()) & published_fields)
+            for name in changed
+            if name != counts_name
+            and out_keys_of.get(name, set()) & published_fields},
+    }
+
+
+def _assert_r2(r: dict, label: str) -> None:
+    """R2, as one reusable assertion so the adversarial cases can require it
+    to *fire* rather than merely observing the mechanism."""
+    assert r["scored"] == [], (
+        f"{label}: the compile-skip handler called Scores.add{r['scored']} — "
+        f"the record enters `n` and every rate over it, and the artifact's "
+        f"denominator_policy stops being true")
+    assert not r["rows"], (
+        f"{label}: a compile-skipped record was appended to `rows`: "
+        f"{r['rows']}. `rows` is the scored population — phase5_report pairs "
+        f"arms on the ids it finds there.")
+    assert not r["moved_published_fields"], (
+        f"{label}: the skip handler moved accumulators that are published "
+        f"under fields a reader compares: {r['moved_published_fields']}. "
+        f"Values now {({k: v[1] for k, v in r['changed'].items() if k in r['moved_published_fields']})}. "
+        f"This commit is supposed to be additive reporting.")
+
+
+# --------------------------------------------------------------------------
+# R1/R2/R3/R4 against the shipped harnesses
+# --------------------------------------------------------------------------
+
+@pytest.mark.parametrize("path,published", _HARNESSES)
+def test_a_compile_skipped_record_can_be_named_from_the_artifact(path, published):
+    """R1, the "which" half — and the launch gate.
+
+    Three records leave the run, two of them for the same reason. A histogram
+    says `{"compile:ValueError": 2, "compile:KeyError": 1}`, from which the
+    difference set against a published `n = 130` cannot be computed: you know
+    three records are missing and not one of their ids. The OOM handler eleven
+    lines below already does this correctly (`oom_records`), so the shape is
+    not in question.
+    """
+    r = _skip_report(path.read_text(), published)
+    assert r["json_error"] is None, (
+        f"{path.name}: the compile-skip bookkeeping does not survive "
+        f"json.dump: {r['json_error']}")
+    assert set(r["recovered"]) == _FAKE_IDS, (
+        f"{path.name}: replayed three compile failures and the artifact can "
+        f"name {sorted(r['recovered']) or 'none'} of them.\n"
+        f"  counts kept: {r['counts']}\n"
+        f"A reader holding this artifact and a published n=130 row cannot "
+        f"compute the difference set, so the two n's are not comparable.")
+
+
+@pytest.mark.parametrize("path,published", _HARNESSES)
+def test_each_named_record_carries_the_reason_it_was_skipped(path, published):
+    """R1, the "why" half.
+
+    An id list alone is only enough while exactly one exception type occurred;
+    the moment two do — and `compile:ValueError` from the build gate will not
+    be the only one forever — the reader is back to guessing. The reason must
+    be attached to the record, not merely present in the same file.
+    """
+    r = _skip_report(path.read_text(), published)
+    unnamed = _FAKE_IDS - set(r["recovered"])
+    missing = {rid: sorted(r["recovered"].get(rid, ()))
+               for rid, _fname, exc in _FAKE_SKIPS
+               if rid not in unnamed
+               and not any(type(exc).__name__ in s
+                           for s in r["recovered"][rid])}
+    assert not unnamed, (
+        f"{path.name}: {sorted(unnamed)} are not named at all, so the `why` "
+        f"half of R1 cannot even be asked — see the test above")
+    assert not missing, (
+        f"{path.name}: these records are named without saying why they left: "
+        f"{missing}. `skipped_by_reason` has the reasons and the record list "
+        f"has the ids, and nothing joins them.")
+
+
+@pytest.mark.parametrize("path,published", _HARNESSES)
+def test_the_skipped_records_reach_the_artifact_and_not_just_a_local(
+        path, published):
+    """R1, third half: recorded is not reported.
+
+    `oom_records` and `zero_partition_records` are values of the `out` dict. A
+    list that is appended to and never written out is a variable, not an
+    artifact — and a list published as `len(...)` is a fourth count, which is
+    the failure this test is most likely to have to catch.
+    """
+    r = _skip_report(path.read_text(), published)
+    assert r["carriers"], "nothing carries the ids; see the R1 test above"
+    assert r["published_carriers"], (
+        f"{path.name}: {sorted(r['carriers'])} carries the skipped record ids "
+        f"and no `out` value **is** that list, so no id reaches the artifact "
+        f"file. (A `len(...)` of it does not count: it is another number.)")
+
+
+@pytest.mark.parametrize("path,published", _HARNESSES)
+def test_reporting_a_skip_does_not_move_a_single_measured_number(path, published):
+    """R2. Additive reporting only.
+
+    Passes today, and must still pass afterwards — it is the whole reason this
+    fix is safe to land before an arm. A compile-skipped record was never put
+    to the model, so it must not reach `Scores` (which would put it in `n`,
+    `cs_rate` and `exact_call_rate`), must not reach `rows` (which
+    `phase5_report.per_record` turns into the paired McNemar population, where
+    a fabricated `accepted=False` becomes a discordant pair against every arm
+    measured before the fix), and must not move any other accumulator that is
+    published — `oom`, `zero_partition` and `failure_reasons` are lists and
+    dicts, and are just as published as `n`.
+    """
+    _assert_r2(_skip_report(path.read_text(), published), path.name)
+
+
+@pytest.mark.parametrize("path,published", _HARNESSES)
+def test_skipped_by_reason_stays_a_reason_to_count_histogram(path, published):
+    """R3, and the interlock that makes the R1 guards non-vacuous.
+
+    `skipped_by_reason` has two live consumers that this test exists to
+    protect, both checked by `test_the_consumers_that_make_skipped_by_reason_
+    load_bearing_still_exist` below:
+
+      * `eval/run_tasks.py` computes the published denominator from it —
+        `n = len(items) - sum(skipped.values())`. Values that are not numbers
+        make `n` a `TypeError` at best and silently wrong at worst;
+      * `scripts/phase5_report.py` prints it verbatim into the coverage
+        section of `docs/RESULTS.md` ("skipped at compile time: none"), which
+        is a published string.
+
+    So the histogram is not free to be repurposed into `{reason: [ids]}`, and
+    a fix that does so is not additive however good the ids look.
+
+    It doubles as the anti-vacuity interlock: the counts asserted here are
+    produced by executing the **shipped** handler three times, so a replay that
+    quietly stopped finding or running it turns this red rather than turning
+    the R1 guards green.
+    """
+    r = _skip_report(path.read_text(), published)
+    assert r["counts_name"], (
+        f"{path.name}: `skipped_by_reason` is no longer a plain name in the "
+        f"`out` dict; its two consumers are pinned to a reason->count mapping")
+    counts = r["counts"]
+    assert isinstance(counts, dict) and counts, "skipped_by_reason is empty"
+    assert all(isinstance(v, int) and not isinstance(v, bool)
+               for v in counts.values()), (
+        f"{path.name}: skipped_by_reason became {counts!r}; "
+        f"`n = len(items) - sum(skipped.values())` needs counts")
+    assert sum(counts.values()) == len(_FAKE_SKIPS), (
+        f"{path.name}: three records were skipped and the histogram totals "
+        f"{sum(counts.values())} — `n` is now wrong by "
+        f"{len(_FAKE_SKIPS) - sum(counts.values())}")
+    assert set(counts) == {"compile:ValueError", "compile:KeyError"}, (
+        f"{path.name}: reason keys are {sorted(counts)}")
+    # The two fields must agree, or the reader has to pick one to believe.
+    assert sum(counts.values()) == len(r["recovered"]) or not r["recovered"], (
+        f"{path.name}: skipped_by_reason totals {sum(counts.values())} but "
+        f"{len(r['recovered'])} records are named; one of them is wrong")
+
+
+def test_the_consumers_that_make_skipped_by_reason_load_bearing_still_exist():
+    """The evidence for R3, kept falsifiable.
+
+    R3 is an empirical claim about two other files, and a claim like that rots.
+    The published `n` must still be *derived from* the histogram — checked by
+    expanding `n`'s expression one level through the local assignments, so
+    `n = len(items) - n_skipped` counts only while `n_skipped` is itself
+    `sum(skipped.values())`. Rewriting it to `len(skipped)` (which counts
+    reasons, not records) fails here, as it should: the compatibility argument
+    would then be about a different expression.
+    """
+    tasks_src = _RUN_TASKS_PY.read_text()
+    assigns: dict[str, str] = {}
+    for node in ast.walk(ast.parse(tasks_src)):
+        if isinstance(node, ast.Assign) and len(node.targets) == 1 and \
+                isinstance(node.targets[0], ast.Name):
+            assigns[node.targets[0].id] = ast.unparse(node.value)
+    assert "n" in assigns, "eval/run_tasks.py no longer assigns `n`"
+    expanded = assigns["n"]
+    for name, expr in assigns.items():
+        if name != "n":
+            expanded = re.sub(rf"\b{re.escape(name)}\b", f"({expr})", expanded)
+    assert "sum(" in expanded and "values()" in expanded, (
+        f"eval/run_tasks.py's `n` no longer sums the skipped histogram — it "
+        f"expands to `{expanded}`. Re-derive R3 before changing "
+        f"skipped_by_reason's shape.")
+
+    assert _PHASE5_REPORT.exists()
+    assert "skipped_by_reason" in _PHASE5_REPORT.read_text(), (
+        "scripts/phase5_report.py no longer reads skipped_by_reason; it is "
+        "what writes `skipped at compile time: ...` into docs/RESULTS.md")
+
+
+# --------------------------------------------------------------------------
+# Self-tests: the replay must be able to tell right from wrong
+# --------------------------------------------------------------------------
+#
+# The section above is a guard over files it does not control. Its R1 tests are
+# kept honest by the R3 interlock; these synthetic harnesses cover the rest —
+# one wrong in the way the shipped code is wrong today, two right in different
+# shapes, and one for each way the fix is most likely to be wrong.
+
+#: `eval/run.py`'s shape: `fn` is bound in the loop before the `try`.
+#: `eval/run_tasks.py`'s: the loop unpacks four names and there is no `fn`
+#: anywhere in the file.
+_LOOP_BFCL = ("    for idx, rec in enumerate(records):\n"
+              "        fn = rec.functions[0]\n"
+              "        try:\n"
+              "            a = pipeline.compile_json_schema("
+              "fn[\"parameters\"]).automaton")
+_LOOP_TASKS = ("    for idx, (rec, prompt, regex, scorer) in enumerate(items):\n"
+               "        try:\n"
+               "            a = pipeline.compile_regex(regex).automaton")
+
+
+def _harness(init: str = "", handler: str = "", out: str = "",
+             loop: str = _LOOP_BFCL) -> str:
+    """A minimal `main()` with the two harnesses' shape, including the
+    accumulators R2 cares about and the `out` keys they are published under."""
+    return f'''
+def main():
+    sc = metrics.Scores()
+    rows, skipped, zero_partition, oom = [], {{}}, [], []
+    reasons = {{}}
+    n_ok = n_cs = n_parsed = 0
+{init}
+{loop}
+        except Exception as e:
+            k = f"compile:{{type(e).__name__}}"
+{handler}
+            continue
+        sc.add(accepted=True, parsed_obj=None, want=None)
+    out = {{"skipped_by_reason": skipped, "rows": rows, "oom": len(oom),
+           "zero_partition": len(zero_partition), "failure_reasons": reasons,
+           "solved": n_ok, {out}}}
+'''
+
+
+#: The synthetic `out` keys that stand for "already published".
+_SYNTHETIC_PUBLISHED = frozenset({
+    "skipped_by_reason", "rows", "oom", "zero_partition", "failure_reasons",
+    "solved"})
+
+#: What the code does today: a histogram and nothing else.
+_SKIP_HISTOGRAM_ONLY = _harness(
+    handler="            skipped[k] = skipped.get(k, 0) + 1")
+
+#: One correct fix, in the shape of the OOM handler four lines away.
+_SKIP_FIXED = _harness(
+    init="    skipped_records = []",
+    handler="            skipped[k] = skipped.get(k, 0) + 1\n"
+            "            skipped_records.append({'id': rec.id, "
+            "'fn': fn.get('name'),\n"
+            "                                    'reason': k, "
+            "'detail': str(e)[:200]})",
+    out='"skipped_records": skipped_records')
+
+#: A second correct fix in a different shape, so the tests above are not
+#: secretly demanding one field layout.
+_SKIP_FIXED_BY_REASON = _harness(
+    init="    skipped_ids = {}",
+    handler="            skipped[k] = skipped.get(k, 0) + 1\n"
+            "            skipped_ids.setdefault(k, []).append(rec.id)",
+    out='"skipped_record_ids": skipped_ids')
+
+
+@pytest.mark.parametrize("source", [_SKIP_FIXED, _SKIP_FIXED_BY_REASON],
+                         ids=["per-record-list", "reason-to-id-lists"])
+def test_the_replay_passes_a_correct_fix(source):
+    """Satisfiability. A checker nothing can satisfy is not a specification.
+
+    Both layouts recover all three ids with their reasons, publish them whole,
+    keep the histogram, and move no published field.
+    """
+    r = _skip_report(source, _SYNTHETIC_PUBLISHED)
+    assert r["json_error"] is None
+    assert set(r["recovered"]) == _FAKE_IDS
+    assert all(any("ValueError" in s for s in r["recovered"][rid])
+               for rid, _f, e in _FAKE_SKIPS if isinstance(e, ValueError))
+    assert r["published_carriers"]
+    assert r["counts"] == {"compile:ValueError": 2, "compile:KeyError": 1}
+    _assert_r2(r, "correct fix")
+
+
+def test_the_replay_detects_todays_histogram_only_handler():
+    """Mutation self-test, on the synthetic pre-fix shape.
+
+    Complements the R3 interlock: this shows the machinery reports "nothing
+    recoverable" for a handler that keeps only a count, while R3 on the real
+    files shows the handler being executed is the shipped one.
+    """
+    r = _skip_report(_SKIP_HISTOGRAM_ONLY, _SYNTHETIC_PUBLISHED)
+    assert r["counts"] == {"compile:ValueError": 2, "compile:KeyError": 1}, (
+        "the replay did not execute the handler; every guard above is vacuous")
+    assert r["recovered"] == {}, (
+        "the pre-fix harness records only a histogram, so nothing should be "
+        f"recoverable — got {r['recovered']}")
+    assert r["carriers"] == set()
+
+
+# --- the adversarial cases: plausible fixes that are still wrong -----------
+
+def test_a_handler_that_reaches_for_a_name_not_in_its_scope_is_rejected():
+    """The `fn` hole, which is specific to `eval/run_tasks.py`.
+
+    That file has no `fn` anywhere: its loop unpacks
+    `(rec, prompt, regex, scorer)`. Copying `eval/run.py`'s
+    `{"id": rec.id, "fn": fn.get("name")}` across — the obvious way to keep
+    the two artifacts consistent, and the reviewer's first instinct — compiles,
+    reads correctly, and raises `NameError` on the first compile failure, an
+    hour into an 80-minute arm. Nothing else in this file would notice, so the
+    replay refuses to seed names the harness cannot see.
+    """
+    src = _harness(
+        init="    skipped_records = []",
+        handler="            skipped[k] = skipped.get(k, 0) + 1\n"
+                "            skipped_records.append({'id': rec.id, "
+                "'fn': fn.get('name'), 'reason': k})",
+        out='"skipped_records": skipped_records',
+        loop=_LOOP_TASKS)
+    with pytest.raises(pytest.fail.Exception, match="NOT in scope"):
+        _skip_report(src, _SYNTHETIC_PUBLISHED)
+
+    # ...and the same handler under `eval/run.py`'s loop, where `fn` IS bound,
+    # is fine. Without this the test would pass on a replay that rejected
+    # everything.
+    ok = _skip_report(src.replace(_LOOP_TASKS, _LOOP_BFCL),
+                      _SYNTHETIC_PUBLISHED)
+    assert set(ok["recovered"]) == _FAKE_IDS
+
+
+def test_a_handler_that_reaches_for_a_success_path_name_is_rejected():
+    """The same hole through the other door: `want` and `state` exist in
+    `eval/run.py`, but are bound *after* the compile `try`. Referencing one
+    from the skip handler is an `UnboundLocalError` at run time, and a replay
+    that seeded every name in the file would bless it.
+    """
+    src = _harness(
+        init="    skipped_records = []",
+        handler="            skipped[k] = skipped.get(k, 0) + 1\n"
+                "            skipped_records.append({'id': rec.id, "
+                "'reason': k, 'want': str(want)})",
+        out='"skipped_records": skipped_records')
+    with pytest.raises(pytest.fail.Exception, match="NOT in scope"):
+        _skip_report(src, _SYNTHETIC_PUBLISHED)
+
+
+def test_an_id_without_a_reason_is_rejected():
+    """Most likely near-miss: `skipped_ids.append(rec.id)`.
+
+    It answers "which" and not "why", and it reads as complete. With one
+    exception type in play it even *is* complete, which is how it survives
+    review — and the build gate's `ValueError` will not be the only one for
+    long. The "which" test must pass and the "why" test must fail, so the
+    failure message points at the missing half.
+    """
+    src = _harness(init="    skipped_ids = []",
+                   handler="            skipped[k] = skipped.get(k, 0) + 1\n"
+                           "            skipped_ids.append(rec.id)",
+                   out='"skipped_ids": skipped_ids')
+    r = _skip_report(src, _SYNTHETIC_PUBLISHED)
+    assert set(r["recovered"]) == _FAKE_IDS, "the ids are there"
+    assert all(r["recovered"][rid] == set() for rid in _FAKE_IDS), (
+        "and no reason is attached to any of them — if this passes, the "
+        "`why` guard cannot fail and is decorative")
+
+
+def test_a_set_of_ids_is_rejected_because_it_never_reaches_the_file():
+    """R4. `skipped_ids = set()` is the natural type for "which records",
+    and `json.dump` raises `TypeError: Object of type set is not JSON
+    serializable` — at the END of the run, after the GPU time is spent.
+    """
+    src = _harness(init="    skipped_ids = set()",
+                   handler="            skipped[k] = skipped.get(k, 0) + 1\n"
+                           "            skipped_ids.add(rec.id)",
+                   out='"skipped_ids": skipped_ids')
+    r = _skip_report(src, _SYNTHETIC_PUBLISHED)
+    assert r["json_error"] is not None, (
+        "a set survived json.dumps; the R4 guard cannot fail")
+    assert r["recovered"] == {}
+
+
+def test_recording_the_exception_object_is_rejected():
+    """R4, the other way: `{"id": rec.id, "error": e}` is the obvious thing to
+    write and is not serialisable either. Same failure, same timing.
+    """
+    src = _harness(init="    skipped_records = []",
+                   handler="            skipped[k] = skipped.get(k, 0) + 1\n"
+                           "            skipped_records.append({'id': rec.id, "
+                           "'error': e})",
+                   out='"skipped_records": skipped_records')
+    assert _skip_report(src, _SYNTHETIC_PUBLISHED)["json_error"] is not None
+
+
+def test_publishing_only_a_count_of_the_skipped_records_is_rejected():
+    """R1's third half, sharpened: `"n_skipped_records": len(skipped_records)`.
+
+    The list is built correctly and the artifact gets a fourth number instead
+    of the ids — which is the defect this whole section is about, reintroduced
+    by the fix for it.
+    """
+    r = _skip_report(_harness(
+        init="    skipped_records = []",
+        handler="            skipped[k] = skipped.get(k, 0) + 1\n"
+                "            skipped_records.append({'id': rec.id, "
+                "'reason': k})",
+        out='"n_skipped_records": len(skipped_records)'),
+        _SYNTHETIC_PUBLISHED)
+    assert r["carriers"], "the list itself is fine"
+    assert not r["published_carriers"], (
+        "a `len(...)` was accepted as publishing the records")
+
+
+def test_a_fix_that_forgets_to_publish_is_rejected():
+    """R1's third half: appended, never written out."""
+    r = _skip_report(_harness(
+        init="    skipped_records = []",
+        handler="            skipped[k] = skipped.get(k, 0) + 1\n"
+                "            skipped_records.append({'id': rec.id, "
+                "'reason': k})"), _SYNTHETIC_PUBLISHED)
+    assert set(r["recovered"]) == _FAKE_IDS
+    assert r["carriers"] and not r["published_carriers"], (
+        "the unpublished-list case is not being detected")
+
+
+def test_a_skipped_record_smuggled_into_rows_is_rejected():
+    """R2's sharp edge, and the most dangerous plausible fix.
+
+    "Put it in `rows` with `skipped: True`" names the record, survives JSON,
+    and keeps `n` intact — and `scripts/phase5_report.py::per_record` builds
+    `{id: bool}` from `rows` and pairs arms on the shared ids, so the record
+    reappears as `accepted=False` in every McNemar comparison against an arm
+    that measured it. That manufactures discordant pairs out of a record
+    nobody ran. R1 is satisfied and R2 must refuse it.
+    """
+    src = _harness(handler="            skipped[k] = skipped.get(k, 0) + 1\n"
+                           "            rows.append({'id': rec.id, "
+                           "'accepted': False,\n"
+                           "                         'reason': k, "
+                           "'skipped': True})")
+    r = _skip_report(src, _SYNTHETIC_PUBLISHED)
+    assert set(reconstruct_skipped({"rows": r["rows"]})) == _FAKE_IDS, (
+        "it does name the records, which is exactly why it is tempting")
+    with pytest.raises(AssertionError, match="appended to `rows`"):
+        _assert_r2(r, "rows-smuggling fix")
+
+
+def test_scoring_the_skipped_record_as_a_failure_is_rejected():
+    """R2's other edge. `sc.add(..., want=want)` for a compile-skipped record
+    looks like [AUDIT-B2]'s fix and is the opposite of it: B2's records
+    *reached the model and failed*, these were never asked. It moves `n` from
+    128 to 130 and drops `cs_rate` — a denominator change wearing a bug fix's
+    clothes, on the same commit that was supposed to be additive.
+    """
+    src = _harness(init="    skipped_records = []",
+                   handler="            skipped[k] = skipped.get(k, 0) + 1\n"
+                           "            skipped_records.append({'id': rec.id, "
+                           "'reason': k})\n"
+                           "            sc.add(accepted=False, "
+                           "parsed_obj=None, want={'a': 'x'}, schema_ok=False)",
+                   out='"skipped_records": skipped_records')
+    with pytest.raises(AssertionError, match="called Scores.add"):
+        _assert_r2(_skip_report(src, _SYNTHETIC_PUBLISHED), "scoring fix")
+
+
+@pytest.mark.parametrize("acc,field,mutation", [
+    ("oom", "oom", "            oom.append(rec.id)"),
+    ("zero_partition", "zero_partition",
+     "            zero_partition.append(rec.id)"),
+    ("reasons", "failure_reasons",
+     "            reasons[k] = reasons.get(k, 0) + 1"),
+    ("n_ok", "solved", "            n_ok += 0 * len(rec.id) + 1"),
+])
+def test_charging_the_skip_to_another_published_column_is_rejected(
+        acc, field, mutation):
+    """R2 over the accumulators that are not integers.
+
+    `oom` and `zero_partition` are lists published as `len(...)`; `reasons` is
+    a dict published as `failure_reasons`. Filing a compile skip under any of
+    them moves a column in `docs/RESULTS.md` while `n` stays put — and a
+    reviewer reading the diff sees a record being recorded, which is what the
+    commit is *supposed* to do. R2 must fire on every one of them, not only on
+    the `int` counters.
+    """
+    src = _harness(init="    skipped_records = []",
+                   handler="            skipped[k] = skipped.get(k, 0) + 1\n"
+                           "            skipped_records.append({'id': rec.id, "
+                           "'reason': k})\n" + mutation,
+                   out='"skipped_records": skipped_records')
+    r = _skip_report(src, _SYNTHETIC_PUBLISHED)
+    assert set(r["recovered"]) == _FAKE_IDS, "R1 is satisfied by this shape"
+    assert acc in r["changed"], f"{acc} was not touched; the case is not live"
+    with pytest.raises(AssertionError, match="published"):
+        _assert_r2(r, f"{acc}-charging fix")
+    assert r["moved_published_fields"] == {acc: [field]}
+
+
+def test_repurposing_the_histogram_into_id_lists_is_rejected():
+    """R3. The tidiest-looking fix of all: one field instead of two.
+
+    `skipped_by_reason = {"compile:ValueError": [id, id]}` answers R1
+    perfectly. It also feeds `sum(skipped.values())` two lists, so
+    `eval/run_tasks.py`'s `n` raises `TypeError`, and it prints record ids into
+    the `docs/RESULTS.md` coverage line. R1 must pass here and R3 must fail.
+    """
+    r = _skip_report(
+        _harness(handler="            skipped.setdefault(k, []).append(rec.id)"),
+        _SYNTHETIC_PUBLISHED)
+    assert set(r["recovered"]) == _FAKE_IDS, "R1 is satisfied by this shape"
+    assert not all(isinstance(v, int) for v in r["counts"].values()), (
+        "the histogram survived; the R3 guard cannot fail")
+    with pytest.raises(TypeError):
+        sum(r["counts"].values())          # what run_tasks.py does to it
+
+
+# --------------------------------------------------------------------------
+# The records this is actually about
+# --------------------------------------------------------------------------
+
+def test_the_next_arm_really_does_skip_the_two_records_the_audit_named():
+    """Grounding. R1 is worth a commit only if the skip path is live.
+
+    `docs/RESULTS.md` and `docs/PHASE1_FINDINGS.md` name
+    `live_simple_117-73-0` and `live_simple_122-78-0` (a BFCL `any`-typed
+    property, whose unparenthesised top-level alternation can never close its
+    brace) as the two records the [AUDIT-D3] build gate refuses. This asserts
+    that they are still at indices 117 and 122 of the 258 single-function
+    records, that the shipped compile call raises, and that the reason key the
+    handler will build for them is `compile:ValueError` — so the artifact the
+    next arm writes must name exactly these two.
+
+    The control record is not decoration: if the gate refused everything, the
+    two ids above would be trivia rather than the difference set.
+    """
+    from diffgemma_fa.compile import bfcl_data, schema as _schema
+    from diffgemma_fa.eval.run import ALLOW, WHITESPACE_PATTERNS
+
+    split = pathlib.Path(bfcl_data.DATA_DIR) / "BFCL_v4_live_simple.json"
+    if not split.exists():
+        pytest.skip("BFCL checkout not present (artifacts/data is gitignored)")
+
+    records = [r for r in bfcl_data.iter_split("BFCL_v4_live_simple.json")
+               if len(r.functions) == 1]
+    assert len(records) == 258, f"the cut changed shape: {len(records)}"
+
+    def compile_as_the_arm_does(rec):
+        fn = rec.functions[0]
+        norm = _schema.normalize_bfcl_schema(fn["parameters"])
+        return pipeline.compile_json_schema(
+            fn["parameters"], name=fn.get("name", ""), from_bfcl=True,
+            allow=ALLOW, allow_wildcard=True,
+            whitespace_pattern=WHITESPACE_PATTERNS["json"], fence=False,
+            verify_renderings=_schema.synthesize_instance(norm),
+            verify_strict=True, nonempty_required_strings=True)
+
+    refused = {}
+    for idx, want_id in ((117, "live_simple_117-73-0"),
+                         (122, "live_simple_122-78-0")):
+        assert records[idx].id == want_id, (
+            f"index {idx} is {records[idx].id}, not {want_id}; the "
+            f"difference set against the n=130 rows has moved")
+        with pytest.raises(ValueError) as exc:
+            compile_as_the_arm_does(records[idx])
+        refused[want_id] = f"compile:{type(exc.value).__name__}"
+
+    assert set(refused.values()) == {"compile:ValueError"}, refused
+    # Non-vacuity: the gate is selective, so `n = 128` and not `n = 0`.
+    assert compile_as_the_arm_does(records[3]).automaton is not None, (
+        "a control record no longer compiles; the gate is refusing more than "
+        "the two records this test is about and the arm is not runnable")
