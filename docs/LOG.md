@@ -923,3 +923,42 @@ the modified target and is currently unimplemented.
 **Do not restate the old Countdown rows.** They are withdrawn, and the scorer
 fixes moved the unconstrained baseline independently (0.048 -> 0.236), so the
 original comparison was wrong on both sides.
+
+### Result (PID 2278246): hypothesis refuted, and a new defect found
+
+`--emission sample`, same grammar and records:
+`CS 0.708, solved 0.032, zero_partition 73/250, 46 min.`
+
+**The length-economics hypothesis is REFUTED.** The prediction was that sampling
+would reduce degeneracy and the solve rate would rise with it. Half held:
+
+| | MAP | sample |
+|---|---|---|
+| degenerate emissions | 84/250 (33.6%) | **29/250 (11.6%)** |
+| single-step | 189 | 118 |
+| **solved** | **0.036** | **0.032** |
+
+Degeneracy fell by two thirds, exactly as predicted, and the solve rate did not
+move — 8/177 = 0.045 scored only over records that emitted, against MAP's 0.036.
+So length economics genuinely drives the degenerate emissions and is **not** what
+holds the accuracy gap open. The gap survives its removal. The tail-weight prior
+γ (S2) targets the same mechanism, so its expected value on this task should be
+revised down before anyone builds it.
+
+**`Z == 0` on 73/250 under sample, 0/250 under MAP — a real defect, classified.**
+CLAUDE.md gives three causes: (a) empty automaton, (b) no live continuation
+within budget, (c) missing scaling. **MAP emitted non-empty output for all 73 of
+the affected records**, on the identical grammar, records and budget — a
+constructive witness that the language is non-empty and reachable within budget.
+That eliminates (a) and (b) and leaves (c): the joint-draw path loses mass the
+log-space `joint_map` path does not, in **float64**, at `L=256`, `|S|=124`.
+
+This is not the fp32 case SPEC §6.3 tests for, and it is not a grammar or budget
+condition. It is a normalization gap on the sample path only. It also means the
+CS column of any sampled arm is measuring two different things at once: the
+guarantee held on all 177 records that emitted, and 0.708 is the rate over an `n`
+that includes 73 silent non-emissions.
+
+Handing to tester -> coder -> reviewer rather than patching: SPEC §2.4/§2.6
+require every tree node's matrix to be normalized with the log-scale sum over all
+`2L-1` nodes, and "no try/except around numerical code to make tests pass".
