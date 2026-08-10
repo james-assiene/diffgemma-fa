@@ -178,7 +178,42 @@ Corollaries that have already cost time here:
   baseline first.
 - A numerical claim validated only on toy shapes is not validated (float32 was
   fine at `L=4`, `|S|<=8` and drove spurious `Z == 0` on >50% of records at
-  `L=256`).
+  `L=256`) — but "toy" means the wrong **regime**, not merely small. The
+  complement-cancellation defect (`da1294a`) reproduced at `L=8, |S|=4, V=64`
+  and was missed for weeks because no fixture had a *narrow* negated class.
+  Scale is one axis; `|N_c|`, polarity and `p` sharpness are others.
+
+### The launch review — every command that spends GPU time or writes an artifact
+
+**A reviewing agent reads the command before it runs. Not after it fails.**
+
+This is the same gate as the code review, applied to the thing the code review
+does not cover: the invocation. A reviewed implementation launched with the
+wrong flag produces a confidently wrong number over several GPU-hours, and
+nothing in the test suite will say so.
+
+Applies to: any `eval.run` / `eval.run_tasks` arm, any batch or sweep script,
+any long-running measurement, anything writing to `artifacts/`. It does not
+apply to reading files, running tests, or `git` inspection.
+
+The reviewer is given the exact command or script text and must check, at
+minimum:
+
+- **Do the flags exist and mean what the caller thinks?** `eval/run.py`'s CLI
+  defaults are `--variant j1 --emission sample`, which contradict SPEC §3.9's
+  stated defaults (`j0`/`map`) *and* `eval/run_tasks.py`'s. Nothing asserts
+  either. An omitted flag is not the default you assume.
+- **Is the comparison it sets up actually valid?** Denominators, splits, seeds,
+  and `n`. A future `bfcl_live_simple` arm reports `n = 128`, not 130.
+- **Is anything being re-run that does not need to be, or exempted that does?**
+  State the exemption's evidence. "Probably unaffected" is not evidence; a
+  traced code path or a measured null is.
+- **Would a failure be loud?** A run that dies at record 3 and leaves no
+  artifact is cheap. One that completes and silently measures the wrong thing
+  is what this rule is for.
+
+Launch only on the reviewer's explicit approval, from an **immutable copy**
+(`chmod 444`) — editing a live bash script corrupts the running instance.
 
 ### When to skip it
 
