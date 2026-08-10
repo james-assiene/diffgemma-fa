@@ -1150,3 +1150,33 @@ formula and never called `class_weights` — fixed by the tester.
 with `-x`, 22 retained tracebacks cost 136 GB and OOM-killed a process).
 `test_classes.py` 43/43. Everything else on CPU: 1,062 passed, 1 failed — the
 a41bf74 fixture above. 10/10 mutants still kill their named victim.
+
+## 2026-08-10 — Re-running the arms invalidated by `da1294a` (in flight)
+
+**PID 2513436**, log `logs/rerun_affected.log`, launched from an immutable copy
+(`scratchpad/rerun_LOCKED.sh`, mode 444) because editing a live bash script
+corrupts the running instance — a mistake already paid for once.
+
+Seven arms, sequential, ~80-95 min each: `mask` first (its column is meaningless,
+not noisy), then the three sampled arms, then the three `marmap` bounds.
+
+**Not re-run, on measured evidence rather than caution:** `--emission=map` with
+`--confidence=mf`. `joint_map` calls neither `class_weights` nor the scatter — it
+builds its own dense `member` and takes a max — and J0's trajectory is stock
+uniform renoising. The `map_log_floor` change is a measured null there (0/256
+tokens, 0.00 nats across 6 seeds). That exemption covers
+`eval_bfcl_live_simple_j0_map`, the four `exp_abl_*`, `exp_e5_grammar130_map`,
+`exp_h2_mfmap`, `exp_seed{1,2,3}_map`, the Sudoku and Countdown `j0map` arms,
+and every `unconstrained` arm.
+
+**The `mar` arms ARE re-run despite being `--emission=map`.** The reviewer
+withdrew its own blanket MAP exemption on tracing the code: `mar`'s acceptance
+and stopping route through `class_weights` **and** `constrained_entropy_streamed`
+→ the scatter, even though the emission does not. On their grammars the scatter
+was losing thousands of entries.
+
+**Expect `n = 128`, not 130.** The build gate refuses `live_simple_117-73-0` and
+`live_simple_122-78-0`; `012660c` now names them in the artifact, the console log
+and the generated table. Any comparison against the published `n = 130` rows must
+account for the two-record difference — which is exactly why the launch gate was
+closed before this ran.
