@@ -1180,3 +1180,52 @@ was losing thousands of entries.
 and the generated table. Any comparison against the published `n = 130` rows must
 account for the two-record difference — which is exactly why the launch gate was
 closed before this ran.
+
+### Correction: the v1 queue (PID 2513436) was stopped, unreviewed, and never ran
+
+The entry above is superseded. That queue was launched **without a launch
+review**, stopped 4 minutes in with **0 artifacts written** and the GPU
+released, and its script must not be used. `CLAUDE.md` now requires a reviewing
+agent to read every GPU- or artifact-writing command **before** it runs
+(`3eb5b20`); this is the first application of that rule, and it paid for itself
+immediately.
+
+**Two independent launch reviews found six defects, none of which any test
+would have caught:**
+
+| defect | what it would have cost |
+|---|---|
+| v1 passed no grammar flags, inheriting `--whitespace json` | **No artifact in this repo has ever been measured at `json`.** The four table arms ran at `stock`, the `marmap` arms at `pretty --fence --ci-enums`. Whitespace alone is worth 0.327 -> 0.643 arg acc — ~20x the effect being measured. Seven numbers differing from the ones they replace for two reasons at once, and the `mar`-vs-`mf` contrast with **no control anywhere in `artifacts/`**. |
+| v1 wrote `artifacts/rerun_*.json` | `phase5_report.py` globs `eval_<task>_<variant>_<emission>.json`, so regenerating `RESULTS.md` would have silently rebuilt it from the **old defective** artifacts. |
+| `exp_h2_marmap` and the Countdown sample arm missing | 3 of 4 affected `mar` arms; and the arm that *found* the defect, whose 0/250 prediction converts 12 h of hope into a 46-minute proof. |
+| `run()` opens `logs/$tag.log` with `>` | Eight of the nine canonical logs already existed from the published runs. `logs/` is gitignored: the queue archived each artifact and then **destroyed the console log of the arm it replaced**, unrecoverably. |
+| the Countdown stop condition was **prose** | Under `nohup`, a falsified prediction would have burned the remaining **~12.5 GPU-hours** anyway. Now an enforced `exit 1`, tested against all five artifact states including the real pre-fix artifact (zp=73 -> STOP). |
+| the smoke missed `constrained_entropy_streamed` | A different scatter call site — the acceptance/stopping path of the four `mar` arms, ~5 h and running **last**. First failure would have surfaced ~8.5 h in. |
+
+**Two measurements that corrected claims of mine.** The two gate-refused records
+are *not* whitespace-dependent — the gate refuses `live_simple_117-73-0` and
+`live_simple_122-78-0` under `stock`, `pretty` **and** `json`, because their
+defect is an unparenthesised top-level alternation. And `n = 128` means **two
+different things**: "130 minus 2" for the four table arms and the three offset-0
+`marmap` arms, but "all 128 ran" for `exp_h2_marmap` (records 130..257 refuse 0),
+whose `mf` control `exp_h2_mfmap` is also 128 — that pair is denominator-clean
+and needs no rescore. Flattening those was called "the same species of error v1
+was condemned for".
+
+A third axis neither review was asked about: `--dtype` did not exist until
+`19a3eca` (Aug 1), so all four table arms predate it and ran float64 —
+`--dtype float64` is a faithful reproduction, not a second variable. The float32
+window contains exactly `exp_e5_grammar130_{j0,s1}`, which are **not
+reproducible** (`--dtype float32 --emission sample` now raises) and should be
+withdrawn rather than re-run.
+
+## The approved queue (v3) — PID 2528151
+
+`scratchpad/rerun_v3_LOCKED.sh`, mode 444, md5 `e28cdb66edc2fd800676cdf9c6359c47`.
+Log `logs/rerun_v3.log`. Two smokes, then Countdown behind a hard stop, then the
+four table arms at `stock`, then the four `mar` arms at `pretty --fence
+--ci-enums`. ~13.5 h. Every measurement-affecting flag passed **explicitly**,
+including those equal to today's default — `eval/run.py`'s defaults (`j1`,
+`sample`) already contradict SPEC §3.9 and `eval/run_tasks.py`, and nothing
+asserts either. Each arm prints its config **read back out of the artifact**,
+which is the only record of what actually ran.
