@@ -962,3 +962,67 @@ that includes 73 silent non-emissions.
 Handing to tester -> coder -> reviewer rather than patching: SPEC §2.4/§2.6
 require every tree node's matrix to be normalized with the log-scale sum over all
 `2L-1` nodes, and "no try/except around numerical code to make tests pass".
+
+## 2026-08-10 — `Z == 0` root-caused: catastrophic cancellation in `class_weights`
+
+Tester deliverable `tests/test_audit_partition.py` — 33 tests, 18 failing.
+Coder in flight.
+
+**Not underflow. Cancellation.** SPEC §2.4 computes a negated class's mass as
+`total − Σ_{v∈N_c} p_i(v)`. When the model is confident about a token *inside*
+`N_c`, both operands agree to all 53 bits and the difference is `0.0`;
+`joint_draw`'s `where(M > 0, log M, NEG)` then erases a structurally present
+transition. Measured on the real grammar: true mass `exp(-47.5) = 2.3e-21`,
+**661 nats above float64's smallest normal**, computed as zero. A wider float
+recovers nothing a subtraction already discarded; `logsumexp` over the members
+returns `-47.5` exactly. `joint_map` is immune — §2.7's `class_max` is a `max`,
+never a difference.
+
+Countdown's `|S|=124` grammar has two negated classes; one stores the reserved
+ids `{0,1,50,100,101,106,107}` — the §3.6 channel-header class, on **8 edges
+every accepted string must traverse**. That is the 73.
+
+**The minimal reproducer is `L=8`, `|S|=4`, `V=64`, `N={0}`**, and it behaves
+identically at `L=256`. **This inverts the project's own standing lesson.**
+CLAUDE.md says toy shapes validate nothing, earned from float32 looking fine at
+`L=4`. Here a toy fixture *would* have caught it — the suite's only negated
+class is "the odd tokens", mass ≈ 0.5, where the subtraction is exact to 1e-16
+relative. The rule should be "fixtures must span the *regime*", of which scale
+is one axis and `|N_c|` is another.
+
+Controlling variable is class mass, not `L`, `|S|` or grammar size: the kernel
+resolves ~16 orders of magnitude (boundary bisected at 1.09e-16 = float64 eps)
+against ~66 the model produces. Survivor error arrives first — at `ε=1e-14` the
+weight is positive and **17% wrong**, which trips no detector.
+
+**Two further defects.**
+
+- **`joint_map`'s `1e-30` floor is above the production range** (smallest
+  marginal `3.7e-58`). 1162 of 6144 (class, position) pairs have their whole
+  class below it, so `class_max` is the clamp for every member and `argmax`
+  ties to the **lowest token id**. This is visible in the shipped artifacts and
+  **corrects yesterday's diagnosis**: the `1 -1=1` emissions I attributed to
+  length economics are substantially this clamp — MAP 69/250 against sample
+  17/177, digit "1" 475× against 253×. The refutation of length economics as
+  the *gap-closer* stands (the solve rate did not move); my account of what the
+  degeneracy *was* does not. SPEC §2.7's "MAP == exhaustive argmax, error
+  0.000e+00" is currently false. §3.1b's guarantee is unaffected.
+
+- **The `mask` baseline is destroyed by defect 1.** Same `p` and grammar: 255 of
+  256 positions lose their entire support; the mask branch is deliberately
+  unflagged, so it goes all-sentinel and `categorical`, being shift-invariant,
+  draws **uniformly over 262k tokens** and reports nothing wrong. `mask` is the
+  published comparison baseline for SPEC §2.8 / §7.2. **Treat its column in
+  `docs/RESULTS.md` as unsafe until this is fixed and the arm re-run.**
+
+**Why 1051 green tests missed it:** no fixture anywhere has a negated class whose
+true mass can fall below 1e-16. Also, SPEC §2.4's own verification ("1.1e-16 with
+mixed polarity") is *absolute*, which says nothing about a class whose true mass
+is 1e-20 — the same absolute error is then 1e4 relative. And nothing compared the
+two emissions' feasibility on the same input: **MAP-feasible ⟹ draw-feasible** is
+a theorem, needs no ground truth, and would have caught this on day one.
+
+The tree is exonerated: `up_sweep` recovers the unnormalised product exactly from
+`root + root_log_scale` over all `2L−1` nodes, and `up_sweep_log` matches a
+sequential float64 fold on the real leaves. The gap is entirely in **leaf
+construction**, which is linear-space and outside the tree's normalization.
