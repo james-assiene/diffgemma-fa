@@ -1026,3 +1026,127 @@ The tree is exonerated: `up_sweep` recovers the unnormalised product exactly fro
 `root + root_log_scale` over all `2L−1` nodes, and `up_sweep_log` matches a
 sequential float64 fold on the real leaves. The gap is entirely in **leaf
 construction**, which is linear-space and outside the tree's normalization.
+
+## 2026-08-10 — `Z == 0` fixed; a41bf74's float32 verdict survives; a second site
+
+Coder deliverable against `tests/test_audit_partition.py` (33 tests / 18 failing
+→ 43 / 43 green after the tester extended it). Two files: `infer/marginals.py`,
+`model/constrained.py`, plus a prose fix in `compile/classes.py`.
+
+**The fix is algebraic, not numerical, and stays in linear space.** A negated
+class's mass is now a sum over its *real members*, split at the class tables'
+own stored support `U`:
+
+    Σ_{v ∉ N_c} p_i(v)  =  Σ_{v ∉ U} p_i(v)  +  Σ_{v ∈ U \ N_c} p_i(v)
+
+Both terms are sums of non-negatives, so nothing cancels. `logsumexp` would also
+have worked, but the log is not what buys the accuracy — *not subtracting* is;
+log space still needs the same `U`-split for the complement, costs extra kernels
+on the launch-bound side of §5.6's crossover, and would ripple into
+`transition_matrices`, `up_sweep` and the `mask` baseline. Linear float64 covers
+the required range with ~660 nats to spare (the softcap bounds a class mass at
+`~e^-150`; float64 normals reach `e^-708`). The naive `O(C·V·L)` dense repair the
+tester used as a diagnostic is **3.6e10 MACs** at BFCL's worst shape; the
+`U`-split replaces `V = 262,144` with `nnz` (110 Countdown, median 9,125, max
+51,200).
+
+Verified by the reviewer against `math.fsum` over each class's true members —
+sharing no code with the implementation or the tester's `logsumexp` oracle — on
+real Countdown and three real BFCL grammars across 7–8 `p` regimes: **worst
+relative error 1.75e-12, 0 entries lost**, against the old kernel's **relative
+error 1.0 with entries lost**. On an idle H100 the worst real shape costs
+**+0.679 ms = +0.323% of a 210 ms model step**. No `scan`, no `while` introduced.
+Peak temp is *not* unchanged and is budgeted in the docstring (0.21 → 3.47 MB
+Countdown, 100 → 205 MB at BFCL's worst `nnz`); §5.6 sets the `|S|` dispatch
+threshold from that headroom.
+
+**The `mask` baseline is repaired.** Same grammar and `p`: empty-support
+positions **255/256 → 0/256**, dead `(position, edge)` leaf slots 8/68,608 → 0,
+`joint_draw` feasible False → True. `docs/RESULTS.md`'s `mask` column still needs
+its arm re-run; the kernel that produced it is fixed, the numbers in the file are
+not.
+
+### a41bf74 survives — do not re-open it
+
+`test_audit_numerics.py::test_float32_at_production_scale_is_either_shown_safe_or_refused`
+went red on the fix, and the honest reading is **the fixture broke, not the
+guard**. Measured on its `_cycle_automaton(64, 64, 4096)` fixture: lost 32 → **0**
+live root entries, survivor error 7.58e-3 → **5.5e-5** nats. The float32 loss
+there was *entirely* the `total − partial` cancellation (float32 cancels at
+~1e-7), never underflow.
+
+The reviewer then measured the real thing on three real BFCL grammars at
+`softcap 30·tanh, T = 0.4`: all four cells (f32-arith old/new × f32-`p` upcast
+old/new) are **identical at every regime**, and `W_lost = 1315` on
+`get_user_info` reproduces `require_x64`'s docstring row exactly. **a41bf74's
+explanation is intact**: the production loss is the float32 `softmax` flushing
+7.6M of 67.1M `p` entries to zero *upstream* of `class_weights`, which this
+change does not touch. `require_x64` stays. The test needs re-pointing at a real
+grammar; its guard half (that `require_x64()` refuses with x64 off) is currently
+unreached and that is the only thing wrong with it.
+
+Why the fixture stopped working is itself a41bf74's own pathology **running in
+reverse**: its two classes are 2,048 tokens wide, so no `p` flush can kill a
+class and cancellation was the only float32 loss it ever had. a41bf74 wrote "the
+toy is where the patch looks like a fix"; here the toy is where the *fix* looks
+like a regression.
+
+### Second site: `scatter_edge_mass_to_tokens`, same subtraction one layer down
+
+`r_i(v) = neg_total − Σ_{c ∈ Neg, v ∈ N_c} U_i(c)` is the identical shape, on a
+path feeding `q_i` (eq 6), `--confidence=mar`, the §2.8 `mask` support and
+`tree.sample_tokens`' eq (8) multiplicity — where a wrong `r` is a silently wrong
+*distribution*, with no `Z == 0` to announce it. Constructed and measured (two
+negated classes, token stored by the large-`U` one):
+
+    U ratio 1e-8    old 1.000000e-08  rel err 6.1e-09   new exact
+    U ratio 1e-14   old 9.992007e-15  rel err 8.0e-04   new exact
+    U ratio 1e-16   old 0.0           rel err 1.0       new exact
+
+Same `U`-split applied. A mixed-polarity `math.fsum` cross-check goes 2.64e-12 →
+2.22e-16.
+
+**Countdown's immunity is positional, and the first two explanations of it were
+wrong.** Not "the scatter is off the emission path" (it is on it, via
+`sample_tokens`), and not "one negated class has `U` exactly 0" (both are live).
+Measured: class 1 — the §3.6 channel header — is live at positions **1..8**;
+class 23 — the unscored `ACC --Σ--> ACC` tail (§3.5) — at **10..255**;
+**0 of 256 positions carry both**, so `neg_total` never has two terms to cancel.
+Front-pinned and back-pinned in *this* grammar only. BFCL carries two non-empty
+negated classes (stored sizes 7 and 1,585) with no such separation. Record the
+reason, not just the conclusion: a wrong reason is what makes the next reader
+assume a new grammar inherits the immunity.
+
+### `joint_map`'s `1e-30` floor — corrected, and the attribution retracted
+
+`map_log_floor(dtype) = finfo(dtype).tiny` replaces the hardcoded `1e-30`, which
+sat *above* the production range (smallest real marginal `3.7e-58`). SPEC §2.4's
+`1e-30` is a rule about `q`, which has exact zeros where the clamp only ever
+multiplies a zero; `p` is a softmax and the clamp was a floor on **live** values,
+flattening every token under it so `argmax` tied to the lowest id.
+
+**Retracting yesterday's entry.** It attributed the MAP Countdown arm's repeated
+`1 -1=1` bodies (69/250, digit "1" 475× vs 253×) to this clamp. That does not
+measure: across 6 seeds on real Countdown, with 1,162–1,213 fully-clamped
+`(class, position)` pairs each time, swapping the floor changed **0 of 256 tokens
+and 0.00 nats**, every time — the clamped classes do not lie on the winning
+max-plus path. The fix is still correct and necessary (a mutant kills a test on
+the minimal fixture, where the clamped class *is* on the path). **The cause of
+the `1 -1=1` repetition is open**, and it is now open for the second time after
+being closed twice on unmeasured reasoning.
+
+### Prose fix
+
+`compile/classes.py`'s module docstring stated `W_c = total − Σ_{v∈N_c} p` as the
+**requirement**. That is why the defect survived review as documentation: an
+implementation matching the spec looks correct by inspection, so the identity was
+never the thing under test. It now states the quantity (`W_c = Σ_{v ∈ S_c} p_i(v)`)
+and leaves the recovery to `marginals.py`. `tests/test_classes.py` had the same
+formula and never called `class_weights` — fixed by the tester.
+
+### Suite
+
+`tests/test_audit_partition.py` 43/43 (7.6 GB peak RSS, 67 s with `-x` — run it
+with `-x`, 22 retained tracebacks cost 136 GB and OOM-killed a process).
+`test_classes.py` 43/43. Everything else on CPU: 1,062 passed, 1 failed — the
+a41bf74 fixture above. 10/10 mutants still kill their named victim.

@@ -10,9 +10,25 @@ Four layers:
 
 1. **Intern** labels into equivalence classes — the same `STRING_INNER` set
    recurs at every string position.
-2. **Polarity for the SUM table** — store the complement when `|S_c| > V/2` and
-   use `W_c = total[i] − Σ_{v ∈ N_c} p_i(v)`. Without this the scheme fails:
-   measured on real BFCL, the largest class covers **~99.6% of the vocab**.
+2. **Polarity for the SUM table** — store the complement `N_c` when
+   `|S_c| > V/2`. Without this the scheme fails: measured on real BFCL, the
+   largest class covers **~99.6% of the vocab**.
+
+   The requirement this table has to satisfy is `W_c[c, i] = Σ_{v ∈ S_c} p_i(v)`
+   — the class's mass, *whatever* polarity it is stored in. **How** the consumer
+   recovers that from `N_c` is `infer/marginals.py::class_weights`' business and
+   is deliberately not specified here.
+
+   This paragraph used to read "use `W_c = total[i] − Σ_{v ∈ N_c} p_i(v)`", and
+   that sentence is why the defect of 2026-08-10 survived review as
+   *documentation*: a subtraction of two near-equal doubles was written down as
+   the specification, so an implementation matching it looked correct by
+   inspection, and the identity — true in exact arithmetic, catastrophically
+   cancelling in float64 whenever the model is confident about a token inside
+   `N_c` — was never the thing under test. It destroyed the constrained language
+   on 73 of 250 Countdown records. Prescribing an implementation in a spec
+   removes the gap an implementation can be found wrong in; state the quantity,
+   not the expression.
 3. **2b. Polarity for the MAX table, computed independently.** `max` has no
    complement trick, so a negated class is evaluated as "the first `topk(p, K)`
    entry not in `N_c`", which forces `K > max_c |N_c|`. Storing the complement

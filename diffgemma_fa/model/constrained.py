@@ -33,6 +33,7 @@ from diffgemma_fa.infer import scans, tree
 __all__ = [
     "budget_terminal_factor",
     "flatten_unaccepted",
+    "map_log_floor",
     "joint_draw",
     "joint_map",
     "advance_states",
@@ -258,6 +259,48 @@ def require_x64() -> None:
         )
 
 
+def map_log_floor(dtype) -> float:
+    """The floor `joint_map` puts under `p` before taking `log`. SPEC §2.7.
+
+    **This was `1e-30` and that was a second, independent defect.** SPEC §2.4's
+    `1e-30` clamp is a rule about `q`, which has *exact zeros* wherever the
+    automaton forbids a token; there the clamp only ever multiplies a zero, so
+    its value is arbitrary. `p` is a softmax: it has no exact zeros, and the
+    clamp is a **floor on live values**. Every token below it scores the same
+    `log(1e-30)`, and `argmax` then resolves the tie by lowest id (SPEC §2.7's
+    convention) — so MAP silently emitted the *smallest admissible token id*
+    rather than the most probable one, with `feasible` still True.
+
+    `1e-30` sits well *above* the range the released model produces. Measured on
+    a Gemma-shaped canvas (softcap `30·tanh(x/30)`, schedule temperature 0.408)
+    at the real `L = 256`, `V = 262,144`: the smallest marginal is `3.7e-58`,
+    and on the compiled Countdown grammar **1,162 of 6,144 (class, position)
+    pairs had their entire class under the floor**. So SPEC §2.7's "MAP ==
+    exhaustive argmax, error 0.000e+00" did not hold as stated.
+
+    **What this has not been shown to do is change a production emission.**
+    Across 6 seeds on real Countdown, with 1,162–1,213 fully-clamped
+    `(class, position)` pairs each time, swapping the floor changed **0 of 256
+    tokens and 0.00 nats of score, every time**: the fully-clamped classes did
+    not lie on the winning max-plus path. The fix is still correct and still
+    necessary — a mutant kills a test on the minimal fixture, where the class
+    that goes under the floor *is* on the path — but do not attribute the MAP
+    Countdown arm's repeated `1 -1=1` bodies to this clamp. That attribution was
+    made upstream of the measurement and the measurement does not support it;
+    the cause of that repetition is open.
+
+    The floor has to sit under everything the model can represent, not under an
+    unrelated round number, so it is derived from the dtype: `finfo(dtype).tiny`
+    is the smallest normal, `log` of it is about `-708` in float64 — finite,
+    order-preserving over every normal `p`, and ~1e38 clear of
+    `scans.NEG_SENTINEL`, so it can never be mistaken for "impossible". The
+    §3.1b guarantee was never affected either way: feasibility is a max over a
+    non-empty class of a finite `log p` and is a property of the automaton and
+    the budget alone (`tests/test_audit_partition.py`).
+    """
+    return float(jnp.finfo(dtype).tiny)
+
+
 def budget_terminal_factor(d: jnp.ndarray, remaining: jnp.ndarray,
                            dtype=jnp.float64) -> jnp.ndarray:
     """`b_L(s) = 1[d(s) ≤ R]`. SPEC §3.1b.
@@ -382,7 +425,7 @@ def joint_map(
       `[L] int32`.
     """
     L, V = p_lv.shape
-    logp = jnp.log(jnp.maximum(p_lv, 1e-30))
+    logp = jnp.log(jnp.maximum(p_lv, map_log_floor(p_lv.dtype)))
 
     # Per-class max and argmax over the *true* member set, complement-aware.
     # A negated class is evaluated as "the first topk(p, K) entry not in N_c";

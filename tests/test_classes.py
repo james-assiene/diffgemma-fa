@@ -8,14 +8,27 @@ than an error.
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 import pytest
 
-from diffgemma_fa.compile.classes import (
+import jax
+
+# `class_weights` is exercised below at class masses down to 1e-40; without x64
+# every `jnp.float64` here is silently a float32 and the sweep would fail for
+# the dtype rather than for the kernel. Set at import, as the other audit
+# modules do.
+jax.config.update("jax_enable_x64", True)
+
+import jax.numpy as jnp  # noqa: E402
+
+from diffgemma_fa.compile.classes import (  # noqa: E402
     DEFAULT_K_MAX,
     build_tables,
     intern_labels,
 )
+from diffgemma_fa.infer import marginals as MG  # noqa: E402
 
 V = 64  # small vocab so complements are enumerable
 
@@ -127,16 +140,59 @@ def test_empty_class_is_representable():
     assert members(t, 0, "sum") == set()
 
 
-def test_emission_mass_matches_direct_sum():
-    """W_c = total - sum(N_c) for a negated class must equal the direct sum."""
+@pytest.mark.parametrize("mass", [1.0, 1e-8, 1e-20, 1e-40])
+def test_emission_mass_matches_direct_sum(mass):
+    """`W_c` from `marginals.class_weights` must equal the direct member sum.
+
+    **Two things were wrong with the previous version of this test and both
+    were invisible while it was green** (see `tests/test_audit_partition.py`):
+
+    1. *It called nothing.* It re-derived `total - p[stored].sum()` in the test
+       body and compared that to a direct sum — an identity of arithmetic, true
+       of any table, and it would have stayed green through any change to the
+       kernel it was named after. It now calls `class_weights`.
+    2. *Its docstring stated the defective formula as the requirement.*
+       `W_c = total - Σ_{v ∈ N_c} p` is catastrophic cancellation, not a
+       specification; it destroyed the constrained language on 73/250 Countdown
+       records. The requirement is `W_c = Σ_{v ∈ S_c} p_i(v)` — how it is
+       reached is the kernel's business, and this test must not prescribe an
+       implementation that a fix has to violate.
+
+    The tolerance is **relative** and the class mass is swept down to 1e-40. An
+    absolute `1e-12` on an `O(1)` fixture — what this asserted before — cannot
+    distinguish a correct small answer from a destroyed one.
+    """
     rng = np.random.default_rng(7)
-    p = rng.random(V)
-    p /= p.sum()
     labels = [frozenset(range(V - 4)), frozenset({0, 5, 9})]
     t = build_tables(labels, vocab_size=V)
     _, classes = intern_labels(labels)
-    total = p.sum()
+
+    # Concentrate `1 - mass` on a token in NEITHER class, so both classes' true
+    # mass is O(mass) and the small-answer regime is actually reached.
+    heavy = V - 1
+    assert not any(heavy in s for s in classes), (
+        "fixture broken: the heavy token must lie outside every class, or the "
+        "masses stay O(1) and the sweep tests nothing"
+    )
+    p = rng.random(V) * mass / V
+    p[heavy] = 1.0 - mass
+    p = p / math.fsum(p)
+
+    seg = np.repeat(np.arange(len(classes), dtype=np.int32),
+                    np.diff(t.sum_indptr))
+    W = np.asarray(MG.class_weights(
+        jnp.asarray(p[:, None], dtype=jnp.float64),
+        jnp.asarray(t.sum_indices), jnp.asarray(seg),
+        jnp.asarray(t.sum_is_neg), len(classes)))[:, 0]
+
     for c, true_set in enumerate(classes):
-        stored = t.sum_indices[t.sum_indptr[c]:t.sum_indptr[c + 1]]
-        w = total - p[stored].sum() if t.sum_is_neg[c] else p[stored].sum()
-        assert w == pytest.approx(sum(p[v] for v in true_set), abs=1e-12)
+        # `math.fsum` over the members: exactly rounded, so the reference has no
+        # error budget of its own at any magnitude.
+        want = math.fsum(p[v] for v in sorted(true_set))
+        assert W[c] > 0.0, (
+            f"class {c} (mass concentration {mass:g}) has true mass "
+            f"{want:.6e} and came back {W[c]:.6e}"
+        )
+        assert W[c] == pytest.approx(want, rel=1e-12), (
+            f"class {c}: {W[c]:.17g} against {want:.17g}"
+        )

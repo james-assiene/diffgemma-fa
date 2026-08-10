@@ -41,6 +41,15 @@ of them; `joint_map` additionally materialises `[C, L, V]`. Those tests run at
 the complement-aware scatter — the `V`-dependence of the *arithmetic* is nil,
 only the memory grows. Said out loud rather than left implicit (CLAUDE.md:
 "never silently cap coverage").
+
+**The float32 test is the exception, and has to be.** It runs on a real
+compiled grammar at the full `V`, because the hazard *is* a `V`-scale effect:
+the low-temperature softmax pushes `p` entries below float32's smallest normal
+and empties whole token classes. A synthetic fixture with 2,048-token classes
+cannot reproduce that no matter how sharp `p` is — one did stand in here, and
+the loss it showed turned out to be an unrelated cancellation bug rather than
+the mechanism. Its `[L, V]` intermediates are confined to a helper that
+returns scalars, so nothing large survives into a failing test's frames.
 """
 
 from __future__ import annotations
@@ -54,6 +63,7 @@ jax.config.update("jax_enable_x64", True)
 
 import jax.numpy as jnp  # noqa: E402
 
+from diffgemma_fa.compile import bfcl_data, pipeline  # noqa: E402
 from diffgemma_fa.infer import marginals as MG  # noqa: E402
 from diffgemma_fa.infer import scans  # noqa: E402
 from diffgemma_fa.model import constrained as C  # noqa: E402
@@ -62,6 +72,36 @@ from diffgemma_fa.model.state import Automaton  # noqa: E402
 NEG = scans.NEG_SENTINEL
 DEAD = NEG / 2.0          # "below this is the sentinel, not a real value"
 L_PROD = 256              # the real canvas_length
+
+
+@pytest.fixture(scope="module")
+def bfcl_grammar():
+    """`get_user_info` from `BFCL_v4_live_simple`, compiled end to end.
+
+    Module-scoped: the compile costs ~7 s and is pure, so paying it once is
+    free correctness. 50 states / 121 edges / 83 classes at the full
+    `V = 262,144` — the smallest real grammar in the split, chosen so the
+    float32 finding below cannot be dismissed as an artefact of scale.
+    """
+    rec = next(iter(bfcl_data.iter_split("BFCL_v4_live_simple.json")))
+    fn = rec.functions[0]
+    assert fn["name"] == "get_user_info", (
+        f"the split's first function is now {fn['name']!r}; the measurements "
+        f"quoted below were taken on `get_user_info`"
+    )
+    a = pipeline.compile_json_schema(fn["parameters"], name=fn["name"],
+                                     from_bfcl=True).automaton
+    aut = Automaton(
+        edge_src=jnp.asarray(a.edge_src), edge_dst=jnp.asarray(a.edge_dst),
+        edge_class=jnp.asarray(a.edge_class),
+        edge_valid=jnp.ones(a.n_edges, bool),
+        csr_indices=jnp.asarray(a.tables.sum_indices),
+        csr_indptr=jnp.asarray(a.tables.sum_indptr),
+        is_neg=jnp.asarray(a.tables.sum_is_neg),
+        d=jnp.asarray(a.d), is_final=jnp.asarray(a.is_final),
+        active=jnp.asarray(a.start_vector),
+    )
+    return a, aut
 
 
 # ===========================================================================
@@ -761,56 +801,37 @@ def test_joint_map_beats_every_perturbation_of_itself():
 # 5. The dtype claim. `require_x64` is a no-op; that is a numerical claim.
 # ===========================================================================
 
-def test_float32_at_production_scale_is_either_shown_safe_or_refused():
-    """`require_x64` was made a no-op on a toy check and the claim did not hold.
+# These two replace `test_float32_at_production_scale_is_either_shown_safe_or_refused`,
+# which asserted both halves in one function against a SYNTHETIC fixture
+# (`_cycle_automaton(64, 64, 4096)`). That fixture has since been shown to be
+# the wrong witness: its two classes are 2,048 tokens wide, so no `p` flush can
+# empty a class, and the float32 loss it exhibited was entirely a
+# catastrophic-cancellation bug in `class_weights` (32 lost / 7.58e-3 nats
+# before the fix, 0 lost / 5.50e-5 after). When that bug was fixed the fixture
+# went lossless and the test went red on its *first* assertion — which meant
+# the second one, the guard with production consequences, stopped being
+# evaluated at all.
+#
+# That is this file's own "the toy is where the patch looks like a fix"
+# pathology, running in reverse: the toy was where the BUG looked like the
+# mechanism. So the halves are now separate tests. The guard assertion depends
+# on no fixture and cannot be gated behind an evidence assertion again.
 
-    The claim it encoded was "float32 is safe on the sampling path". This test
-    measures that claim where it has to hold — a `[256, V]` sharp `p` run
-    through the real class-table → `M` → `up_sweep_log` chain — and asserts
-    **both** halves unconditionally:
+def test_require_x64_refuses_when_x64_is_off():
+    """The half with production consequences, asserted unconditionally.
 
-      1. float32 *is* lossy here, so the fixture cannot silently stop
-         exercising the hazard;
-      2. `require_x64()` refuses when x64 is off, rather than letting the
-         sampler draw from a degenerate distribution.
+    With `jax_enable_x64` off, every `jnp.float64` in the constrained sampling
+    path silently becomes float32 — so a caller that *asks* for float64 does
+    not get it, and the tree is built in a dtype measured to drop live
+    transitions (see the test below). `require_x64` exists to make that fail at
+    construction rather than produce a degenerate draw that returns
+    plausible-looking tokens.
 
-    **[Corrected 2026-08-08.]** This used to return early when (1) came back
-    clean — "the no-op is justified" — which meant a drifting fixture would
-    make the test pass while asserting nothing *and* silently drop its guard on
-    (2). An escape hatch that disables the assertion it guards is not a
-    two-outcome contract, it is a hole.
+    Deliberately fixture-free. The previous version reached this assertion only
+    after a separate assertion about a synthetic grammar passed; when that
+    grammar stopped being lossy, this guard silently stopped being tested.
+    Nothing here can rot in that way.
     """
-    S, V, n = 64, 4096, 64
-    aut = _cycle_automaton(n, S, V)
-
-    def log_root(dtype):
-        p = _sharp_marginals(L_PROD, V, seed=1, scale=12.0, dtype=dtype)
-        _p_vl, _W, M = C._matrices(p, aut, S, 2)
-        tiny = jnp.finfo(dtype).tiny
-        logM = jnp.where(M > 0, jnp.log(jnp.maximum(M, tiny)),
-                         jnp.asarray(NEG, dtype))
-        return np.asarray(scans.up_sweep_log(logM).root, dtype=np.float64)
-
-    r64 = log_root(jnp.float64)
-    r32 = log_root(jnp.float32)
-    live64, live32 = r64 > DEAD, r32 > DEAD
-    lost = int((live64 & ~live32).sum())
-    both = live64 & live32
-    err = float(np.abs(r64[both] - r32[both]).max()) if both.any() else np.inf
-
-    # UNCONDITIONAL. A previous version returned early when the fixture came
-    # back clean, which made the test pass while asserting nothing AND stop
-    # protecting the guard — the failure mode this file exists to prevent.
-    # Both halves are now assertions: the fixture must be lossy, and the guard
-    # must refuse.
-    assert lost > 0 or err > 1e-2, (
-        f"the fixture is no longer lossy in float32 (lost {lost}, err "
-        f"{err:.3g} nats), so the second half of this test would be vacuous. "
-        f"Either the leaf construction was fixed to build `M` in float64 — in "
-        f"which case retarget this at whatever still runs in float32 — or the "
-        f"sharpness of `p` has drifted below the regime real grammars occupy."
-    )
-
     jax.config.update("jax_enable_x64", False)
     raised = False
     try:
@@ -821,15 +842,89 @@ def test_float32_at_production_scale_is_either_shown_safe_or_refused():
         jax.config.update("jax_enable_x64", True)
 
     assert raised, (
-        f"float32 is measurably lossy at L = 256: {lost}/{int(live64.sum())} "
-        f"live root entries vanish and the survivors are off by {err:.3g} nats "
-        f"— a spurious `Z == 0` on every one of those state pairs, which is "
-        f"the 70/130 failure `require_x64`'s own docstring records. But "
-        f"`require_x64()` returns silently with x64 disabled, so nothing stops "
-        f"the sampler running there. The loss is in the LEAF construction "
-        f"(`_matrices` -> `transition_matrices`), upstream of the tree: `p` "
-        f"entries below float32's 1.18e-38 flush to zero and take their edges "
-        f"with them, which the pairwise-max anchor never addressed."
+        "`require_x64()` returned silently with `jax_enable_x64` off. Nothing "
+        "then stops the constrained sample path running in float32, where the "
+        "lost transitions surface as a spurious `Z == 0` and the misvalued "
+        "survivors trip no detector at all."
+    )
+
+    # And it must not be a guard that simply always raises: on the supported
+    # configuration it has to return cleanly, or the refusal is uninformative.
+    C.require_x64()
+
+
+def test_float32_loses_live_transitions_on_a_real_grammar_at_production_temperature(
+        bfcl_grammar):
+    """The evidence for the guard above, on a **real compiled grammar**.
+
+    `get_user_info` from `BFCL_v4_live_simple` — 50 states, 121 edges, 83
+    classes, the full `V = 262,144` vocabulary — which is about as small as a
+    real grammar gets, so it understates the hazard rather than dramatising it.
+
+    **Temperature is the mechanism, and that is what is asserted.** At the
+    schedule's start (`T = 1.0`) float32 is *lossless*; at its floor
+    (`min_temperature = 0.4`) it drops live transitions outright. The `p`
+    entries that vanish are the ones the low temperature pushes below float32's
+    smallest normal (1.18e-38) in the softmax, and they take their edges out of
+    `W` — and therefore out of `M` — before `log_matmul` ever runs. So neither
+    the pairwise-max anchor nor a wider accumulator inside the tree addresses
+    this, and "the grammar is small" is not a defence.
+
+    Asserting the *contrast* rather than a magnitude is what makes this
+    seed-robust. Measured here across three seeds:
+
+        T = 1.0 : W_lost 0 / 0 / 0        of 30,976 live
+        T = 0.4 : W_lost 1315 / 1399 / 1374 of 30,976 live   (~4.3%)
+
+    so the loss count is draw-dependent — as is every figure in this area, a
+    lesson learned the hard way when 67/1,168 was quoted as canonical on two
+    runs that shared a seed — while the *presence* of loss at 0.4 and its
+    *absence* at 1.0 are not. The threshold below sits two orders of magnitude
+    under the observed 4.3% for that reason.
+    """
+    a, aut = bfcl_grammar
+    n_classes = len(a.tables.sum_indptr) - 1
+
+    def lost_live_entries(dtype, T: float, seed: int = 1) -> tuple[int, int]:
+        """`(lost, live)` for `W_e` at temperature `T`.
+
+        Returns **scalars**, so the `[256, 262144]` intermediates are freed
+        before any assertion runs. pytest retains the frames of a failing test
+        for the whole session, and a sibling module that kept `[L, V]` float64
+        locals alive across a failure reached 136 GB RSS.
+        """
+        rng = np.random.default_rng(seed)
+        logits = rng.standard_normal((L_PROD, a.vocab_size)) * 8.0
+
+        def build(dt):
+            x = jnp.asarray(logits, dtype=dt)
+            x = 30.0 * jnp.tanh(x / 30.0)   # gemma/diffusion's logit softcap
+            p = jax.nn.softmax(x / jnp.asarray(T, dt), axis=-1)
+            _pv, W_e, _M = C._matrices(p, aut, 128, n_classes)
+            return np.asarray(W_e, dtype=np.float64) > 0
+
+        live64 = build(jnp.float64)
+        live32 = build(dtype)
+        return int((live64 & ~live32).sum()), int(live64.sum())
+
+    lost_hot, live = lost_live_entries(jnp.float32, T=1.0)
+    assert lost_hot == 0, (
+        f"float32 already loses {lost_hot}/{live} live transitions at T = 1.0. "
+        f"The hazard is supposed to be temperature-driven; if it now bites at "
+        f"the top of the schedule, something upstream regressed and the "
+        f"contrast this test relies on no longer isolates the mechanism."
+    )
+
+    lost_cold, live = lost_live_entries(jnp.float32, T=0.4)
+    assert lost_cold > 0.01 * live, (
+        f"float32 lost only {lost_cold}/{live} live transitions at the "
+        f"production temperature T = 0.4, against ~4.3% measured across three "
+        f"seeds. Either the softmax now runs in float64 regardless of the "
+        f"requested dtype — in which case retarget this at whatever still "
+        f"runs in float32 — or this grammar has stopped exercising the "
+        f"regime. Do NOT relax the threshold to make this pass: the guard it "
+        f"is evidence for lives in `test_require_x64_refuses_when_x64_is_off`, "
+        f"which is asserted independently and must stay that way."
     )
 
 
