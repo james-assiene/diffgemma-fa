@@ -1379,3 +1379,212 @@ one s/record latency figure. It is placed **last**, so killing it costs nothing.
 Still missing from SPEC §3.4 after this: bounds 0.03 and 0.3, and the whole
 `entropy_threshold` axis, which is structurally unswept because `early_stop_fn`
 is passed at zero production call sites.
+
+---
+
+## 2026-08-12 — The `any` wildcard compiled to an unparenthesised alternation (SPEC §4.2)
+
+**Tester → coder → reviewer.** Tests first (`tests/test_audit_wildcard.py`, 105
+tests, **63 red on the unfixed tree**), then this implementation, then review.
+The tests were not editable by the implementer and are not edited here.
+
+### The defect
+
+`compile/schema.py` translated BFCL's `"type": "any"` by **omitting** `type`.
+outlines-core 0.2.14 expands an omitted type into a seven-way alternation and
+**does not group it**, so as a property value it composes to
+
+```
+\{ws"input_value"ws:ws((true|false))|(null)|(number)|(string)|(array)|(object)ws\}
+```
+
+`|` binds loosest: only the *first* branch carries the opening `\{ws"key"ws:ws`,
+only the *last* carries the closing `ws\}`. Measured (`JSON_WS`,
+`allow_wildcard=True`, `live_simple_117-73-0`): the grammar **rejects**
+`{"input_value": "say hi"}` — the ground-truth answer — and **accepts** `1`,
+`null`, `"say hi"`, `1.5`, `[1]`, `{"input_value": true` (unterminated) and
+`{"input_value": "say hi"}}` (stray brace).
+
+Both leaks are in published artifacts. `exp_e5_grammar130_map.json` /
+`_s1.json`: `live_simple_122-78-0` emitted the single character `1` at
+`accepted=True`, CS 1.000, `schema_ok=False`, while the *unconstrained* arm on
+the same record emitted a correct complete object; `live_simple_117-73-0`
+emitted `{"input_value": "hi say reverse"}}`. **The automaton was exact and the
+language was wrong** — the same shape of failure as the whitespace bug, and the
+reason CLAUDE.md's "a number that contradicts a proof means the measurement is
+wrong" now has a companion: a *guarantee* that holds against the wrong language
+guarantees nothing.
+
+### The fix
+
+`schema.WILDCARD_ANYOF_TYPES` (exported) + `_expand_wildcards`: every **typeless**
+sub-schema is rewritten as `{"anyOf": [{"type": t} for t in
+WILDCARD_ANYOF_TYPES]}`, which outlines *does* group. Typeless is defined as
+"carries none of outlines' nine precedence keywords" — the exact condition for
+the defect, not a proxy — so it covers all three routes: BFCL `"type": "any"`, a
+literal `{}` sub-schema, and a node whose only key was an annotation (which
+`normalize_bfcl_schema` strips to `{}`, and on which outlines *raises*). The
+`__wildcard__` marker is kept so `check_supported(allow_wildcard=False)` still
+refuses the shape; `_strip_markers` removes it before outlines sees it.
+Recursion is schema-position aware — a JSON object literal inside an `enum` is
+"typeless" by this predicate and must not be rewritten.
+
+`expand_wildcard: bool = True` on `normalize_bfcl_schema`, `build_regex`,
+`synthesize_instance`, `pipeline.compile_json_schema`, and
+`eval/run.py --expand-wildcard` / `--no-expand-wildcard`, recorded in the run
+artifact and **in `schema_fingerprint`** (it changes the language outright).
+
+**The opt-out is loud, and deliberately not covered by the whitespace hatch.**
+`verify_strict=False` re-checks under `JSON_WS` while keeping the caller's
+`expand_wildcard`, so an unexpanded wildcard still raises. Precedent: the same
+hatch was found in review to swallow `live_simple_117-73-0` — this very defect —
+when it was scoped to "any failure" rather than "the narrowness you declared".
+
+Also fixed, a live crash the tester found: `check_supported` did `t in
+WILDCARD_TYPES` with `t` possibly a **list** (`{"type": ["string","null"]}` is
+legal, and `normalize_bfcl_schema` maps type unions), raising `TypeError:
+unhashable type: 'list'` in a module whose contract is to raise
+`UnsupportedSchemaError` or pass. Reachable only on the `allow_wildcard=False`
+path, which is why no production call site hit it.
+
+### Measured (CPU only; `JAX_PLATFORMS=cpu`, `CUDA_VISIBLE_DEVICES=""`)
+
+`expand_wildcard=False` reproduces the pre-fix language exactly, so both arms
+come from one working tree and one process.
+
+**Gate survey, all 4,549 BFCL-Live schemas** (`JSON_WS`, `allow_wildcard=True`,
+`allow=tasks.bfcl.ALLOW`, instance from `synthesize_instance`, key order ignored
+— `tasks/bfcl.py`'s own gate):
+
+| | pass | refused |
+|---|---|---|
+| pre-fix | 4,538 / 4,549 | **11**, each failing all five renderings |
+| fixed | **4,549 / 4,549** | 0 |
+
+The 11 are exactly the `any` schemas. Nothing else changes state in either
+direction. **SPEC §4.7's "4,549 / 4,549, zero failures" was stale** — it predates
+the build gate (`b58fd84`) — and is corrected in place.
+
+**Full pipeline** (`compile_json_schema`, `from_bfcl=True`, `allow=bfcl.ALLOW`,
+`allow_wildcard=True`, `whitespace_pattern=JSON_WS`, `channel_header=True`,
+`fence=False`, `nonempty_required_strings=False`, 262,144-token vocabulary,
+gate not wired because the pre-fix arm is the grammar the gate refuses):
+
+| schema | expand | regex | `\|S\|` | bucket | edges | classes | tree GB | wall s |
+|---|---|---|---|---|---|---|---|---|
+| `reverse_input` | False | 15,323 | 568 | 1024 | 2,810 | 208 | 2.1433 | 331.5 |
+| `reverse_input` | **True** | 15,311 | 568 | 1024 | **2,594** | **182** | 2.1433 | **248.8** |
+| `process_data` | False | 15,509 | 610 | 1024 | 3,274 | 268 | 2.1433 | 370.1 |
+| `process_data` | **True** | 15,497 | 610 | 1024 | **2,728** | **223** | 2.1433 | **280.5** |
+
+Every structural figure reproduces the tester's independent measurement exactly;
+only wall-clock differs (this box, two single-threaded compiles overlapping for
+the first two rows — `logs/wildcard_pipeline_measure.log`). Same `|S|`, same
+bucket, same tree, fewer edges and classes, faster to compile.
+`is_dfa` stays True and `needs_chain_path` stays False. **There is no cost
+tradeoff**: the fix is a parenthesisation, 12 regex characters *shorter*, and
+strictly cheaper downstream. (The `{items:{}}` / `{additionalProperties:true}`
+spelling of the same seven-way is 38 KB and was killed at 54 GB RSS — not used.)
+
+Width is **seven, declared, not five**. The five-scalar narrowing is genuinely
+cheaper (`|S|` 57, bucket 64, ~60x faster) and would cost nothing on BFCL today
+— every ground-truth value at a wildcard position is a string — but "the
+benchmark does not exercise it" is the argument that retired the Countdown
+grammar. It stays reachable as a one-line *declared* narrowing of
+`WILDCARD_ANYOF_TYPES`, which `test_the_admitted_type_set_equals_the_declared_one`
+holds the grammar to in both directions.
+
+### THE DENOMINATOR MOVES: n = 128 → 130, for some arms only
+
+Two of the 11 (`live_simple_117-73-0`, `live_simple_122-78-0`) are inside the
+`live_simple` cut. An arm that reported `n = 128` **with
+`records_available = 130` and `skipped_by_reason = {"compile:ValueError": 2}`**
+now reports **130**, and 130 is not comparable to those 128 rows without
+accounting for the two records. **`exp_h2_*` also reports `n = 128` but has
+`records_available = 128` and no skips — a different cut, which does NOT become
+130.** Check `records_available`, not `n`.
+
+### Two things left for someone else
+
+1. **`tests/test_audit_measurement.py::test_the_next_arm_really_does_skip_the_two_records_the_audit_named` is now RED, by construction.** It asserts that the shipped compile call *raises* on those two records — the pre-fix state — and `tests/test_audit_wildcard.py::test_the_two_gate_refused_records_pass_the_gate_after_the_fix` asserts the opposite. Only one can be true, and the fix makes it the latter. The coder may not edit `tests/`; the reviewer rules on which test retires. Nothing else in that module depends on it (its `_FAKE_SKIPS` ids are synthetic).
+2. **`compile/tasks/bfcl_python.py` is untouched and unaffected**: `value_regex` dispatches on `type`, so a wildcard property still falls to its own `_scalar_union()` — a 4-way narrowing it declares in a comment. It does not read `WILDCARD_ANYOF_TYPES`, so the JSON and Python grammars now disagree about what `any` means. Pre-existing, harmless today (no Python arm has been run), worth closing when it is.
+
+### Unrelated, found while working: THE RE-RUN QUEUE IS DEAD
+
+PID 3267670 (the 16-arm, ~19.3 h queue logged above) **stopped at 04:19 UTC on
+2026-08-12**, ~4 h before this session started and before any edit here. It ran
+one smoke arm and then aborted with
+
+```
+!! THE TREE MOVED UNDER THE QUEUE (fingerprint 228fc705dc0f9c695cb03111cfe42087 -> 228fc705dc0f9c695cb03111cfe42087).
+```
+
+**The two fingerprints in its own message are identical**, so the guard is
+comparing something other than what it prints — a false positive that cost the
+whole queue. `logs/rerun_2c9f9d9.log` is 1,054 bytes and ends there; the GPU has
+been idle at 0 MiB since; `scratchpad/rerun_2c9f9d9_LOCKED.sh` no longer exists,
+so the queue cannot be resumed as launched. **Fifteen arms did not run.**
+
+### Review round 1 — one blocking correction to the fix above
+
+**`_is_typeless` over-fired, and its stated justification was false.** It
+expanded *every* node carrying none of outlines' nine precedence keywords, on
+the written grounds that outlines "either honours or ignores" everything else.
+Measured against installed outlines-core 0.2.14, **it ignores nothing — it
+raises**:
+
+| typeless sub-schema | raw outlines | `expand=False` | `expand=True`, as first written |
+|---|---|---|---|
+| `{}` | fall-through | ok | ok |
+| `{"pattern": "^a$"}` | **raises** | ValueError | **compiled as any-JSON** |
+| `{"minLength": 3}`, `{"format":…}`, `{"required":[…]}`, `{"items":{…}}`, `{"additionalProperties":{…}}` | **raises** | ValueError | **compiled as any-JSON** |
+
+So the expansion converted a loud `ValueError` into a **silent, maximally
+permissive grammar with the constraint dropped** — and `check_supported` does
+not catch these (`pattern`, `format`, `required`, `items` are not in
+`_SILENTLY_DROPPED`; the length/item bounds sit on `tasks.bfcl.ALLOW`). That is
+precisely the desensitisation SPEC §4.2's fail-loud pre-pass exists to prevent,
+written into the same diff that corrects SPEC for the same mistake. Reach was
+**0 of 4,549** — latent, not live — but a wrong keyword list is how the next one
+gets through.
+
+**Fixed (reviewer's option (a)):** `_typeless_kind` expands only a node that is
+empty **modulo pure annotations** (`description`, `title`, `$comment`,
+`examples`, `default`, `deprecated`, `readOnly`, `__wildcard__`) — which is the
+real fall-through condition and the semantically correct reading of
+`{"description": …}` — and **raises `UnsupportedSchemaError`, naming the
+keywords**, when a typeless node carries a real constraint. Re-measured after
+the change:
+
+```
+{}                                           fall-through   ok             ok
+{"description": ...}                         ValueError     ValueError     ok
+{"pattern": "^a$"}                           ValueError     ValueError     UnsupportedSchemaError
+{"minLength": 3} / {"format"} / {"required"} / {"items"} / {"additionalProperties"}
+                                             ValueError     ValueError     UnsupportedSchemaError
+```
+
+**Nothing measured moves.** The new raise fires on **0 of 4,549** BFCL-Live
+schemas; the gate survey is unchanged (4,538 → **4,549**); and the compiled
+regex for both measured schemas is byte-identical to the one the pipeline table
+above was produced from (`reverse_input` 15,311 chars `sha df180d694c30`,
+`process_data` 15,497 `sha ca76a852950f`), so `|S|`, edges, classes and tree
+cannot have moved and the 20-minute compiles were not repeated.
+
+Also in this round:
+
+- `_expand_wildcards` now recurses into draft-04's **list-valued `items`**.
+- `synthesize_instance(expand_wildcard=…)` was a no-op unless `from_bfcl=True`,
+  while `build_regex` expanded on both paths — so the gate could compare an
+  instance against a language it was not drawn from. Wired.
+- `docs/RESULTS.md` gains **the third denominator category**, which neither the
+  brief nor this log had named: the pre-gate `n=130 / avail=130 / no skips`
+  artifacts (`exp_e5_grammar130_*`, `exp_seed{1,2,3}_map`, `exp_abl_*`,
+  `exp_oomfix_*`, `exp_f64_*`, `exp_greedy_unconstrained`, `exp_noorder_unc`)
+  keep their `n`, but scored both defective records **under the broken
+  grammar** — so a post-fix `n=130` is not comparable to a pre-gate `n=130`
+  either. 7 artifacts move to 130; the five `exp_h2_*` do not.
+- `bfcl_python.value_regex`'s fall-through now cross-references
+  `WILDCARD_ANYOF_TYPES` as a second, narrower, **declared** reading of `any`.
+- Reviewer's find: `prefixItems: [{}]` was a fifth escape route the tester's
+  known-defective list did not name. The fix repairs it too, unchanged.

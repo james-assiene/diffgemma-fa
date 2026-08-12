@@ -1896,20 +1896,47 @@ def test_repurposing_the_histogram_into_id_lists_is_rejected():
 # The records this is actually about
 # --------------------------------------------------------------------------
 
-def test_the_next_arm_really_does_skip_the_two_records_the_audit_named():
-    """Grounding. R1 is worth a commit only if the skip path is live.
+def test_the_next_arm_runs_all_130_records_after_the_wildcard_fix():
+    """Grounding for the arm's **denominator**, now that it has changed.
 
-    `docs/RESULTS.md` and `docs/PHASE1_FINDINGS.md` name
-    `live_simple_117-73-0` and `live_simple_122-78-0` (a BFCL `any`-typed
-    property, whose unparenthesised top-level alternation can never close its
-    brace) as the two records the [AUDIT-D3] build gate refuses. This asserts
-    that they are still at indices 117 and 122 of the 258 single-function
-    records, that the shipped compile call raises, and that the reason key the
-    handler will build for them is `compile:ValueError` — so the artifact the
-    next arm writes must name exactly these two.
+    **History, because this test used to assert the opposite.** It was written
+    to protect a launch gate whose premise was "the next arm reports `n = 128`
+    because the [AUDIT-D3] build gate refuses `live_simple_117-73-0` and
+    `live_simple_122-78-0`". That premise was correct: a BFCL `"type": "any"`
+    property compiled, via outlines' unparenthesised typeless expansion, to a
+    grammar whose object braces sat on the first and last branch of a seven-way
+    alternation — so it rejected every rendering of its own instance and
+    accepted a bare `1` as a whole answer. `live_simple_122-78-0` emitted
+    exactly that under constrained decoding, with `CS = 1.000` and
+    `schema_valid = False`.
 
-    The control record is not decoration: if the gate refused everything, the
-    two ids above would be trivia rather than the difference set.
+    `schema.WILDCARD_ANYOF_TYPES` retired the premise (2026-08-12): `any` now
+    expands to an explicit, *grouped* `anyOf` over the seven JSON types. The
+    protection is not retired with it — the *reason* for the assertion changed,
+    not the need for one. So the index pins below are kept **verbatim**, and
+    the two `pytest.raises` blocks became positive assertions.
+
+    What this pins:
+
+    * the cut is still 258 single-function records, and the two records are
+      still at indices 117 and 122 — the arithmetic that makes any
+      `n = 128` ↔ `n = 130` reconciliation computable against the rows already
+      in `docs/RESULTS.md`;
+    * both now compile under the arm's own regime (`--whitespace=json`,
+      `--nonempty`, `verify_strict=True`);
+    * the arm's 130-record cut yields **no** `compile:ValueError` at all, so
+      the next artifact must report `n = 130` with an empty `skipped_by_reason`.
+
+    Beware the *other* `n = 128`: `artifacts/exp_h2_*.json` report it with
+    `records_available = 128` and no skips. That is a different, smaller cut
+    and it does **not** become 130. Only artifacts with
+    `records_available = 130` and `compile:ValueError: 2` move.
+
+    Runtime: three real compiles, two of them wildcard grammars whose lift is
+    minutes. The 130-record sweep is done at the **gate** — regex only, ~1 s —
+    because the gate is what produces `compile:ValueError`; lifting 130
+    automata would be hours and would assert nothing extra about the
+    denominator.
     """
     from diffgemma_fa.compile import bfcl_data, schema as _schema
     from diffgemma_fa.eval.run import ALLOW, WHITESPACE_PATTERNS
@@ -1932,18 +1959,49 @@ def test_the_next_arm_really_does_skip_the_two_records_the_audit_named():
             verify_renderings=_schema.synthesize_instance(norm),
             verify_strict=True, nonempty_required_strings=True)
 
-    refused = {}
+    def gate_as_the_arm_does(rec) -> list[str]:
+        """The gate alone. Returns the renderings it would refuse."""
+        fn = rec.functions[0]
+        prepared = _schema.require_nonempty_strings(
+            _schema.normalize_bfcl_schema(fn["parameters"]))
+        regex = _schema.build_regex(
+            prepared, allow=ALLOW, allow_wildcard=True,
+            whitespace_pattern=WHITESPACE_PATTERNS["json"])
+        _, bad = _schema.accepts_all_renderings(
+            regex, _schema.synthesize_instance(prepared))
+        return [b for b in bad if b != "reordered-keys"]
+
+    # The index pins, verbatim from the version this replaces.
     for idx, want_id in ((117, "live_simple_117-73-0"),
                          (122, "live_simple_122-78-0")):
         assert records[idx].id == want_id, (
             f"index {idx} is {records[idx].id}, not {want_id}; the "
             f"difference set against the n=130 rows has moved")
-        with pytest.raises(ValueError) as exc:
-            compile_as_the_arm_does(records[idx])
-        refused[want_id] = f"compile:{type(exc.value).__name__}"
+        assert compile_as_the_arm_does(records[idx]).automaton is not None, (
+            f"{want_id} still does not compile under the arm's regime; the "
+            f"arm remains n=128 and the wildcard fix has not landed")
 
-    assert set(refused.values()) == {"compile:ValueError"}, refused
-    # Non-vacuity: the gate is selective, so `n = 128` and not `n = 0`.
+    # The control, restated. It is no longer needed to prove the gate is
+    # selective about *these* two — the positives above do that — so it now
+    # asserts the gate is selective at all: a schema whose grammar genuinely
+    # cannot accept its own instance must still be refused, or `n = 130` would
+    # mean nothing more than "the gate was switched off".
     assert compile_as_the_arm_does(records[3]).automaton is not None, (
         "a control record no longer compiles; the gate is refusing more than "
-        "the two records this test is about and the arm is not runnable")
+        "the records this test is about and the arm is not runnable")
+    with pytest.raises(ValueError, match="rendering"):
+        pipeline.compile_json_schema(
+            {"type": "object", "required": ["v"],
+             "properties": {"v": {"type": "boolean"}}},
+            name="deliberately-broken", allow=ALLOW, allow_wildcard=True,
+            whitespace_pattern=WHITESPACE_PATTERNS["json"],
+            verify_renderings={"v": "not a boolean"}, verify_strict=True)
+
+    # The new denominator: the arm's own 130-record cut, gate only.
+    refused = {rec.id: bad for rec in records[:130]
+               if (bad := gate_as_the_arm_does(rec))}
+    assert not refused, (
+        f"{len(refused)} of the arm's 130 records still fail the build gate, "
+        f"so the next artifact reports n={130 - len(refused)} and is not "
+        f"comparable to the published n=128 rows without accounting for the "
+        f"difference: {refused}")

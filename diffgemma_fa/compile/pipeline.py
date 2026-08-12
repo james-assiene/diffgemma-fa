@@ -147,6 +147,7 @@ def compile_json_schema(
     from_bfcl: bool = False,
     allow: Sequence[str] = (),
     allow_wildcard: bool = False,
+    expand_wildcard: bool = True,
     whitespace_pattern: str | None = schema_mod.JSON_WS,
     nonempty_required_strings: bool = False,
     verify_renderings: dict | None = None,
@@ -175,6 +176,17 @@ def compile_json_schema(
     still raises. The gate may be lenient about a narrowness the caller
     declared; it may not be lenient about one nobody declared.
 
+    `expand_wildcard` (default `True`) rewrites typeless sub-schemas as an
+    explicit `anyOf`; see `schema.WILDCARD_ANYOF_TYPES` for the defect it
+    repairs. **`False` reproduces a grammar that is known to be wrong**, so it is
+    deliberately *not* wired into the gate's leniency: the recompile under
+    `JSON_WS` keeps the caller's `expand_wildcard`, so an unexpanded wildcard
+    still raises under `verify_strict=False`. `False` declares "give me the
+    unexpanded wildcard"; it does not declare "let through a grammar that
+    rejects its own instance and accepts a bare `1`". Same scoping lesson as the
+    whitespace hatch below, which was found in review to swallow
+    `live_simple_117-73-0` — this very defect.
+
     **[V-P5] It used to default to `""` — forbidding whitespace — on the
     reasoning that this "shrinks the automaton and costs nothing the benchmark
     scores". That reasoning was wrong.** Gemma's natural tokenisation of JSON
@@ -202,12 +214,15 @@ def compile_json_schema(
     t0 = time.perf_counter()
     prepared = json_schema
     if nonempty_required_strings:
-        prepared = schema_mod.normalize_bfcl_schema(prepared) if from_bfcl else prepared
+        prepared = (schema_mod.normalize_bfcl_schema(
+            prepared, expand_wildcard=expand_wildcard)
+            if from_bfcl else prepared)
         prepared = schema_mod.require_nonempty_strings(prepared)
         from_bfcl = False
     regex = schema_mod.build_regex(
         prepared, from_bfcl=from_bfcl, allow=allow,
         allow_wildcard=allow_wildcard, whitespace_pattern=whitespace_pattern,
+        expand_wildcard=expand_wildcard,
     )
     if verify_renderings is not None:
         # THE GATE. Turns "the grammar must accept how the model writes" from
@@ -241,7 +256,12 @@ def compile_json_schema(
                 schema_mod.build_regex(
                     prepared, from_bfcl=from_bfcl, allow=allow,
                     allow_wildcard=allow_wildcard,
-                    whitespace_pattern=schema_mod.JSON_WS),
+                    whitespace_pattern=schema_mod.JSON_WS,
+                    # NOT `expand_wildcard=True`: the hatch is scoped to the
+                    # whitespace narrowness the caller declared. Repairing the
+                    # wildcard here would make the wide grammar pass and
+                    # downgrade a wildcard defect to a printed line.
+                    expand_wildcard=expand_wildcard),
                 verify_renderings)
             wide_bad = [b for b in wide_bad if b != "reordered-keys"]
             if not wide_bad:
@@ -277,6 +297,7 @@ def compile_json_schema(
             json_schema, whitespace_pattern=whitespace_pattern,
             nonempty_required_strings=nonempty_required_strings,
             channel_header=channel_header, allow=allow,
-            allow_wildcard=allow_wildcard, from_bfcl=from_bfcl, fence=fence),
+            allow_wildcard=allow_wildcard, expand_wildcard=expand_wildcard,
+            from_bfcl=from_bfcl, fence=fence),
         **kwargs)
     return dataclasses.replace(report, seconds_regex=seconds_regex)

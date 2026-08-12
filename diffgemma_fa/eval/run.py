@@ -204,6 +204,22 @@ def main() -> None:
                          "those: a schema whose grammar is defective for any "
                          "other reason is still refused, because the same "
                          "schema is re-checked under the wide pattern first")
+    ap.add_argument("--expand-wildcard", action="store_true", default=True,
+                    help="rewrite typeless sub-schemas (BFCL's `type: any`, a "
+                         "literal `{}`) as an explicit anyOf over every JSON "
+                         "type. ON BY DEFAULT and you want it: outlines-core "
+                         "0.2.14 emits the typeless expansion as an "
+                         "UNPARENTHESISED 7-way alternation, so the enclosing "
+                         "object's braces attach to its first and last branch "
+                         "only -- the grammar then rejects `{\"input_value\": "
+                         "\"say hi\"}` and accepts a bare `1` and a stray `}`. "
+                         "Measured on 11 of BFCL-Live's 4,549 schemas, 2 of "
+                         "them inside the live_simple 130 cut")
+    ap.add_argument("--no-expand-wildcard", dest="expand_wildcard",
+                    action="store_false",
+                    help="reproduce the pre-fix (broken) wildcard language. "
+                         "The build gate still REFUSES those schemas, so this "
+                         "reproduces the n=128 denominator, not the n=130 one")
     ap.add_argument("--fence", action="store_true",
                     help="E4/P2: allow an optional ```json fence around the "
                          "object, which 126/130 unconstrained outputs use")
@@ -284,7 +300,8 @@ def main() -> None:
             schema_params = fn["parameters"]
             if args.ci_enums:
                 schema_params = _case_insensitive_enums(schema_params)
-            norm = _schema.normalize_bfcl_schema(schema_params)
+            norm = _schema.normalize_bfcl_schema(
+                schema_params, expand_wildcard=args.expand_wildcard)
             # [AUDIT-D3] THE BUILD GATE, wired. An unwired gate is not a
             # mitigation: `verify_renderings` existed and neither call site
             # passed it, so the check that turns "the grammar must accept how
@@ -296,6 +313,7 @@ def main() -> None:
             a = pipeline.compile_json_schema(
                 schema_params, name=fn.get("name", ""), from_bfcl=True,
                 allow=ALLOW, allow_wildcard=True,
+                expand_wildcard=args.expand_wildcard,
                 whitespace_pattern=WHITESPACE_PATTERNS[args.whitespace],
                 fence=args.fence,
                 verify_renderings=gate_instance,
@@ -479,6 +497,12 @@ def main() -> None:
         "temp": args.temp,
         "dtype": args.dtype,
         "whitespace": args.whitespace,
+        # A grammar-shaping boolean that never lands in the artifact is
+        # invisible in exactly the way `--whitespace` was. It also moves the
+        # DENOMINATOR: with it on, the two live_simple records the build gate
+        # refused (live_simple_117-73-0, live_simple_122-78-0) compile, so a
+        # `live_simple` arm reports n=130 where the published ones report 128.
+        "expand_wildcard": args.expand_wildcard,
         "fence": args.fence,
         "ci_enums": args.ci_enums,
         "records_available": len(records),

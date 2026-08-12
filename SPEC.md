@@ -1154,6 +1154,39 @@ running. [V] **Its limitations are severe and silent** — put them in Phase 1's
 - `{}` / missing `type` / `additionalProperties: true` expand to a 7-way alternation over all JSON
   types — the origin of "regex too large" and of §4.4's wildcard classes.
 
+  > **[V-P5, 2026-08-12] The typeless expansion is emitted UNPARENTHESISED, and that is a
+  > correctness bug, not a cost one.** outlines-core 0.2.14 splices the seven branches in without
+  > an enclosing group, so composing a typeless node as a property value gives
+  >
+  > ```
+  > \{ws"input_value"ws:ws((true|false))|(null)|(number)|(string)|(array)|(object)ws\}
+  > ```
+  >
+  > and `|` binds loosest: only the **first** branch carries the opening `\{ws"key"ws:ws` and only
+  > the **last** carries the closing `ws\}`. Measured on `live_simple_117-73-0`, `JSON_WS`,
+  > `allow_wildcard=True`: the grammar **rejects** `{"input_value": "say hi"}` — the ground-truth
+  > answer — and **accepts** `1`, `null`, `"say hi"`, `{"input_value": true` (unterminated) and
+  > `{"input_value": "say hi"}}` (stray brace). Both leaks reached production
+  > (`artifacts/exp_e5_grammar130_*.json`): `live_simple_122-78-0` emitted the single character `1`
+  > at CS 1.000 with `schema_valid=False`, while the *unconstrained* arm on the same record emitted
+  > the correct object. The automaton was exact; the language was wrong.
+  >
+  > **Fix: never hand outlines a typeless node.** `compile/schema.py: WILDCARD_ANYOF_TYPES` +
+  > `_expand_wildcards` rewrite every typeless sub-schema as an explicit `anyOf` over the seven JSON
+  > types, which outlines *does* group. `expand_wildcard=True` is the default on
+  > `normalize_bfcl_schema`, `build_regex`, `synthesize_instance` and `compile_json_schema`, and
+  > `eval/run.py --expand-wildcard` / `--no-expand-wildcard` (default on, recorded in the artifact).
+  >
+  > **It is a parenthesisation, not a change of language, and it is cheaper on every axis.**
+  > `(?:<today's wildcard>)` and the seven-way `anyOf` agree on 10,000/10,000 random JSON documents;
+  > the regex is 15,253 chars against 15,265; full pipeline on `reverse_input`, `|S|` 568 → 568 and
+  > bucket 1024 → 1024 and tree 2.143 GB → 2.143 GB, while edges 2,810 → 2,594, classes 208 → 182
+  > and wall 361.6 s → 246.9 s. (Spelling the array/object arms as `{items:{}}` /
+  > `{additionalProperties:true}` instead costs 38,369 chars and was killed at 54 GB RSS — do not.)
+  > The survey below is measured on all 4,549 BFCL-Live schemas, and the defect is
+  > **wildcard-specific**: `anyOf`, `oneOf`, `type: [a,b]`, `enum`, `const`, `items` unions and
+  > `additionalProperties: true` are all correctly parenthesised (`tests/test_audit_wildcard.py`).
+
 [D] **Fail loud.** Wrap the converter with a pre-pass that **raises** on any keyword outlines will
 silently drop. Port llguidance's `parser/src/json/numeric.rs` (`rx_int_range`, `rx_float_range`) for
 real numeric bounds. Anchor: JSONSchemaBench measured Outlines at **0.47 declared / 0.03 empirical
@@ -1369,6 +1402,14 @@ on NFAs (§2.7).
 > **11 schemas failed with `ValueError: Unsupported type: any`.** BFCL's `any` has no JSON Schema
 > spelling and must be translated to a *typeless* schema (`{}`), not passed through as the literal
 > string. Fixed in `compile/schema.py`; the wildcard is still refused unless `allow_wildcard=True`.
+>
+> > **[V-P5, 2026-08-12] The `{}` translation was itself wrong — the same 11 schemas, a different
+> > failure.** A typeless node reaches outlines' *unparenthesised* seven-way expansion (§4.2), so
+> > those 11 compiled to a grammar that rejects its own ground-truth answer and accepts a bare
+> > scalar. They must be translated to an explicit `anyOf` over the seven JSON types instead;
+> > `schema.WILDCARD_ANYOF_TYPES`, `expand_wildcard=True` by default. The 11 are exactly
+> > `live_simple_{117-73-0,122-78-0}`, `live_multiple_{83..88}-38-{0..5}`, `live_multiple_182-77-0`
+> > and `live_parallel_multiple_{13-11-0,14-12-0}`.
 
 > **[V-P1] Full-pipeline compile of all of BFCL-Live** (`python -m diffgemma_fa.compile.tasks.bfcl
 > --splits live --jobs 12`, `artifacts/bfcl_compile_report.json`). This is the whole pipeline —
@@ -1376,7 +1417,7 @@ on NFAs (§2.7).
 >
 > | | |
 > |---|---|
-> | compiled | **4,549 / 4,549, zero failures** |
+> | compiled | ~~**4,549 / 4,549, zero failures**~~ — **stale, see below** |
 > | all deterministic | **4,549 DFA / 0 NFA** |
 > | wall, 12 workers | **2,562 s = 42.7 min** |
 > | CPU, serial equivalent | **26,908 s = 7.5 h** |
@@ -1394,6 +1435,23 @@ on NFAs (§2.7).
 > `needs_chain_path` never fires, and the largest tree is 2.14 GB against ~20 GB of headroom.
 > **The chain-path fallback is not needed for BFCL at all** — it remains necessary only for Spider
 > (§5.6, open question 0a).
+>
+> > **[V-P5, 2026-08-12] "4,549 / 4,549, zero failures" is stale — it predates the build gate**
+> > (`b58fd84`, 2026-08-08), which turned "compiled" from "outlines did not raise" into "the grammar
+> > accepts all five standard renderings of an instance the schema permits". Re-measured today over
+> > all 4,549 schemas (`whitespace_pattern=JSON_WS`, `allow_wildcard=True`, `allow=tasks.bfcl.ALLOW`,
+> > instance from `synthesize_instance`, key order ignored — the gate `tasks/bfcl.py` ships):
+> >
+> > | | refused | which |
+> > |---|---|---|
+> > | pre-fix (`expand_wildcard=False`) | **11 / 4,549** | exactly the 11 `any` schemas, each failing **all five** renderings |
+> > | with the §4.2 wildcard fix | **0 / 4,549** | — |
+> >
+> > So the honest row is **4,538 / 4,549 before the fix, 4,549 / 4,549 after it**, and nothing else
+> > changes state in either direction. **The denominator moves**: two of the 11
+> > (`live_simple_117-73-0`, `live_simple_122-78-0`) are inside the `live_simple` cut, so an arm that
+> > reported `n = 128` with `skipped_by_reason={"compile:ValueError": 2}` becomes `n = 130` — and
+> > `n = 130` is not comparable to those rows without accounting for the two records.
 
 Consequences:
 

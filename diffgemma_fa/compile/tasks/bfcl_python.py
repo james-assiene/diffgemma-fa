@@ -143,6 +143,12 @@ def value_regex(
     # No type / `any`: a scalar union. Deliberately NOT the 7-way alternation
     # including containers - Phase 0 measured that shape at 26-130x the cost of
     # every other, and it is the realistic route to "regex too large".
+    #
+    # **This is a SECOND, narrower definition of `any` than the JSON grammar's**
+    # (`schema.WILDCARD_ANYOF_TYPES`, seven types including `array` and
+    # `object`). The divergence is deliberate and declared here, not silent, and
+    # it is safe because this branch is properly grouped - but the two must be
+    # read together, and this one has never been exercised by a run.
     return _scalar_union()
 
 

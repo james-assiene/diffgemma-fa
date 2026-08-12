@@ -26,6 +26,7 @@ from typing import Any, Iterable
 __all__ = [
     "UnsupportedSchemaError",
     "BFCL_TYPE_MAP",
+    "WILDCARD_ANYOF_TYPES",
     "normalize_bfcl_schema",
     "check_supported",
     "build_regex",
@@ -81,6 +82,68 @@ BFCL_TYPE_MAP: dict[str, str] = {
 #: `{}` schema at 16.7 s / 3,261 states / 36.2M transitions, i.e. 26-130x every
 #: other shape. Callers must opt in.
 WILDCARD_TYPES = frozenset({"any"})
+
+#: **The JSON types a wildcard expands to.** The declaration CLAUDE.md's "never
+#: silently cap coverage" is enforced against: `tests/test_audit_wildcard.py`
+#: asserts that the compiled grammar admits *exactly* these types at a wildcard
+#: property, in both directions, so narrowing the wildcard means editing this
+#: tuple — which is a declared narrowing, and is allowed — while narrowing it in
+#: the grammar alone turns the suite red.
+#:
+#: **Why the expansion is written out at all.** outlines-core 0.2.14 expands an
+#: omitted `type` into a seven-way alternation that it does **not** wrap in a
+#: group, so composing it as a property value yields
+#:
+#:     \{ws"v"ws:ws((true|false))|(null)|(number)|(string)|(array)|(object)ws\}
+#:
+#: and `|` binds loosest: only the *first* branch carries the opening
+#: `\{ws"v"ws:ws` and only the *last* carries the closing `ws\}`. Measured on
+#: `live_simple_117-73-0` (`reverse_input`), `JSON_WS`, `allow_wildcard=True`:
+#: the grammar **rejects** `{"input_value": "say hi"}` — the ground-truth answer
+#: — and **accepts** `1`, `null`, `"say hi"`, `{"input_value": true` (no closing
+#: brace) and `{"input_value": "say hi"}}` (a stray one). Both defects reached
+#: production: `artifacts/exp_e5_grammar130_map.json` records
+#: `live_simple_122-78-0` emitting the single character `1` at `accepted=True`
+#: (CS 1.000) with `schema_ok=False`, and `live_simple_117-73-0` emitting
+#: `{"input_value": "hi say reverse"}}`. The automaton was exact; the *language*
+#: was wrong.
+#:
+#: **This is a parenthesisation, not a change of language, and it is cheaper on
+#: every axis.** Regex length, `whitespace_pattern=JSON_WS`, one required
+#: property named `v`:
+#:
+#:     today's omitted-`type` wildcard                  15,313 chars
+#:     anyOf over the 7 bare types (this)               15,301 chars
+#:     anyOf, array as {items:{}}, object as
+#:         {additionalProperties: true}                 38,369 chars  <- killed
+#:                                                      at 54 GB RSS; do not use
+#:     anyOf over the 5 scalars                            181 chars
+#:
+#: **Twelve characters shorter than the shape it replaces**, and
+#: `(?:<today's wildcard>)` and this seven-way agree on 10,000/10,000 random
+#: JSON documents (`tests/test_audit_wildcard.py`). Full pipeline, CPU, one
+#: process, `from_bfcl=True`, `allow=tasks.bfcl.ALLOW`, `allow_wildcard=True`,
+#: `JSON_WS`, `channel_header=True`, `fence=False`,
+#: `nonempty_required_strings=False`, Gemma's 262,144-token vocabulary
+#: (2026-08-12; `expand_wildcard=False` reproduces the pre-fix language exactly,
+#: so both rows come from one tree):
+#:
+#:     reverse_input      |S|  bucket  edges  classes  tree GB   wall s
+#:     today (broken)     568    1024   2810      208    2.143    331.5
+#:     this               568    1024   2594      182    2.143    248.8
+#:     process_data       610    1024   3274      268    2.143    370.1
+#:     this               610    1024   2728      223    2.143    280.5
+#:
+#: Same `|S|`, same bucket, same tree, `is_dfa` still True and
+#: `needs_chain_path` still False, *fewer* edges and classes, ~1.3-1.4x faster
+#: to compile. The five-scalar narrowing is genuinely cheaper (|S| 57 / bucket
+#: 64 / ~60x faster) and would cost nothing on BFCL today — all four
+#: ground-truth values at wildcard positions are strings — but "the benchmark
+#: does not exercise it" is the argument that retired the Countdown grammar, so
+#: it stays a *declared* narrowing rather than the default.
+WILDCARD_ANYOF_TYPES: tuple[str, ...] = (
+    "string", "integer", "number", "boolean", "null", "array", "object",
+)
 
 #: Keys whose value is a **map of user-chosen names to schemas**, not a schema.
 #: The keyword-drop in `normalize_bfcl_schema` must never be applied to these
@@ -185,6 +248,141 @@ _PRECEDENCE = (
 )
 
 
+#: Keys whose value is a **single** sub-schema.
+_SCHEMA_VALUED = ("items", "additionalProperties", "contains",
+                  "not", "if", "then", "else")
+
+#: Keys whose value is a **list** of sub-schemas.
+_SCHEMA_LIST_VALUED = ("allOf", "anyOf", "oneOf", "prefixItems")
+
+
+#: Keywords that carry **documentation, not constraint**. A node consisting of
+#: nothing but these is the JSON Schema spelling of "any value", which is what
+#: the wildcard expansion is for. `__wildcard__` is our own marker for BFCL's
+#: `any` and belongs here for the same reason.
+#:
+#: **This list is the whole safety of `_expand_wildcards`, so it is short on
+#: purpose.** Anything not named here is treated as a constraint outlines cannot
+#: honour without a type, and raises — see `_typeless_kind`.
+_ANNOTATION_KEYWORDS = frozenset({
+    "description", "title", "$comment", "examples", "default", "deprecated",
+    "readOnly", "__wildcard__",
+})
+
+
+def _typeless_kind(node: dict[str, Any]) -> tuple[bool, list[str]]:
+    """Is this node typeless, and if so is it a *wildcard* or a *defect*?
+
+    Returns `(typeless, offending_keywords)`. `typeless` means the node carries
+    none of outlines' nine first-match-wins keywords (`properties`, `allOf`,
+    `anyOf`, `oneOf`, `prefixItems`, `enum`, `const`, `$ref`, `type`), so
+    outlines has no type to compile. `offending_keywords` is then whatever is
+    left over that is **not** pure annotation.
+
+    **[REVIEW 2026-08-12] The distinction is load-bearing, and an earlier
+    version of this function did not make it.** It expanded every typeless node
+    on the stated grounds that outlines "either honours or ignores" everything
+    outside the nine. Measured against installed outlines-core 0.2.14, that is
+    false — **it ignores nothing, it raises**:
+
+        {}                                          fall-through (the wildcard)
+        {"pattern": "^a$"}                          ValueError
+        {"minLength": 3} / {"format": ...}          ValueError
+        {"required": [...]} / {"items": {...}}      ValueError
+        {"additionalProperties": {...}}             ValueError
+
+    So the real fall-through condition is "empty modulo annotations", and
+    expanding the rest would have converted a loud `ValueError` into a silent,
+    maximally-permissive grammar with `pattern` / `minLength` / `items` /
+    `required` **dropped** — which `check_supported` does not catch either
+    (`pattern`, `format`, `required` and `items` are not in `_SILENTLY_DROPPED`,
+    and the length/item bounds are on `tasks.bfcl.ALLOW`). That is exactly the
+    desensitisation SPEC §4.2's fail-loud pre-pass exists to prevent, committed
+    in the same breath as correcting SPEC for the same mistake.
+
+    Reach was **0 of 4,549** BFCL-Live schemas — latent, not live, and no
+    measured figure moved — but a wrong keyword list is how the next one gets
+    through.
+
+    `{"type": "any"}` reaches here as `{"__wildcard__": True}`, because
+    `normalize_bfcl_schema` has already removed the un-spellable type.
+    """
+    if any(k in node for k in _PRECEDENCE):
+        return False, []
+    return True, sorted(k for k in node if k not in _ANNOTATION_KEYWORDS)
+
+
+def _expand_wildcards(node: Any, *, path: str = "") -> Any:
+    """Rewrite every typeless sub-schema as an explicit `anyOf`. SPEC §4.2.
+
+    The fix for outlines-core 0.2.14's unparenthesised typeless expansion: an
+    `anyOf` **is** wrapped in a group, so the enclosing object's braces stay
+    attached to the whole alternation instead of to its first and last branch.
+    Same language (10,000/10,000 random documents), see `WILDCARD_ANYOF_TYPES`.
+
+    Only a node that is empty **modulo annotations** is expanded; a typeless
+    node carrying a real constraint keyword (`pattern`, `minLength`, `items`,
+    `required`, ...) is something outlines cannot compile without a type, and it
+    raises `UnsupportedSchemaError` here rather than being silently widened into
+    "any JSON value" with the constraint dropped. See `_typeless_kind`, which
+    carries the measurement.
+
+    Idempotent: an already-expanded node carries `anyOf` and is no longer
+    typeless.
+
+    The `__wildcard__` marker is **kept**, not consumed, so that
+    `check_supported(allow_wildcard=False)` can still refuse the shape — an
+    expansion that hid the wildcard from the fail-loud pre-pass would trade one
+    silent behaviour for another. `_strip_markers` removes it before outlines
+    ever sees the schema.
+
+    Recursion is **schema-position aware** (`properties`/`$defs` values,
+    `items`, `anyOf` elements, ...) rather than over every dict in the tree:
+    `enum`, `const` and `default` carry *data*, and a JSON object literal inside
+    an `enum` is typeless by this predicate. Rewriting one would silently change
+    the value the grammar admits.
+    """
+    if isinstance(node, list):
+        return [_expand_wildcards(v, path=f"{path}[{i}]")
+                for i, v in enumerate(node)]
+    if not isinstance(node, dict):
+        return node
+
+    def _sub(value: Any, key: str) -> Any:
+        return _expand_wildcards(value, path=f"{path}.{key}" if path else key)
+
+    out: dict[str, Any] = {}
+    for key, value in node.items():
+        if key in _NAME_KEYED and isinstance(value, dict):
+            out[key] = {name: _expand_wildcards(
+                sub, path=f"{path}.{key}.{name}" if path else f"{key}.{name}")
+                for name, sub in value.items()}
+        elif key in _SCHEMA_VALUED and isinstance(value, dict):
+            out[key] = _sub(value, key)
+        elif key == "items" and isinstance(value, list):
+            # Draft-04's tuple form (`items` as a list of schemas). Unreachable
+            # on BFCL, one branch to keep the walk total.
+            out[key] = _sub(value, key)
+        elif key in _SCHEMA_LIST_VALUED and isinstance(value, list):
+            out[key] = _sub(value, key)
+        else:
+            out[key] = value
+
+    typeless, offending = _typeless_kind(out)
+    if typeless and offending:
+        raise UnsupportedSchemaError(
+            path, offending[0],
+            f"typeless schema carrying {offending} — outlines-core has no type "
+            f"to compile and RAISES on this shape; expanding it to the "
+            f"any-JSON wildcard would silently drop {offending}. Give the node "
+            f"a `type` (or an `enum`/`const`/`anyOf`), or state the wildcard "
+            f"explicitly with `{{}}`.")
+    if typeless:
+        out["__wildcard__"] = True
+        out["anyOf"] = [{"type": t} for t in WILDCARD_ANYOF_TYPES]
+    return out
+
+
 def require_nonempty_strings(schema: dict[str, Any]) -> dict[str, Any]:
     """Give every **required** string property `minLength: 1`.
 
@@ -228,20 +426,45 @@ def require_nonempty_strings(schema: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
-def normalize_bfcl_schema(node: Any, *, path: str = "") -> Any:
+def normalize_bfcl_schema(
+    node: Any, *, path: str = "", expand_wildcard: bool = True
+) -> Any:
     """Rewrite a BFCL parameter schema into JSON Schema, recursively.
 
     Translates the type vocabulary via `BFCL_TYPE_MAP`, drops BFCL's `default`
     and `optional` annotations (which are documentation, not constraints), and
     leaves everything else untouched.
 
+    Args:
+      node: a BFCL `function[].parameters` block, or a fragment of one.
+      path: dotted path, for error messages.
+      expand_wildcard: rewrite every typeless sub-schema — BFCL's `"type":
+        "any"`, a literal `{}`, a node whose only key was an annotation — as an
+        explicit `anyOf` over `WILDCARD_ANYOF_TYPES`. **Default `True`: the safe
+        behaviour is what you get when you do not ask.** `False` reproduces the
+        pre-fix language, in which the wildcard's alternation escapes the
+        enclosing object; it is kept only so an old arm can be re-run, and the
+        build gate still refuses the result (see `pipeline.compile_json_schema`).
+
     Raises:
       UnsupportedSchemaError: on an unrecognised type name, so a new dialect
         leaking into the data set is a loud failure rather than a silently
         mistyped grammar.
     """
+    out = _normalize_bfcl(node, path=path)
+    return _expand_wildcards(out) if expand_wildcard else out
+
+
+def _normalize_bfcl(node: Any, *, path: str = "") -> Any:
+    """The BFCL dialect translation itself; see `normalize_bfcl_schema`.
+
+    Split out so the wildcard expansion runs **once, at the top**, over a
+    schema-position-aware walk. Applying it inside this generic recursion would
+    reach `enum` and `default` *values*, where a bare JSON object literal is
+    "typeless" and would be rewritten into a schema.
+    """
     if isinstance(node, list):
-        return [normalize_bfcl_schema(v, path=f"{path}[{i}]") for i, v in enumerate(node)]
+        return [_normalize_bfcl(v, path=f"{path}[{i}]") for i, v in enumerate(node)]
     if not isinstance(node, dict):
         return node
 
@@ -283,7 +506,7 @@ def normalize_bfcl_schema(node: Any, *, path: str = "") -> Any:
             # occurrences; `check_supported` recurses correctly here, so the
             # fail-loud pre-pass could not see the asymmetry either.
             out[key] = {
-                name: normalize_bfcl_schema(sub, path=f"{path}.{key}.{name}")
+                name: _normalize_bfcl(sub, path=f"{path}.{key}.{name}")
                 for name, sub in value.items()
             }
             continue
@@ -319,7 +542,7 @@ def normalize_bfcl_schema(node: Any, *, path: str = "") -> Any:
                 mapped.append(BFCL_TYPE_MAP[v])
             out["type"] = mapped
             continue
-        out[key] = normalize_bfcl_schema(value, path=f"{path}.{key}" if path else key)
+        out[key] = _normalize_bfcl(value, path=f"{path}.{key}" if path else key)
     return out
 
 
@@ -403,7 +626,14 @@ def check_supported(
 
     if not allow_wildcard:
         t = node.get("type")
-        if t in WILDCARD_TYPES or node.get("__wildcard__"):
+        # `isinstance(t, str)` is not decoration: `{"type": ["string", "null"]}`
+        # is legal JSON Schema (and `normalize_bfcl_schema` explicitly maps type
+        # unions), `WILDCARD_TYPES` is a frozenset, and `list in frozenset`
+        # raises `TypeError: unhashable type: 'list'` — an unhandled crash in a
+        # module whose whole contract is to raise `UnsupportedSchemaError` or
+        # pass. It fires only on the `allow_wildcard=False` path, which is why
+        # no production call site ever hit it.
+        if (isinstance(t, str) and t in WILDCARD_TYPES) or node.get("__wildcard__"):
             raise UnsupportedSchemaError(
                 path, "type",
                 "a wildcard over all JSON types; pass allow_wildcard=True "
@@ -629,7 +859,8 @@ def _synth(node: Any, *, path: str, depth: int) -> Any:
 
 
 def synthesize_instance(
-    schema: dict[str, Any], *, from_bfcl: bool = False
+    schema: dict[str, Any], *, from_bfcl: bool = False,
+    expand_wildcard: bool = True,
 ) -> dict:
     """A minimal instance the **grammar** should accept, for the build gate.
 
@@ -658,9 +889,15 @@ def synthesize_instance(
     first member that is type-consistent and ASCII, relaxing each of those two
     preferences in turn if no member satisfies them.
 
-    Measured over all 4,549 BFCL-Live schemas: 0 failures to synthesize, and 11
-    schemas whose grammar then rejects **all five** renderings of their own
-    instance — a real defect the gate had never been given the chance to see.
+    Measured over all 4,549 BFCL-Live schemas *before* the wildcard fix: 0
+    failures to synthesize, and 11 schemas whose grammar then rejects **all
+    five** renderings of their own instance — a real defect the gate had never
+    been given the chance to see. After the fix: 0 of 4,549 refused.
+
+    `expand_wildcard` must match what the grammar was built with (both default
+    to `True`), or the gate compares an instance against a language it was not
+    drawn from. Under the expansion a wildcard property synthesizes to `"a"`,
+    the first arm of `WILDCARD_ANYOF_TYPES`, rather than `1`.
 
     Raises:
       UnsupportedSchemaError: when no instance can be produced that the grammar
@@ -670,7 +907,13 @@ def synthesize_instance(
         reason about, which is how the original defect survived.
     """
     if from_bfcl:
-        schema = normalize_bfcl_schema(schema)
+        schema = normalize_bfcl_schema(schema, expand_wildcard=expand_wildcard)
+    elif expand_wildcard:
+        # **[REVIEW 2026-08-12] Not `if from_bfcl` alone.** `build_regex`
+        # expands on both paths, so gating the instance on `from_bfcl` made the
+        # flag a no-op for a plain JSON Schema and left the gate comparing an
+        # instance against a language it was not drawn from.
+        schema = _expand_wildcards(schema)
     value = _synth(schema, path="", depth=0)
     if not isinstance(value, dict):
         raise UnsupportedSchemaError(
@@ -776,6 +1019,7 @@ def build_regex(
     allow: Iterable[str] = (),
     allow_wildcard: bool = False,
     whitespace_pattern: str | None = None,
+    expand_wildcard: bool = True,
 ) -> str:
     """Compile a schema to an anchored byte-level regex.
 
@@ -786,6 +1030,13 @@ def build_regex(
       allow_wildcard: permit the 7-way-alternation shapes.
       whitespace_pattern: passed through to outlines; `""` forbids whitespace
         between tokens, which shrinks the automaton considerably.
+      expand_wildcard: rewrite typeless sub-schemas as an explicit `anyOf` over
+        `WILDCARD_ANYOF_TYPES`, so outlines' unparenthesised expansion cannot
+        let a branch escape the enclosing object. **Default `True`.** Applied
+        whatever the value of `from_bfcl`: `"type": "any"` is only one route to
+        a typeless node, a literal `{}` sub-schema is another, and
+        `allow_wildcard=True` (which every production call site passes) lets it
+        through untouched.
 
     Returns:
       The regex string.
@@ -793,7 +1044,11 @@ def build_regex(
     import outlines_core as oc  # local: keeps import cost off module load
 
     if from_bfcl:
-        schema = normalize_bfcl_schema(schema)
+        schema = normalize_bfcl_schema(schema, expand_wildcard=expand_wildcard)
+    if expand_wildcard:
+        # Idempotent after `normalize_bfcl_schema`; the second call is what
+        # covers the non-BFCL routes.
+        schema = _expand_wildcards(schema)
     check_supported(schema, allow=allow, allow_wildcard=allow_wildcard)
     schema = _strip_markers(schema)
 

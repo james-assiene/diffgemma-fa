@@ -356,6 +356,22 @@ Three things make this **not** comparable to SPEC §7.3's projection:
 - `j0-map`: n=130 of 130 available; skipped at compile time: none; seed=0; entropy_bound=0.1; nonempty_strings=True; 3518.4 s.
 - `j0-sample`: n=130 of 130 available; skipped at compile time: none; seed=0; entropy_bound=0.1; nonempty_strings=True; 5523.7 s.
 
+> ### [2026-08-12] THE DENOMINATOR HAS THREE CATEGORIES, NOT TWO — and every row above is in the third
+>
+> The `any`-wildcard grammar fix (SPEC §4.2; `compile/schema.py: WILDCARD_ANYOF_TYPES`) repairs 11 of
+> BFCL-Live's 4,549 schemas, **two of them inside this 130-record cut** —
+> `live_simple_117-73-0` and `live_simple_122-78-0`. Before deciding whether any two rows are
+> comparable, work out which category each artifact is in:
+>
+> | category | `n` / `records_available` / skips | what the fix does to it |
+> |---|---|---|
+> | **pre-gate** — every row in this table, plus `exp_e5_grammar130_*`, `exp_seed{1,2,3}_map`, `exp_abl_*`, `exp_oomfix_*`, `exp_f64_*`, `exp_greedy_unconstrained`, `exp_noorder_unc` | 130 / 130 / none | `n` does **not** move — but both records were scored **under the broken grammar**, so `cs`, `schema_valid` and `arg_accuracy` are contaminated on 2 of 130. `live_simple_122-78-0` emitted the single character `1` at CS 1.000 with `schema_valid=False`. **A post-fix n=130 is not comparable to a pre-gate n=130 either.** |
+> | **post-gate** — 7 artifacts | 128 / **130** / `{"compile:ValueError": 2}` | `n` moves **128 → 130**: the two records stop being refused and are scored under a correct grammar. |
+> | **a different cut** — the five `exp_h2_*` | 128 / **128** / none | reports 128 for an unrelated reason and **does not move**. |
+>
+> The discriminator is `records_available`, never `n`. Measured gate survey over the whole
+> population: 4,538 / 4,549 before the fix, **4,549 / 4,549** after (`docs/LOG.md`, 2026-08-12).
+
 - **Task**: `bfcl_live_simple`. This is one split, not all of BFCL. Records with more than one candidate function are excluded — the grammar is compiled from a single schema.
 - `--nonempty` gives every required string `minLength: 1`. Measured cost: exactly two BFCL-Live ground truths are required strings the benchmark accepts as empty (`live_multiple_507-149-4`, `live_multiple_834-178-9`), and they are unanswerable under this flag.
 - **`DGFA_DEDICATED=1`.** If 0, JAX preallocation is off and the GPU is shared: any latency number measured here is pessimistic and not publishable (CLAUDE.md). The columns above are accuracy, not latency, and are unaffected.
