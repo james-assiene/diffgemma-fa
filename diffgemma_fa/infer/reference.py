@@ -235,13 +235,60 @@ def label_count_matrix(automaton: Automaton, token: int) -> np.ndarray:
 # §2.4 — forward–backward
 # ---------------------------------------------------------------------------
 
+def _log(x: np.ndarray) -> np.ndarray:
+    """Elementwise `log` with exact zeros mapped to `-inf`, no warning.
+
+    `-inf` and not a finite sentinel: this module is plain numpy, there is no
+    fused kernel to produce `NaN` from `-inf + -inf`, and every reduction below
+    anchors on its own max so `-inf` never participates in an arithmetic that
+    could produce `NaN`. (SPEC §2.7's finite-sentinel rule is about the JAX
+    kernels; `scans.NEG_SENTINEL` exists for that reason and this does not.)
+    """
+    x = np.asarray(x, dtype=np.float64)
+    pos = x > 0.0
+    out = np.full(x.shape, -np.inf, dtype=np.float64)
+    np.log(np.where(pos, x, 1.0), out=out, where=pos)
+    return out
+
+
+def _lse(t: np.ndarray, axis: int | None = None) -> np.ndarray | float:
+    """`logsumexp` anchored on the reduced axis's own max.
+
+    Relative to the max the dominant term is `exp(0) = 1`, so nothing that
+    matters underflows at any dynamic range — the same argument that moved
+    `scans.log_matmul` to a pairwise-max anchor after two wrong shifts were
+    measured on real grammars. An all-`-inf` slice reduces to `-inf` rather
+    than `NaN`, which is what `m - m = -inf - -inf` would give.
+    """
+    t = np.asarray(t, dtype=np.float64)
+    m = np.max(t, axis=axis)
+    finite = np.isfinite(m)
+    safe = np.where(finite, m, 0.0)
+    shifted = t - (safe if axis is None else np.expand_dims(safe, axis))
+    s = np.sum(np.exp(shifted), axis=axis)
+    with np.errstate(divide="ignore"):
+        out = safe + np.log(s)
+    out = np.where(finite, out, -np.inf)
+    return float(out) if axis is None else out
+
+
 @dataclasses.dataclass(frozen=True)
 class ForwardBackward:
-    """Scaled `a`/`b` with their accumulated log-scales.
+    """`a`/`b` in **both** representations: log space, and scaled linear.
 
     `a[i]` is `a_i` in SPEC's notation: the vector **before** position `i`, so
     `a[0] == start` and `a[L]` is the vector after the last position.
     Likewise `b[i]` is the vector before position `i`, with `b[L] == b_L`.
+
+    **`log_a` / `log_b` are the primary representation and everything in this
+    module reads them.** `a`, `b`, `log_scale_a`, `log_scale_b` are the same
+    vectors max-normalised — `a[i] · exp(log_scale_a[i])` is the true prefix
+    vector — kept because the JAX kernels take linear factors and the
+    differential tests feed them straight across. They are lossy by
+    construction: a vector whose internal dynamic range exceeds ~745 nats
+    cannot be held in a float64 linear vector at any single scale, and that
+    loss is exactly the defect the log fields exist to remove (see
+    `forward_backward`).
     """
 
     a: np.ndarray        # [L+1, S]
@@ -250,17 +297,35 @@ class ForwardBackward:
     log_scale_b: np.ndarray  # [L+1]
     log_Z: float
     scaled: bool
+    log_a: np.ndarray | None = None   # [L+1, S], `-inf` where exactly zero
+    log_b: np.ndarray | None = None   # [L+1, S]
+
+    @property
+    def la(self) -> np.ndarray:
+        """`log a_i`, unscaled. Reconstructed for hand-built instances."""
+        if self.log_a is not None:
+            return self.log_a
+        return _log(self.a) + np.asarray(self.log_scale_a)[:, None]
+
+    @property
+    def lb(self) -> np.ndarray:
+        """`log b_i`, unscaled."""
+        if self.log_b is not None:
+            return self.log_b
+        return _log(self.b) + np.asarray(self.log_scale_b)[:, None]
 
     def log_Z_at(self, i: int) -> float:
-        """`log(a_i · b_i) + logscale_a[i] + logscale_b[i]`.
+        """`logsumexp_s (log a_i(s) + log b_i(s))`.
+
+        Identical in exact arithmetic to `log(a_i · b_i) + logscale_a[i] +
+        logscale_b[i]`, and that is still what it computes for an unscaled
+        `ForwardBackward` — but evaluated on the log vectors it survives a
+        within-vector range the linear dot cannot hold.
 
         SPEC §2.4 requires this be **`i`-invariant**; §6.1 test 2 asserts it
         across all `i`.
         """
-        dot = float(self.a[i] @ self.b[i])
-        if dot <= 0.0:
-            return -np.inf
-        return float(np.log(dot) + self.log_scale_a[i] + self.log_scale_b[i])
+        return float(_lse(self.la[i] + self.lb[i]))
 
 
 def forward_backward(
@@ -272,15 +337,59 @@ def forward_backward(
 ) -> ForwardBackward:
     """SPEC eq (3)/(4), longhand.
 
+    **`scaled=True` runs the recursions in log space.** Max-normalising each
+    vector and accumulating log-scales — what this used to do — bounds a
+    vector's *maximum*, not its internal dynamic range, and that is not the
+    same thing. It is the identical construction `scans.prefix_suffix` was
+    rewritten to eliminate in commit `2c9f9d9`, and it fails here for the same
+    reason: with SPEC §3.5's mandatory unscored `ACC --Σ--> ACC` tail beside a
+    live chain, the tail's emission mass is exactly 1.0, so it pins `max_s
+    b_i(s) = 1` while the chain sits at `e^{-30(L-i)}`. At `L = 32` the start
+    state's `b_0` divides straight to exactly `0.0`, `log Z` comes back `-inf`,
+    and `marginals` / `sample_chain` / `sample_tree` then raise
+    `EmptyLanguageError` on a language whose true `log Z` is `-956.566` —
+    CLAUDE.md's cause **(c)** delivered to the caller as **(a)/(b)**, the
+    misclassification the taxonomy exists to prevent. Measured rate on random
+    `V = 4` instances: 0/33 at `L=32, σ=45`; 1/35 at `L=64, σ=20`; 1/32 at
+    `L=256, σ=10`; 2/31 at `L=256, σ=45`.
+
+    Log space is the **simplest** correct fix rather than a port of the fast
+    path's machinery, and this file is required to prefer that (CLAUDE.md:
+    "plain float64 numpy with no cleverness"). `scans.prefix_suffix` cannot do
+    this: its callers are JAX kernels that read a *pair of linear factors*, so
+    it is forced into a balanced pair of scales, a widening floor and a
+    `feasible_out` flag — a whole apparatus whose only purpose is to survive the
+    two-factor linear interface. Here the consumers are three functions in this
+    module, so the log vectors can simply be handed to them and every one of
+    those trade-offs disappears. There is no accuracy question left to guard: an
+    `L`-fold product of logs is exact to a rounding, at any dynamic range.
+
+    `a`, `b`, `log_scale_a` and `log_scale_b` are still returned, still
+    max-normalised, and still satisfy `a[i]·exp(log_scale_a[i]) == a_i`,
+    because the JAX differential tests feed them straight into the kernels —
+    `tests/test_numerics.py` (:102, :121–127, :356, :365) and
+    `tests/test_exactness.py` (:516, :632–633) read them, and the convention is
+    preserved: measured difference against the pre-log-space code is 3.3e-12.
+    They remain lossy — that is a property of a linear vector at one scale, not
+    of how it was computed.
+
+    **No consumer in this module reads them on any path this module
+    constructs.** The one thing that can is `ForwardBackward.la`/`.lb`, which
+    fall back to reconstructing the log vectors from `a` and `log_scale_a` when
+    `log_a is None` — i.e. only for a hand-built `ForwardBackward`, of which
+    there are none in `diffgemma_fa/`, `tests/` or `scripts/`. Dead in
+    practice, not dead by construction, and the difference is worth stating
+    rather than rounding off.
+
     Args:
       M: `[L, S, S]`.
       a_start: `[S]`, the start **vector**.
       b_final: `[S]`, the terminal factor — `1[d(s) ≤ R]` in the port, **not**
         `1[s ∈ F]` (SPEC §3.1b).
-      scaled: max-normalize each `a_i`/`b_i` and accumulate log-scales.
-        Mandatory in fp32 at `L = 256`, where the unnormalized product
-        underflows to exactly zero. Kept optional so §6.3 can demonstrate the
-        underflow it is there to prevent.
+      scaled: run in log space and return max-normalised linear vectors with
+        their log-scales. `scaled=False` keeps the plain unnormalised linear
+        recursion, so §6.3 can still demonstrate the underflow that motivates
+        all of this.
 
     Returns:
       A `ForwardBackward`.
@@ -291,40 +400,57 @@ def forward_backward(
     ls_a = np.zeros(L + 1, dtype=np.float64)
     ls_b = np.zeros(L + 1, dtype=np.float64)
 
-    a[0] = a_start
-    if scaled:
-        m = a[0].max()
-        if m > 0:
-            a[0] = a[0] / m
-            ls_a[0] = np.log(m)
+    if not scaled:
+        # SPEC §6.3's demonstration path: no scaling of any kind, so the
+        # underflow it exists to exhibit still happens.
+        a[0] = a_start
+        for i in range(L):
+            a[i + 1] = a[i] @ M[i]
+        b[L] = b_final
+        for i in range(L - 1, -1, -1):
+            b[i] = M[i] @ b[i + 1]
+        dot = float(a[0] @ b[0])
+        log_Z = -np.inf if dot <= 0.0 else float(np.log(dot))
+        return ForwardBackward(a=a, b=b, log_scale_a=ls_a, log_scale_b=ls_b,
+                               log_Z=log_Z, scaled=False,
+                               log_a=_log(a), log_b=_log(b))
+
+    logM = _log(M)                                        # [L, S, S]
+    log_a = np.full((L + 1, S), -np.inf, dtype=np.float64)
+    log_b = np.full((L + 1, S), -np.inf, dtype=np.float64)
+
+    log_a[0] = _log(a_start)
     for i in range(L):
-        a[i + 1] = a[i] @ M[i]
-        ls_a[i + 1] = ls_a[i]
-        if scaled:
-            m = a[i + 1].max()
-            if m > 0:
-                a[i + 1] = a[i + 1] / m
-                ls_a[i + 1] += np.log(m)
+        # log a_{i+1}(t) = logsumexp_s (log a_i(s) + log M_i(s, t))
+        log_a[i + 1] = _lse(log_a[i][:, None] + logM[i], axis=0)
 
-    b[L] = b_final
-    if scaled:
-        m = b[L].max()
-        if m > 0:
-            b[L] = b[L] / m
-            ls_b[L] = np.log(m)
+    log_b[L] = _log(b_final)
     for i in range(L - 1, -1, -1):
-        b[i] = M[i] @ b[i + 1]
-        ls_b[i] = ls_b[i + 1]
-        if scaled:
-            m = b[i].max()
-            if m > 0:
-                b[i] = b[i] / m
-                ls_b[i] += np.log(m)
+        # log b_i(s) = logsumexp_t (log M_i(s, t) + log b_{i+1}(t))
+        log_b[i] = _lse(logM[i] + log_b[i + 1][None, :], axis=1)
 
-    dot = float(a[0] @ b[0])
-    log_Z = -np.inf if dot <= 0.0 else float(np.log(dot) + ls_a[0] + ls_b[0])
+    # Max-normalised linear view. An all-`-inf` vector keeps the previous
+    # scale — exactly what the old carried `ls_a[i+1] = ls_a[i]` did — so a
+    # dead boundary does not silently reset the bookkeeping.
+    for i in range(L + 1):
+        m = float(np.max(log_a[i]))
+        if np.isfinite(m):
+            ls_a[i] = m
+        elif i > 0:
+            ls_a[i] = ls_a[i - 1]
+        a[i] = np.exp(log_a[i] - ls_a[i])
+    for i in range(L, -1, -1):
+        m = float(np.max(log_b[i]))
+        if np.isfinite(m):
+            ls_b[i] = m
+        elif i < L:
+            ls_b[i] = ls_b[i + 1]
+        b[i] = np.exp(log_b[i] - ls_b[i])
+
+    log_Z = float(_lse(log_a[0] + log_b[0]))
     return ForwardBackward(a=a, b=b, log_scale_a=ls_a, log_scale_b=ls_b,
-                           log_Z=log_Z, scaled=scaled)
+                           log_Z=log_Z, scaled=True,
+                           log_a=log_a, log_b=log_b)
 
 
 # ---------------------------------------------------------------------------
@@ -343,22 +469,37 @@ def marginals(
     vector before position `i` and `b[i+1]` the one after it. Verified against
     brute-force enumeration; there is no off-by-one.
 
+    **`u` is formed in log space and anchored on the position's own dominant
+    edge.** `q_i` is normalised by its row total, so a per-position constant
+    cancels exactly — which makes `max_e log u_i(e)` the anchor that loses
+    least, and it is *available here* only because the row is closed over `i`.
+    (`scans.prefix_suffix`' docstring rejects the same anchor for the JAX path,
+    correctly: its consumers read `u` through `a` and `b` alone, with no
+    channel to add a per-position scale back.) With this anchor the dominant
+    edge sits at `exp(0)` at every position, so a live position can never come
+    back empty at any dynamic range.
+
     Returns:
       `[L, V] float64` with `Σ_v q_i(v) == 1` for every `i`.
     """
     L, V = p.shape
+    la, lb = fb.la, fb.lb
     q = np.zeros((L, V), dtype=np.float64)
     for i in range(L):
         # u_i over edges, then scatter each edge's mass onto its label set.
+        log_u = np.array(
+            [la[i][src] + lb[i + 1][dst] for src, dst, _ in automaton.edges],
+            dtype=np.float64) if automaton.n_edges else np.zeros(0)
+        anchor = np.max(log_u) if log_u.size else -np.inf
         acc = np.zeros(V, dtype=np.float64)
-        for e, (src, dst, labels) in enumerate(automaton.edges):
-            u = fb.a[i][src] * fb.b[i + 1][dst]
-            if u == 0.0 or not labels:
-                continue
-            idx = np.fromiter(sorted(labels), dtype=np.int64, count=len(labels))
-            acc[idx] += u
-        # The scale of a[i]*b[i+1] is not the scale of Z; normalise by the
-        # row's own total, which equals a_i.b_i/Z == 1 analytically.
+        if np.isfinite(anchor):
+            u_all = np.exp(log_u - anchor)
+            for e, (_, _, labels) in enumerate(automaton.edges):
+                if u_all[e] == 0.0 or not labels:
+                    continue
+                idx = np.fromiter(sorted(labels), dtype=np.int64,
+                                  count=len(labels))
+                acc[idx] += u_all[e]
         row = p[i] * acc
         total = row.sum()
         if total <= 0.0:
@@ -400,12 +541,20 @@ def marginals_complement_aware(
     """
     L, V = p.shape
     n_classes = len(class_members)
+    la, lb = fb.la, fb.lb
     q = np.zeros((L, V), dtype=np.float64)
 
     for i in range(L):
+        # Same log-space, position-anchored `u` as `marginals` — see there.
+        log_u = np.array(
+            [la[i][src] + lb[i + 1][dst] for src, dst, _ in automaton.edges],
+            dtype=np.float64) if automaton.n_edges else np.zeros(0)
+        anchor = np.max(log_u) if log_u.size else -np.inf
         U = np.zeros(n_classes, dtype=np.float64)
-        for e, (src, dst, _) in enumerate(automaton.edges):
-            U[class_of[e]] += fb.a[i][src] * fb.b[i + 1][dst]
+        if np.isfinite(anchor):
+            u_all = np.exp(log_u - anchor)
+            for e in range(automaton.n_edges):
+                U[class_of[e]] += u_all[e]
 
         r = np.zeros(V, dtype=np.float64)
         # Every negated class contributes its full mass everywhere...
@@ -447,6 +596,20 @@ def _choice(rng: np.random.Generator, weights: np.ndarray) -> int:
     return int(rng.choice(len(weights), p=weights / total))
 
 
+def _exp_anchored(log_w: np.ndarray) -> np.ndarray:
+    """`exp(log_w − max log_w)`, i.e. the same weights up to the one constant
+    a subsequent normalisation removes. All-`-inf` in, all-zero out — so
+    `_choice` still raises `EmptyLanguageError` on a genuinely dead draw.
+    """
+    log_w = np.asarray(log_w, dtype=np.float64)
+    if log_w.size == 0:
+        return np.zeros(0, dtype=np.float64)
+    m = np.max(log_w)
+    if not np.isfinite(m):
+        return np.zeros_like(log_w)
+    return np.exp(log_w - m)
+
+
 def sample_chain(
     p: np.ndarray,
     automaton: Automaton,
@@ -459,12 +622,19 @@ def sample_chain(
     It draws the *edge* first, which is what makes it path-weighted and hence
     the reference the tree sampler must match in distribution.
 
+    Every draw here is a categorical over one position's candidates, and
+    `_choice` normalises by their sum — so each weight vector is formed in log
+    space and anchored on its own maximum. That is exact at any dynamic range
+    and it is what stops SPEC §3.5's unscored tail from normalising the live
+    chain's `b` to zero (see `forward_backward`).
+
     Returns:
       `(tokens [L], states [L+1])`.
     """
     L = p.shape[0]
+    la, lb = fb.la, fb.lb
     # The start is a vector, so draw s_0 ~ a_start(s) * b_0(s) (SPEC §5.7).
-    s = _choice(rng, fb.a[0] * fb.b[0])
+    s = _choice(rng, _exp_anchored(la[0] + lb[0]))
 
     tokens = np.zeros(L, dtype=np.int64)
     states = np.zeros(L + 1, dtype=np.int64)
@@ -472,11 +642,12 @@ def sample_chain(
 
     for i in range(L):
         # e_i ~ P(e) proportional to 1[src(e)=s] * W[i,e] * b_i(dst e)
-        w = np.zeros(automaton.n_edges, dtype=np.float64)
+        log_w = np.full(automaton.n_edges, -np.inf, dtype=np.float64)
+        logW_i = _log(W[i])
         for e, (src, dst, _) in enumerate(automaton.edges):
             if src == s:
-                w[e] = W[i, e] * fb.b[i + 1][dst]
-        e = _choice(rng, w)
+                log_w[e] = logW_i[e] + lb[i + 1][dst]
+        e = _choice(rng, _exp_anchored(log_w))
         _, dst, labels = automaton.edges[e]
 
         # x_i ~ P(v) proportional to p_i(v) * 1[v in label(e_i)]
@@ -534,6 +705,34 @@ def _range_product(M: np.ndarray, lo: int, hi: int,
     return prod
 
 
+def _log_matmul(A: np.ndarray, B: np.ndarray) -> np.ndarray:
+    """`C[i,j] = logsumexp_k (A[i,k] + B[k,j])`, pairwise-max anchored.
+
+    The numpy twin of `scans.log_matmul`, and for the reason recorded there at
+    length: only the pairwise max makes every *entry's* dominant term `exp(0)`,
+    so nothing that matters underflows at any dynamic range. A single row/col
+    shift returns `Z == 0` on a provably non-empty language as soon as SPEC
+    §3.5's unscored tail sits beside a real grammar path.
+    """
+    t = A[:, :, None] + B[None, :, :]          # [S, S, S]
+    return np.asarray(_lse(t, axis=1))
+
+
+def _log_range_product(logM: np.ndarray, lo: int, hi: int,
+                       cache: dict[tuple[int, int], np.ndarray]) -> np.ndarray:
+    """`log P_{[lo,hi)}`, memoized, left block first (SPEC §2.6(c))."""
+    if (lo, hi) in cache:
+        return cache[(lo, hi)]
+    if hi - lo == 1:
+        cache[(lo, hi)] = logM[lo]
+        return logM[lo]
+    mid = (lo + hi) // 2
+    prod = _log_matmul(_log_range_product(logM, lo, mid, cache),
+                       _log_range_product(logM, mid, hi, cache))
+    cache[(lo, hi)] = prod
+    return prod
+
+
 def sample_tree(
     p: np.ndarray,
     automaton: Automaton,
@@ -555,6 +754,15 @@ def sample_tree(
         e_i ~ 1[src=s_i, dst=s_{i+1}] · W[i, e]                            (8a)
         x_i ~ p_i(v) · 1[v ∈ label(e_i)]                                   (8b)
 
+    **The dyadic products are formed in log space** (`_log_matmul`), for the
+    same reason `forward_backward` is and `tree.sample_states_log` is on the
+    JAX side: an `L`-fold linear product of matrices whose entries span SPEC
+    §3.5's unscored tail (mass 1.0) beside a real grammar path (`e^{-30}` a
+    token) underflows to exactly zero, and the root draw then raises
+    `EmptyLanguageError` — cause (c) reported as (a)/(b). Each draw is a
+    categorical, so the log weights are anchored on their own maximum and the
+    one constant that leaves cancels in the normalisation.
+
     Args:
       use_exists_form: draw `x_i ∝ p_i(v) · 1[∃e : …, v ∈ label(e)]` instead of
         the edge-multiplicity-weighted form. **This is the bug**, exposed
@@ -567,17 +775,19 @@ def sample_tree(
     """
     L = p.shape[0]
     S = automaton.n_states
-    cache: dict[tuple[int, int], np.ndarray] = block_products(M)
+    logM = _log(M)
+    cache: dict[tuple[int, int], np.ndarray] = {}
 
     # --- root: draw (s_0, s_L) jointly -----------------------------------
-    P0L = _range_product(M, 0, L, cache)
-    joint = a_start[:, None] * P0L * b_final[None, :]
+    log_P0L = _log_range_product(logM, 0, L, cache)
+    log_joint = (_log(a_start)[:, None] + log_P0L + _log(b_final)[None, :])
+    joint = _exp_anchored(log_joint.ravel())
     total = joint.sum()
     if total <= 0.0:
         raise EmptyLanguageError(
             "Z == 0: no accepted string of this length within budget"
         )
-    flat = int(rng.choice(S * S, p=(joint / total).ravel()))
+    flat = int(rng.choice(S * S, p=joint / total))
     s0, sL = divmod(flat, S)
 
     states = np.full(L + 1, -1, dtype=np.int64)
@@ -589,10 +799,10 @@ def sample_tree(
         if hi - lo <= 1:
             return
         mid = (lo + hi) // 2
-        left = _range_product(M, lo, mid, cache)
-        right = _range_product(M, mid, hi, cache)
-        w = left[states[lo], :] * right[:, states[hi]]
-        states[mid] = _choice(rng, w)
+        left = _log_range_product(logM, lo, mid, cache)
+        right = _log_range_product(logM, mid, hi, cache)
+        log_w = left[states[lo], :] + right[:, states[hi]]
+        states[mid] = _choice(rng, _exp_anchored(log_w))
         recurse(lo, mid)
         recurse(mid, hi)
 
@@ -650,13 +860,31 @@ def map_decode(
     **Tie-break: lowest token id, then lowest state id.** `test_guarantee` and
     the unconstrained-equivalence test depend on it.
 
+    **The floor under `p` is `finfo(dtype).tiny`, derived from the dtype, and
+    it must stay that way.** It was `1e-300`, which is eight orders of
+    magnitude above the JAX path's — `model/constrained.map_log_floor` was
+    moved from `1e-30` to `finfo(dtype).tiny` and its docstring records that
+    finding at length. A floor is not a clamp on a value that is about to be
+    multiplied by zero (SPEC §2.4's `1e-30` rule about `q`, which has exact
+    zeros); `p` is a softmax with no exact zeros, so every token underneath the
+    floor scores the same `log(floor)` and the §2.7 tie-break then emits the
+    *smallest admissible token id* rather than the most probable one, with
+    `feasible` still True. Measured on the old floor: MAP emitted token 0 at
+    `p = 1.000e-305` over token 1 at `p = 1.000e-301`. Reachable — softcapped
+    logits with a 56-nat gap at `T = 0.08`, and `_MIN_TEMP = 1e-12` makes any
+    `T` reachable by configuration alone (SPEC §3.9). While the two floors
+    differed, **the arbiter was less exact than the path it certifies** and any
+    differential test landing in the window would have blamed the fast path.
+
     Returns:
       `(tokens [L], states [L+1], log_score)`.
     """
     L, _ = p.shape
     S = automaton.n_states
+    # Smallest normal of the input dtype, exactly `constrained.map_log_floor`.
+    floor = float(np.finfo(np.asarray(p).dtype).tiny)
     with np.errstate(divide="ignore"):
-        logp = np.where(p > 0.0, np.log(np.maximum(p, 1e-300)), _NEG)
+        logp = np.where(p > 0.0, np.log(np.maximum(p, floor)), _NEG)
 
     # M_tilde[i, s, s'] and the token realising it.
     Mt = np.full((L, S, S), _NEG, dtype=np.float64)
@@ -675,8 +903,11 @@ def map_decode(
                 Mt[i, src, dst] = best
                 arg[i, src, dst] = tok
 
-    log_a_start = np.where(a_start > 0.0, np.log(np.maximum(a_start, 1e-300)), _NEG)
-    log_b_final = np.where(b_final > 0.0, np.log(np.maximum(b_final, 1e-300)), _NEG)
+    with np.errstate(divide="ignore"):
+        log_a_start = np.where(a_start > 0.0,
+                               np.log(np.maximum(a_start, floor)), _NEG)
+        log_b_final = np.where(b_final > 0.0,
+                               np.log(np.maximum(b_final, floor)), _NEG)
 
     # Forward max-plus, retaining backpointers.
     alpha = np.full((L + 1, S), _NEG, dtype=np.float64)

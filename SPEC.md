@@ -438,6 +438,24 @@ q_i(v) = p_i(v) · r_i(v) / Z          where  U_i(c) = Σ_{e ∈ class c} u_i(e)
 Verified against a direct scatter to 1.1e-16 with mixed polarity. [V] Getting this wrong silently
 produces a *plausible* wrong distribution that only §6.1 test 11 will catch.
 
+> **Regime qualifier added 2026-08-12.** That 1.1e-16 holds only **below ~69 nats of p-row dynamic
+> range**, and the sentence above was written without one. `infer/reference.py`'s
+> `marginals_complement_aware` computes the negated class as the linear difference
+> `Σ_Neg U[c] − Σ_{Neg, v∈N_c} U[c]`, which cancels catastrophically as that range grows: measured
+> against a `Fraction` oracle, 2/254 instances wrong at 4.19e-06 at 69 nats, 6/252 wrong at
+> **max err 1.000** at 150 nats, and worst relative error 1.32e+10 at 207. Plain `marginals` is
+> exact to ~1e-15 on the identical inputs. The shipped `T = 0.4` admits 150 nats per position, so
+> the onset is **inside production reach**, not a corner.
+>
+> **The JAX kernel this section prescribes is exact and that was measured, not assumed** — 420
+> instances of `marginals.class_weights` against the same oracle across 0/69/150/207/250 nats:
+> **0 wrong at every span**, worst 1.96e-16. It builds the negated class as
+> `outside + sel @ gathered`, a sum of **non-negative** terms. So Layer 2b as specified is sound;
+> it is the float64 *reference* that diverges from it, which means the arbiter is weaker than the
+> path it certifies in this regime. Tracked as an open `[?]` in `docs/LOG.md` and pinned by
+> `tests/test_audit_infer.py::test_reference_complement_aware_marginals_survive_a_10e90_p_span`
+> (`xfail(strict=True)`).
+
 > **`q_i` has exact zeros wherever the automaton forbids a token. Never compute `log q_i`
 > directly.** For entropy use `lq = jnp.log(jnp.maximum(q, 1e-30))` and `H = -(q*lq).sum(-1)`,
 > which gives exactly `0·(−69) = 0` on forbidden tokens. For any write-back into a logits slot use

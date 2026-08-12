@@ -1588,3 +1588,231 @@ Also in this round:
   `WILDCARD_ANYOF_TYPES` as a second, narrower, **declared** reading of `any`.
 - Reviewer's find: `prefixItems: [{}]` was a fifth escape route the tester's
   known-defective list did not name. The fix repairs it too, unchanged.
+
+---
+
+## 2026-08-12 — `infer/` audit: the arbiter itself had two defects
+
+`infer/` was the one subsystem the four-slice audit never covered, and three
+defects had been found there since — none by the audit. A tester wrote
+`tests/test_audit_infer.py` (282 tests) against two oracles sharing no code with
+the implementation: a `fractions.Fraction` exact enumerator (path multiplicity
+from a memoized DFS over edges) and a 60-digit unbounded-exponent `decimal`
+forward pass. Six were red. **The headline is that `infer/reference.py` — the
+float64 oracle every optimised path is differential-tested against — was one of
+the things that was wrong.**
+
+The rest of it verified: `forward_backward`, `marginals`,
+`marginals_complement_aware`, `enumerate_posterior`, `sample_chain`,
+`sample_tree`, `map_decode`, `distance_to_final`, `budget_vector`, `simulate`,
+`accepts`, `block_products`, `max_over_class_topk` and `segment_max_argmin` all
+check out to ≤7.2e-15 against exact rationals across DFA/NFA × flat/σ∈{12,25,40}
+× point/set/weighted starts × `b_L` variants. And the circularity is broken:
+`test_exactness.py` validated the reference against `reference.enumerate_
+posterior` **in the same file**; that oracle is now itself verified against exact
+rationals.
+
+### 1. `forward_backward` reported a non-empty language empty
+
+Per-vector max normalisation bounds a vector's *maximum*, not its internal
+dynamic range. This is the same construction `scans.prefix_suffix` was rewritten
+to eliminate in `2c9f9d9`, and it failed here the same way: SPEC §3.5's mandatory
+unscored `ACC --Σ--> ACC` tail has emission mass exactly 1.0, so it pins
+`max_s b_i(s) = 1` while a live chain sits at `e^{-30(L-i)}`. At `L = 32` the
+start state's `b_0` divides straight to `0.0`.
+
+| L | 60-digit decimal chain | before | after |
+|---|---|---|---|
+| 8 | −238.0541 | −238.0541 | −238.0541 |
+| 16 | −477.2919 | −477.2919 | −477.2919 |
+| 32 | −956.5660 | **−inf** | −956.5660 |
+| 64 | −1915.8569 | **−inf** | −1915.8569 |
+| 256 | −7674.4587 | **−inf** | −7674.4587 |
+
+`marginals`, `sample_chain` and `sample_tree` then raised `EmptyLanguageError` —
+**CLAUDE.md's cause (c) delivered to the caller as (a)/(b)**, the exact
+misclassification the taxonomy exists to prevent. Rate on random `V = 4`
+instances: 0/33 at `L=32,σ=45`; 1/35 at `L=64,σ=20`; 1/32 at `L=256,σ=10`; 2/31
+at `L=256,σ=45` — a structural corner, not a common one, but the corner is
+SPEC §3.5's mandatory tail.
+
+**Fixed in full log space, deliberately *not* by porting the fast path.**
+`prefix_suffix` needs a balanced pair of scales, a widening floor and a
+`feasible_out` flag *only because* its consumers are JAX kernels reading a pair
+of **linear** factors; the whole apparatus exists to survive that interface.
+`reference.py`'s consumers are three functions in the same file, so the log
+vectors are handed to them directly and every trade-off disappears. `marginals`,
+`marginals_complement_aware` and `sample_chain` anchor `u` on the **position's
+own maximum** — the anchor `prefix_suffix`' docstring correctly rejects for JAX,
+available here because each row is normalised by its own total so the constant
+cancels exactly. `a`, `b`, `log_scale_a`, `log_scale_b` keep their convention
+(external readers: `test_numerics.py` :102/:121–127/:356/:365,
+`test_exactness.py` :516/:632–633); measured difference 3.3e-12.
+
+**`sample_tree` was fixed too, unbriefed and necessary.** It built the dyadic
+products linearly and raised on the same fixture *even when handed a fixed
+`forward_backward`*. Now `_log_matmul`, the numpy twin of `scans.log_matmul`.
+Reviewer-verified χ²-clean on the **joint** over whole token paths (21 × 20,000
+draws, 0 out-of-support, 0/21 failures at Bonferroni α = 0.00238);
+`block_products` / `_range_product` byte-identical.
+
+### 2. `map_decode`'s floor was eight orders above the fast path's
+
+`1e-300`, while `model/constrained.map_log_floor` had already been moved from
+`1e-30` to `finfo(dtype).tiny` — **so the arbiter was less exact than the path it
+certifies**, and between the two floors they rank tokens differently by
+construction. Measured: MAP emitted token 0 at `p = 1.000e-305` over token 1 at
+`p = 1.000e-301`. Reachable — softcapped logits with a 56-nat gap at `T = 0.08`,
+and `_MIN_TEMP = 1e-12` makes any `T` reachable by configuration (SPEC §3.9).
+Now `finfo(dtype).tiny`, matching, and applied to `a_start`/`b_final` too.
+
+### 3. `tree.map_states_and_tokens` broke ties by edge index, not token id
+
+SPEC §2.7 says lowest token id; `jnp.argmax(masked)` gave lowest **edge** index.
+Not live on the compiled path — `compile/automaton._group_edges` emits one edge
+per `(src,dst)` (confirmed on the real countdown artifact: S=124, E=268, **0
+duplicate `(src,dst)` pairs**) — but live for SPEC §4.6's NFA fallback and for
+any hand-built automaton, and a divergence from the arbiter on an input the
+signature accepts. Honoured the rule rather than asserting an unenforceable
+precondition: among edges tied at the row max, take the lowest `class_argmax`.
+Provably a no-op when one edge is selected. A fallback keeps the old answer on a
+no-edge transition so the int sentinel never leaks as a token id.
+
+### 4. `up_sweep`'s leaf flush was unreported — `[?]` from `2c9f9d9` closed
+
+`2c9f9d9` left this open: *"below T ~ 0.1, `up_sweep`'s linear `M_i / max(M_i)`
+underflows … losing live edges at UNFLAGGED positions via `viable == False`."*
+`prefix_suffix` rebuilds `log M_i` as `where(m > 0, …, NEG_SENTINEL)`, so a
+flushed entry is reclassified as a **structurally impossible transition** and the
+caller gets `Z == 0` with no way to classify it. Pinned at 737 nats of leaf span:
+`log Z = -3e+38` where the true value is `4789.38`, **with `feasible_out`
+reporting `all_representable=True`**.
+
+**Root cause, measured to the nat:** XLA flushes subnormals to zero, so the
+threshold is `|log(tiny)| = 708.396` nats above the leaf maximum, **not**
+float64's 744.44. `1e-20 / 1e300` returns exactly `0.0` under `jnp` where numpy
+returns the subnormal `1e-320`. The boundary was pinned between 708 and 709.
+(The tester's docstring still cites ~745; the fixture at 736.8 nats sits between
+the two, which is why it is red under `jnp` and would not be under numpy.)
+
+`_normalize` now returns a per-node loss mask, `up_sweep` ORs it up the tree into
+`TreeLevels.underflow [L] bool`, and `prefix_suffix` ANDs `~underflow` into
+`representable` **last** — it must be last, because the flushed leaf empties the
+position and the pre-existing `~any(viable)` clause would otherwise report it
+healthy. Confirmed empirically on a 730-nat leaf: without the flag `representable
+= [T,T,T,T]`, with it `[T,F,T,T]`. `underflow=None` means *not measured*, never a
+clean bill of health.
+
+**No over-reporting:** fired on 0/240 synthetic `L=256` sweeps (σ ≤ 45) and
+**0/256 positions on bfcl, countdown and sudoku at T = 1.0/0.4/0.2/0.1**. The
+`representable` counts at T ≤ 0.2 are entirely the pre-existing γ guard,
+unmoved.
+
+**Contract is narrower than it looks**, and the docstring now says so: the flag
+detects loss *caused by the division*. Past ~750 nats the entry is already `0.0`
+on arrival and reads False, because from `_normalize`'s vantage it is
+indistinguishable from a structurally absent transition. That needs the exact
+value, i.e. `up_sweep_log` (SPEC §2.6 `[V-P4]`).
+
+### Does the new arbiter change any published number? No.
+
+This was the question that mattered, since every "the fast path matches the
+reference" result is now re-derived through a different arbiter. Two independent
+sweeps, mine (400 instances) and the reviewer's (360 instances across
+`L ∈ {8…256}` × `σ ∈ {1…45}` × {DFA, NFA with parallel overlapping edges} ×
+{tail, no tail}):
+
+| quantity | divergence, old vs new |
+|---|---|
+| `log_Z` | **0 disagreements**; 0 regressions at the `-inf` boundary, against 1 case that went `-inf` → finite |
+| `map_decode` tokens | **0 of 302** differ; score identical to exactly 0.0 |
+| `marginals` `q` | 1.49e-13 |
+| linear `a`, `b`, scales | 3.33e-12 |
+
+Anchor verified exact against a `Fraction` oracle on NFAs with true multiplicity
+(1.19e-15). **No published result needs re-deriving.**
+
+Green: `test_audit_infer` 282, **`test_exactness` 254** (the file CLAUDE.md says
+must never go red, now running against the fixed arbiter), `test_audit_numerics`
+35, `test_audit_partition` 43, `test_audit_prefix_suffix` 29,
+`test_jax_differential` 103, `test_guarantee` 29; also `test_numerics` 36,
+`test_sampler` 33, `test_constrained_draw` 22, `test_kernel_shape` 24,
+`test_audit_sampler` 46.
+
+Mutants against `test_audit_infer.py`: `no_ceil` 1 kill, `forget_leaf_scales` 7
+kills — both still die, neither regressed. A `mute_leaf_underflow` mutant of my
+own kills 1, so the new detector is load-bearing rather than incidental.
+`prefix_suffix_off_by_one` **still survives**, and the honest reason is that the
+change gives `representable` a second independent *cause* and no new coverage of
+the γ guard: a mutant that makes γ over-fire cannot be caught by a suite
+asserting only "False at γ ≈ 2000". Killing it needs a test pinning
+`representable == True` under a moderate γ — a tester change. The right division
+of labour does hold: a related off-by-one is killed 1× by
+`test_audit_prefix_suffix.py` and 0× by `test_audit_infer.py`.
+
+### OPEN `[?]` — `marginals_complement_aware` is not exact at extreme dynamic range
+
+Found by the reviewer while verifying the above, **pre-existing, unchanged by
+this work, and not fixable from where the fix landed.** With mixed-polarity class
+tables and `p` rows spanning a wide log range, SPEC §2.4's complement-aware inner
+sum
+
+    r_i(v) = Σ_{c∈Neg} U_i(c) + Σ_{c∈Pos, v∈S_c} U_i(c) − Σ_{c∈Neg, v∈N_c} U_i(c)
+
+catastrophically cancels in the **linear** `r`, downstream of the log-space
+anchor on `u`, so no log-space fix to `u` reaches it. Reproduced independently
+here at `L = 4, V = 4`, mixed polarity, against the `Fraction` oracle:
+
+```
+p-row log-spread   marginals_complement_aware      marginals (plain scatter)
+   69 nats          2/254 wrong, max err 4.19e-06   0/254, max err 1.78e-15
+  150 nats          6/252 wrong, max err 1.000      0/252, max err 1.22e-15
+  300 nats          1/62  wrong, max err 1.000      0/62,  max err 4.44e-16
+```
+
+`|new − old|` on the identical inputs is **1.22e-15**, so this is not from the
+log-space change. The onset is well below the failure: it is already wrong at
+4e-06 at 69 nats, where nothing raises. **The 282 tests do not reach it** — their
+σ tops out around 30 nats — so this is a hole in the arbiter, not a caught
+regression. Not fixed here: it needs a compensated/log-space summation of the
+Pos/Neg algebra, which is a change to what SPEC §4.4 Layer 2b prescribes and
+belongs with whoever owns that. The JAX twin (`marginals.class_weights` /
+`scatter_edge_mass_to_tokens`) has had one cancellation defect already
+(`da1294a`) and should be measured in the same regime before it is trusted there.
+
+### Correction to the entry above: the blast radius is confined, and the repair is smaller
+
+Two claims in the `[?]` logged for `marginals_complement_aware` were wrong, and the
+reviewer measured what settled both.
+
+**The JAX twin is exact, and that is measured.** The open question was recorded as
+"unknown blast radius — the JAX twin has never been measured in this regime".
+It has been now: `marginals.class_weights` against the same `Fraction` oracle,
+420 instances, mixed polarity, spans 0 / 69 / 150 / 207 / 250 nats —
+**0 wrong at every span, worst relative error 1.96e-16.** The reason is
+structural: it forms the negated class as `outside + sel @ gathered`, a sum of
+**non-negative** terms, which is precisely the `da1294a` rebuild. So the defect
+is **confined to the reference** and nothing on the shipped path is at risk.
+
+**And repair is not a design change.** The earlier note said the fix needs
+compensated or log-space summation of the Pos/Neg algebra, and would change what
+SPEC §4.4 Layer 2b prescribes. **Retracted.** Layer 2b's kernel already uses the
+non-subtractive form and is exact at 250 nats. The correct repair is the same
+move this slice made twice — `prefix_suffix` → reference, and the MAP floor —
+namely **make the arbiter use the form the kernel it certifies already uses.**
+A scoped follow-up, not a redesign.
+
+**Quote the 69-nat onset, not the 207-nat failure.** The shipped `T = 0.4` admits
+150 nats per position (`MAX_NATS_PER_POSITION = 2·SOFTCAP/T`), so 69 is inside
+production reach and 207 is not. A 207-only framing reads as an unreachable
+corner — the reassurance version of the claim.
+
+Pinned as `xfail(strict=True)` rather than a standing red, on the reviewer's
+ruling: a permanent red in the arbiter's own suite is what trains people to stop
+reading red, and `strict=True` turns an accidental fix into a failure rather
+than letting it pass unnoticed.
+
+This is the **third** instance of one shape — a linear subtraction that cancels
+catastrophically. `class_weights` and `scatter_edge_mass_to_tokens` were each
+rebuilt to remove it (`da1294a`); this is the same algebra surviving in the
+float64 reference, found only because the arbiter itself was finally audited.

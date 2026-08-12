@@ -156,6 +156,10 @@ def map_states_and_tokens(
         argclass[i, pair] = argmax over edges e with (src,dst)=pair of class_max[class_id[e], i]
         x_i               = class_argmax[argclass[i, pair(s_i, s_{i+1})], i]
 
+    "edges" there is plural on purpose, and when several of them tie the winner
+    is the one carrying the **lowest token id** (SPEC §2.7), matching
+    `reference.map_decode`. See the comment at the token-recovery step.
+
     Args:
       logp_vl: `[V, L]` log-marginals.
       tree_maxplus: `up_sweep_maxplus` over `M̃`.
@@ -193,13 +197,35 @@ def map_states_and_tokens(
         states = states.at[mid].set(jnp.argmax(w, axis=-1).astype(jnp.int32))
 
     # Which class realises the max on each realised transition?
+    #
+    # **Ties go to the lowest TOKEN id, not the lowest edge index.** SPEC §2.7:
+    # "Deterministic tie-breaking — lowest token id, then lowest state id", and
+    # `reference.map_decode` implements exactly that. `jnp.argmax(masked)` here
+    # used to resolve a tie between two edges on the same `(s, s')` by edge
+    # ordering, so with two parallel edges in different classes at equal
+    # `class_max` the reference emitted token 1 and this emitted token 2.
+    #
+    # Not a live defect on the compiled path — `compile/automaton._group_edges`
+    # emits one edge per `(src, dst)`, so `sel` picks exactly one edge and this
+    # reduces identically to the old expression — but it is live for SPEC §4.6's
+    # NFA fallback and for any hand-built automaton, and `reference.py` is the
+    # arbiter of every differential test in this repo. Honouring the rule costs
+    # one `min` and removes an undocumented precondition rather than adding one.
     sel = ((edge_src[None, :] == states[:-1, None])
            & (edge_dst[None, :] == states[1:, None]))                 # [L, E]
     per_edge = class_max[class_id, :].T                               # [L, E]
     masked = jnp.where(sel, per_edge, NEG_SENTINEL)
-    best_edge = jnp.argmax(masked, axis=1)                            # [L]
-    chosen_class = class_id[best_edge]                                # [L]
-    tokens = class_argmax[chosen_class, jnp.arange(L)].astype(jnp.int32)
+    best = jnp.max(masked, axis=1, keepdims=True)                     # [L, 1]
+    tok_per_edge = class_argmax[class_id, :].T                        # [L, E]
+    tied = sel & (masked >= best)                                     # [L, E]
+    sentinel = jnp.asarray(jnp.iinfo(tok_per_edge.dtype).max,
+                           dtype=tok_per_edge.dtype)
+    tokens = jnp.min(jnp.where(tied, tok_per_edge, sentinel), axis=1)  # [L]
+    # No edge at all on this transition means the boundary draw is infeasible
+    # (`score` reports it below); keep the old expression's answer there rather
+    # than emitting the int sentinel as a token id.
+    fallback = class_argmax[class_id[jnp.argmax(masked, axis=1)], jnp.arange(L)]
+    tokens = jnp.where(jnp.any(tied, axis=1), tokens, fallback).astype(jnp.int32)
     # `score` IS the feasibility signal and was previously discarded by the
     # caller: on an empty language it comes back exactly at the sentinel.
     feasible = score > (NEG_SENTINEL / 2.0)

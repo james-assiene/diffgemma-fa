@@ -64,10 +64,18 @@ class TreeLevels:
       log_scales: `log_scales[k]` is `[L / 2^k]`, the accumulated log of every
         normalisation applied at or below that node. Summing the root's entry
         recovers the true magnitude.
+      underflow: `[L] bool` or `None`. True at every leaf position covered by a
+        node where max-normalisation drove a **strictly positive** entry to
+        exactly `0.0` — i.e. where a live transition was destroyed rather than
+        merely rounded. `None` means "not measured" (the max-plus and log
+        sweeps, which have nothing to normalise, and any hand-built
+        `TreeLevels`), and consumers must treat that as *no information*, never
+        as a clean bill of health.
     """
 
     levels: tuple[jnp.ndarray, ...]
     log_scales: tuple[jnp.ndarray, ...]
+    underflow: jnp.ndarray | None = None
 
     @property
     def n_levels(self) -> int:
@@ -87,11 +95,50 @@ class TreeLevels:
         return sum(int(x.shape[0]) for x in self.levels)
 
 
-def _normalize(mats: jnp.ndarray, carried: jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray]:
-    """Max-normalize each matrix, folding the scale into `carried` (in logs)."""
+def _normalize(mats: jnp.ndarray, carried: jnp.ndarray
+               ) -> tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray]:
+    """Max-normalize each matrix, folding the scale into `carried` (in logs).
+
+    Also returns `[n] bool`, true where the division took a strictly positive
+    entry to exactly `0.0`. That is **not** ordinary rounding: `prefix_suffix`
+    rebuilds `log M_i` as `where(m > 0, log(max(m, tiny)) + leaf_scales[i],
+    NEG_SENTINEL)`, so a flushed entry is reclassified as a *structurally
+    impossible transition* and leaves through `viable == False`. A live edge
+    then vanishes with `Z == 0` and no way for the caller to classify it —
+    which is none of CLAUDE.md's three causes, since the language is non-empty,
+    the budget is satisfiable and the scaling is present.
+
+    The threshold is `|log(tiny)| + log(max_{s,s'} M_i(s,s'))` — **708.396**
+    nats above the leaf maximum, not float64's 744.44. XLA flushes subnormals
+    to zero, so the quotient dies at the smallest *normal* rather than at the
+    smallest denormal; the boundary was pinned between 708 and 709. Measured on
+    a leaf with `max M_i = 1e300` and a live entry 736.8 nats below it,
+    `1e-20 / 1e300` returns exactly `0.0` under `jnp` where numpy returns the
+    subnormal `1e-320`.
+
+    **Contract, and it is narrower than "this position lost a live entry".**
+    What is detected is loss *caused by this division*: `mats > 0` and the
+    quotient `== 0`. An entry that already underflowed to `0.0` in the caller's
+    own arithmetic — a gap of ~750 nats or more, where `M_i(s,s')` is zero
+    before `_normalize` ever sees it — reads **False** here, because from this
+    function's vantage the transition is indistinguishable from a structurally
+    absent one. That is a limit of the two-argument interface, not a detector
+    failure: recovering it needs the exact value, which is `up_sweep_log`'s job
+    (SPEC §2.6 `[V-P4]`).
+
+    Fed `M` from `marginals.transition_matrices` on probability marginals
+    `max M_i` is at most a small multiple of 1, so on the production path this
+    costs only `log(max M_i)` nats beyond the float's own floor — measured
+    firing on 0/240 synthetic `L = 256` sweeps at σ up to 45, and on 0/256
+    positions of bfcl, countdown and sudoku at `T = 1.0 / 0.4 / 0.2 / 0.1`.
+    What is regime-independent, and what this return value exists for, is that
+    the loss must not be silent.
+    """
     m = jnp.max(mats, axis=(-2, -1))
     safe = jnp.where(m > 0, m, 1.0)
-    return mats / safe[:, None, None], carried + jnp.log(safe)
+    out = mats / safe[:, None, None]
+    lost = jnp.any((mats > 0) & (out == 0), axis=(-2, -1))
+    return out, carried + jnp.log(safe), lost
 
 
 def up_sweep(M: jnp.ndarray, *, normalize: bool = True) -> TreeLevels:
@@ -104,7 +151,19 @@ def up_sweep(M: jnp.ndarray, *, normalize: bool = True) -> TreeLevels:
         fp32 at `L = 256`.
 
     Returns:
-      A `TreeLevels` with `log₂(L) + 1` levels and `2L − 1` nodes.
+      A `TreeLevels` with `log₂(L) + 1` levels and `2L − 1` nodes, and — when
+      `normalize` — an `underflow [L] bool` marking every leaf position under a
+      node whose normalisation destroyed a live entry (`_normalize`).
+      `prefix_suffix` folds it into `representable`, so the caller is told
+      rather than handed an unclassifiable `Z == 0`.
+
+      **What `underflow` does not cover** — two things, both because detecting
+      them needs the exact value rather than the quotient: an entry that was
+      already `0.0` on arrival (a gap past ~750 nats, so the caller's own
+      arithmetic killed it, not the division), and the `left @ right` product
+      underflowing at an internal level. Both are `up_sweep_log`'s job
+      (SPEC §2.6 `[V-P4]`); the second cannot reach `prefix_suffix` at all,
+      which reads only `levels[0]`. See `_normalize`.
 
     The combine is `left @ right`, **left block first**. `reverse=True` on
     `lax.associative_scan` yields `f(f(z,y),x)`, which for non-commutative
@@ -118,26 +177,35 @@ def up_sweep(M: jnp.ndarray, *, normalize: bool = True) -> TreeLevels:
 
     cur = M
     carried = jnp.zeros((L,), dtype=M.dtype)
+    # `[L] bool`, ORed up as levels are built: a node at level `k` covers leaf
+    # positions `[j·2^k, (j+1)·2^k)`, and a normalisation that destroys a live
+    # entry there contaminates every one of them. See `_normalize`.
+    underflow = jnp.zeros((L,), dtype=bool)
     if normalize:
-        cur, carried = _normalize(cur, carried)
+        cur, carried, lost = _normalize(cur, carried)
+        underflow = underflow | lost
 
     levels = [cur]
     log_scales = [carried]
 
     # Python `while`, unrolled at trace time — the level shapes differ, so this
     # cannot be a device loop even in principle.
+    width = 1
     while cur.shape[0] > 1:
         left = cur[0::2]
         right = cur[1::2]
         nxt = left @ right                      # left block first
         sc = log_scales[-1][0::2] + log_scales[-1][1::2]
+        width *= 2
         if normalize:
-            nxt, sc = _normalize(nxt, sc)
+            nxt, sc, lost = _normalize(nxt, sc)
+            underflow = underflow | jnp.repeat(lost, width)
         levels.append(nxt)
         log_scales.append(sc)
         cur = nxt
 
-    return TreeLevels(levels=tuple(levels), log_scales=tuple(log_scales))
+    return TreeLevels(levels=tuple(levels), log_scales=tuple(log_scales),
+                      underflow=underflow)
 
 
 def _log_reduce(t: jnp.ndarray, axis: int) -> jnp.ndarray:
@@ -318,11 +386,13 @@ def prefix_suffix(
     two conventions differ; that is what a test would have to do to pin this.
 
     Args:
-      feasible_out: also return `[L] bool`, false at every position where
-        `γ_i` exceeded the validity bound above and the floor had to widen —
-        i.e. where `u_i` keeps its mass but no longer certifies its own
-        support. Keyword-only and off by default so the 4-tuple every existing
-        caller unpacks is unchanged.
+      feasible_out: also return `[L] bool`, false at every position where the
+        result no longer certifies its own support. Two independent causes are
+        reported through the one flag: (i) `γ_i` exceeded the validity bound
+        above and the floor had to widen, and (ii) `up_sweep`'s max
+        normalisation destroyed a live entry of that position's leaf
+        (`TreeLevels.underflow`). Keyword-only and off by default so the
+        4-tuple every existing caller unpacks is unchanged.
 
     Returns:
       `(a, b, log_scale_a, log_scale_b)`, plus `representable [L] bool` when
@@ -454,6 +524,18 @@ def prefix_suffix(
     # (SPEC §6.3, CLAUDE.md causes (a)/(b)).
     representable = jnp.logical_or(widened >= floor_base,
                                    ~jnp.any(viable[:-1], axis=1))    # [L]
+
+    # **`up_sweep`'s own loss is ANDed in last, and it has to be last.** The
+    # `γ` guard above and the "no viable state" clause both concern *this*
+    # function's scaling. A leaf whose live entry `up_sweep` flushed to exactly
+    # `0.0` arrives here already reclassified as a structurally impossible
+    # transition, so it empties the position, `viable` goes all-false, and the
+    # second clause would then report the position **healthy** — the failure
+    # mode reporting exists to prevent. `underflow=None` means the sweep did
+    # not measure it (max-plus, log, `normalize=False`, hand-built), which is
+    # absence of information, not evidence of health, and is left alone.
+    if tree.underflow is not None:
+        representable = representable & ~tree.underflow[:L]
     return a, b, scale_a, scale_b, representable
 
 
