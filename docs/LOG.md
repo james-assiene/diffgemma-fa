@@ -1318,3 +1318,64 @@ deliberately left alone. And `float32` is now refused for `--variant mask` and
 `emission == "sample"`, but both of those read the linear forward–backward on
 every emission, and its bound is ~87 nats in float32 against the 404–474
 measured.
+
+## 2026-08-12 — Re-running the arms invalidated by `2c9f9d9` — PID 3267670
+
+`scratchpad/rerun_2c9f9d9_LOCKED.sh`, mode 444, md5
+`de27ca6b85bad51b27ee8178edecd07c`. Log `logs/rerun_2c9f9d9.log`. **16 arms,
+~19.3 h** from the arms' own `elapsed_seconds`. Launched from a clean tree at
+`2c9f9d9`, fingerprint `228fc705dc0f9c695cb03111cfe42087`, re-checked **before
+every arm** — the guard that the previous queue lacked, which is how three
+artifacts ended up unattributable.
+
+**The exemption was re-derived from source, not inherited from the commit
+message.** `model/sampler.py` has exactly two `prefix_suffix` call sites: the
+`mar` branch (→ `constrained_entropy_streamed`) and the `mask` branch (→
+`scatter_edge_mass_to_tokens`). `_accept_mask` takes `softmax(out.logits)` —
+unconstrained shaped logits — so every `mf` arm is clean, and `joint_map` /
+`joint_draw` never reach it. The one `2c9f9d9` change on the `mf` path, the
+`|H| < 1e-12` snap, is a measured null at every bound ≥ 0.003, and every arm
+here is at 0.003 or above.
+
+**Configuration reproduced field-by-field.** All 14 existing arms match their
+artifact exactly across `variant, emission, confidence, entropy_bound,
+whitespace, fence, ci_enums, dtype, seed, offset, prompt_style, temp,
+nonempty_strings, think`. Where an artifact stores no value, the review
+established from git that the flag **did not exist yet** — `--confidence`
+landed `66042d9`, `--temp` `e4e7144`, `--offset` `8c3be4c`, all 2026-08-02, all
+after the four artifacts' mtimes — with the control that artifacts written
+after each landing do carry the key.
+
+**Two confounds that cannot be flagged away**, recorded rather than hidden: the
+Aug-8 build gate moves `exp_f64_ws_only_j1` / `exp_oomfix_j0` from n=130 to
+n=128, and the Aug-8 scorer (`e2be58c`) postdates every Sudoku/Countdown
+artifact — `task_sudoku_mask` *stores* `solved = 0.204` while `RESULTS.md`
+carries the rescored 0.012. **Compare new task arms against `RESULTS.md`, never
+against the artifact they replace.** Every gate is therefore written on `cs`,
+which is Simulator-based and scorer-independent.
+
+**The falsifiable prediction, enforced as code (gate C):** `task_sudoku_mask`
+must report `cs ≥ 2` against a published **1 of 250**. 249 of 250 pre-fix
+emissions have the entire header-name region missing
+(`'<|channel>124\n4321\n…'`); the single accepted one does not. One mechanical
+cause — positions 0–15 empty ⇒ token 0 — which the fix removes. A false stop
+would require the fix to have changed nothing.
+
+Gate B is deliberately **graded** rather than strict on the long arms: `Z==0`
+of 0 is `[ok]`, under 10% prints `[!!]` and continues, ≥10% stops. The commit's
+γ ≤ 474 nats was measured on 8 grammars, not 130 records, and one tail record is
+a finding in its own column — not a reason to discard 127 records and 14 hours.
+
+The `mar` sweep is ranked high on a specific argument: pre-fix, a dead position
+returned `H = −708`, sorted first and always accepted, making acceptance nearly
+**bound-independent**. The published flatness (0.6655 / 0.6899 / 0.6725 across
+1.7 decades) is exactly what a corrupted rule produces, so it is the most likely
+artifact left in `RESULTS.md`, and 0.003 / 1.0 are where signal would appear.
+
+`exp_f64_ws_only_j1` is judged **not worth its 105 min** — it published at n=130
+pre-gate, returns n=128 on a scorer that also changed, and its only citation is
+one s/record latency figure. It is placed **last**, so killing it costs nothing.
+
+Still missing from SPEC §3.4 after this: bounds 0.03 and 0.3, and the whole
+`entropy_threshold` axis, which is structurally unswept because `early_stop_fn`
+is passed at zero production call sites.
