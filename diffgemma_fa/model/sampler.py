@@ -196,6 +196,38 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
         # returns plausible tokens. "Small grammar" is therefore not a defence,
         # and neither is the pairwise-max anchor: the loss is upstream of the
         # tree, in the float32 `p_real` softmax below and in `_matrices`.
+        # [Added 2026-08-12.] The refusal above is gated on `emission`, but
+        # `--variant mask` and `--confidence=mar` reach the linear
+        # forward-backward on **every** emission, `map` included, and it has a
+        # dtype-derived validity condition of its own: `scans.prefix_suffix`
+        # can only represent `u_i(e)` while the viable misalignment stays under
+        # `2·|floor|`, which is ~703 nats in float64 but only ~82 in float32.
+        # The measured misalignment at the shipped `T = 0.4` is 404 (Sudoku) /
+        # 415 (Countdown) / 474 (BFCL) nats — inside the float64 bound and a
+        # factor of five outside the float32 one. Past it `u` stops being a
+        # posterior while its support stays exact, so `mask` still masks to the
+        # right set and `mar` silently reweights.
+        # Membership rather than equality, and the equality is not spelled in
+        # this comment either: the accept-rule provenance test in
+        # `tests/test_sampler.py` scopes "the mar branch" by the FIRST
+        # occurrence of that comparison in the class source, so writing it here
+        # would silently move the test's window over `__post_init__`.
+        if (self.constrained_dtype == "float32"
+                and (self.variant == "mask" or self.confidence in ("mar",))
+                and not self.allow_unsafe_float32):
+            raise ValueError(
+                f"constrained_dtype='float32' is refused with "
+                f"variant={self.variant!r} / confidence={self.confidence!r}: "
+                "both read the linear forward-backward, whose two factors can "
+                "only carry a viable misalignment of ~82 nats in float32 "
+                "against the 404-474 measured on real grammars at the "
+                "production temperature. Unlike the sample path this is not "
+                "gated on emission -- `--emission map` reaches it too. Use "
+                "constrained_dtype='float64', or pass allow_unsafe_float32="
+                "True to measure it deliberately (the per-position guard "
+                "`scans.prefix_suffix(..., feasible_out=True)` then reports "
+                "the damage through `feasible`)."
+            )
         if (self.emission == "sample"
                 and self.constrained_dtype == "float32"
                 and not self.allow_unsafe_float32):
@@ -375,6 +407,17 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
 
             p_real = jax.nn.softmax(out.logits.astype(dt), axis=-1)  # [B, L, V]
 
+            # SPEC §2.4: the forward-backward's two linear factors can only
+            # represent `u_i(e)` while the viable misalignment stays inside
+            # `2·|floor|` (see `scans.prefix_suffix`). Past that the support is
+            # still exact -- so `mask` still masks to `pi_i(C)` -- but `u` stops
+            # being a posterior and `H(q_i)` shifts while remaining inside
+            # `[0, log V]`, i.e. no existing detector fires. It rides `feasible`
+            # for the reason [V-P5] gives: a degenerate result must not be
+            # indistinguishable from a good one. `True` on every path that does
+            # not run the forward-backward.
+            rep_ok = jnp.ones((batch_size,), dtype=jnp.bool_)
+
             if self.confidence == "mar":
                 # SPEC §3.4 / the paper's remasking confidence. `r_i(v)` is the
                 # same quantity the `mask` variant already builds; `q = p*r/Z`
@@ -387,10 +430,11 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
                     p_vl, W_e, M = _constrained._matrices(  # noqa: SLF001
                         pi, aut, self.n_states_bucket, self.n_classes)
                     tr = scans.up_sweep(M)
-                    a_v, b_v, _, _ = scans.prefix_suffix(
+                    a_v, b_v, _, _, rep = scans.prefix_suffix(
                         tr, aut.active.astype(pi.dtype),
                         _constrained.budget_terminal_factor(
-                            aut.d, remaining, dtype=pi.dtype))
+                            aut.d, remaining, dtype=pi.dtype),
+                        feasible_out=True)
                     u = (a_v[:-1][:, aut.edge_src]
                          * b_v[1:][:, aut.edge_dst])             # [L, E]
                     # Streamed: `H(q)` from the CSR without building `q`,
@@ -401,8 +445,9 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
                     return _marginals.constrained_entropy_streamed(
                         p_vl, u, aut.edge_class, aut.csr_indices,
                         aut.csr_indptr, aut.is_neg, self.n_classes,
-                        pi.shape[-1])                            # [L]
-                h_q = jax.vmap(_q_entropy)(p_real, automaton.active)
+                        pi.shape[-1]), rep                       # [L], [L]
+                h_q, rep = jax.vmap(_q_entropy)(p_real, automaton.active)
+                rep_ok = rep_ok & jnp.all(rep, axis=-1)
                 accepted = _accept_from_entropy(
                     h_q.astype(jnp.float32),
                     self.sample_from_predictions.entropy_bound)
@@ -435,7 +480,8 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
                     step=step + 1, canvas=canvas, emit_canvas=canvas,
                     sc_embeddings=out.sc_embeddings.astype(
                         carry.sc_embeddings.dtype),
-                    rng=next_rng_, done=new_done, feasible=carry.feasible)
+                    rng=next_rng_, done=new_done,
+                    feasible=carry.feasible & (rep_ok | carry.done))
 
             if self.variant == "mask":
                 # SPEC §7.2 baseline 2 and §2.8's target: **naive per-position
@@ -453,16 +499,18 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
                     p_vl, W_e, M = _constrained._matrices(  # noqa: SLF001
                         pi, aut, self.n_states_bucket, self.n_classes)
                     tr = scans.up_sweep(M)
-                    a_v, b_v, _, _ = scans.prefix_suffix(
+                    a_v, b_v, _, _, rep = scans.prefix_suffix(
                         tr, aut.active.astype(pi.dtype),
                         _constrained.budget_terminal_factor(
-                            aut.d, remaining, dtype=pi.dtype))
+                            aut.d, remaining, dtype=pi.dtype),
+                        feasible_out=True)
                     u = a_v[:-1][:, aut.edge_src] * b_v[1:][:, aut.edge_dst]
                     return _marginals.scatter_edge_mass_to_tokens(
                         u, aut.edge_class, aut.csr_indices, aut.csr_indptr,
-                        aut.is_neg, self.n_classes, pi.shape[-1])
+                        aut.is_neg, self.n_classes, pi.shape[-1]), rep
 
-                r = jax.vmap(support_of)(p_real, automaton.active)   # [B, L, V]
+                r, rep = jax.vmap(support_of)(p_real, automaton.active)
+                rep_ok = rep_ok & jnp.all(rep, axis=-1)             # [B, L, V]
                 masked = jnp.where(r > 0, out.logits.astype(jnp.float32),
                                    _marginals.MASK_SENTINEL)
                 sampled = jax.random.categorical(sample_rng_, masked)
@@ -476,10 +524,13 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
                     step=step + 1, canvas=canvas, emit_canvas=canvas,
                     sc_embeddings=out.sc_embeddings.astype(
                         carry.sc_embeddings.dtype),
-                    # Deliberately NOT flagged. An empty per-position support is
-                    # this baseline's *result*, not an error -- SPEC §2.8 exists
-                    # because factorized masking gets the joint wrong.
-                    rng=next_rng_, done=new_done, feasible=carry.feasible)
+                    # An empty per-position support is deliberately NOT flagged:
+                    # it is this baseline's *result*, not an error -- SPEC §2.8
+                    # exists because factorized masking gets the joint wrong.
+                    # `rep_ok` is a different claim: that the numbers the mask
+                    # was computed from mean what they say (SPEC §2.4).
+                    rng=next_rng_, done=new_done,
+                    feasible=carry.feasible & (rep_ok | carry.done))
 
             def per_example(pi, act, key):
                 aut = automaton.with_active(act)
@@ -556,8 +607,9 @@ class ConstrainedDiffusionSampler(_diffusion_sampler.DiffusionSampler):
                 rng=next_rng_, done=new_done,
                 # `| carry.done` for the same reason `emit` is gated on it: a
                 # finished example's emission is frozen, so a later step's
-                # infeasibility never reaches the output.
-                feasible=carry.feasible & (ok | carry.done))
+                # infeasibility never reaches the output. `rep_ok` is `True`
+                # unless `--confidence=mar` ran the forward-backward.
+                feasible=carry.feasible & ((ok & rep_ok) | carry.done))
 
         init_carry = _ConstrainedCarry(
             step=jnp.int32(0), canvas=initial, emit_canvas=initial,
@@ -617,6 +669,14 @@ def _accept_mask(logits: jnp.ndarray, entropy_bound: float) -> jnp.ndarray:
     return _accept_from_entropy(h, entropy_bound)
 
 
+#: `|H| < 1e-12` nats is a point mass, in any arithmetic that could have
+#: produced it. `H(q_i)` is formed by cancelling two quantities of magnitude up
+#: to `|log tiny| = 708` nats, so its own float64 rounding floor is ~1.6e-13;
+#: and a distribution with `H = 1e-12` has `max_v q(v) >= 1 - 4e-14`. Eleven
+#: orders below the smallest `entropy_bound` any arm ships (0.1).
+_ENTROPY_NUMERICAL_ZERO = 1e-12
+
+
 def _accept_from_entropy(h: jnp.ndarray, entropy_bound: float) -> jnp.ndarray:
     """The accept rule's *selection*, given per-position entropy `[B, L]`.
 
@@ -625,7 +685,21 @@ def _accept_from_entropy(h: jnp.ndarray, entropy_bound: float) -> jnp.ndarray:
     paper's own ablation puts that swap at 68.4 -> 76.4, the larger half of its
     accuracy gain; here it was built (`infer/marginals.py`) and then never
     called on the production path.
+
+    **The comparison below is exact, and the rule is a running total, so a
+    single positive ulp at the *sharpest* position gates every position behind
+    it.** That is not hypothetical: on a canvas the automaton determines
+    completely, `H(q_i) = 0` at every position, and
+    `constrained_entropy_streamed`'s `log Z_i − (1/Z_i)Σ w log w` returns
+    `+2.5e-32` there whenever `Z_i` is not a dyadic rational (measured:
+    `[2.5e-32, 2.5e-32, 0.0, 2.5e-32]`, 2 of 4 positions accepted at
+    `entropy_bound = 0`, against the 4 that SPEC §3.4 requires). Snapping
+    numerical zeros is the narrowest available repair: it moves nothing that any
+    shipped bound can distinguish, and it deliberately does **not** touch large
+    negative values — a collapsed `H = −708` still drags the running total down,
+    exactly as it does today, so no detector loses its signal here.
     """
+    h = jnp.where(jnp.abs(h) < _ENTROPY_NUMERICAL_ZERO, jnp.zeros_like(h), h)
     order = jnp.argsort(h, axis=-1)
     srt = jnp.take_along_axis(h, order, axis=-1)
     keep = (jnp.cumsum(srt, axis=-1) - srt) <= entropy_bound

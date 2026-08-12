@@ -1229,3 +1229,92 @@ including those equal to today's default — `eval/run.py`'s defaults (`j1`,
 `sample`) already contradict SPEC §3.9 and `eval/run_tasks.py`, and nothing
 asserts either. Each arm prints its config **read back out of the artifact**,
 which is the only record of what actually ran.
+
+## 2026-08-12 — `prefix_suffix` was not implementing SPEC §2.4's scaling rule
+
+`infer/scans.prefix_suffix` returned linear `a`, `b` normalised **per vector**,
+and SPEC §2.4 eq (5) makes `u_i(e) = a_{i−1}(src e)·b_i(dst e)` the object of the
+theory. Per-vector max normalisation bounds neither factor's within-vector range
+nor their product, so the quantity the `mask` baseline and `--confidence=mar`
+actually read was losing structurally live edges. Measured on the compiled
+grammars at the sharpness Phase 0 saw on the checkpoint (mean `H = 3.0e-4` nats,
+`T = 0.4`):
+
+| grammar | live edges lost | legal (position, token) pairs lost | positions with EMPTY support | `log Z_i` spread |
+|---|---|---|---|---|
+| Sudoku (`\|S\|` = 64) | 108 | 2,097,192 | **16 of 256 — positions 0…15** | ∞ (some `Z_i = 0`) |
+| Countdown (`\|S\|` = 128) | 5,432 | 0 | 0 | **480 nats** |
+| BFCL `get_user_info` | 16,089 | 5 | 0 | 654 nats |
+| BFCL `github_star` | 7,134 | 0 | 0 | 419 nats |
+| BFCL `uber.ride` | 10,208 | **2,360,164** | **7** | ∞ |
+
+At a flat `p` every one of these is clean: the defect is switched on by
+sharpness, which is why no smoke test at `T = 1` ever saw it. `docs/RESULTS.md`'s
+Sudoku `mask` row (`CS 0.004 / parsed 0.040 / solved 0.012`) was measured through
+it, and the dead positions are exactly the front of the canvas — the §3.6 channel
+header and the first grid row — which is where its emissions are malformed
+(`'<|channel>124\n4321\n…'`, first row a digit short). **That row must be re-run
+before it is quoted again.** The `mar` sweep must also be re-run: an arm was
+launched from a dirty tree mid-edit on 2026-08-12 and its three artifacts are
+quarantined in `artifacts/unattributable_dirty_tree/`.
+
+**The fix** (`infer/scans.py`): the forward–backward runs in log space with
+`log_matmul`'s pairwise-max anchor — the linear recursion was itself lossy, the
+viable within-vector range of `a` being 3,420 nats on Countdown — and the two
+returned linear factors are anchored on a **pair of per-boundary scales whose sum
+is `log Z` exactly**, so `u` is the edge posterior and `Σ_v p_i(v) r_i(v) = 1` at
+every position. Anchoring on the unrestricted vector maxima does not work: SPEC
+§3.5's unscored `ACC --Σ--> ACC` tail pins `max_s b_i(s)` at 1.0 while the grammar
+sits at `Z`, so the misalignment is exactly `−log Z` = 1,316 nats on Sudoku;
+restricted to **viable** states (`a > 0 ∧ b > 0`) it is ≤ 474 nats across the 8
+grammars measured.
+
+**`[?]` resolved by measurement: how far a two-factor `u` can be pushed.** With
+`γ_i = α'_i + β'_{i+1} − log Z`, any pair of scales with a fixed sum has
+`max(log a) + max(log b) − (scale_a + scale_b) = γ_i` — invariant under the
+split — and a floored factor multiplies a partner of up to `exp(max log)`. So
+`Σ_e u_i` is undisturbed only while `γ_i ≤ |F_a| + |F_b| ≤ |log tiny| ≈ 708`
+nats, and **no anchor, split or floor placement evades that** while `u` must
+factor as `a(src)·b(dst)`. Sudoku measures `γ = 163 / 404 / 808 / 1,616` nats at
+`T = 1.0 / 0.4 / 0.2 / 0.1`: the shipped `T = 0.4` is 304 nats inside the bound,
+one halving of `T` away, and `_MIN_TEMP = 1e-12` plus the shipped `--temp greedy`
+make that reachable by configuration alone. Above the bound the floor now widens
+instead of clipping, so mass stays exact and **support** degrades — 16 live edges
+at `T = 0.1`, no position emptied — and `prefix_suffix(..., feasible_out=True)`
+reports every affected position out through `ConstrainedSamplingState.feasible`.
+With a fixed floor the same sweep gave `max|Z_i − 1|` = 1.63 at `T = 0.2` and
+1.9e+109 at `T = 0.1` **with nothing raising**, because `H(q_i)` stays inside
+`[0, log V]` while being silently reweighted.
+
+Two options were measured and rejected. Anchoring per position on
+`c_i = max_e (log a(src) + log b(dst))` is bounded by construction but is not
+available at this signature: `c_i − log Z` varies by 94.7 nats across positions
+on Sudoku at `T = 0.4`, and production reads `u` through `a` and `b` alone, with
+no channel to add a per-position scale back. Reassociating
+`constrained_entropy_streamed` to `−(1/Z)Σ w(log w − log Z)` is better
+conditioned and makes `H ≥ 0` structural, but it **deletes the suite's only
+detector for this defect** — fed the pre-fix `u` the shipped form returns
+`H = −708.4` at 17 Sudoku and 10 BFCL positions, which is exactly what
+`test_mar_confidence_is_a_real_entropy` catches. Reverted, with the reason
+recorded in its docstring.
+
+**Method note, for the next numerical audit: use `decimal`.** The review that
+cleared this change verified it against a 45-digit unbounded-exponent
+`decimal`-module edge-list forward–backward sharing no code with the
+implementation, over 8 real grammars × 4 `p` regimes and 38 randomised NFAs —
+`scale_a[i] + scale_b[i+1] == log Z` to 0 or 1 ulp, `q` to 1.4e-15, floor
+inflation exactly 0 by independent `fsum`. Unbounded exponent is what makes the
+oracle able to answer questions float64 cannot represent, which is the whole
+subject matter here; it is cheap at these shapes and it is now the recommended
+reference for anything in §2.4.
+
+**Also changed.** `_accept_from_entropy` snaps `|H| < 1e-12` to zero: the rule is
+an exact comparison on a *running* total, so a single positive ulp at the
+sharpest position gated every position behind it once `Z_i` became 1 (measured
+`[2.5e-32, 2.5e-32, 0.0, 2.5e-32]` → 2 of 4 positions accepted at
+`entropy_bound = 0`, against the 4 SPEC §3.4 requires). Large negatives are
+deliberately left alone. And `float32` is now refused for `--variant mask` and
+`--confidence=mar` regardless of `--emission`: the existing refusal is gated on
+`emission == "sample"`, but both of those read the linear forward–backward on
+every emission, and its bound is ~87 nats in float32 against the 404–474
+measured.

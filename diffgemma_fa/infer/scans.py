@@ -140,11 +140,43 @@ def up_sweep(M: jnp.ndarray, *, normalize: bool = True) -> TreeLevels:
     return TreeLevels(levels=tuple(levels), log_scales=tuple(log_scales))
 
 
+def _log_reduce(t: jnp.ndarray, axis: int) -> jnp.ndarray:
+    """`logsumexp` along `axis`, anchored on that axis's own max. `[S,S] -> [S]`.
+
+    The same anchor `log_matmul` uses and for the same reason (its docstring
+    records two wrong shifts measured on real grammars): relative to the max the
+    dominant term is `exp(0) = 1`, so nothing that matters underflows at any
+    dynamic range. `log_matmul` itself is not called here because a
+    vector-matrix product has `n = 1` and its broadcast `[1, S, S]` operand is
+    just `t` — recomputing it for the second reduction, which is the right trade
+    at `[L/2, S, S]`, is pure waste at this shape.
+    """
+    m = jnp.max(t, axis=axis)
+    live = m > NEG_SENTINEL / 2.0
+    safe = jnp.where(live, m, jnp.zeros_like(m))
+    s = jnp.sum(jnp.exp(t - jnp.expand_dims(safe, axis)), axis=axis)
+    tiny = jnp.asarray(jnp.finfo(t.dtype).tiny, dtype=t.dtype)
+    return jnp.where(live, safe + jnp.log(jnp.maximum(s, tiny)),
+                     jnp.full_like(m, NEG_SENTINEL))
+
+
+def _log_vec_mat(v: jnp.ndarray, logM: jnp.ndarray) -> jnp.ndarray:
+    """`out[j] = logsumexp_i (v[i] + logM[i, j])`. `[S] , [S, S] -> [S]`."""
+    return _log_reduce(v[:, None] + logM, axis=0)
+
+
+def _log_mat_vec(logM: jnp.ndarray, v: jnp.ndarray) -> jnp.ndarray:
+    """`out[i] = logsumexp_j (logM[i, j] + v[j])`. `[S, S] , [S] -> [S]`."""
+    return _log_reduce(logM + v[None, :], axis=1)
+
+
 def prefix_suffix(
     tree: TreeLevels,
     a_start: jnp.ndarray,
     b_final: jnp.ndarray,
-) -> tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray, jnp.ndarray]:
+    *,
+    feasible_out: bool = False,
+) -> tuple[jnp.ndarray, ...]:
     """Exclusive prefix/suffix vectors `a` and `b`, over the tree's leaves.
 
     **What this is not.** An earlier docstring claimed "the down-sweep is needed
@@ -158,53 +190,271 @@ def prefix_suffix(
     a `lax.scan` compiles to a device `while`, which is *not* in XLA's default
     command-buffer capture set — precisely the paper's +114%. Python unrolling
     emits straight-line code, so the whole chain is capturable. What it costs
-    is `L` dependent GEMVs of latency, which is small next to the `[S, S]`
-    matmuls the tree above already does log-depth.
+    is `L` dependent vector-matrix products of latency, which is small next to
+    the `[S, S]` matmuls the tree above already does log-depth.
 
     It also is not on the constrained hot path. The J0/J1 emission goes through
     `tree.sample_states_log` / `tree.map_states_and_tokens`; the only production
-    caller here is SPEC §2.8's `mask` baseline, which needs the per-position
-    support projection. If this ever moves onto the hot path, make it a genuine
-    down-sweep — do not reintroduce a `lax.scan`.
+    callers here are SPEC §2.8's `mask` baseline, which needs the per-position
+    support projection, and `--confidence=mar`. If this ever moves onto the hot
+    path, make it a genuine down-sweep — do not reintroduce a `lax.scan`.
+
+    ---
+
+    **The recursions run in log space, and the linear vectors are anchored on
+    the partition function** (SPEC §2.6 [V-P4], applied one layer up from the
+    tree). Both halves are load-bearing; an earlier revision did neither and
+    the consequences were measured on compiled grammars:
+
+    1. *The recursion.* A linear `a[i+1] = a[i] @ M[i]` with per-vector max
+       normalisation destroys every entry more than ~745 nats below its own
+       vector max, and the loss then propagates forward. The **viable**
+       within-vector range of `a` is 3,420 nats on Countdown and 425 on Sudoku
+       at the sharpness Phase 0 measured on the checkpoint, so this is not a
+       corner case. Log space with `log_matmul`'s pairwise-max anchor is exact
+       at any dynamic range, which is the identical argument that moved the
+       tree itself to log space.
+
+    2. *The anchor.* SPEC §2.4 eq (5) makes `u_i(e) = a_{i−1}(src e)·b_i(dst e)`
+       the object of the theory, and every factor in (3)/(4) is non-negative, so
+       `u_i(e) == 0` **iff** the automaton forbids that edge there. Per-vector
+       max normalisation bounds neither factor's within-vector range nor their
+       product: measured on Sudoku, 87 live edges came back with `b` exactly
+       `0.0` and 21 more with `a > 0, b > 0, a·b == 0`, costing 16 of 256
+       positions their entire `mask` support and 2,097,192 legal (position,
+       token) pairs. So the pair of scales is chosen to satisfy
+
+           log_scale_a[i] + log_scale_b[i+1] == log Z   for every i,
+
+       which makes `u` the **edge posterior** `P(edge e at position i)`: bounded
+       above by 1 at every position, hence never overflowing, and — because the
+       scale no longer varies with `i` — leaving `Σ_v p_i(v)·r_i(v) = 1` for
+       every `i`, the non-vacuous invariant of SPEC §2.4 that
+       `constrained_marginals_and_partition` exists to check.
+
+       The split between the two factors is balanced around each vector's
+       maximum **over viable states** (`a > 0` and `b > 0`). Anchoring on the
+       unrestricted maximum does not work: SPEC §3.5's unscored `ACC --Σ--> ACC`
+       tail pins `max_s b_i(s)` at 1.0 while the whole grammar sits at `Z`, so
+       the misalignment `max log a_i + max log b_{i+1} − log Z` is **1,316 nats
+       on Sudoku** — it is exactly `−log Z`, since the tail state's `b` and the
+       start state's `a` are both 1. Restricted to viable states the same
+       quantity is **≤ 474 nats across 8 real grammars** at the production
+       temperature (404 Sudoku, 415 Countdown, 473.6 on BFCL `0-0-0 pretty`,
+       which is the worst of the six BFCL variants measured), so each factor
+       stays within `e^±237` of its anchor.
+
+    3. *The floor.* Both consumers ask a **support** question — `r > 0` in the
+       §2.8 mask and `q_i(v) > 0` — where the last representable decade carries
+       a bit that matters even when the value does not. The true `log u_i(e)`
+       spans over 1,200 nats *within one position* on a real grammar, so no
+       choice of scales fits it in float64 and the small end must be clamped
+       rather than lost: each factor is floored at `0.5·log(tiny)`, so a live
+       edge's `u` is never below `tiny` and never exactly zero. The floored
+       entries are ≥ 700 nats below the position's dominant edge; their
+       contribution to `Σ_e u_i(e)` was measured at exactly 0 relative on both
+       grammars (independently confirmed by `math.fsum`), i.e. far under the
+       1e-6 the `i`-invariance of `Z_i` is asserted at.
+
+    **Validity condition, and why it is a property of the interface rather than
+    of this scheme.** Write `γ_i = α'_i + β'_{i+1} − log Z` for the
+    viable-restricted misalignment above, and `|F_a|, |F_b|` for the two floors.
+    Any pair of scales with a fixed sum has
+    `max(log a_i) + max(log b_{i+1}) − (scale_a + scale_b) = γ_i`: the two
+    vectors' headrooms trade against each other and their **sum is invariant
+    under the split**. A floored factor is multiplied by a partner of up to
+    `exp(max log)`, so `Σ_e u_i` is undisturbed only while
+    `max(log a) ≤ |F_b|` and `max(log b) ≤ |F_a|`, i.e. only while
+
+        γ_i ≤ |F_a| + |F_b| ≤ |log tiny| ≈ 708 nats   (float64; ≈ 87 float32)
+
+    the second inequality being forced by needing the *product* of two floored
+    factors to stay representable. No choice of split, anchor, normalisation or
+    floor placement evades that while `u` must factor as `a(src)·b(dst)` with a
+    per-position scale — it is a property of the two-factor interface, not of
+    this construction.
+
+    Above the bound the two requirements are genuinely incompatible and the
+    floor gives up **support**, not mass (see the code below). Measured on
+    Sudoku, `γ = 163 / 404 / 808 / 1,616` nats at `T = 1.0 / 0.4 / 0.2 / 0.1`,
+    and the shipped `T = 0.4` sits 304 nats inside the bound — one halving of
+    `T`, which `_MIN_TEMP = 1e-12` and the shipped `--temp greedy` make
+    reachable by configuration alone. With a fixed `0.5·log(tiny)` floor,
+    `max|Z_i − 1|` went `1.2e-12 → 4.1e-12 → 1.63 → 1.9e+109` across those four
+    temperatures — support intact throughout, so the §2.8 `mask` baseline still
+    masked to `π_i(C)`, while `H(q_i)` was silently reweighted inside
+    `[0, log V]` and **nothing downstream raised**. With the widening floor it
+    is `9.9e-13 / 3.9e-12 / 7.8e-13 / 1.9e-12`, the support is still exact at
+    `T = 0.2`, and what degrades at `T = 0.1` is 16 live edges of 262,139
+    (position, token) pairs — with no position emptied, because the dominant
+    edge sits at `exp(0)` by construction — at the 21 of 256 positions
+    `feasible_out` reports.
+
+    The alternative the reviewer of this change proposed — anchoring on the
+    per-position edge maximum `c_i = max_e (log a(src) + log b(dst))`, which is
+    bounded by construction — is **not available at this signature**: `c_i −
+    log Z` varies by 94.7 nats across positions on Sudoku at `T = 0.4` (37.99 at
+    `T = 1.0`, 378.8 at `T = 0.1`), and the production consumers read `u`
+    through `a` and `b` alone, with no channel to add a per-position scale back.
+    It would trade a guarded cliff for an unguarded 94-nat error in `Z_i`.
+
+    **Non-viable states are returned as exact `0.0`, which is a deliberate
+    change of what `a` means and no consumer can see it.** A state with
+    `a_i(s) > 0` and `b_i(s) == 0` is a dead end, and
+    `b_i(s) = Σ_{s'} M_i(s,s')·b_{i+1}(s') = 0` is a sum of non-negatives, so
+    `b_{i+1}(s') = 0` on every edge out of it: no `u_i(e)` with `src(e) = s` can
+    be non-zero either way, and `Σ_s a_j(s)·b_j(s)` already had a zero factor
+    there. Those two forms are the *only* ways anything reads `a` or `b`
+    (`sampler.py`'s two closures, `marginals.constrained_marginals_and_partition`
+    and the `log Z` self-check), so the change is exactly unobservable rather
+    than approximately so — but only while that enumeration holds. What it buys
+    is that non-viable entries are precisely the ones no anchor bounds, and it
+    is the **`b` side** that runs away: SPEC §3.5's unscored tail is
+    backward-reachable long before it is forward-reachable, so on Sudoku a
+    non-viable `log b − scale_b` reaches **+1,284 nats at the shipped
+    `T = 0.4`** (+2,568 at `T = 0.2`; Countdown +447 / +895) against
+    `log(max) = 709.8`. Keeping those entries is `inf` unless the ceiling below
+    catches them, and then `inf · 0 = NaN` in `u`. Read `a` or `b` alone and the
+    two conventions differ; that is what a test would have to do to pin this.
+
+    Args:
+      feasible_out: also return `[L] bool`, false at every position where
+        `γ_i` exceeded the validity bound above and the floor had to widen —
+        i.e. where `u_i` keeps its mass but no longer certifies its own
+        support. Keyword-only and off by default so the 4-tuple every existing
+        caller unpacks is unchanged.
 
     Returns:
-      `(a, b, log_scale_a, log_scale_b)` with `a`, `b` shaped `[L+1, S]`:
-      `a[i]` is the vector before position `i` (`a[0] == a_start`), and `b[i]`
-      likewise with `b[L] == b_final`.
+      `(a, b, log_scale_a, log_scale_b)`, plus `representable [L] bool` when
+      `feasible_out`. `a`, `b` are `[L+1, S]` and the scales `[L+1]`:
+      `a[i]·exp(log_scale_a[i])` is the true prefix vector before position `i`
+      restricted to viable states, `b[i]·exp(log_scale_b[i])` the true suffix
+      vector, so `log(a[i]·b[i]) + log_scale_a[i] + log_scale_b[i]` is
+      `i`-invariant and equals `log Z` (SPEC §2.4 `[D]`). `a[0]` and `b[L]` are
+      no longer `a_start` / `b_final` verbatim — they carry the same scale
+      convention as every other boundary.
     """
     leaves = tree.levels[0]
     leaf_scales = tree.log_scales[0]
-    L, S = leaves.shape[0], leaves.shape[1]
+    L = leaves.shape[0]
+    dt = leaves.dtype
+    neg = jnp.asarray(NEG_SENTINEL, dtype=dt)
+    tiny = jnp.asarray(jnp.finfo(dt).tiny, dtype=dt)
 
-    # Exclusive prefix: a[i+1] = a[i] @ leaves[i]. Unrolled; the tree above is
-    # what makes the *products* log-depth, and these vector-matrix products are
-    # cheap by comparison, but they are still emitted as straight-line code so
-    # nothing becomes a device while-loop.
-    a_list = [a_start]
-    sa_list = [jnp.zeros((), dtype=leaves.dtype)]
+    # The tree's leaves are max-normalised; `leaf_scales` restores the true
+    # magnitude, so this is `log M_i` exactly.
+    #
+    # **Sliced first, transformed second, which is worth 2.6x in wall time.**
+    # Built as one `[L, S, S]` `logM` and then sliced per position, XLA charges
+    # every one of the `2L` consumers for the whole elementwise producer: the
+    # cost analysis reports 1.62 GFLOP at `S = 64` against 16 MFLOP this way,
+    # a 100x that is mostly an attribution artefact -- the honest figure is the
+    # 2.6x of measured wall time. Taking the `[S, S]` slice first keeps the
+    # per-position transform per-position.
+    def log_leaf(i: int) -> jnp.ndarray:
+        m = leaves[i]
+        return jnp.where(m > 0, jnp.log(jnp.maximum(m, tiny)) + leaf_scales[i],
+                         neg)
+
+    log_a0 = jnp.where(a_start > 0, jnp.log(jnp.maximum(a_start, tiny)), neg)
+    log_bL = jnp.where(b_final > 0, jnp.log(jnp.maximum(b_final, tiny)), neg)
+
+    # Unrolled at trace time, exactly as before: straight-line code, no device
+    # `while`, so the whole chain stays inside a CUDA-graph capture (SPEC §0).
+    fwd = [log_a0]
     for i in range(L):
-        v = a_list[-1] @ leaves[i]
-        s = sa_list[-1] + leaf_scales[i]
-        m = jnp.max(v)
-        safe = jnp.where(m > 0, m, 1.0)
-        a_list.append(v / safe)
-        sa_list.append(s + jnp.log(safe))
-
-    b_list = [b_final]
-    sb_list = [jnp.zeros((), dtype=leaves.dtype)]
+        fwd.append(_log_vec_mat(fwd[-1], log_leaf(i)))
+    bwd = [log_bL]
     for i in range(L - 1, -1, -1):
-        v = leaves[i] @ b_list[-1]
-        s = sb_list[-1] + leaf_scales[i]
-        m = jnp.max(v)
-        safe = jnp.where(m > 0, m, 1.0)
-        b_list.append(v / safe)
-        sb_list.append(s + jnp.log(safe))
+        bwd.append(_log_mat_vec(log_leaf(i), bwd[-1]))
 
-    a = jnp.stack(a_list)
-    log_a = jnp.stack(sa_list)
-    b = jnp.stack(b_list[::-1])
-    log_b = jnp.stack(sb_list[::-1])
-    return a, b, log_a, log_b
+    log_a = jnp.stack(fwd)                      # [L+1, S]
+    log_b = jnp.stack(bwd[::-1])                # [L+1, S]
+
+    live = NEG_SENTINEL / 2.0
+    viable = (log_a > live) & (log_b > live)    # [L+1, S]
+
+    # log Z, read off boundary 0. Every boundary gives the same value; this one
+    # involves `a_start` unmodified, so it is the least processed of them.
+    t0 = jnp.where(viable[0], log_a[0] + log_b[0], neg)
+    m0 = jnp.max(t0)
+    ok0 = m0 > live
+    logZ = jnp.where(
+        ok0,
+        m0 + jnp.log(jnp.maximum(jnp.sum(jnp.exp(t0 - jnp.where(ok0, m0, 0.0))), tiny)),
+        neg)
+
+    # Per-boundary maxima over viable states only -- see the docstring: the
+    # unrestricted maxima are pinned by the unscored tail and misalign by
+    # `-log Z`.
+    alpha = jnp.max(jnp.where(viable, log_a, neg), axis=1)      # [L+1]
+    beta = jnp.max(jnp.where(viable, log_b, neg), axis=1)       # [L+1]
+
+    # `scale_a[i] + scale_b[i+1] == logZ` exactly (the second is formed as the
+    # complement of the first, so the identity survives rounding), which is what
+    # makes the per-position partition `i`-invariant. The endpoints `scale_a[L]`
+    # and `scale_b[0]` pair with nothing and only have to keep `a[L]`, `b[0]`
+    # and the boundary dots representable, so they use the same balanced form.
+    half = jnp.asarray(0.5, dtype=dt)
+    scale_a = jnp.concatenate([
+        half * (logZ + alpha[:-1] - beta[1:]),
+        half * (logZ + alpha[L:] - beta[L:]),
+    ])                                                          # [L+1]
+    scale_b = jnp.concatenate([
+        half * (logZ - alpha[:1] + beta[:1]),
+        logZ - scale_a[:-1],
+    ])                                                          # [L+1]
+
+    # `floor` keeps a live edge's product above `tiny`; `ceil` is pure insurance
+    # against `exp` overflowing on an entry the anchor does not bound (there are
+    # none once non-viable states are dropped, but an `inf` here would become a
+    # `NaN` one multiplication later).
+    #
+    # **The floor widens rather than clipping mass.** `|F| = 0.5·|log tiny|`
+    # keeps every live product representable, and it is the right floor exactly
+    # while `γ_i ≤ 2|F|`. Past that the two requirements are provably
+    # incompatible (see the validity condition above), and of the two failures
+    # only one is quiet: clipping a load-bearing factor moves `Σ_e u_i` — `u`
+    # stops being a posterior and `H(q_i)` is silently reweighted inside
+    # `[0, log V]` — whereas widening the floor drops the support of edges more
+    # than `2|F_i|` below the position's dominant one, which is a strict subset
+    # of what is unrepresentable anyway and cannot empty a position (the
+    # dominant edge is at `exp(0)`). So the floor follows `γ_i` when it has to,
+    # and `feasible_out` reports every position where it did.
+    # `slack` is what keeps the widened floor from becoming the next quiet
+    # error: a floored factor still multiplies a partner of at most
+    # `exp(γ_i/2)`, so putting the floor exactly at `−γ_i/2` bounds the
+    # inflation of `Σ_e u_i` by `exp(0)` — no better than clipping. `S²` pairs
+    # at `exp(−40)` bound it by 1.7e-14 instead, which is under the 4e-12 the
+    # scheme's own rounding already costs. Measured at `T = 0.2`: a 2-nat slack
+    # leaves `max|Z_i − 1| = 0.135 = e^-2`, exactly this term.
+    floor_base = half * (jnp.log(tiny) + jnp.asarray(5.0, dtype=dt))
+    slack = jnp.minimum(jnp.asarray(40.0, dtype=dt), -half * floor_base)
+    gamma = alpha[:-1] + beta[1:] - logZ                        # [L]
+    widened = -jnp.maximum(-floor_base, half * gamma + slack)
+    floor_a = jnp.concatenate([widened, floor_base[None]])      # [L+1]
+    floor_b = jnp.concatenate([floor_base[None], widened])      # [L+1]
+    ceil = jnp.log(jnp.finfo(dt).max) - jnp.asarray(8.0, dtype=dt)
+    a = jnp.where(viable,
+                  jnp.exp(jnp.clip(log_a - scale_a[:, None],
+                                   floor_a[:, None], ceil)),
+                  jnp.zeros((), dtype=dt))
+    b = jnp.where(viable,
+                  jnp.exp(jnp.clip(log_b - scale_b[:, None],
+                                   floor_b[:, None], ceil)),
+                  jnp.zeros((), dtype=dt))
+    if not feasible_out:
+        return a, b, scale_a, scale_b
+
+    # The guard on the validity condition in the docstring. `widened < 0`
+    # exactly at the positions where `γ_i > 2|F|` forced the floor down, i.e.
+    # where `u_i` keeps its mass but no longer certifies its own support. A
+    # boundary with no viable state carries nothing either way and is reported
+    # representable; `Z == 0` is a different signal with its own detector
+    # (SPEC §6.3, CLAUDE.md causes (a)/(b)).
+    representable = jnp.logical_or(widened >= floor_base,
+                                   ~jnp.any(viable[:-1], axis=1))    # [L]
+    return a, b, scale_a, scale_b, representable
 
 
 # ---------------------------------------------------------------------------

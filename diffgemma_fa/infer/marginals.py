@@ -438,6 +438,17 @@ def constrained_entropy_streamed(
     Both sums decompose over the CSR, so the cost is `O(nnz)` rather than
     `O(L·V)`.
 
+    **Do not reassociate this as `−(1/Z)Σ w(log w − log Z)`** without replacing
+    the detector it would delete. That form is better conditioned — every term
+    is `≤ 0` because `w ≤ Z`, so `H ≥ 0` becomes structural — and it was tried
+    here in 2026-08. It is also the reason the out-of-range value this function
+    is *relied on* to produce disappears: fed a `u` whose scaling has collapsed,
+    the form above returns `log(tiny) = −708.4` at the affected positions, which
+    is exactly what `tests/test_audit_prefix_suffix.py::
+    test_mar_confidence_is_a_real_entropy` names and catches (17 Sudoku and 10
+    BFCL positions on the pre-2026-08-12 `prefix_suffix`); the reassociated form
+    returns `−0.0` there and the test flags nothing.
+
     Returns:
       `[L]`.
     """
