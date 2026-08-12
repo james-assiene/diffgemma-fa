@@ -215,6 +215,36 @@ minimum:
 Launch only on the reviewer's explicit approval, from an **immutable copy**
 (`chmod 444`) — editing a live bash script corrupts the running instance.
 
+### Never measure a tree that an agent is editing
+
+The launch review checks the *command*. It cannot check what happens to the
+files underneath it for the next two hours. Both halves of that have now cost
+real time on the same afternoon:
+
+- A GPU arm was launched as a "clean pre-fix baseline" while a coder was
+  rewriting `infer/scans.py`; the file's mtime landed **mid-run**. The artifact
+  is attributable to no commit and was quarantined to
+  `artifacts/unattributable_dirty_tree/` rather than used.
+- A tester re-measuring the same defect straddled the same write and spent
+  ~40 minutes measuring the *fix* while reading it as the defect. It caught
+  this only by fingerprinting for compilation nondeterminism.
+
+So: **`git status` must be clean before any measurement whose number you intend
+to quote**, and no agent may edit `diffgemma_fa/` while another is measuring it.
+If the tree is dirty, commit the verified part first or wait — an unattributable
+number is worse than no number, because it looks like evidence.
+
+Corollary, from the same afternoon: **when a measurement changes and you did not
+change any code, check `git status` before you believe either value.** The likely
+cause is not nondeterminism.
+
+And state the *whole* regime beside every number. A blast-radius table was wrong
+by four orders of magnitude because two grammars were measured at `remaining=0`
+(the production single-block value) and a third at `remaining=1000`, which makes
+`b_L = 1[s live]` — §3.1b's `b_l_unbounded` error — and hides the loss being
+measured. Same code, same `p`, same function: 706 lost pairs and 0 dead
+positions at one setting, 2,359,296 and 8 at the other.
+
 ### When to skip it
 
 Typo fixes, comment and docstring edits, renaming, and mechanical refactors
