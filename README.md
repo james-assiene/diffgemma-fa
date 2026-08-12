@@ -62,8 +62,12 @@ about what makes an answer right.
   object and accepts bare scalars. They are refused at compile time rather than
   mis-decoded. This is the entire reason schema validity reads 0.992 and not
   1.000; see "A worked example" below.
-- The generated string regex carries no `\uXXXX` escape production at all, so
-  the grammar is narrower than RFC 8259 for every string.
+- **The compiled grammar is narrower than RFC 8259**, inherited from
+  `outlines-core` rather than introduced here: `\uXXXX` escapes, unsigned
+  exponents (`1e5`), and nesting deeper than 4 are all rejected despite being
+  valid JSON. Measured, with root causes and fixability, in
+  `docs/LIMITATIONS.md` — the first two are one-line RFC deviations, the third
+  is a real bound on what a finite automaton can express.
 - SPEC §3.7 (`--self-cond=constrained`) and §3.3 (`--trajectory=R1/R2`) do not
   exist in the tree. Five of six SPEC §7.1 datasets have never been run.
 
