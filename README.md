@@ -31,12 +31,21 @@ task):
 
 | | unconstrained | constrained |
 |---|---|---|
-| **schema valid** | 0.631 | **0.992** |
+| **schema valid** | 0.631 | **1.000** (130/130) |
 | constraint satisfaction | 0.000 | **1.000** |
-| argument accuracy | 0.639 | 0.650 |
-| exact call | 0.500 | 0.523 |
+| argument accuracy | 0.639 | 0.663 |
+| exact call | 0.500 | 0.531 |
 
-Schema validity 63% → 99% at no measurable accuracy cost. Read the two content
+Schema validity 63% → **100%** at no accuracy cost. Every record emits a valid
+instance of its schema, with zero partition failures and zero OOMs.
+
+Measured at `4f9a6e3` (code identity `1aa8ccf`), n = 130 of 130 available, no
+records skipped at compile time. The constrained row reached 1.000 only after
+the `type: any` fix (`15cdc47`) — before it, the single failure was
+`live_simple_122-78-0`, whose grammar could not emit a well-formed object; see
+"A worked example" below. The unconstrained row was re-verified at HEAD in the
+same run and reproduces verbatim, so it is a current number rather than a stale
+one. Read the two content
 columns carefully, though: **the accuracy claim is parity, not a gain.**
 Restricted to records both arms answered, argument accuracy *reverses*
 (0.6703 unconstrained vs 0.6667), and the exact-call gap is 7 vs 4 discordant
@@ -57,11 +66,25 @@ about what makes an answer right.
 ### Caveats on the JSON result
 
 - 130 of 258 records in one split, one seed. A prefix is not a random sample.
-- 11 of 4,549 BFCL-Live schemas fail the build gate — BFCL's `"type": "any"`
-  compiles to an *unparenthesised* alternation, so the grammar rejects the valid
-  object and accepts bare scalars. They are refused at compile time rather than
-  mis-decoded. This is the entire reason schema validity reads 0.992 and not
-  1.000; see "A worked example" below.
+- **The accuracy movement is not attributable.** Schema validity 0.992 → 1.000
+  is: the failing record is named and its mechanism measured. The argument
+  accuracy move (0.650 → 0.663, four arguments of 291) is **not** — four commits
+  landed on the `j0/map` path between the two measurements (`da1294a` can move a
+  MAP argmax, `b58fd84` gates eq (8)'s fast path), so this is not a
+  one-variable delta and no cause should be assigned to it.
+- **The constrained block straddles two grammars.** This row is post-`15cdc47`;
+  `j0-sample`, `j1-sample`, `j2-sample`, `mask-sample` and `j0-map` are not, and
+  they decoded records 117 and 122 under a grammar that rejects the correct
+  object. This row pairs legitimately against the unconstrained baseline, which
+  is grammar-invariant and was re-verified at HEAD — but **not** against the
+  other constrained rows without restricting to common records, which the
+  per-record `rows` lists in each artifact permit on CPU.
+- **All 4,549 BFCL-Live schemas now compile** (was 4,538). BFCL's `"type": "any"`
+  used to become an *unparenthesised* alternation, so the grammar rejected the
+  valid object and accepted bare scalars; those 11 were refused at compile time
+  rather than mis-decoded. Fixed in `15cdc47` — see "A worked example" below,
+  which is retained because it is the clearest case in this project of the
+  guarantee locating a fault.
 - **The compiled grammar is narrower than RFC 8259**, inherited from
   `outlines-core` rather than introduced here: `\uXXXX` escapes, unsigned
   exponents (`1e5`), and nesting deeper than 4 are all rejected despite being

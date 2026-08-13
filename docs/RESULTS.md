@@ -46,6 +46,40 @@ measurement audit — see "Rescored 2026-08-08" below for what changed and why.
 CS, schema-valid, parsed and non-empty are untouched.
 
 
+> ## Re-measured 2026-08-13 — the constrained JSON row reaches schema validity 1.000
+>
+> `exp_e5_grammar130_map` re-run at `4f9a6e3` (code identity `1aa8ccf`) after the
+> `type: any` fix (`15cdc47`), under a coded hard stop requiring
+> `schema_valid_rate == 1.0`:
+>
+> | | unconstrained | constrained (whitespace-tolerant) |
+> |---|---|---|
+> | **schema valid** | 0.631 | **1.000** (130/130) |
+> | constraint satisfaction | 0.000 | **1.000** |
+> | argument accuracy | 0.639 | 0.663 (193/291) |
+> | exact call | 0.500 | 0.531 |
+>
+> `n = 130` of 130 available, `skipped_by_reason = {}`, `expand_wildcard = True`,
+> zero partition failures, zero OOMs, 106.2 min. The prior 0.992 had exactly one
+> failure — `live_simple_122-78-0`, whose `type: any` property compiled to an
+> unparenthesised alternation, so the grammar rejected `{"model": "..."}` and
+> accepted a bare `1`. That grammar is repaired and the record now validates.
+>
+> **Two things this does NOT license.** The argument-accuracy move (0.650 → 0.663,
+> four arguments of 291) is **not attributable**: `da1294a`, `b58fd84`, `a41bf74`
+> and `1aa8ccf` all landed on the `j0/map` path between the two measurements, so
+> this is not a one-variable delta. And the constrained block now **straddles two
+> grammars** — this row is post-fix while `j0/j1/j2-sample`, `mask-sample` and
+> `j0-map` are not, so the paired comparisons below hold only against the
+> unconstrained baseline (which arm 0 of the same run re-verified as reproducing
+> verbatim at HEAD, so it is current rather than stale). Restricting the other
+> pairs to common records is possible on CPU from the per-record `rows` lists.
+>
+> **`docs/RESULTS.md` must not be regenerated from `artifacts/` right now.**
+> Eleven tags are archived in `artifacts/stale_pre_1aa8ccf/` with no current
+> version, and `scripts/phase5_report.py` would drop those rows silently. See the
+> 2026-08-13 entry in `docs/LOG.md`.
+
 ## Rates, with 95% Wilson intervals
 
 | arm | n | CS | schema valid | parsed | non-empty | arg acc | exact call |
