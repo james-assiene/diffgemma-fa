@@ -1816,3 +1816,49 @@ This is the **third** instance of one shape — a linear subtraction that cancel
 catastrophically. `class_weights` and `scatter_edge_mass_to_tokens` were each
 rebuilt to remove it (`da1294a`); this is the same algebra surviving in the
 float64 reference, found only because the arbiter itself was finally audited.
+
+## 2026-08-13 — Eleven artifacts are archived with no current version
+
+The 16-arm queue of 2026-08-12 (PID 3405194) archives each tag **before** running
+it, so its abort at the third arm left eleven tags displaced with nothing in
+`artifacts/`:
+
+    eval_bfcl_live_simple_mask_sample   exp_marmap_b0.01
+    exp_f64_ws_only_j1                  exp_marmap_b0.1
+    exp_h2_grammar_j1                   exp_marmap_b0.5
+    exp_h2_marmap                       exp_oomfix_j0
+    exp_h2_stock_j1                     task_countdown_mask
+                                        task_sudoku_j1_sample
+
+**`scripts/phase5_report.py` globs `artifacts/` and would silently omit those
+rows from a regenerated `docs/RESULTS.md` rather than failing.** So until they
+are re-run, **`docs/RESULTS.md` must not be regenerated** — its committed text
+is the record. They sit in `artifacts/stale_pre_1aa8ccf/` with a local README.
+
+Do **not** restore them to close the gap. They are pre-`2c9f9d9` and
+pre-`15cdc47`: the mask/mar arms were measured through a `prefix_suffix` that
+silently erased live transitions, and the BFCL arms decoded records 117 and 122
+under a `type: any` grammar that rejects the correct object. That is why they
+were archived.
+
+### The queue stopped because a prediction of mine was falsified
+
+`task_sudoku_mask` is the one arm it completed, and it returned **`cs = 1/250`
+against a coded hard stop of `>= 2`** (published: 1/250). The reasoning behind
+the prediction was measured, not guessed — 16 of 256 positions had empty support
+pre-`2c9f9d9`, `where(r>0, logits, -1e30)` went all-sentinel, `categorical`
+returned token 0 deterministically, and the recorded emissions carry exactly
+that signature. The arm still reproduces its published value. `solved` did move,
+0.012 → 0.024.
+
+**Evidence that a mechanism is real is not evidence that it is the only cause,
+nor that removing it is sufficient.** I asserted the second from evidence for
+the first. The gate cost 48 minutes and saved ~17 GPU-hours from measuring a
+closure that is still degenerate.
+
+Three candidates, none yet tested: another defect in the mask path; a correct
+`u` still producing a bad draw, since the `mask` branch is deliberately
+unflagged; or `cs` being the wrong metric here at all, since Sudoku's grammar
+carries the §3.6 channel header that `mask` has no reason to emit — in which
+case the *gate* was wrong rather than the fix. The third is cheapest to check
+and the emissions are on disk. **Do not lower the threshold to make it pass.**
