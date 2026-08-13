@@ -1,0 +1,136 @@
+........................................................................ [  7%]
+........................................................................ [ 14%]
+.....F..
+string-body saturation diagnostic (report only)
+variant               n  median    p90    max  open-quote
+j0                 3706       5     27    583           6
+j1                 1374      10     34    501          26
+j2                  380       0     19    478           1
+mask                630       0     12    132          27
+unconstrained      1298       0     23    382          25
+  open quote in a guarantee arm: j0 ('exp_h2_marmap.json', 'live_simple_188-113-0')
+  open quote in a guarantee arm: j0 ('exp_marmap_b0.01.json', 'live_simple_35-12-0')
+  open quote in a guarantee arm: j0 ('exp_marmap_b0.01.json', 'live_simple_123-79-0')
+  open quote in a guarantee arm: j0 ('exp_marmap_b0.1.json', 'live_simple_123-79-0')
+  open quote in a guarantee arm: j0 ('exp_marmap_b0.5.json', 'live_simple_120-76-0')
+  open quote in a guarantee arm: j1 ('exp_e2_prompt_j1.json', 'live_simple_0-0-0')
+  open quote in a guarantee arm: j1 ('exp_e2_prompt_j1.json', 'live_simple_5-3-1')
+  open quote in a guarantee arm: j1 ('exp_e2_prompt_j1.json', 'live_simple_7-3-3')
+  open quote in a guarantee arm: j1 ('exp_e2_prompt_j1.json', 'live_simple_9-3-5')
+  open quote in a guarantee arm: j1 ('exp_e2_prompt_j1.json', 'live_simple_10-3-6')
+................................................................ [ 21%]
+........................................................................ [ 28%]
+........................................................................ [ 35%]
+........................................................................ [ 42%]
+........................................................................ [ 49%]
+........................................................................ [ 56%]
+........................................................................ [ 64%]
+..................................................F..................... [ 71%]
+........................................................................ [ 78%]
+........................................................................ [ 85%]
+....................................F................................... [ 92%]
+........................................................................ [ 99%]
+...                                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_mar_confidence_also_drives_the_stopping_rule _______________
+
+    def test_mar_confidence_also_drives_the_stopping_rule():
+        """SPEC §3.4: "`--confidence={mf,mar}` selects the entropy source. **Note it
+        changes stopping as well as acceptance** (the same tensor feeds both)."
+    
+        Constructed so the two answers are maximally far apart: the stub logits are
+        uniform (`H(p) = log V`, ~2.08 nats) while the automaton admits exactly one
+        string of the canvas length, so `H(q_i) = 0` at every position. An
+        entropy-threshold stopping rule must therefore fire immediately under `mar`
+        and never under `mf`.
+    
+        Measured by counting executed denoising steps through `DIAGNOSTICS`, not by
+        reading the source.
+        """
+        V = 8
+        members = ({2}, {3}, {4}, {1}, set(range(V)))
+        edges = ((0, 1, 0), (1, 2, 1), (2, 3, 2), (3, 4, 3), (4, 4, 4))
+        spec = _Spec(n_states=5, bucket=8, vocab=V, edges=edges, members=members,
+                     is_neg=(False,) * 5, finals=frozenset({4}),
+                     start=frozenset({0}))
+        L = 4                       # exactly one accepted string: (2, 3, 4, EOS)
+        assert _enumerate_language(spec, L) == [(2, 3, 4, 1)]
+        logits = jnp.zeros((1, L, spec.vocab))
+    
+        @dataclasses.dataclass(frozen=True)
+        class _EntropyStop:
+            threshold: float = 0.005
+    
+            def should_stop(self, *, step, canvas, previous_canvas, logits):
+                lp = jax.nn.log_softmax(logits.astype(jnp.float32))
+                p = jnp.exp(lp)
+                h = -jnp.sum(jnp.where(p == 0, 0.0, lp) * p, axis=-1)
+                return jnp.mean(h, axis=-1) < self.threshold
+    
+        steps = 4
+        counts = {}
+        for conf in ("mf", "mar"):
+            S.DIAGNOSTICS.reset()
+            _run_denoise(spec, variant="j0", emission="map", logits=logits, L=L,
+                         steps=steps, confidence=conf, diagnose=True,
+                         early_stop_fn=_EntropyStop())
+            counts[conf] = len(S.DIAGNOSTICS.rows)
+        S.DIAGNOSTICS.reset()
+    
+        assert counts["mf"] == steps, (
+            f"sanity: with unconstrained entropy ~{math.log(spec.vocab):.2f} nats "
+            f"the rule must never fire, got {counts['mf']} of {steps} steps"
+        )
+>       assert counts["mar"] < counts["mf"], (
+            "`--confidence=mar` changed acceptance but not stopping: the stopping "
+            "rule is still reading the unconstrained logits, so the mar arm's "
+            "step budget is not the one SPEC §3.4 describes and its stopping "
+            "threshold has not been recalibrated onto the constrained entropy"
+        )
+E       AssertionError: `--confidence=mar` changed acceptance but not stopping: the stopping rule is still reading the unconstrained logits, so the mar arm's step budget is not the one SPEC §3.4 describes and its stopping threshold has not been recalibrated onto the constrained entropy
+E       assert 4 < 4
+
+tests/test_audit_sampler.py:1332: AssertionError
+____________________ test_normalise_matches_bfcls_own_rule _____________________
+
+    def test_normalise_matches_bfcls_own_rule():
+        """SPEC §4.8: "scoring lowercases and strips `",./-_*^`". Scoring more
+        strictly than the benchmark understates accuracy and is not comparable to
+        the leaderboard."""
+        assert normalise("Black") == normalise("black")
+>       assert normalise('"black"') == normalise("black")      # quote IS stripped
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert '"black"' == 'black'
+E         
+E         - black
+E         + "black"
+E         ? +     +
+
+tests/test_metrics.py:28: AssertionError
+_________ test_j2_is_not_flagged_infeasible_for_violating_the_grammar __________
+
+    def test_j2_is_not_flagged_infeasible_for_violating_the_grammar():
+        """`j2`, `mask` and `unconstrained` emit rejected tokens **by
+        construction** — that is what they measure. Folding `advance_ok` into the
+        `Z == 0` flag for them would raise on the baselines and make them
+        unrunnable, turning a measurement into a crash."""
+        import inspect
+        src = inspect.getsource(S.ConstrainedDiffusionSampler._sample_step)
+>       assert 'self.variant in ("j0", "j1")' in src, (
+            "the advance_ok conjunct must be gated to the arms that actually "
+            "promise the guarantee"
+        )
+E       AssertionError: the advance_ok conjunct must be gated to the arms that actually promise the guarantee
+E       assert 'self.variant in ("j0", "j1")' in '    def sample_constrained(self, *, params, init_state, max_new_tokens,\n                           automaton: Automa...new_tokens), stream=stream,\n        )\n        if not stream:\n            _check_feasible(out)\n        return out\n'
+
+tests/test_sampler.py:363: AssertionError
+=============================== warnings summary ===============================
+tests/test_sampler.py::test_float32_on_the_sample_path_has_an_explicit_opt_out
+  <string>:25: RuntimeWarning: allow_unsafe_float32=True: the constrained sample path is running in float32, which is measured to lose live root entries and to misvalue the survivors by tens of nats at L = 256. Results from this run are not comparable to float64.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_audit_sampler.py::test_mar_confidence_also_drives_the_stopping_rule
+FAILED tests/test_metrics.py::test_normalise_matches_bfcls_own_rule - assert ...
+FAILED tests/test_sampler.py::test_j2_is_not_flagged_infeasible_for_violating_the_grammar
+3 failed, 1008 passed, 1 warning in 538.74s (0:08:58)

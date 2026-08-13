@@ -1,0 +1,63 @@
+[load] model + params
+[load] done
+2026-07-28 07:20:23.994217: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+
+--- per-step trace, bound=0.1, get_user_info ---
+  step  0 acc= 57 H=  0.3030 emit='{"user_id":6}'
+  step  1 acc= 33 H=  0.1370 emit='{"user_id":8}'
+  step  2 acc= 53 H=  0.0303 emit='{"user_id":8}'
+  step  3 acc= 72 H=  0.0453 emit='{"user_id":9}'
+  step  4 acc= 34 H=  0.1132 emit='{"user_id":1}'
+  step  5 acc= 15 H=  0.3128 emit='{"user_id":8}'
+  step  6 acc= 27 H=  0.2776 emit='{"user_id":8}'
+  step  7 acc=158 H=  0.1198 emit='{"user_id":0}'
+  step  8 acc= 77 H=  0.0401 emit='{"user_id":2}'
+  step  9 acc=107 H=  0.0263 emit='{"user_id":3}'
+  step 10 acc=236 H=  0.0130 emit='{"user_id":5}'
+  step 11 acc=247 H=  0.0098 emit='{"user_id":97}'
+  step 12 acc=254 H=  0.0079 emit='{"user_id":17890}'
+  step 13 acc=256 H=  0.0009 emit='{"user_id":97890,"special":":black"}'
+  step 14 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 15 acc=256 H=  0.0001 emit='{"user_id":97890,"special":":black"}'
+  step 16 acc=256 H=  0.0001 emit='{"user_id":77890,"special":":black"}'
+  step 17 acc=256 H=  0.0001 emit='{"user_id":77890,"special":":black"}'
+  step 18 acc=256 H=  0.0001 emit='{"user_id":77890,"special":":black"}'
+  step 19 acc=256 H=  0.0001 emit='{"user_id":77890,"special":":black"}'
+  step 20 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 21 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 22 acc=256 H=  0.0001 emit='{"user_id":77890,"special":":black"}'
+  step 23 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 24 acc=256 H=  0.0001 emit='{"user_id":77890,"special":":black"}'
+  step 25 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 26 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 27 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 28 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 29 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 30 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 31 acc=256 H=  0.0000 emit='{"user_id":97890,"special":":black"}'
+  step 32 acc=256 H=  0.0000 emit='{"user_id":97890,"special":":black"}'
+  step 33 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 34 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 35 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 36 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 37 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 38 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 39 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 40 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 41 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 42 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 43 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 44 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 45 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 46 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+  step 47 acc=256 H=  0.0000 emit='{"user_id":77890,"special":":black"}'
+[bound=0.1   ] n=  2 CS=2/2 parsed=2 nonempty=2 arg_acc=0/4=0.000
+
+===== SPEC §3.4 CALIBRATION =====
+   bound       CS  parsed  nonempty   arg_acc
+     0.1 2/2            2         2 0/4     0.000
+
+stock default is 0.1
+wrote artifacts/phase5_diag_j1.json

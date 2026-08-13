@@ -1,0 +1,15 @@
+=== task_sudoku_think ===
+    n: 250
+    cs_rate: 1.0
+    solve_rate: 0.004
+    zero_partition: 0
+    oom: 0
+    elapsed_seconds: 5334.7
+=== task_countdown_think ===
+    n: 250
+    cs_rate: 1.0
+    solve_rate: 0.0
+    zero_partition: 0
+    oom: 0
+    elapsed_seconds: 5366.4
+THINK DONE

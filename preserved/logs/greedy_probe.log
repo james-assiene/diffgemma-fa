@@ -1,0 +1,28 @@
+[eval] task=bfcl_live_simple variant=j1 emission=sample bound=0.1
+2026-08-02 21:33:04.065930: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: j1
+emission: sample
+n: 3
+cs: 0
+cs_rate: 0.0
+schema_ok: 0
+schema_valid_rate: 0.0
+parsed: 0
+nonempty: 0
+nonempty_rate: 0.0
+arg_correct: 0
+arg_total: 0
+arg_accuracy: 0.0
+exact_calls: 0
+exact_call_rate: 0.0
+skipped_by_reason: {}
+zero_partition: 3
+oom: 0
+elapsed_seconds: 156.7
+
+wrote /tmp/claude-1000/-home-ubuntu-diffgemma-fa/29da7bd9-0534-4f90-a9d4-d456e1f98acd/scratchpad/greedy_probe.json

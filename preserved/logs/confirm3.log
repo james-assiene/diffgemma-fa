@@ -1,0 +1,27 @@
+=== exp_f64_grammar130_j1 ===
+  !! exp_f64_grammar130_j1 DIED
+     jax.errors.JaxRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 8.02GiB. [tf-allocator-allocation-error='']
+     --------------------
+     For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+=== exp_f64_grammar130_j0 ===
+  !! exp_f64_grammar130_j0 DIED
+     jax.errors.JaxRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 8.02GiB. [tf-allocator-allocation-error='']
+     --------------------
+     For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+=== exp_f64_grammar130_s1 ===
+    n: 130
+    cs_rate: 0.9923
+    schema_valid_rate: 0.9923
+    nonempty_rate: 0.8923
+    arg_accuracy: 0.6562
+    exact_call_rate: 0.5154
+    zero_partition: 0
+=== exp_f64_ws_only_j1 ===
+    n: 130
+    cs_rate: 0.9769
+    schema_valid_rate: 0.9769
+    nonempty_rate: 0.8769
+    arg_accuracy: 0.6444
+    exact_call_rate: 0.5
+    zero_partition: 2
+CONFIRM3 DONE

@@ -1,0 +1,170 @@
+[eval] task=bfcl_live_simple variant=j0 emission=map bound=0.003
+[gate] get_user_info: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+2026-08-11 23:15:08.433043: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+[gate] github_star: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] uber.ride: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] uber.ride: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+  [10/130] CS=1.000 schema=1.000 acc=0.688 nonempty=1.000
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+  [20/130] CS=1.000 schema=1.000 acc=0.677 nonempty=1.000
+[gate] change_food: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] change_food: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] ChaFod: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] ChaFod: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] ChaFod: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] ChaFod: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] uber.ride: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] uber.eat.order: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] uber.eat.order: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] uber.eat.order: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+  [30/130] CS=1.000 schema=1.000 acc=0.706 nonempty=1.000
+[gate] aws.lexv2_models.list_exports: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] aws.lexv2_models.list_exports: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] answer.string: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] answer.string: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] answer.string: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] answer.string: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] parseAnswer: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] parseAnswer: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] fetch_weather_data: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+  [40/130] CS=1.000 schema=1.000 acc=0.636 nonempty=1.000
+[gate] ThinQ_Connect: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] ThinQ_Connect: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] ThinQ_Connect: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] ThinQ_Connect: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] ThinQ_Connect: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] ThinQ_Connect: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] ThinQ_Connect: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] multiply: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] find_beer: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] find_beer: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+  [50/130] CS=1.000 schema=1.000 acc=0.624 nonempty=0.880
+[gate] get_latest_carbon_intensity: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] ThinQ_Connect: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] ThinQ_Connect: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] todo_add: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] todo: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] todo: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] todo_manager.handle_action: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] todo_manager.handle_action: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_movies: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_movies: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+  [60/130] CS=1.000 schema=1.000 acc=0.645 nonempty=0.867
+[gate] todo: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] todo: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] todo: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] todo: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] todo: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] todo: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] inventory.restock_check: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] obtener_cotizacion_de_creditos: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] sum: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] analysis_api.AnalysisApi.retrieve_analysis: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+  [70/130] CS=1.000 schema=1.000 acc=0.656 nonempty=0.886
+[gate] get_sensor_alerts: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] extract_parameters_v1: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] detect_beats_and_filter: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] detect_beats_and_filter: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] detect_beats_and_filter: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] detect_beats_and_filter: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] language_translator.translate: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] weather.get: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] send_email: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] search_hotels: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+  [80/130] CS=1.000 schema=1.000 acc=0.622 nonempty=0.900
+[gate] sitefinity_create_contentitem: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] sitefinity_create_contentitem: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] sitefinity_create_contentitem: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] sitefinity_create_contentitem: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_coordinates_from_city: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] open_meteo_api.fetch_weather_data: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] sort_array: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_loc: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] log_food: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] interior_design_analysis.generate_report: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+  [90/130] CS=1.000 schema=1.000 acc=0.625 nonempty=0.889
+[gate] temperature: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] fetchPerson: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] play_artist: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] play_artist: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] play_song: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] process_data: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_current_weather: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_weather_by_coordinates: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] connectBluetooth: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+  [100/130] CS=1.000 schema=1.000 acc=0.650 nonempty=0.900
+[gate] connectBluetooth: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] askForSSID: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] calculate_tax: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] calculate_tax: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] calculate_tax: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] classify: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] record: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] record: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] record: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] record: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+  [110/130] CS=1.000 schema=1.000 acc=0.651 nonempty=0.900
+[gate] record: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] record: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] record: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] calculate_dynamic_pricing: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] update_user_profile: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] calculate_sum: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] sum_numbers: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_temperature: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] GetPrimeMinisters: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+  [120/130] CS=1.000 schema=1.000 acc=0.636 nonempty=0.882
+[gate] weather.forecast: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] generate_chart: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] pipeline: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] get_tickets: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] concat_strings: grammar rejects ['indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] telemetry.flowrules.interfaceInfo.get: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] telemetry.flowrules.interfaceInfo.get: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] requests.get: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] requests.get: grammar rejects ['tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+  [130/130] CS=1.000 schema=1.000 acc=0.648 nonempty=0.891
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: j0
+emission: map
+n: 128
+cs: 128
+cs_rate: 1.0
+schema_ok: 128
+schema_valid_rate: 1.0
+parsed: 128
+nonempty: 114
+nonempty_rate: 0.8906
+arg_correct: 186
+arg_total: 287
+arg_accuracy: 0.6481
+exact_calls: 63
+exact_call_rate: 0.4922
+skipped_by_reason: {'compile:ValueError': 2}
+zero_partition: 0
+oom: 0
+elapsed_seconds: 7389.1
+skipped_records: ['live_simple_117-73-0', 'live_simple_122-78-0']
+
+wrote artifacts/exp_marmap_b0.003.json

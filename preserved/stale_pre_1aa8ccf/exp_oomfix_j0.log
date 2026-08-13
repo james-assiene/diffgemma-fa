@@ -1,0 +1,76 @@
+[eval] task=bfcl_live_simple variant=j0 emission=sample bound=0.1
+2026-08-02 13:24:05.076368: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+  [10/130] CS=1.000 schema=1.000 acc=0.688 nonempty=1.000
+  [20/130] CS=1.000 schema=1.000 acc=0.677 nonempty=1.000
+  [30/130] CS=1.000 schema=1.000 acc=0.745 nonempty=1.000
+  [40/130] CS=1.000 schema=1.000 acc=0.697 nonempty=1.000
+  [50/130] CS=1.000 schema=1.000 acc=0.613 nonempty=0.880
+  [60/130] CS=1.000 schema=1.000 acc=0.617 nonempty=0.867
+  [70/130] CS=0.986 schema=0.986 acc=0.643 nonempty=0.871
+  [80/130] CS=0.988 schema=0.988 acc=0.617 nonempty=0.887
+  [90/130] CS=0.989 schema=0.989 acc=0.621 nonempty=0.878
+  [100/130] CS=0.990 schema=0.990 acc=0.646 nonempty=0.890
+  [110/130] CS=0.991 schema=0.991 acc=0.643 nonempty=0.900
+  [120/130] CS=0.992 schema=0.992 acc=0.608 nonempty=0.883
+W0802 14:35:29.891636 1291211 bfc_allocator.cc:363] Allocator (GPU_0_bfc) ran out of memory trying to allocate 8.02GiB from the lower end with freed_by_count=0. The caller indicates that this is not a failure, but this may mean that there could be performance gains if more memory were available.
+E0802 14:35:29.891832 1291051 config_assigner.cc:478] Could not get config for HLO: %input_reduce_fusion.52 = f64[2048,128,2048]{2,1,0} fusion(%loop_select_fusion.33, %input_transpose_fusion.6, %loop_select_fusion.31), kind=kInput, calls=
+(param_0.29113: f64[2048,1,128,2048], param_1.32595: f64[128,2048,2048], param_2.23327: f64[2048,1,256,2048]) -> f64[2048,128,2048] {
+  %param_1.32595 = f64[128,2048,2048]{2,1,0} parameter(1)
+  %broadcast.14531.3 = f64[2048,1,128,2048,2048]{4,3,2,1,0} broadcast(%param_1.32595), dimensions={2,3,4}, metadata={op_name="jit(_sample_loop)/while/body/jit(_sample_step)/while/body/vmap(jit(joint_draw))/add" stack_frame_id=1760}
+  %param_2.23327 = f64[2048,1,256,2048]{3,2,1,0} parameter(2)
+  %slice.4741.2 = f64[2048,1,128,2048]{3,2,1,0} slice(%param_2.23327), slice={[0:2048:1], [0:1:1], [1:256:2], [0:2048:1]}, metadata={op_name="jit(_sample_loop)/while/body/jit(_sample_step)/while/body/vmap(jit(joint_draw))/slice" stack_frame_id=1761}
+  %bitcast.9802.5 = f64[2048,128,2048]{2,1,0} bitcast(%slice.4741.2)
+  %broadcast.14532.5 = f64[2048,1,128,2048,2048]{4,3,2,1,0} broadcast(%bitcast.9802.5), dimensions={0,2,4}, metadata={op_name="jit(_sample_loop)/while/body/jit(_sample_step)/while/body/vmap(jit(joint_draw))/add" stack_frame_id=1760}
+  %add.25249.3 = f64[2048,1,128,2048,2048]{4,3,2,1,0} add(%broadcast.14531.3, %broadcast.14532.5), metadata={op_name="jit(_sample_loop)/while/body/jit(_sample_step)/while/body/vmap(jit(joint_draw))/add" stack_frame_id=1760}
+  %param_0.29113 = f64[2048,1,128,2048]{3,2,1,0} parameter(0)
+  %bitcast.9822.5 = f64[2048,128,2048]{2,1,0} bitcast(%param_0.29113)
+  %broadcast.14536.5 = f64[2048,1,128,2048,2048]{4,3,2,1,0} broadcast(%bitcast.9822.5), dimensions={0,2,3}, metadata={op_name="jit(_sample_loop)/while/body/jit(_sample_step)/while/body/vmap(jit(joint_draw))/sub" stack_frame_id=1768}
+  %subtract.55.3 = f64[2048,1,128,2048,2048]{4,3,2,1,0} subtract(%add.25249.3, %broadcast.14536.5), metadata={op_name="jit(_sample_loop)/while/body/jit(_sample_step)/while/body/vmap(jit(joint_draw))/sub" stack_frame_id=1768}
+  %exponential.11 = f64[2048,1,128,2048,2048]{4,3,2,1,0} exponential(%subtract.55.3), metadata={op_name="jit(_sample_loop)/while/body/jit(_sample_step)/while/body/vmap(jit(joint_draw))/exp" stack_frame_id=1771}
+  %bitcast.25544.1 = f64[2048,128,2048,2048]{3,2,1,0} bitcast(%exponential.11)
+  %constant.9099.4 = f64[] constant(0), metadata={op_name="jit(_sample_loop)/while/body/jit(_sample_step)" stack_frame_id=841}
+  ROOT %reduce.2224.1 = f64[2048,128,2048]{2,1,0} reduce(%bitcast.25544.1, %constant.9099.4), dimensions={3}, to_apply=
+  (reduce_sum.3616: f64[], reduce_sum.3617: f64[]) -> f64[] {
+    %reduce_sum.3616 = f64[] parameter(0), metadata={op_name="reduce_sum"}
+    %reduce_sum.3617 = f64[] parameter(1), metadata={op_name="reduce_sum"}
+    ROOT %reduce_sum.3618.0 = f64[] add(%reduce_sum.3616, %reduce_sum.3617), metadata={op_name="while/body/reduce_sum" stack_frame_id=73}
+  }
+}. Status: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 8.02GiB. [tf-allocator-allocation-error='']
+=== Source Location Trace: === 
+external/xla/xla/stream_executor/integrations/tf_allocator_adapter.cc:269
+external/xla/xla/stream_executor/integrations/tf_allocator_adapter.cc:192
+external/xla/xla/stream_executor/gpu/redzone_allocator.cc:93
+external/xla/xla/stream_executor/gpu/redzone_allocator.cc:262
+external/xla/xla/service/gpu/autotuning/redzone_buffers.cc:107
+external/xla/xla/service/gpu/autotuning/redzone_buffers.cc:89
+external/xla/xla/backends/gpu/autotuner/gpu_profiler.cc:269
+external/xla/xla/backends/autotuner/config_runner.cc:69
+external/xla/xla/backends/autotuner/config_assigner.cc:417
+
+  [130/130] CS=0.985 schema=0.985 acc=0.629 nonempty=0.885
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: j0
+emission: sample
+n: 130
+cs: 128
+cs_rate: 0.9846
+schema_ok: 128
+schema_valid_rate: 0.9846
+parsed: 128
+nonempty: 115
+nonempty_rate: 0.8846
+arg_correct: 180
+arg_total: 286
+arg_accuracy: 0.6294
+exact_calls: 63
+exact_call_rate: 0.4846
+skipped_by_reason: {}
+zero_partition: 1
+oom: 1
+elapsed_seconds: 4579.8
+
+wrote artifacts/exp_oomfix_j0.json

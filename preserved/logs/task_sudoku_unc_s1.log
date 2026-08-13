@@ -1,0 +1,43 @@
+[eval] task=sudoku variant=unconstrained emission=sample n=250
+2026-08-03 22:32:10.449360: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+  [10/250] CS=0.000 solved=0.700
+  [20/250] CS=0.000 solved=0.800
+  [30/250] CS=0.000 solved=0.767
+  [40/250] CS=0.000 solved=0.825
+  [50/250] CS=0.000 solved=0.860
+  [60/250] CS=0.000 solved=0.867
+  [70/250] CS=0.000 solved=0.871
+  [80/250] CS=0.000 solved=0.875
+  [90/250] CS=0.000 solved=0.878
+  [100/250] CS=0.000 solved=0.860
+  [110/250] CS=0.000 solved=0.855
+  [120/250] CS=0.000 solved=0.842
+  [130/250] CS=0.000 solved=0.854
+  [140/250] CS=0.000 solved=0.864
+  [150/250] CS=0.000 solved=0.860
+  [160/250] CS=0.000 solved=0.863
+  [170/250] CS=0.000 solved=0.865
+  [180/250] CS=0.000 solved=0.872
+  [190/250] CS=0.000 solved=0.874
+  [200/250] CS=0.000 solved=0.870
+  [210/250] CS=0.000 solved=0.871
+  [220/250] CS=0.000 solved=0.868
+  [230/250] CS=0.000 solved=0.874
+  [240/250] CS=0.000 solved=0.875
+  [250/250] CS=0.000 solved=0.868
+
+===== RESULT =====
+task: sudoku
+variant: unconstrained
+emission: sample
+n: 250
+cs_rate: 0.0
+solve_rate: 0.868
+zero_partition: 0
+oom: 0
+failure_reasons: {'ok': 217, 'only 0 digits': 8, 'col 2': 8, 'overwrote the given at (0,2)': 6, 'row 1': 1, 'col 1': 7, 'box (0,0)': 1, 'overwrote the given at (3,3)': 1, 'overwrote the given at (3,2)': 1}
+elapsed_seconds: 2602.6
+
+wrote artifacts/task_sudoku_unc_s1.json

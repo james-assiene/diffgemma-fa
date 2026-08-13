@@ -1,0 +1,147 @@
+{
+  "task": "bfcl_live_simple",
+  "variant": "j1",
+  "emission": "sample",
+  "entropy_bound": 0.1,
+  "nonempty_strings": true,
+  "seed": 0,
+  "offset": 0,
+  "prompt_style": "stock",
+  "confidence": "mf",
+  "temp": "stock",
+  "dtype": "float64",
+  "whitespace": "stock",
+  "fence": false,
+  "ci_enums": false,
+  "records_available": 4,
+  "denominator_policy": "n = records attempted. Compile-skipped records never reached the model: they are excluded from n and from arg_total, and reported in skipped_by_reason. Oom and zero_partition records DID reach the model and failed: they stay in n AND in arg_total as failures, and are reported in their own columns. arg_total therefore depends only on the benchmark, never on what the model emitted. Matches eval/run_tasks.py. The skipped records are named individually in skipped_records, so the difference set against another arm's n is computable from this file alone.",
+  "skipped_by_reason": {},
+  "skipped_records": [],
+  "zero_partition": 0,
+  "oom": 0,
+  "oom_records": [],
+  "zero_partition_records": [],
+  "elapsed_seconds": 161.3,
+  "n": 4,
+  "cs": 4,
+  "cs_rate": 1.0,
+  "schema_ok": 4,
+  "schema_valid_rate": 1.0,
+  "parsed": 4,
+  "nonempty": 4,
+  "nonempty_rate": 1.0,
+  "arg_correct": 4,
+  "arg_total": 10,
+  "arg_accuracy": 0.4,
+  "exact_calls": 1,
+  "exact_call_rate": 0.25,
+  "per_key": [
+    {
+      "key": "user_id",
+      "want": "7890",
+      "got": "7890",
+      "ok": true
+    },
+    {
+      "key": "special",
+      "want": "black",
+      "got": "black",
+      "ok": true
+    },
+    {
+      "key": "repos",
+      "want": "ShishirPatil/gorilla,gorilla-llm/gorilla-cli",
+      "got": ":",
+      "ok": false
+    },
+    {
+      "key": "aligned",
+      "want": "True",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "loc",
+      "want": "2020 Addison Street, Berkeley, CA, USA",
+      "got": "2020 Addison Street, Berkeley, CA, USA1  ",
+      "ok": false
+    },
+    {
+      "key": "type",
+      "want": "comfort",
+      "got": "comfort",
+      "ok": true
+    },
+    {
+      "key": "time",
+      "want": "600",
+      "got": "6000",
+      "ok": false
+    },
+    {
+      "key": "loc",
+      "want": "221B Baker Street, Berkeley, CA, USA",
+      "got": "221B Baker Street, Berkeley, CA, USA1  ",
+      "ok": false
+    },
+    {
+      "key": "type",
+      "want": "plus",
+      "got": "plus",
+      "ok": true
+    },
+    {
+      "key": "time",
+      "want": "600",
+      "got": "6000",
+      "ok": false
+    }
+  ],
+  "rows": [
+    {
+      "id": "live_simple_0-0-0",
+      "fn": "get_user_info",
+      "text": "<|channel>```\n<channel|>{\"user_id\": 7890, \"special\": \"black\"}",
+      "parsed": {
+        "user_id": 7890,
+        "special": "black"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_1-1-0",
+      "fn": "github_star",
+      "text": "<|channel>```json\":{\n<channel|>{\"repos\":\":\"}",
+      "parsed": {
+        "repos": ":"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_2-2-0",
+      "fn": "uber.ride",
+      "text": "<|channel>```json {{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, USA1  \",\"type\": \"comfort\" ,\"time\": 6000}",
+      "parsed": {
+        "loc": "2020 Addison Street, Berkeley, CA, USA1  ",
+        "type": "comfort",
+        "time": 6000
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_3-2-1",
+      "fn": "uber.ride",
+      "text": "<|channel>```jsonBest{\n<channel|>{\"loc\": \"221B Baker Street, Berkeley, CA, USA1  \",\"type\": \"plus\" ,\"time\": 6000}",
+      "parsed": {
+        "loc": "221B Baker Street, Berkeley, CA, USA1  ",
+        "type": "plus",
+        "time": 6000
+      },
+      "accepted": true,
+      "schema_ok": true
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+=== unconstrained_sample (n=50) ===
+    n: 50
+    cs_rate: 0.0
+    nonempty_rate: 1.0
+    arg_accuracy: 0.6129
+    exact_call_rate: 0.4
+=== mask_sample (n=50) ===
+    n: 50
+    cs_rate: 0.0
+    nonempty_rate: 0.52
+    arg_accuracy: 0.4651
+    exact_call_rate: 0.16
+=== j2_sample (n=50) ===
+    n: 50
+    cs_rate: 0.96
+    nonempty_rate: 0.84
+    arg_accuracy: 0.3294
+    exact_call_rate: 0.18
+=== j1_sample (n=50) ===
+    n: 50
+    cs_rate: 1.0
+    nonempty_rate: 0.88
+    arg_accuracy: 0.3978
+    exact_call_rate: 0.22
+=== j0_map (n=50) ===
+=== j0_sample (n=50) ===
+
+=== SUMMARY ===
+variant                   n      CS  parsed  nonempty  arg_acc   exact
+j1-sample                50   1.000      50     0.880    0.398   0.220
+j2-sample                50   0.960      48     0.840    0.329   0.180
+mask-sample              50   0.000      28     0.520    0.465   0.160
+unconstrained-sample     50   0.000      50     1.000    0.613   0.400

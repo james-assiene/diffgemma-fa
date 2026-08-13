@@ -1,0 +1,1031 @@
+{
+  "task": "bfcl_live_simple",
+  "variant": "j2",
+  "emission": "sample",
+  "entropy_bound": 0.1,
+  "nonempty_strings": true,
+  "seed": 0,
+  "records_available": 50,
+  "skipped_by_reason": {},
+  "elapsed_seconds": 1312.2,
+  "n": 50,
+  "cs": 48,
+  "cs_rate": 0.96,
+  "parsed": 48,
+  "nonempty": 42,
+  "nonempty_rate": 0.84,
+  "arg_correct": 28,
+  "arg_total": 85,
+  "arg_accuracy": 0.3294,
+  "exact_calls": 9,
+  "exact_call_rate": 0.18,
+  "per_key": [
+    {
+      "key": "user_id",
+      "want": "7890",
+      "got": "78",
+      "ok": false
+    },
+    {
+      "key": "special",
+      "want": "black",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "repos",
+      "want": "ShishirPatil/gorilla,gorilla-llm/gorilla-cli",
+      "got": "{",
+      "ok": false
+    },
+    {
+      "key": "aligned",
+      "want": "True",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "loc",
+      "want": "2020 Addison Street, Berkeley, CA, USA",
+      "got": "2020 Addison Street, Berkeley, CA, USA1                               ",
+      "ok": false
+    },
+    {
+      "key": "type",
+      "want": "comfort",
+      "got": "comfort",
+      "ok": true
+    },
+    {
+      "key": "time",
+      "want": "600",
+      "got": "6000",
+      "ok": false
+    },
+    {
+      "key": "loc",
+      "want": "221B Baker Street, Berkeley, CA, USA",
+      "got": "221B Baker Street, Berkeley, CA, USA1  ",
+      "ok": false
+    },
+    {
+      "key": "type",
+      "want": "plus",
+      "got": "plus",
+      "ok": true
+    },
+    {
+      "key": "time",
+      "want": "600",
+      "got": "6000",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Tel Aviv, Israel",
+      "got": "Tel",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Divin\u00f3polis, MG",
+      "got": "Divin\u00f3polis, MG",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "San Francisco, CA",
+      "got": "San Francisco",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Riga, Latvia",
+      "got": "Riga, Latvia, Latvia",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "London, UK",
+      "got": "London, UK",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Hyderabad, India",
+      "got": "Hyderabad",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Mariposa, CA",
+      "got": "Yosemite National Park, CA",
+      "ok": false
+    },
+    {
+      "key": "unit",
+      "want": "celsius",
+      "got": "celsius",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Naples, FL",
+      "got": "Naples, Florida",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "New York, NY",
+      "got": "New York, NY",
+      "ok": true
+    },
+    {
+      "key": "unit",
+      "want": "celsius",
+      "got": "celsius",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Shanghai, China",
+      "got": "\u4e0a\u6d77",
+      "ok": false
+    },
+    {
+      "key": "unit",
+      "want": "celsius",
+      "got": "celsius",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Bangkok, Thailand",
+      "got": "Bangkok,",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Chennai, Tamil Nadu",
+      "got": "Chennai, Tamil Nadu",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Lang Son, Vietnam",
+      "got": "Lang Son, Vietnam",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Boston, MA",
+      "got": "Boston",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Moscow, Russia",
+      "got": "Moscow",
+      "ok": false
+    },
+    {
+      "key": "unit",
+      "want": "celsius",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Quintana Roo, Mexico",
+      "got": "Quintana Roo, Mexico",
+      "ok": true
+    },
+    {
+      "key": "unit",
+      "want": "celsius",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "food_item",
+      "want": "burger",
+      "got": "burger1  ",
+      "ok": false
+    },
+    {
+      "key": "modification_request",
+      "want": "no onions, extra cheese",
+      "got": "no onions, extra cheese",
+      "ok": true
+    },
+    {
+      "key": "food_item",
+      "want": "chicken dish",
+      "got": "chicken dish   ",
+      "ok": true
+    },
+    {
+      "key": "modification_request",
+      "want": "extra spicy",
+      "got": "extra spicy",
+      "ok": true
+    },
+    {
+      "key": "TheFod",
+      "want": "BURGER",
+      "got": "BURGER",
+      "ok": true
+    },
+    {
+      "key": "TheFod",
+      "want": "BURGER",
+      "got": "BURGER",
+      "ok": true
+    },
+    {
+      "key": "TheFod",
+      "want": "SALAD",
+      "got": "SOUP",
+      "ok": false
+    },
+    {
+      "key": "loc",
+      "want": "123 \u0110\u01b0\u1eddng \u0110\u1ea1i h\u1ecdc, Berkeley, CA",
+      "got": "123 University Dr, Berkeley, CA 94704Business ",
+      "ok": false
+    },
+    {
+      "key": "type",
+      "want": "plus",
+      "got": "plus",
+      "ok": true
+    },
+    {
+      "key": "time",
+      "want": "10",
+      "got": "100",
+      "ok": false
+    },
+    {
+      "key": "restaurant",
+      "want": "uber pitada",
+      "got": "uber pitada ",
+      "ok": true
+    },
+    {
+      "key": "items",
+      "want": "['burgers', 'chicken wings']",
+      "got": "['burgers', 'chicken', '],  ']",
+      "ok": false
+    },
+    {
+      "key": "quantities",
+      "want": "[5, 6]",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "restaurant",
+      "want": "\u80af\u5fb7\u57fa",
+      "got": "\u80af\u5fb7\u57fa1",
+      "ok": false
+    },
+    {
+      "key": "items",
+      "want": "['\u9ea6\u8fa3\u9e21\u817f\u5821', '\u53ef\u53e3\u53ef\u4e50', '\u6cb9\u70b8\u9e21\u7fc5', '\u85af\u6761']",
+      "got": "['\u9ea6\u8fa3\u9e21\u817f\u5821', '\u53ef\u53e3\u53ef\u4e50', '\u6cb9\u70b8\u9e21\u7fc5', '\u85af(\"],']",
+      "ok": false
+    },
+    {
+      "key": "quantities",
+      "want": "[10, 50, 30, 90]",
+      "got": "[100, 50, 30, 90]",
+      "ok": false
+    },
+    {
+      "key": "restaurant",
+      "want": "McDonald's",
+      "got": "McDonald's \time",
+      "ok": false
+    },
+    {
+      "key": "items",
+      "want": "['pizza']",
+      "got": "['\"pizza', '  ],']",
+      "ok": false
+    },
+    {
+      "key": "quantities",
+      "want": "[1]",
+      "got": "[1]",
+      "ok": true
+    },
+    {
+      "key": "botId",
+      "want": "my-bot-id",
+      "got": "my-bot-id1  ",
+      "ok": false
+    },
+    {
+      "key": "botVersion",
+      "want": "v2",
+      "got": "v2",
+      "ok": true
+    },
+    {
+      "key": "botId",
+      "want": "B12345",
+      "got": "B123455_",
+      "ok": false
+    },
+    {
+      "key": "botVersion",
+      "want": "v1",
+      "got": "v1",
+      "ok": true
+    },
+    {
+      "key": "sortBy",
+      "want": "DESC",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "answer",
+      "want": "Logistic regression is not present in the text, therefore I cannot answer this q",
+      "got": "Logistic regression is not present in the text, therefore I cannot answer this q",
+      "ok": true
+    },
+    {
+      "key": "answer",
+      "want": "Logistic regression is not present in the text, therefore I cannot answer this q",
+      "got": "Logistic regression is not present in the text, however I cannot answer this que",
+      "ok": false
+    },
+    {
+      "key": "answer",
+      "want": "Logistic regression is not present in the text, therefore I cannot answer this q",
+      "got": "Valid",
+      "ok": false
+    },
+    {
+      "key": "answer",
+      "want": "Logistic regression is not present in the text, therefore I cannot answer this q",
+      "got": "\\",
+      "ok": false
+    },
+    {
+      "key": "answer",
+      "want": "The text does not define logistic regression, therefore I cannot answer this que",
+      "got": "answer",
+      "ok": false
+    },
+    {
+      "key": "answer",
+      "want": "The text does not define logistic regression, therefore I cannot answer this que",
+      "got": "The text does not define logistic regression, however I cannot answer to thisQue",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Mariposa, CA",
+      "got": "https://api.weather.com/v1",
+      "ok": false
+    },
+    {
+      "key": "unit",
+      "want": "fahrenheit",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "latitude",
+      "want": "37.8651",
+      "got": "1",
+      "ok": false
+    },
+    {
+      "key": "longitude",
+      "want": "-119.5383",
+      "got": "1",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "{'airConJobMode': 'AIR_CLEAN', 'windStrength': 'HIGH', 'monitoringEnabled': True",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "{'airConJobMode': 'AIR_DRY'}",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "{'coolTargetTemperature': 22}",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "{'windStrength': 'HIGH'}",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "{'airConOperationMode': 'POWER_ON'}",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "{'airCleanOperationMode': 'START', 'airConOperationMode': 'POWER_ON', 'coolTarge",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "a",
+      "want": "3",
+      "got": "300",
+      "ok": false
+    },
+    {
+      "key": "b",
+      "want": "2",
+      "got": "22",
+      "ok": false
+    },
+    {
+      "key": "brewery",
+      "want": "Sierra Nevada",
+      "got": "Sierra Nevada brewery",
+      "ok": false
+    },
+    {
+      "key": "taste",
+      "want": "bitter",
+      "got": "bitter",
+      "ok": true
+    },
+    {
+      "key": "aroma",
+      "want": "hoppy",
+      "got": "hoppy",
+      "ok": true
+    },
+    {
+      "key": "color",
+      "want": "pale",
+      "got": "pale",
+      "ok": true
+    },
+    {
+      "key": "style",
+      "want": "lager",
+      "got": ":",
+      "ok": false
+    },
+    {
+      "key": "pairings",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "brewery",
+      "want": "Creek",
+      "got": "Creek brewery least  ",
+      "ok": false
+    },
+    {
+      "key": "taste",
+      "want": "slightly bitter",
+      "got": "slightly bitter    ",
+      "ok": true
+    },
+    {
+      "key": "aroma",
+      "want": "chocolatey",
+      "got": "rich, chocolatey aroma    ",
+      "ok": false
+    },
+    {
+      "key": "color",
+      "want": "dark",
+      "got": "dark  ",
+      "ok": true
+    },
+    {
+      "key": "style",
+      "want": "porter",
+      "got": "porter",
+      "ok": true
+    },
+    {
+      "key": "pairings",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    }
+  ],
+  "rows": [
+    {
+      "id": "live_simple_0-0-0",
+      "fn": "get_user_info",
+      "text": "<|channel>/**```json {{\n<channel|>{\"user_id\": 78}<turn|>",
+      "parsed": {
+        "user_id": 78
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_1-1-0",
+      "fn": "github_star",
+      "text": "<|channel>thought\n<channel|>{\"repos\":\"{\"}<turn|>",
+      "parsed": {
+        "repos": "{"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_2-2-0",
+      "fn": "uber.ride",
+      "text": "<|channel>\n\n\n```json {{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, USA1                               \",\"type\": \"comfort\" ,\"time\": 6000}",
+      "parsed": {
+        "loc": "2020 Addison Street, Berkeley, CA, USA1                               ",
+        "type": "comfort",
+        "time": 6000
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_3-2-1",
+      "fn": "uber.ride",
+      "text": "<|channel>```json {{\n<channel|>{\"loc\": \"221B Baker Street, Berkeley, CA, USA1  \",\"type\": \"plus\" ,\"time\": 6000}",
+      "parsed": {
+        "loc": "221B Baker Street, Berkeley, CA, USA1  ",
+        "type": "plus",
+        "time": 6000
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_4-3-0",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json\n<channel|>{\"location\": \"Tel\"}",
+      "parsed": {
+        "location": "Tel"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_5-3-1",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json\n<channel|>{\"location\": \"Divin\u00f3polis, MG\"}",
+      "parsed": {
+        "location": "Divin\u00f3polis, MG"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_6-3-2",
+      "fn": "get_current_weather",
+      "text": "<|channel>thought\n<channel|>{\"location\": \"San Francisco\", \"unit\": \"fahrenheit\"}",
+      "parsed": {
+        "location": "San Francisco",
+        "unit": "fahrenheit"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_7-3-3",
+      "fn": "get_current_weather",
+      "text": "<|channel>```jsonjson\n<channel|>{\"location\": \"Riga, Latvia, Latvia\"}",
+      "parsed": {
+        "location": "Riga, Latvia, Latvia"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_8-3-4",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json\n<channel|>{ \"location\": \"London, UK\"}",
+      "parsed": {
+        "location": "London, UK"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_9-3-5",
+      "fn": "get_current_weather",
+      "text": "<|channel>json      {\n<channel|>{\"location\": \"Hyderabad\"}",
+      "parsed": {
+        "location": "Hyderabad"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_10-3-6",
+      "fn": "get_current_weather",
+      "text": "<|channel>..```\n<channel|>{\"location\": \"Yosemite National Park, CA\", \"unit\": \"celsius\"}",
+      "parsed": {
+        "location": "Yosemite National Park, CA",
+        "unit": "celsius"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_11-3-7",
+      "fn": "get_current_weather",
+      "text": "<|channel>json_\n<channel|>{\"location\": \"Naples, Florida\"}",
+      "parsed": {
+        "location": "Naples, Florida"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_12-3-8",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json\n<channel|>{\"location\": \"New York, NY\", \"unit\": \"celsius\" }",
+      "parsed": {
+        "location": "New York, NY",
+        "unit": "celsius"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_13-3-9",
+      "fn": "get_current_weather",
+      "text": "<|channel>```\n<channel|>{\"location\": \"\u4e0a\u6d77\", \"unit\": \"celsius\"}",
+      "parsed": {
+        "location": "\u4e0a\u6d77",
+        "unit": "celsius"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_14-3-10",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json {{\n<channel|>{\"location\": \"Bangkok,\"}",
+      "parsed": {
+        "location": "Bangkok,"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_15-3-11",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json\n<channel|>{ \"location\": \"Chennai, Tamil Nadu\"}",
+      "parsed": {
+        "location": "Chennai, Tamil Nadu"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_16-3-12",
+      "fn": "get_current_weather",
+      "text": "<|channel>json\n<channel|>{ \"location\": \"Lang Son, Vietnam\"}",
+      "parsed": {
+        "location": "Lang Son, Vietnam"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_17-3-13",
+      "fn": "get_current_weather",
+      "text": "<|channel>thought\n<channel|>{\"location\": \"Boston\"}<|tool_response>",
+      "parsed": {
+        "location": "Boston"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_18-3-14",
+      "fn": "get_current_weather",
+      "text": "<|channel>json      {\n<channel|>{\"location\": \"Moscow\"}",
+      "parsed": {
+        "location": "Moscow"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_19-3-15",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json_{\n<channel|>{\"location\": \"Quintana Roo, Mexico\"}",
+      "parsed": {
+        "location": "Quintana Roo, Mexico"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_20-4-0",
+      "fn": "change_food",
+      "text": "<|channel>```json continuation{\n<channel|>{\"food_item\": \"burger1  \",\"modification_request\": \"no onions, extra cheese\" }",
+      "parsed": {
+        "food_item": "burger1  ",
+        "modification_request": "no onions, extra cheese"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_21-4-1",
+      "fn": "change_food",
+      "text": "<|channel>json\n<channel|>{ \"food_item\": \"chicken dish   \",\"modification_request\": \"extra spicy\"}<|tool_response>",
+      "parsed": {
+        "food_item": "chicken dish   ",
+        "modification_request": "extra spicy"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_22-5-0",
+      "fn": "ChaFod",
+      "text": "<|channel>});```json {{\n<channel|>{\"TheFod\":\"BURGER\"}",
+      "parsed": {
+        "TheFod": "BURGER"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_23-5-1",
+      "fn": "ChaFod",
+      "text": "<|channel>\u0447\u043d\u043e\u0435<|channel> Adrien<|channel> m\u0119\u017cczy<|channel>Belgium<|channel>azin<|channel>\u043c\u0435\u043d\u043d\u043e<|channel>\ud83d\udc8a<|channel>text<|channel>1\n<channel|>{ \"TheFod\" \ud6cc<|channel>orney<|channel>hre<|channel>\u10d4\u10e5\u10e1<|channel>CLUSIVE<|channel",
+      "parsed": null,
+      "accepted": false
+    },
+    {
+      "id": "live_simple_24-5-2",
+      "fn": "ChaFod",
+      "text": "<|channel>```json {{\n<channel|>{\"TheFod\": \"BURGER\" }",
+      "parsed": {
+        "TheFod": "BURGER"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_25-5-3",
+      "fn": "ChaFod",
+      "text": "<|channel>thought\n<channel|>{ \"TheFod\": \"SOUP\"}",
+      "parsed": {
+        "TheFod": "SOUP"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_26-6-0",
+      "fn": "uber.ride",
+      "text": "<|channel>```json {{\n<channel|>{\"loc\": \"123 University Dr, Berkeley, CA 94704Business \",\"type\": \"plus\" ,\"time\": 100}",
+      "parsed": {
+        "loc": "123 University Dr, Berkeley, CA 94704Business ",
+        "type": "plus",
+        "time": 100
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_27-7-0",
+      "fn": "uber.eat.order",
+      "text": "<|channel>```jsonBest{\n<channel|>{\"restaurant\": \"uber pitada \" ,\"items\": [\"burgers\", \"chicken\",\"],  \"],\"quantities\": []}",
+      "parsed": {
+        "restaurant": "uber pitada ",
+        "items": [
+          "burgers",
+          "chicken",
+          "],  "
+        ],
+        "quantities": []
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_28-7-1",
+      "fn": "uber.eat.order",
+      "text": "<|channel>```json    {\n<channel|>{\"restaurant\": \"\u80af\u5fb7\u57fa1\", \"items\": [\"\u9ea6\u8fa3\u9e21\u817f\u5821\", \"\u53ef\u53e3\u53ef\u4e50\", \"\u6cb9\u70b8\u9e21\u7fc5\", \"\u85af(\\\"],\"], \"quantities\": [100, 50, 30, 90] }",
+      "parsed": {
+        "restaurant": "\u80af\u5fb7\u57fa1",
+        "items": [
+          "\u9ea6\u8fa3\u9e21\u817f\u5821",
+          "\u53ef\u53e3\u53ef\u4e50",
+          "\u6cb9\u70b8\u9e21\u7fc5",
+          "\u85af(\"],"
+        ],
+        "quantities": [
+          100,
+          50,
+          30,
+          90
+        ]
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_29-7-2",
+      "fn": "uber.eat.order",
+      "text": "<|channel>```json organization{\n<channel|>{\"restaurant\": \"McDonald's \\time\",\"items\": [ \"\\\"pizza\",\"  ],\"], \"quantities\": [1]}",
+      "parsed": {
+        "restaurant": "McDonald's \time",
+        "items": [
+          "\"pizza",
+          "  ],"
+        ],
+        "quantities": [
+          1
+        ]
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_30-8-0",
+      "fn": "aws.lexv2_models.list_exports",
+      "text": "<|channel>json\n<channel|>{ \"botId\": \"my-bot-id1  \",\"botVersion\": \"v2\"}",
+      "parsed": {
+        "botId": "my-bot-id1  ",
+        "botVersion": "v2"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_31-8-1",
+      "fn": "aws.lexv2_models.list_exports",
+      "text": "<|channel>jsonjson{\n<channel|>{\"botId\": \"B123455_\",\"botVersion\": \"v1\"}",
+      "parsed": {
+        "botId": "B123455_",
+        "botVersion": "v1"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_32-9-0",
+      "fn": "answer.string",
+      "text": "<|channel>```json\n<channel|>{\"answer\": \"Logistic regression is not present in the text, therefore I cannot answer this question.\" }",
+      "parsed": {
+        "answer": "Logistic regression is not present in the text, therefore I cannot answer this question."
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_33-10-0",
+      "fn": "answer.string",
+      "text": "<|channel>.\n\n\n```json {{\n<channel|>{\"answer\": \"Logistic regression is not present in the text, however I cannot answer this question.\" }",
+      "parsed": {
+        "answer": "Logistic regression is not present in the text, however I cannot answer this question."
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_34-11-0",
+      "fn": "answer.string",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"answer\": \"Valid\" }",
+      "parsed": {
+        "answer": "Valid"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_35-12-0",
+      "fn": "answer.string",
+      "text": "<|channel>```json\n<channel|>{\"answer\": \"\\\\\" }",
+      "parsed": {
+        "answer": "\\"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_36-13-0",
+      "fn": "parseAnswer",
+      "text": "<|channel>```json {{\n<channel|>{\"answer\": \"answer\" }",
+      "parsed": {
+        "answer": "answer"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_37-14-0",
+      "fn": "parseAnswer",
+      "text": "<|channel>```json\n<channel|>{\"answer\": \"The text does not define logistic regression, however I cannot answer to thisQuestion.\"}",
+      "parsed": {
+        "answer": "The text does not define logistic regression, however I cannot answer to thisQuestion."
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_38-15-0",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json exit{\n<channel|>{\"location\": \"https://api.weather.com/v1\"}<turn|>",
+      "parsed": {
+        "location": "https://api.weather.com/v1"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_39-16-0",
+      "fn": "fetch_weather_data",
+      "text": "<|channel>thought\n<channel|>{\"latitude\":1,\"longitude\":1 }",
+      "parsed": {
+        "latitude": 1,
+        "longitude": 1
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_40-17-0",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>:**:**\n\n\n```\n<channel|>{\"body\": {}}",
+      "parsed": {
+        "body": {}
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_41-17-1",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>json\n<channel|>{\"body\": {}}",
+      "parsed": {
+        "body": {}
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_42-17-2",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>json\n<channel|>{ \"body\": {}}<turn|>",
+      "parsed": {
+        "body": {}
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_43-17-3",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>```json\n<channel|>{\"body\": {}}<turn|>",
+      "parsed": {
+        "body": {}
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_44-18-0",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>```json    {\n<channel|>{\"body\": {}}",
+      "parsed": {
+        "body": {}
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_45-18-1",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>```json-patch\n<channel|>{\"body\": {}}<turn|>",
+      "parsed": {
+        "body": {}
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_46-19-0",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>arkar<|channel> \u09ac\u09cd\u09af\u09ac\u09b9\u09c3\u09a4<|channel>{\"airunless<|channel>Mode\": \"cool\", \" Zusammenarbeit<|channel>\": \"medium\", \"monitoringEnabled\n<channel|>{ \"ai plummeted<|channel> \"start\", \"airConOperationMode\n<channel|>{ \"airC",
+      "parsed": null,
+      "accepted": false
+    },
+    {
+      "id": "live_simple_47-20-0",
+      "fn": "multiply",
+      "text": "<|channel>```json argument{\n<channel|>{\"a\": 300,\"b\": 22}",
+      "parsed": {
+        "a": 300,
+        "b": 22
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_48-21-0",
+      "fn": "find_beer",
+      "text": "<|channel><tool_call|>```\n<channel|>{\"brewery\": \"Sierra Nevada brewery\", \"taste\": \"bitter\", \"aroma\": \"hoppy\", \"color\": \"pale\", \"style\": \":\"}",
+      "parsed": {
+        "brewery": "Sierra Nevada brewery",
+        "taste": "bitter",
+        "aroma": "hoppy",
+        "color": "pale",
+        "style": ":"
+      },
+      "accepted": true
+    },
+    {
+      "id": "live_simple_49-21-1",
+      "fn": "find_beer",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"brewery\": \"Creek brewery least  \",\"taste\": \"slightly bitter    \",\"aroma\": \"rich, chocolatey aroma    \",\"color\": \"dark  \",\"style\": \"porter\" }<turn|>",
+      "parsed": {
+        "brewery": "Creek brewery least  ",
+        "taste": "slightly bitter    ",
+        "aroma": "rich, chocolatey aroma    ",
+        "color": "dark  ",
+        "style": "porter"
+      },
+      "accepted": true
+    }
+  ]
+}

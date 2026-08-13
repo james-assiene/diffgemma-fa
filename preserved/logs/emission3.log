@@ -1,0 +1,9 @@
+=== sudoku j1-sample ===
+    cs_rate: 1.0
+    solve_rate: 0.012
+    zero_partition: 0
+=== sudoku j0-sample ===
+    cs_rate: 1.0
+    solve_rate: 0.0
+    zero_partition: 0
+EMISSION DONE

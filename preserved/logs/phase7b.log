@@ -1,0 +1,7 @@
+[bench] bucket=64 dtype=float32
+[bench] bucket=64 dtype=float64
+[bench] bucket=128 dtype=float32
+E0802 15:34:15.586609 1301776 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.2 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************

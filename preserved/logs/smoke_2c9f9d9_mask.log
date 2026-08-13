@@ -1,0 +1,32 @@
+[eval] task=bfcl_live_simple variant=mask emission=sample bound=0.1
+[gate] get_user_info: grammar rejects ['indent2', 'indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+2026-08-12 04:15:38.882588: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+[gate] github_star: grammar rejects ['indent2', 'indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] uber.ride: grammar rejects ['indent2', 'indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] uber.ride: grammar rejects ['indent2', 'indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: mask
+emission: sample
+n: 4
+cs: 0
+cs_rate: 0.0
+schema_ok: 0
+schema_valid_rate: 0.0
+parsed: 4
+nonempty: 4
+nonempty_rate: 1.0
+arg_correct: 8
+arg_total: 10
+arg_accuracy: 0.8
+exact_calls: 2
+exact_call_rate: 0.5
+skipped_by_reason: {}
+zero_partition: 0
+oom: 0
+elapsed_seconds: 221.8
+
+wrote artifacts/smoke_2c9f9d9_mask.json

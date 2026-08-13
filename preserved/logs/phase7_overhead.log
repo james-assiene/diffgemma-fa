@@ -1,0 +1,12 @@
+[bench] bucket=64 dtype=float32
+[bench] bucket=64 dtype=float64
+[bench] bucket=128 dtype=float32
+E0802 14:54:58.987387 1299284 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.5 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0802 14:59:17.013345 1299263 slow_operation_alarm.cc:140] The operation took 6m18.026027103s
+
+********************************
+[Compiling module input_reduce_fusion.5 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************

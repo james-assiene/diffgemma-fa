@@ -1,0 +1,58 @@
+[load] devices=[CudaDevice(id=0)]
+[load] params loaded in 35.3s
+[mem] after load: {'bytes_in_use_gb': 51.65, 'peak_bytes_in_use_gb': 51.66, 'bytes_limit_gb': 76.52}
+2026-07-27 19:40:35.404770: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+[00]   11.9s  blocks=1 steps=4 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>The capital of France is **Paris**.<turn|>'
+[01]    3.0s  blocks=1 steps=11 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>There are several ways to reverse a string in Python, depending on whether you wan'
+[02]    2.9s  blocks=1 steps=11 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>A finite automaton is a mathematical model of computation used to recognize patter'
+[03]    1.7s  blocks=1 steps=4 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>Three prime numbers greater than 100 are:\n\n1. **101**\n2. **103**\n3. **107**<turn|>'
+[04]    2.4s  blocks=1 steps=10 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>To convert Celsius to Fahrenheit, use the following formula:\n\n**°F = (°C × 9/5) + '
+[05]    3.5s  blocks=1 steps=16 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>17 * 23 = **391**\n\n**Here is a quick trick to solve it:**\nSince both 17 and 23 are'
+[06]    1.2s  blocks=1 steps=3 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>The largest planet in the solar system is **Jupiter**.'
+[07]    1.4s  blocks=1 steps=3 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>```json\n{\n  "name": "John Doe",\n  "age": 30\n}\n```<turn|>'
+[08]    3.5s  blocks=1 steps=16 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>After the ghost of his murdered father reveals he was killed by his uncle, Danish '
+[09]    2.0s  blocks=1 steps=5 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>The acronym **GPU** stands for **Graphics Processing Unit**.<turn|>'
+[10]    3.4s  blocks=1 steps=14 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>The most common way to count lines in a file is using the `wc` (word count) comman'
+[11]    2.1s  blocks=1 steps=6 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>The Apollo 11 mission landed on the moon in **1969**. The lunar module, *Eagle*, t'
+[12]    1.6s  blocks=1 steps=4 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>The translation for "good morning" in Spanish is:\n\n**Buenos días**<turn|>'
+[13]    2.9s  blocks=1 steps=12 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>The derivative of $x^3$ is **$3x^2$**.\n\n### Explanation:\nTo find this derivative, '
+[14]    3.4s  blocks=1 steps=15 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>The fundamental difference between **TCP** (Transmission Control Protocol) and **U'
+[15]    2.6s  blocks=1 steps=11 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>Writing a "perfect" email regular expression is notoriously difficult because the '
+[16]    1.8s  blocks=1 steps=6 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>The boiling point of water at sea level is **100 degrees Celsius** (**212 degrees '
+[17]    2.1s  blocks=1 steps=8 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>The first five Fibonacci numbers are: **0, 1, 1, 2, 3**.\n\n*(Note: If you start the'
+[18]    1.5s  blocks=1 steps=5 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>The chemical symbol for gold is **Au**. It comes from the Latin word for gold, *au'
+[19]    4.2s  blocks=1 steps=20 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>Imagine you have a **magic box**. \n\nInside that box, there is a **smaller box**. \n'
+
+===== SUMMARY =====
+checkpoint: /home/ubuntu/diffgemma_fa/artifacts/ckpt/diffusiongemma-26B-A4B-it
+load_seconds: 35.3
+memory: {'bytes_in_use_gb': 53.53, 'peak_bytes_in_use_gb': 56.52, 'bytes_limit_gb': 76.52}
+jax_version: 0.11.0
+n_prompts: 20
+blocks_total: 20
+blocks_exiting_via_budget: 0
+blocks_exiting_via_early_stop: 20
+mean_non_accepted_on_final_step: 0.0
+max_non_accepted_on_final_step: 0
+
+wrote artifacts/phase0_baseline.json

@@ -1,0 +1,40 @@
+[eval] task=bfcl_live_simple variant=j0 emission=map bound=0.1
+2026-07-29 16:05:41.849715: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+  [10/130] CS=1.000 schema=1.000 acc=0.438 nonempty=1.000
+  [20/130] CS=1.000 schema=1.000 acc=0.419 nonempty=1.000
+  [30/130] CS=1.000 schema=1.000 acc=0.353 nonempty=1.000
+  [40/130] CS=1.000 schema=1.000 acc=0.303 nonempty=1.000
+  [50/130] CS=1.000 schema=1.000 acc=0.290 nonempty=0.880
+  [60/130] CS=1.000 schema=1.000 acc=0.346 nonempty=0.867
+  [70/130] CS=1.000 schema=1.000 acc=0.397 nonempty=0.886
+  [80/130] CS=1.000 schema=1.000 acc=0.365 nonempty=0.887
+  [90/130] CS=1.000 schema=1.000 acc=0.353 nonempty=0.878
+  [100/130] CS=1.000 schema=1.000 acc=0.390 nonempty=0.890
+  [110/130] CS=1.000 schema=1.000 acc=0.345 nonempty=0.891
+  [120/130] CS=1.000 schema=0.992 acc=0.318 nonempty=0.867
+  [130/130] CS=1.000 schema=0.985 acc=0.328 nonempty=0.869
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: j0
+emission: map
+n: 130
+cs: 130
+cs_rate: 1.0
+schema_ok: 128
+schema_valid_rate: 0.9846
+parsed: 128
+nonempty: 113
+nonempty_rate: 0.8692
+arg_correct: 94
+arg_total: 287
+arg_accuracy: 0.3275
+exact_calls: 30
+exact_call_rate: 0.2308
+skipped_by_reason: {}
+zero_partition: 0
+elapsed_seconds: 3518.4
+
+wrote artifacts/eval_bfcl_live_simple_j0_map.json

@@ -1,0 +1,246 @@
+{
+  "results": [
+    {
+      "idx": 0,
+      "prompt": "Write a detailed 600-word essay on the history of the printing press.",
+      "wall_seconds": 42.97,
+      "n_blocks_observed": 3,
+      "steps_per_block": [
+        23,
+        21,
+        23
+      ],
+      "exit_per_block": [
+        "early_stop",
+        "early_stop",
+        "early_stop"
+      ],
+      "final_accepted_per_block": [
+        256,
+        256,
+        255
+      ],
+      "non_accepted_final_per_block": [
+        0,
+        0,
+        1
+      ],
+      "output_chars": 3795,
+      "output_token_ids_len": 700,
+      "first_40_token_ids": [
+        100,
+        45518,
+        107,
+        101,
+        818,
+        17410,
+        529,
+        506,
+        16386,
+        2686,
+        528,
+        506,
+        5453,
+        236772,
+        236770,
+        236810,
+        594,
+        7691,
+        563,
+        12865,
+        18793,
+        618,
+        506,
+        1346,
+        36503,
+        2460,
+        529,
+        506,
+        4532,
+        6933,
+        236761,
+        1030,
+        7779,
+        618,
+        506,
+        11825,
+        1534,
+        506,
+        12266,
+        52901
+      ],
+      "channel_open_positions": [
+        0
+      ],
+      "channel_close_positions": [
+        3
+      ],
+      "output_head": "<|channel>thought\n<channel|>The invention of the printing press in the mid-15th century is widely regarded as the most influential event of the modern era. It served as the bridge between the Middle Ages and modernity, fundamentally altering how information was produced, disseminated, and consumed. ",
+      "output_tail": "ed the world once again, the printing press remains the foundational technology of the modern world, proving that the written word, when multiplied, possesses a power mightier than any sword. Creating"
+    },
+    {
+      "idx": 1,
+      "prompt": "Explain, at length and with worked examples, how quicksort works, then how mergesort works, then compare them.",
+      "wall_seconds": 10.83,
+      "n_blocks_observed": 4,
+      "steps_per_block": [
+        15,
+        14,
+        11,
+        13
+      ],
+      "exit_per_block": [
+        "early_stop",
+        "early_stop",
+        "early_stop",
+        "early_stop"
+      ],
+      "final_accepted_per_block": [
+        256,
+        256,
+        256,
+        256
+      ],
+      "non_accepted_final_per_block": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "output_chars": 2955,
+      "output_token_ids_len": 1024,
+      "first_40_token_ids": [
+        100,
+        45518,
+        107,
+        101,
+        2094,
+        8214,
+        4728,
+        496,
+        5268,
+        30386,
+        1131,
+        1156,
+        529,
+        506,
+        1346,
+        2132,
+        37007,
+        17927,
+        236787,
+        5213,
+        3285,
+        8523,
+        632,
+        1018,
+        532,
+        5213,
+        78145,
+        36702,
+        84750,
+        10508,
+        1500,
+        506,
+        5213,
+        125449,
+        532,
+        146360,
+        1018,
+        50901,
+        236764,
+        840
+      ],
+      "channel_open_positions": [
+        0
+      ],
+      "channel_close_positions": [
+        3
+      ],
+      "output_head": "<|channel>thought\n<channel|>This guide provides a deep dive into two of the most important sorting algorithms: **Quicksort** and **Merge Sort**. Both follow the **Divide and Conquer** paradigm, but they approach the problem in fundamentally different ways.\n\n---\n\n# 1. Quicksort: The \"Partition\" Strat",
+      "output_tail": "   Merge `[43]` and `[3]` $\\rightarrow$ `[3, 43]`\n*   Merge `[9]` and `[82]` $\\rightarrow$ `[9, 82]`\n*   Merge `[10]` (alone) $\\rightarrow$ `[10]`\n\n**Step 3: Final Merging**\n*   Merge `[27, 38]` and `"
+    },
+    {
+      "idx": 2,
+      "prompt": "List 40 distinct countries, each with its capital city and a one-sentence fact.",
+      "wall_seconds": 16.45,
+      "n_blocks_observed": 4,
+      "steps_per_block": [
+        20,
+        17,
+        16,
+        31
+      ],
+      "exit_per_block": [
+        "early_stop",
+        "early_stop",
+        "early_stop",
+        "early_stop"
+      ],
+      "final_accepted_per_block": [
+        256,
+        256,
+        256,
+        256
+      ],
+      "non_accepted_final_per_block": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "output_chars": 3719,
+      "output_token_ids_len": 994,
+      "first_40_token_ids": [
+        100,
+        45518,
+        107,
+        101,
+        8291,
+        659,
+        236743,
+        236812,
+        236771,
+        9245,
+        4808,
+        236764,
+        910,
+        5279,
+        9979,
+        236764,
+        532,
+        496,
+        886,
+        236772,
+        54554,
+        1707,
+        1003,
+        1546,
+        236787,
+        108,
+        236770,
+        236761,
+        5213,
+        109324,
+        568,
+        60929,
+        48111,
+        1473,
+        1018,
+        1030,
+        563,
+        2033,
+        531,
+        506
+      ],
+      "channel_open_positions": [
+        0
+      ],
+      "channel_close_positions": [
+        3
+      ],
+      "output_head": "<|channel>thought\n<channel|>Here are 40 distinct countries, their capital cities, and a one-sentence fact about each:\n\n1. **Argentina (Buenos Aires):** It is home to the world\u2019s widest waterfall, Iguazu Falls.\n2. **Australia (Canberra):** It is the only country in the world that is also an entire co",
+      "output_tail": "te in the world.\n39. **Zimbabwe (Windhoek):** It is the largest country by area in Africa.\n40. **Zambia (Lusaka):** It is home to the Victoria Falls, one of the largest waterfalls in the world.<turn|>"
+    }
+  ]
+}

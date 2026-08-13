@@ -1,0 +1,18 @@
+=== unconstrained_sample (n=130) ===
+    n: 130
+    cs_rate: 0.0
+    schema_valid_rate: 0.6308
+    nonempty_rate: 0.9692
+    arg_accuracy: 0.6413
+    exact_call_rate: 0.4692
+=== mask_sample (n=130) ===
+    n: 130
+    cs_rate: 0.0
+    schema_valid_rate: 0.3
+    nonempty_rate: 0.4846
+    arg_accuracy: 0.5083
+    exact_call_rate: 0.2308
+=== j2_sample (n=130) ===
+=== j1_sample (n=130) ===
+scripts/phase5_baselines.sh: line 54: unexpected EOF while looking for matching `''
+scripts/phase5_baselines.sh: line 56: syntax error: unexpected end of file

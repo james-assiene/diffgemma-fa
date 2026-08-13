@@ -1,0 +1,162 @@
+........................................................................ [ 13%]
+........................................................................ [ 26%]
+........................................................................ [ 40%]
+....................................F...F............................... [ 53%]
+........................................................................ [ 67%]
+........................................................................ [ 80%]
+........................................................................ [ 94%]
+................................                                         [100%]
+=================================== FAILURES ===================================
+__________________ test_tree_map_tie_break_is_lowest_token_id __________________
+
+    def test_tree_map_tie_break_is_lowest_token_id():
+        """**RED — `tree.map_states_and_tokens` breaks ties by lowest EDGE index.**
+    
+        SPEC §2.7: *"Deterministic tie-breaking — lowest token id, then lowest state
+        id. `test_guarantee` and the unconstrained-equivalence test depend on it."*
+        `reference.map_decode` implements exactly that. `tree.py` instead does
+    
+            best_edge = jnp.argmax(masked, axis=1)      # ties -> lowest EDGE index
+            chosen_class = class_id[best_edge]
+    
+        so when two edges on the same `(s, s')` belong to different classes whose
+        maxima tie, the winner is decided by edge ordering, not by token id.
+        Measured here: the reference emits token 1, the tree emits token 2, on
+        `p[1] == p[2]` exactly.
+    
+        **Reachability, stated rather than assumed.** `compile/automaton._group_edges`
+        emits **one edge per `(src, dst)`** carrying the union of its labels, so a
+        compiled artifact never presents two edges for the tree to choose between,
+        and the token then comes from `class_argmax`, whose `jnp.argmax` does resolve
+        to the lowest id. This is therefore **not** a live production defect on the
+        compiled path. What it is: (i) a divergence from `reference.py` on an input
+        the function's own signature accepts, and `reference.py` is what every
+        differential test in this repo treats as the arbiter; (ii) an undocumented
+        precondition — the docstring derives `argclass` over "edges `e` with
+        `(src,dst) = pair`", plural, and says nothing about grouping; (iii) live for
+        the SPEC §4.6 NFA fallback and for any hand-built automaton. The fix is
+        either to honour SPEC's rule or to state the precondition and assert it.
+        """
+        A = R.Automaton(
+            n_states=2, vocab_size=V,
+            edges=((0, 1, frozenset({2})), (0, 1, frozenset({1}))),
+            start=np.array([1.0, 0.0]), finals=frozenset({1}))
+        L = 1
+        p = np.array([[0.1, 0.45, 0.45, 0.0]])      # tokens 1 and 2 tie exactly
+        assert p[0, 1] == p[0, 2], "fixture check: the tie must be exact"
+    
+        ref_toks, _, _ = R.map_decode(p, A, A.start, A.final_vector())
+        assert int(ref_toks[0]) == 1, "reference check: SPEC's rule is lowest token id"
+    
+        cid, members, is_neg, indices, indptr = class_tables(A, threshold=2)
+        C = len(members)
+        logp = np.where(p > 0, np.log(np.maximum(p, 1e-320)), scans.NEG_SENTINEL)
+        class_max = np.array([[max(logp[i, v] for v in sorted(m)) for i in range(L)]
+                              for m in members])
+        class_arg = np.array([[min(v for v in sorted(m)
+                                   if logp[i, v] == class_max[c, i])
+                               for i in range(L)] for c, m in enumerate(members)],
+                             dtype=np.int32)
+        Mt = np.full((L, 2, 2), scans.NEG_SENTINEL)
+        for e, (s, d, _) in enumerate(A.edges):
+            for i in range(L):
+                Mt[i, s, d] = max(Mt[i, s, d], class_max[cid[e], i])
+        trm = scans.up_sweep_maxplus(jnp.asarray(Mt))
+        toks, _, _, feasible = tree.map_states_and_tokens(
+            jnp.asarray(logp.T), trm, jnp.asarray([e[0] for e in A.edges]),
+            jnp.asarray([e[1] for e in A.edges]), jnp.asarray(cid),
+            jnp.asarray(class_max), jnp.asarray(class_arg),
+            jnp.asarray(np.array([0.0, scans.NEG_SENTINEL])),
+            jnp.asarray(np.array([scans.NEG_SENTINEL, 0.0])))
+        assert bool(feasible)
+>       assert int(toks[0]) == int(ref_toks[0]) == 1, (
+            f"tie-break: reference emits {int(ref_toks[0])}, tree emits "
+            f"{int(toks[0])}; SPEC §2.7 says lowest token id")
+E       AssertionError: tie-break: reference emits 1, tree emits 2; SPEC §2.7 says lowest token id
+E       assert 2 == 1
+E        +  where 2 = int(Array(2, dtype=int32))
+E        +  and   1 = int(np.int64(1))
+
+tests/test_audit_infer.py:1555: AssertionError
+__ test_up_sweep_normalisation_does_not_delete_a_live_transition[1e-20-736.8] __
+
+small = 1e-20, live_nats = 736.8
+
+    @pytest.mark.parametrize("small,live_nats", [(1e-5, 702.3), (1e-20, 736.8)])
+    def test_up_sweep_normalisation_does_not_delete_a_live_transition(small, live_nats):
+        """**RED at `small = 1e-20`. Open item: `up_sweep`'s linear `M_i / max(M_i)`.**
+    
+        `up_sweep` divides every leaf by its own maximum. `prefix_suffix` then
+        rebuilds `log M_i` as `where(m > 0, log(max(m, tiny)) + leaf_scales[i], neg)`
+        — so any entry that the division flushes to exactly `0.0` is reclassified as
+        a **structurally impossible transition**, not as an underflow. It leaves via
+        `viable == False`, and `feasible_out` does not report it: that flag guards
+        `γ_i`, an entirely different quantity.
+    
+        **Regime, stated rather than assumed — the magnitude matters and it is not
+        the same as the mechanism.** The loss needs a leaf whose live entries lie
+        more than `745 + log(max_{s,s'} M_i(s,s'))` nats below its maximum. Fed
+        `M` from `marginals.transition_matrices` on probability marginals,
+        `max M_i` is at most a small multiple of 1, so the normalisation costs only
+        `log(max M_i)` nats *beyond* float64's own 745-nat floor — i.e. on the
+        production path this mechanism is a few nats, not a cliff, and the real
+        protection against the cliff is `up_sweep_log` (SPEC §2.6 `[V-P4]`).
+        The fixture below therefore uses `max M_i = 1e300` to exhibit the mechanism
+        in isolation; that magnitude is **not** production-reachable through
+        `transition_matrices`, and this test should not be read as one.
+    
+        What *is* regime-independent, and what the assertion is about, is that the
+        loss is **unreported**. `feasible_out` guards `γ_i`, an entirely different
+        quantity, so a caller gets `Z == 0` with no way to classify it — and
+        CLAUDE.md is explicit that `Z == 0` must be classified before it is acted
+        on, with (a) and (b) raising and (c) meaning the scaling is missing. This
+        is none of the three: the language is non-empty, the budget is satisfiable,
+        and the scaling is present. So the assertion is the disjunction: either the
+        value survives, or the caller is told it did not.
+    
+        Fixture shape is SPEC §3.5's: an unscored `ACC --Σ--> ACC` tail pinning the
+        leaf maximum, and the sole entry into the accepting chain far below it.
+        `small = 1e-5` (702 nats of span) is the control and must pass; `1e-20`
+        (737 nats) is the case under test. Both leaves are perfectly representable
+        float64 before `up_sweep` touches them.
+        """
+        L, S, big = 8, 3, 1e300
+        M = np.zeros((L, S, S))
+        for i in range(L):
+            M[i, 0, 0] = big          # the unscored tail: pins the leaf maximum
+            M[i, 0, 1] = small        # the only entry into the accepting chain
+            M[i, 1, 1] = small
+        a0 = np.zeros(S); a0[0] = 1.0
+        bL = np.zeros(S); bL[1] = 1.0
+        assert np.all(np.isfinite(M)) and M[0, 0, 1] > 0.0, \
+            "fixture check: every leaf entry is a representable float64"
+        span = math.log(big) - math.log(small)
+        assert abs(span - live_nats) < 1.0, f"fixture check: span = {span:.1f} nats"
+    
+        exact = _float64_log_chain(M, a0, bL)
+        assert math.isfinite(exact), "fixture check: the language is non-empty"
+    
+        trm = scans.up_sweep(jnp.asarray(M))
+        a, b, sa, sb, representable = scans.prefix_suffix(
+            trm, jnp.asarray(a0), jnp.asarray(bL), feasible_out=True)
+        got = float(jnp.log(jnp.maximum(a[0] @ b[0], jnp.finfo(jnp.float64).tiny))
+                    + sa[0] + sb[0])
+    
+        lost = (not math.isfinite(got)) or got < scans.NEG_SENTINEL / 2.0
+        reported = not bool(jnp.all(representable))
+>       assert (not lost) or reported, (
+            f"the language is non-empty (external log Z = {exact:.2f}) but "
+            f"prefix_suffix returned log Z = {got!r} after up_sweep normalised a "
+            f"leaf whose live entry sat {span:.1f} nats below its maximum, and "
+            f"feasible_out reported all_representable=True. SPEC §6.3 requires "
+            f"`Z == 0` to be classified before it is acted on; this is none of "
+            f"causes (a), (b) or (c) — the language is non-empty, the budget is "
+            f"satisfiable, and the scaling is present.")
+E       AssertionError: the language is non-empty (external log Z = 4789.38) but prefix_suffix returned log Z = -3e+38 after up_sweep normalised a leaf whose live entry sat 736.8 nats below its maximum, and feasible_out reported all_representable=True. SPEC §6.3 requires `Z == 0` to be classified before it is acted on; this is none of causes (a), (b) or (c) — the language is non-empty, the budget is satisfiable, and the scaling is present.
+E       assert (not True or False)
+
+tests/test_audit_infer.py:1717: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_audit_infer.py::test_tree_map_tie_break_is_lowest_token_id
+FAILED tests/test_audit_infer.py::test_up_sweep_normalisation_does_not_delete_a_live_transition[1e-20-736.8]
+2 failed, 534 passed in 152.83s (0:02:32)

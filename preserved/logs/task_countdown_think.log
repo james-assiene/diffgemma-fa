@@ -1,0 +1,43 @@
+[eval] task=countdown variant=j0 emission=map n=250
+2026-08-03 17:22:43.558026: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+  [10/250] CS=1.000 solved=0.000
+  [20/250] CS=1.000 solved=0.000
+  [30/250] CS=1.000 solved=0.000
+  [40/250] CS=1.000 solved=0.000
+  [50/250] CS=1.000 solved=0.000
+  [60/250] CS=1.000 solved=0.000
+  [70/250] CS=1.000 solved=0.000
+  [80/250] CS=1.000 solved=0.000
+  [90/250] CS=1.000 solved=0.000
+  [100/250] CS=1.000 solved=0.000
+  [110/250] CS=1.000 solved=0.000
+  [120/250] CS=1.000 solved=0.000
+  [130/250] CS=1.000 solved=0.000
+  [140/250] CS=1.000 solved=0.000
+  [150/250] CS=1.000 solved=0.000
+  [160/250] CS=1.000 solved=0.000
+  [170/250] CS=1.000 solved=0.000
+  [180/250] CS=1.000 solved=0.000
+  [190/250] CS=1.000 solved=0.000
+  [200/250] CS=1.000 solved=0.000
+  [210/250] CS=1.000 solved=0.000
+  [220/250] CS=1.000 solved=0.000
+  [230/250] CS=1.000 solved=0.000
+  [240/250] CS=1.000 solved=0.000
+  [250/250] CS=1.000 solved=0.000
+
+===== RESULT =====
+task: countdown
+variant: j0
+emission: map
+n: 250
+cs_rate: 1.0
+solve_rate: 0.0
+zero_partition: 0
+oom: 0
+failure_reasons: {'unparsable step': 111, 'operand 1 not available': 69, 'operand 7 not available': 8, 'operand 2 not available': 11, 'operand 6 not available': 6, 'operand 3 not available': 6, 'operand 4 not available': 6, 'operand 69 not available': 1, 'arithmetic': 2, 'operand 0 not available': 9, 'operand 46 not available': 1, 'operand 42 not available': 1, 'operand 5 not available': 2, 'operand 9 not available': 3, 'operand 8 not available': 5, 'operand 90 not available': 1, 'operand 25 not available': 1, 'operand 86 not available': 1, 'operand 35 not available': 1, 'operand 29 not available': 1, 'operand 48 not available': 1, 'final 47 != target 31': 1, 'operand 44 not available': 1, 'operand 47 not available': 1}
+elapsed_seconds: 5366.4
+
+wrote artifacts/task_countdown_think.json

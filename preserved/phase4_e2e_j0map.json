@@ -1,0 +1,96 @@
+{
+  "n": 6,
+  "compiled": 6,
+  "accepted": 6,
+  "prefix_viable": 6,
+  "stop_positions": [
+    7,
+    5,
+    14,
+    13,
+    4,
+    4
+  ],
+  "emission": "map",
+  "variant": "j0",
+  "results": [
+    {
+      "idx": 0,
+      "id": "live_simple_0-0-0",
+      "fn": "get_user_info",
+      "states": 39,
+      "bucket": 64,
+      "wall_seconds": 38.58,
+      "stop_token_position": 7,
+      "n_emitted": 8,
+      "simulator_accepts": true,
+      "prefix_viable": true,
+      "text": "{\"user_id\":1}<turn|>"
+    },
+    {
+      "idx": 1,
+      "id": "live_simple_1-1-0",
+      "fn": "github_star",
+      "states": 41,
+      "bucket": 64,
+      "wall_seconds": 38.29,
+      "stop_token_position": 5,
+      "n_emitted": 6,
+      "simulator_accepts": true,
+      "prefix_viable": true,
+      "text": "{\"repos\":\":\"}<turn|>"
+    },
+    {
+      "idx": 2,
+      "id": "live_simple_2-2-0",
+      "fn": "uber.ride",
+      "states": 56,
+      "bucket": 64,
+      "wall_seconds": 39.6,
+      "stop_token_position": 14,
+      "n_emitted": 15,
+      "simulator_accepts": true,
+      "prefix_viable": true,
+      "text": "{\"loc\":\"\",\"type\":\"black\",\"time\":-20}<turn|>"
+    },
+    {
+      "idx": 3,
+      "id": "live_simple_3-2-1",
+      "fn": "uber.ride",
+      "states": 56,
+      "bucket": 64,
+      "wall_seconds": 9.55,
+      "stop_token_position": 13,
+      "n_emitted": 14,
+      "simulator_accepts": true,
+      "prefix_viable": true,
+      "text": "{\"loc\":\"\",\"type\":\"black\",\"time\":-2}"
+    },
+    {
+      "idx": 4,
+      "id": "live_simple_4-3-0",
+      "fn": "get_current_weather",
+      "states": 52,
+      "bucket": 64,
+      "wall_seconds": 39.96,
+      "stop_token_position": 4,
+      "n_emitted": 5,
+      "simulator_accepts": true,
+      "prefix_viable": true,
+      "text": "{\"location\":\"\"}"
+    },
+    {
+      "idx": 5,
+      "id": "live_simple_5-3-1",
+      "fn": "get_current_weather",
+      "states": 52,
+      "bucket": 64,
+      "wall_seconds": 9.65,
+      "stop_token_position": 4,
+      "n_emitted": 5,
+      "simulator_accepts": true,
+      "prefix_viable": true,
+      "text": "{\"location\":\"\"}"
+    }
+  ]
+}

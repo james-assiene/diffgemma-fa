@@ -1,0 +1,135 @@
+........................................................................ [  4%]
+........................................................................ [  9%]
+..................................................................F..... [ 13%]
+........................................................................ [ 18%]
+........................................................................ [ 23%]
+........................................................................ [ 27%]
+........................................................................ [ 32%]
+...............................................
+string-body saturation diagnostic (report only)
+variant               n  median    p90    max  open-quote
+j0                 4198       0     23    583           6
+j1                 1376      10     36    501          28
+j2                  378       0     21    478           0
+mask                632       0     12    132          21
+unconstrained      1298       0     23    382          25
+  open quote in a guarantee arm: j0 ('exp_h2_marmap.json', 'live_simple_188-113-0')
+  open quote in a guarantee arm: j0 ('exp_marmap_b0.01.json', 'live_simple_35-12-0')
+  open quote in a guarantee arm: j0 ('exp_marmap_b0.01.json', 'live_simple_123-79-0')
+  open quote in a guarantee arm: j0 ('exp_marmap_b0.1.json', 'live_simple_123-79-0')
+  open quote in a guarantee arm: j0 ('exp_marmap_b0.5.json', 'live_simple_120-76-0')
+  open quote in a guarantee arm: j1 ('eval_bfcl_live_simple_j1_sample.json', 'live_simple_1-1-0')
+  open quote in a guarantee arm: j1 ('exp_e2_prompt_j1.json', 'live_simple_0-0-0')
+  open quote in a guarantee arm: j1 ('exp_e2_prompt_j1.json', 'live_simple_5-3-1')
+  open quote in a guarantee arm: j1 ('exp_e2_prompt_j1.json', 'live_simple_7-3-3')
+  open quote in a guarantee arm: j1 ('exp_e2_prompt_j1.json', 'live_simple_9-3-5')
+......................... [ 37%]
+....................................................x..........x........ [ 41%]
+..................s..................................................... [ 46%]
+........................................................................ [ 51%]
+........................................................................ [ 55%]
+........................................................................ [ 60%]
+........................................................................ [ 65%]
+........................................................................ [ 69%]
+........................................................................ [ 74%]
+........................................................................ [ 79%]
+........................................................................ [ 83%]
+........................................................................ [ 88%]
+........................................................................ [ 93%]
+........................................................................ [ 97%]
+...............................                                          [100%]
+=================================== FAILURES ===================================
+_______ test_reference_complement_aware_marginals_survive_a_10e90_p_span _______
+
+    def test_reference_complement_aware_marginals_survive_a_10e90_p_span():
+        """**RED — `marginals_complement_aware` destroys mass by cancellation.**
+    
+        SPEC §2.4's complement-aware inner sum is evaluated as
+    
+            r_i(v) = Σ_{c ∈ Neg} U_i(c) + Σ_{c ∈ Pos, v ∈ S_c} U_i(c)
+                                        − Σ_{c ∈ Neg, v ∈ N_c} U_i(c)
+    
+        and the reference implements that literally: `r += U[c]` for every negated
+        class, then `r[idx] -= U[c]` on the complement each one stores. **That is
+        the subtract-shaped algebra twice removed from production already.**
+        `marginals.class_weights` was rebuilt to eliminate it (commit `da1294a`,
+        which measured relative error 1.0 with entries lost), and
+        `marginals.scatter_edge_mass_to_tokens` was rebuilt to eliminate the
+        identical expression one layer down (5,013 entries destroyed on
+        `github_star`, 4,033 on `uber.ride`). This is the third instance, and it is
+        in the arbiter.
+    
+        **Measured, with the whole regime stated.** `V = 4`, `L = 4`, `S ∈ [3,6)`,
+        DFA and NFA, polarity threshold `|S_c| > 2` so both polarities are present
+        in every instance, `p` rows spanning `207` nats (`10^90`) — inside the
+        checkpoint's own reachable sharpness once `_MIN_TEMP = 1e-12` is available
+        by configuration (SPEC §3.9). Over 82 non-degenerate instances: **6 come
+        back with relative error ≥ 1.0** against the exact rational posterior — mass
+        destroyed outright, and the *support* differs by 1–2 (position, token) pairs
+        — while worst-case error over the other 76 is 5.7e-14.
+    
+        **Plain `marginals` is exact on the identical inputs** (worst 5.7e-14 over
+        all 82). That contrast is the point and it is asserted below: the two
+        functions read the same `fb`, the same `u`, the same anchor. The difference
+        is entirely the complement algebra, so this is **not** reachable by any
+        further work on the forward-backward — it is downstream of the anchor, in
+        linear space, and no log-space fix upstream touches it.
+    
+        **Pre-existing and unchanged by this slice**: the pre-slice
+        `marginals_complement_aware` gives the identical answers here (`ca_old` in
+        `_MUTANTS` does not change this test's verdict).
+        """
+        span = 207.0
+        failures = []
+        plain_worst = 0.0
+        n = 0
+        for seed in range(200):
+            rng = np.random.default_rng(90000 + seed + SEED_OFFSET)
+            A = (random_dfa if seed % 2 else random_nfa)(rng, int(rng.integers(3, 6)))
+            L = 4
+            p = wide_span_p(rng, L, span)
+            b = A.final_vector()
+            members = [lab for _, _, lab in A.edges]
+            is_neg = [len(m) > 2 for m in members]
+            if not any(is_neg) or all(is_neg):
+                continue                      # this arm is about MIXED polarity
+            oracle = _ExactOracle(p, A, b)
+            if not oracle.nonempty or len(oracle.weights) < 2:
+                continue
+            n += 1
+            W = R.edge_weights(p, A)
+            M = R.transition_matrices(W, A)
+            fb = R.forward_backward(M, A.start, b)
+            exact = oracle.marginals()
+            sup = exact > 0
+    
+            q_plain = R.marginals(p, A, fb, W)
+            plain_worst = max(plain_worst,
+                              float(np.max(np.abs(q_plain[sup] - exact[sup])
+                                           / exact[sup])))
+            q_ca = R.marginals_complement_aware(p, A, fb, list(range(A.n_edges)),
+                                                members, is_neg)
+            err = float(np.max(np.abs(q_ca[sup] - exact[sup]) / exact[sup]))
+            if err > 1e-6:
+                failures.append((seed, err, int(np.sum((q_ca > 0) != sup)),
+                                 int(np.sum(is_neg)), len(is_neg)))
+    
+        assert n >= 40, f"only {n} mixed-polarity instances found; regime too narrow"
+        assert plain_worst < 1e-9, (
+            f"plain `marginals` is itself inexact here (worst relative error "
+            f"{plain_worst:.3e}), so this arm cannot attribute the failure to the "
+            f"complement algebra")
+>       assert not failures, (
+            f"{len(failures)}/{n} mixed-polarity instances at a {span:.0f}-nat "
+            f"({10 ** (span / math.log(10)):.0e}) p-span come back wrong from "
+            f"`marginals_complement_aware`, while plain `marginals` is exact to "
+            f"{plain_worst:.1e} on the same inputs. Worst offenders "
+            f"(seed, rel_err, support_diff, n_neg/n_classes): "
+            f"{sorted(failures, key=lambda r: -r[1])[:4]}")
+E       AssertionError: 6/82 mixed-polarity instances at a 207-nat (8e+89) p-span come back wrong from `marginals_complement_aware`, while plain `marginals` is exact to 5.7e-14 on the same inputs. Worst offenders (seed, rel_err, support_diff, n_neg/n_classes): [(68, 13231340579.025642, 1, 5, 16), (156, 10079640755.08948, 2, 7, 11), (44, 1.0, 2, 4, 8), (50, 1.0, 1, 2, 6)]
+E       assert not [(44, 1.0, 2, 4, 8), (50, 1.0, 1, 2, 6), (68, 13231340579.025642, 1, 5, 16), (90, 1.0, 1, 4, 12), (134, 1.0, 1, 6, 15), (156, 10079640755.08948, 2, 7, 11)]
+
+tests/test_audit_infer.py:1228: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_audit_infer.py::test_reference_complement_aware_marginals_survive_a_10e90_p_span
+1 failed, 1539 passed, 1 skipped, 2 xfailed in 1176.42s (0:19:36)

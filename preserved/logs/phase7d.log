@@ -1,0 +1,39 @@
+{'bucket': 64, 'dtype': 'float64', 'compile_s': 0.09, 'tree_s': 0.0005, 'vs_forward': 0.0024}
+{'bucket': 128, 'dtype': 'float64', 'compile_s': 0.07, 'tree_s': 0.00217, 'vs_forward': 0.0104}
+{'bucket': 256, 'dtype': 'float64', 'compile_s': 0.12, 'tree_s': 0.01812, 'vs_forward': 0.0863}
+{'bucket': 512, 'dtype': 'float64', 'compile_s': 0.27, 'tree_s': 0.17345, 'vs_forward': 0.826}
+
+=== SPEC 7.3 ===
+  |S|=  64  float64  tree       0.5 ms  =     0.2% of a forward   (compile 0.1 s)
+  |S|= 128  float64  tree       2.2 ms  =     1.0% of a forward   (compile 0.1 s)
+  |S|= 256  float64  tree      18.1 ms  =     8.6% of a forward   (compile 0.1 s)
+  |S|= 512  float64  tree     173.4 ms  =    82.6% of a forward   (compile 0.3 s)
+
+end-to-end seconds per record:
+  exp_e2_prompt_unc                            15.3
+  exp_e2_prompt_j1                             15.7
+  exp_e6_seed1_j1                              15.7
+  exp_e6_seed2_j1                              15.7
+  exp_e0_base30_j1                             15.8
+  exp_e5_both_j1                               16.9
+  exp_e4_grammar_j1                            23.0
+  eval_bfcl_live_simple_j0_map                 27.1
+  eval_bfcl_live_simple_j1_sample              28.4
+  smoke_after_zdetector                        34.0
+  exp_oomfix_j1                                34.2
+  exp_f64_grammar130_s1                        35.0
+  exp_oomfix_j0                                35.2
+  eval_bfcl_live_simple_unconstrained_sample   37.4
+  exp_abl_ci_only                              38.6
+  exp_abl_fence_only                           38.9
+  exp_abl_ws_only                              40.1
+  exp_abl_ws_fence                             41.2
+  exp_e5_grammar130_s1                         42.3
+  eval_bfcl_live_simple_j0_sample              42.5
+  eval_bfcl_live_simple_j2_sample              44.0
+  eval_bfcl_live_simple_mask_sample            44.4
+  exp_e5_grammar130_j0                         47.2
+  exp_e5_grammar130_map                        47.6
+  exp_f64_ws_only_j1                           48.3
+
+wrote artifacts/overhead.json

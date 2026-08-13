@@ -1,0 +1,1750 @@
+{
+  "task": "countdown",
+  "variant": "j0",
+  "emission": "sample",
+  "confidence": "mf",
+  "entropy_bound": 0.1,
+  "think": false,
+  "seed": 0,
+  "n": 250,
+  "records_available": 250,
+  "denominator_policy": "n = records attempted: compile-skipped records are excluded from n and reported in skipped_by_reason; oom and zero_partition records stay in n as failures. Matches eval/run.py. The compile-skipped records are named individually in skipped_records, so the difference set against another arm's n is computable from this file alone.",
+  "cs": 177,
+  "cs_rate": 0.708,
+  "solved": 8,
+  "solve_rate": 0.032,
+  "parsed": 177,
+  "parse_rate": 0.708,
+  "zero_partition": 73,
+  "oom": 0,
+  "skipped_by_reason": {},
+  "skipped_records": [],
+  "failure_reasons": {
+    "operand 4 not available": 11,
+    "arithmetic": 7,
+    "operand 7 not available": 8,
+    "operand 1 not available": 28,
+    "operand 2 not available": 14,
+    "operand 123 not available": 1,
+    "operand 105 not available": 1,
+    "operand 69 not available": 1,
+    "operand 6 not available": 11,
+    "operand 5 not available": 10,
+    "operand 8 not available": 14,
+    "operand 3 not available": 8,
+    "operand 44 not available": 1,
+    "operand 169 not available": 1,
+    "final 77 != target 76": 1,
+    "operand 138 not available": 1,
+    "operand 9 not available": 7,
+    "ok": 8,
+    "operand 146 not available": 1,
+    "operand 0 not available": 10,
+    "operand 140 not available": 2,
+    "operand 142 not available": 2,
+    "operand 100 not available": 2,
+    "unparsable step": 4,
+    "operand 126 not available": 1,
+    "operand 149 not available": 1,
+    "operand 186 not available": 1,
+    "final 96 != target 10": 1,
+    "operand 711 not available": 1,
+    "operand 29 not available": 1,
+    "operand 170 not available": 1,
+    "operand 101 not available": 1,
+    "operand 33 not available": 1,
+    "operand 110 not available": 1,
+    "operand 129 not available": 1,
+    "operand 828 not available": 1,
+    "operand 117 not available": 2,
+    "final 13 != target 25": 1,
+    "operand 130 not available": 1,
+    "operand 102 not available": 1,
+    "operand 128 not available": 1,
+    "operand 76 not available": 1,
+    "operand 157 not available": 1,
+    "operand 900 not available": 1,
+    "operand 135 not available": 1,
+    "operand 151 not available": 1
+  },
+  "elapsed_seconds": 2754.2,
+  "rows": [
+    {
+      "id": "countdown_0",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_1",
+      "text": "<|channel>82-80=2\n<channel|>4*2=68\n68-11=57",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_2",
+      "text": "<|channel>thought\n<channel|>51-4=49<turn|>",
+      "ok": false,
+      "why": "arithmetic: 51-4 = 47, claimed 49",
+      "accepted": true
+    },
+    {
+      "id": "countdown_3",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_4",
+      "text": "<|channel>56-49=\n<channel|>7*4=28\n46-9=37\n37-28=9",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_5",
+      "text": "<|channel> you\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_6",
+      "text": "<|channel> of\n<channel|>2 -1=1",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_7",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_8",
+      "text": "<|channel>78+45=12\n<channel|>123-50=73",
+      "ok": false,
+      "why": "operand 123 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_9",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_10",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_11",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_12",
+      "text": "<|channel>7+30=67\n<channel|>7+1=68",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_13",
+      "text": "<|channel>51+54=10\n<channel|>105-63=42\n42+57=99<turn|>",
+      "ok": false,
+      "why": "operand 105 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_14",
+      "text": "<|channel>31 + 38=6\n<channel|>69 + 8=77",
+      "ok": false,
+      "why": "operand 69 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_15",
+      "text": "<|channel>80-54=26\n<channel|>6+51=77<turn|>",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_16",
+      "text": "<|channel>e\n<channel|>1/1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_17",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_18",
+      "text": "<|channel>21+14=35\n<channel|>5*2=70",
+      "ok": false,
+      "why": "operand 5 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_19",
+      "text": "<|channel>48-6=42\n<channel|>8/6=3\n42+3=4",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_20",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_21",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_22",
+      "text": "<|channel>20+23=43\n<channel|>3-28=1<turn|>",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_23",
+      "text": "<|channel>93-81=12\n<channel|>6/12=3",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_24",
+      "text": "<|channel>9*16=144\n<channel|>44-47=97<turn|>",
+      "ok": false,
+      "why": "operand 44 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_25",
+      "text": "<|channel>68-50=18\n<channel|>8+17=3<turn|>",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_26",
+      "text": "<|channel>5\n<channel|>6/8=123\n123 - 38=85\n85 + 69=154",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_27",
+      "text": "<|channel>93-11=82\n<channel|>2-56=26\n26+24=50<turn|>",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_28",
+      "text": "<|channel>1 - 7=84\n<channel|>4 - 36=48<turn|>",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_29",
+      "text": "<|channel>98+71=16\n<channel|>169-78=9<turn|>",
+      "ok": false,
+      "why": "operand 169 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_30",
+      "text": "<|channel>thought\n<channel|>96-19=77",
+      "ok": false,
+      "why": "final 77 != target 76",
+      "accepted": true
+    },
+    {
+      "id": "countdown_31",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_32",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_33",
+      "text": "<|channel>95+43=13\n<channel|>138-33=10<turn|>",
+      "ok": false,
+      "why": "operand 138 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_34",
+      "text": "<|channel>70-51=19\n<channel|>9+35=54<turn|>",
+      "ok": false,
+      "why": "operand 9 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_35",
+      "text": "<|channel>92+6=98\n<channel|>8/7=14<turn|>",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_36",
+      "text": "<|channel>91-69=22\n<channel|>8+28=54\n54+2=56",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_37",
+      "text": "<|channel>8-97=\n<channel|>1+57=58",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_38",
+      "text": "<|channel>8\n<channel|>1 -3=4<turn|>",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_39",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_40",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_41",
+      "text": "<|channel>thought\n<channel|>10+57=67\n67+4=71<turn|>",
+      "ok": true,
+      "why": "ok",
+      "accepted": true
+    },
+    {
+      "id": "countdown_42",
+      "text": "<|channel>e\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_43",
+      "text": "<|channel>64-61=3\n<channel|>7/3=19\n19-3=16",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_44",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_45",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_46",
+      "text": "<|channel>61+85=14\n<channel|>146-11=135",
+      "ok": false,
+      "why": "operand 146 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_47",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_48",
+      "text": "<|channel>55+22=77\n<channel|>7-7=70\n70/5=14<turn|>",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_49",
+      "text": "<|channel>79-15=64\n<channel|>0/2=25",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_50",
+      "text": "<|channel>74+66=14\n<channel|>140-39=101",
+      "ok": false,
+      "why": "operand 140 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_51",
+      "text": "<|channel>72+70=14\n<channel|>142-82=60",
+      "ok": false,
+      "why": "operand 142 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_52",
+      "text": "<|channel>50+50=10\n<channel|>100-23=77",
+      "ok": false,
+      "why": "operand 100 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_53",
+      "text": "<|channel>95-69=26\n<channel|>6+20=46<turn|>",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_54",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_55",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_56",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_57",
+      "text": "<|channel>70+15=85\n<channel|>5-6=7<turn|>",
+      "ok": false,
+      "why": "operand 5 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_58",
+      "text": "<|channel>85-81=4\n<channel|>5+4=29\n29-1=28",
+      "ok": false,
+      "why": "operand 5 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_59",
+      "text": "<|channel>93-9=84\n<channel|>5-60=25\n84-25=59",
+      "ok": false,
+      "why": "operand 5 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_60",
+      "text": "<|channel>9*12=108\n<channel|>0\n-30=78<turn|>",
+      "ok": false,
+      "why": "unparsable step: '0'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_61",
+      "text": "<|channel>82-31=51\n<channel|>1-10=41<turn|>",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_62",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_63",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_64",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_65",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_66",
+      "text": "<|channel>88+7=95\n<channel|>6/28=2\n95-2=92",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_67",
+      "text": "<|channel>51+75=12\n<channel|>126-37=89\n89+9=98<turn|>",
+      "ok": false,
+      "why": "operand 126 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_68",
+      "text": "<|channel>e\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_69",
+      "text": "<|channel>68-34=34\n<channel|>4+17=51",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_70",
+      "text": "<|channel>87-86=1\n<channel|>3-1=42\n42+4=466",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_71",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_72",
+      "text": "<|channel>85+64=14\n<channel|>149-34=115",
+      "ok": false,
+      "why": "operand 149 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_73",
+      "text": "<|channel>78+20=98\n<channel|>8-11=87\n87/7=12",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_74",
+      "text": "<|channel>9\n<channel|>2/9=5",
+      "ok": false,
+      "why": "operand 9 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_75",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_76",
+      "text": "<|channel>49-34=15\n<channel|>5+6=21",
+      "ok": false,
+      "why": "operand 5 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_77",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_78",
+      "text": "<|channel>94-5=89\n<channel|>9-2=87<turn|>",
+      "ok": false,
+      "why": "operand 9 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_79",
+      "text": "<|channel>73-70=\n<channel|>7*6=42\n42+721=3",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_80",
+      "text": "<|channel>78-62=16\n<channel|>6+39=53<turn|>",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_81",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_82",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_83",
+      "text": "<|channel>48 / 48 = \n<channel|>19 * 1=119<turn|>",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_84",
+      "text": "<|channel>62 * 3=18\n<channel|>186 + 32=218\n218 / 2=10<turn|>",
+      "ok": false,
+      "why": "operand 186 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_85",
+      "text": "<|channel>thought\n<channel|>3*27=81\n81-3=78",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_86",
+      "text": "<|channel>26 * 2=52\n<channel|>2 + 19=71<turn|>",
+      "ok": false,
+      "why": "arithmetic: 2+19 = 21, claimed 71",
+      "accepted": true
+    },
+    {
+      "id": "countdown_87",
+      "text": "<|channel>e\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_88",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_89",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_90",
+      "text": "<|channel>thought\n<channel|>71+43=114\n114-18=96<turn|>",
+      "ok": false,
+      "why": "final 96 != target 10",
+      "accepted": true
+    },
+    {
+      "id": "countdown_91",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_92",
+      "text": "<|channel>thought\n<channel|>78 - 19=559",
+      "ok": false,
+      "why": "arithmetic: 78-19 = 59, claimed 559",
+      "accepted": true
+    },
+    {
+      "id": "countdown_93",
+      "text": "<|channel>thought\n<channel|>91+61=152\n152-66=86<turn|>",
+      "ok": true,
+      "why": "ok",
+      "accepted": true
+    },
+    {
+      "id": "countdown_94",
+      "text": "<|channel>thought\n<channel|>54-12=42\n42+711=48<turn|>",
+      "ok": false,
+      "why": "operand 711 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_95",
+      "text": "<|channel>87/3=2\n<channel|>29+27=56\n56-15=4<turn|>",
+      "ok": false,
+      "why": "operand 29 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_96",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_97",
+      "text": "<|channel>e\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_98",
+      "text": "<|channel>51+25=76\n<channel|>2/26=5<|tool_response>",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_99",
+      "text": "<|channel>83+87=17\n<channel|>170-88=8<turn|>",
+      "ok": false,
+      "why": "operand 170 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_100",
+      "text": "<|channel>90-18=72\n<channel|>2-11=61<turn|>",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_101",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_102",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_103",
+      "text": "<|channel>55+46=10\n<channel|>101-39=62<turn|>",
+      "ok": false,
+      "why": "operand 101 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_104",
+      "text": "<|channel>1.\n<channel|>8 - 82=116",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_105",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_106",
+      "text": "<|channel>80-55=25\n<channel|>5+53=78",
+      "ok": false,
+      "why": "operand 5 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_107",
+      "text": "<|channel>98-94=\n<channel|>4*9=36\n36+9=4<turn|>",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_108",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_109",
+      "text": "<|channel>1\n<channel|>2-8=308\n308 - 55=2<turn|>",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_110",
+      "text": "<|channel>51 + 60=1\n<channel|>111\n/ 18=93",
+      "ok": false,
+      "why": "unparsable step: '111'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_111",
+      "text": "<|channel> de\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_112",
+      "text": "<|channel>70+70=14\n<channel|>140-73=67",
+      "ok": false,
+      "why": "operand 140 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_113",
+      "text": "<|channel> de\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_114",
+      "text": "<|channel>73-70=\n<channel|>3*14=42<turn|>",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_115",
+      "text": "<|channel>e\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_116",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_117",
+      "text": "<|channel>36-15=21\n<channel|>1-7=14",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_118",
+      "text": "<|channel>:\n<channel|>8+86=16<turn|>",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_119",
+      "text": "<|channel>88-16=72\n<channel|>2+6=78",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_120",
+      "text": "<|channel>78+64=14\n<channel|>142-57=85<turn|>",
+      "ok": false,
+      "why": "operand 142 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_121",
+      "text": "<|channel>80 + 52=1\n<channel|>213\n- 32=100\n100 / 4=2<turn|>",
+      "ok": false,
+      "why": "unparsable step: '213'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_122",
+      "text": "<|channel>0+53=133\n<channel|>33-33=100<turn|>",
+      "ok": false,
+      "why": "operand 33 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_123",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_124",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_125",
+      "text": "<|channel>93-92=1\n<channel|>7-1=86<turn|>",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_126",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_127",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_128",
+      "text": "<|channel>60+50=11\n<channel|>110-5=105",
+      "ok": false,
+      "why": "operand 110 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_129",
+      "text": "<|channel>65+64=12\n<channel|>129-48=81<turn|>",
+      "ok": false,
+      "why": "operand 129 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_130",
+      "text": "<|channel>92-39=53\n<channel|>3+2=55",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_131",
+      "text": "<|channel>thought\n<channel|>48-35=13<turn|>",
+      "ok": true,
+      "why": "ok",
+      "accepted": true
+    },
+    {
+      "id": "countdown_132",
+      "text": "<|channel>75+20=95\n<channel|>5-17=78<turn|>",
+      "ok": false,
+      "why": "operand 5 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_133",
+      "text": "<|channel>thought\n<channel|>54-25=29\n29+20=4<turn|>",
+      "ok": false,
+      "why": "arithmetic: 29+20 = 49, claimed 4",
+      "accepted": true
+    },
+    {
+      "id": "countdown_134",
+      "text": "<|channel>53+38=91\n<channel|>1-73=18<turn|>",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_135",
+      "text": "<|channel>thought3-40=3\n<channel|>9+7=66\n66/3=22",
+      "ok": false,
+      "why": "operand 9 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_136",
+      "text": "<|channel>83+3=86\n<channel|>6-79=7\n7+82=89<turn|>",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_137",
+      "text": "<|channel>31+50=81\n<channel|>1+17=98\n98-12=86<turn|>",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_138",
+      "text": "<|channel>50/50=1\n<channel|>0-1=49<turn|>",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_139",
+      "text": "<|channel>75-67=8\n<channel|>8+8=36<turn|>",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_140",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_141",
+      "text": "<|channel>35*3=105\n<channel|>0\n-60=45\n45+14=59",
+      "ok": false,
+      "why": "unparsable step: '0'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_142",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_143",
+      "text": "<|channel>72-47=25\n<channel|>5+11=36<turn|>",
+      "ok": false,
+      "why": "operand 5 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_144",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_145",
+      "text": "<|channel>e\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_146",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_147",
+      "text": "<|channel>78 - 50 = \n<channel|>828 + 99=1<|tool_response>",
+      "ok": false,
+      "why": "operand 828 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_148",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_149",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_150",
+      "text": "<|channel>78-57=21\n<channel|>1+66=87<turn|>",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_151",
+      "text": "<|channel>86+31=11\n<channel|>117-55=62\n62+62=124<turn|>",
+      "ok": false,
+      "why": "operand 117 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_152",
+      "text": "<|channel>thought\n<channel|>66-39=27\n27-14=13",
+      "ok": false,
+      "why": "final 13 != target 25",
+      "accepted": true
+    },
+    {
+      "id": "countdown_153",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_154",
+      "text": "<|channel>88-35=53\n<channel|>8-34=64\n64-53=11\n58+88=9",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_155",
+      "text": "<|channel>90-20=70\n<channel|>0-5=65<turn|>",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_156",
+      "text": "<|channel>87-53=34\n<channel|>4-11=23\n23+1=24<turn|>",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_157",
+      "text": "<|channel>1-36=5\n<channel|>6-45=11\n11+5=16\n16+6=22<|tool_response>",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_158",
+      "text": "<|channel>98-92=6\n<channel|>9-6=43<turn|>",
+      "ok": false,
+      "why": "operand 9 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_159",
+      "text": "<|channel>70+15=85\n<channel|>5+9=94\n94-73=2<turn|>",
+      "ok": false,
+      "why": "operand 5 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_160",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_161",
+      "text": "<|channel>78+52=13\n<channel|>130/5=26\n26+59=8<turn|>",
+      "ok": false,
+      "why": "operand 130 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_162",
+      "text": "<|channel>75+42=11\n<channel|>117-95=22\n22-4=18<turn|>",
+      "ok": false,
+      "why": "operand 117 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_163",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_164",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_165",
+      "text": "<|channel>75-43=32\n<channel|>4/2=17",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_166",
+      "text": "<|channel>e\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_167",
+      "text": "<|channel>6 * 17=10\n<channel|>102-39=63<turn|>",
+      "ok": false,
+      "why": "operand 102 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_168",
+      "text": "<|channel>57-38=19\n<channel|>0/25=2\n19-2=17<turn|>",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_169",
+      "text": "<|channel>86+42=12\n<channel|>128-49=79",
+      "ok": false,
+      "why": "operand 128 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_170",
+      "text": "<|channel>54+34=88\n<channel|>8-56=32<turn|>",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_171",
+      "text": "<|channel>40+56=96\n<channel|>6-9=87<turn|>",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_172",
+      "text": "<|channel>39+37=7\n<channel|>76-48=28\n28*3=8",
+      "ok": false,
+      "why": "operand 76 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_173",
+      "text": "<|channel>83-70=13\n<channel|>2-28=2<turn|>",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_174",
+      "text": "<|channel>e\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_175",
+      "text": "<|channel>10 * 4=40\n<channel|>0 + 3=43<turn|>",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_176",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_177",
+      "text": "<|channel>8 * 9=72\n<channel|>2-13=59<turn|>",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_178",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_179",
+      "text": "<|channel>40+23=63\n<channel|>3-1=62\n62-4=5<turn|>",
+      "ok": false,
+      "why": "arithmetic: 3-1 = 2, claimed 62",
+      "accepted": true
+    },
+    {
+      "id": "countdown_180",
+      "text": "<|channel>76-32=44\n<channel|>4+228=6<turn|>",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_181",
+      "text": "<|channel>45-42=\n<channel|>3*3=9\n9*3=27",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_182",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_183",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_184",
+      "text": "<|channel>84-46=38\n<channel|>8-31=7",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_185",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_186",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_187",
+      "text": "<|channel>```\n<channel|>9-46=23\n23+23=46\n46-9=33",
+      "ok": false,
+      "why": "arithmetic: 9-46 = -37, claimed 23",
+      "accepted": true
+    },
+    {
+      "id": "countdown_188",
+      "text": "<|channel>18 + \n<channel|>2/0=5",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_189",
+      "text": "<|channel>e\n<channel|>2 -1=1",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_190",
+      "text": "<|channel>98-75=23\n<channel|>3+79=102<turn|>",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_191",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_192",
+      "text": "<|channel>59-51=8\n<channel|>0-8=82\n82+16=98",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_193",
+      "text": "<|channel>thought\n<channel|>90-83=7\n42/7=6\n18+6=24",
+      "ok": true,
+      "why": "ok",
+      "accepted": true
+    },
+    {
+      "id": "countdown_194",
+      "text": "<|channel>e\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_195",
+      "text": "<|channel>e\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_196",
+      "text": "<|channel>72-50=22\n<channel|>2+12=34<turn|>",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_197",
+      "text": "<|channel>78+79=15\n<channel|>157-65=92",
+      "ok": false,
+      "why": "operand 157 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_198",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_199",
+      "text": "<|channel>80-48=32\n<channel|>2+21=53\n53-18=3<turn|>",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_200",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_201",
+      "text": "<|channel>73-66=\n<channel|>7+61=68",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_202",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_203",
+      "text": "<|channel> de\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_204",
+      "text": "<|channel>\n\n```\n<channel|>2-13=1<turn|>",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_205",
+      "text": "<|channel>86-82=4\n<channel|>4-4=20\n65+20=85",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_206",
+      "text": "<|channel>56+17=73\n<channel|>3+8=81<turn|>",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_207",
+      "text": "<|channel>thought\n<channel|>77+10=87\n87-11=76<turn|>",
+      "ok": true,
+      "why": "ok",
+      "accepted": true
+    },
+    {
+      "id": "countdown_208",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_209",
+      "text": "<|channel>thought\n<channel|>36+41=77\n77+35=112\n112-29=83<turn|>",
+      "ok": true,
+      "why": "ok",
+      "accepted": true
+    },
+    {
+      "id": "countdown_210",
+      "text": "<|channel>26\n<channel|>3/7=1",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_211",
+      "text": "<|channel>47+45=92\n<channel|>2-5=8<turn|>",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_212",
+      "text": "<|channel>68+27=95\n<channel|>5-45=50\n50+18=68",
+      "ok": false,
+      "why": "operand 5 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_213",
+      "text": "<|channel>```\n<channel|>9+45=124\n124-56=6<turn|>",
+      "ok": false,
+      "why": "operand 9 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_214",
+      "text": "<|channel>90 / 9=10\n<channel|>1-25=16\n10+16=26",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_215",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_216",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_217",
+      "text": "<|channel>e\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_218",
+      "text": "<|channel>10 * 8=80\n<channel|>0-30=50",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_219",
+      "text": "<|channel>18+58=76\n<channel|>6+1=77",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_220",
+      "text": "<|channel>88 / 4=22\n<channel|>2 - 6=16<turn|>",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_221",
+      "text": "<|channel>thought\n<channel|>93/3=31\n31-8=23<turn|>",
+      "ok": true,
+      "why": "ok",
+      "accepted": true
+    },
+    {
+      "id": "countdown_222",
+      "text": "<|channel>42-28=14\n<channel|>4+30=44",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_223",
+      "text": "<|channel>45*20=90\n<channel|>900-26=874\n874+15=889<turn|>",
+      "ok": false,
+      "why": "operand 900 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_224",
+      "text": "<|channel>84+51=13\n<channel|>135/3=45",
+      "ok": false,
+      "why": "operand 135 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_225",
+      "text": "<|channel>6\n<channel|>4+4=112\n112 - 62=50\n50 - 46=4\n4 * 6=2",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_226",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_227",
+      "text": "<|channel>thought\n<channel|>53-6=47",
+      "ok": true,
+      "why": "ok",
+      "accepted": true
+    },
+    {
+      "id": "countdown_228",
+      "text": "<|channel>10 * 9=90\n<channel|>6 / 56=1\n1+2=3\n90+3=93<turn|>",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_229",
+      "text": "<|channel>48+31=79\n<channel|>9-28=51<turn|>",
+      "ok": false,
+      "why": "operand 9 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_230",
+      "text": "<|channel>51 + 9=60\n<channel|>0 + 12=72<turn|>",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_231",
+      "text": "<|channel>43+57=10\n<channel|>100-32=68<turn|>",
+      "ok": false,
+      "why": "operand 100 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_232",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_233",
+      "text": "<|channel>92-41=51\n<channel|>1+26=77<turn|>",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_234",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_235",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_236",
+      "text": "<|channel>e\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_237",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_238",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_239",
+      "text": "<|channel>24+24=48\n<channel|>8+1=49<turn|>",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_240",
+      "text": "<|channel>44+46=90\n<channel|>0-34=56",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_241",
+      "text": "<|channel> de\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_242",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_243",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    },
+    {
+      "id": "countdown_244",
+      "text": "<|channel>87-23=64\n<channel|>4/25=4",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_245",
+      "text": "<|channel>64-35=29\n<channel|>9+11=40\n40+9=49<turn|>",
+      "ok": false,
+      "why": "arithmetic: 9+11 = 20, claimed 40",
+      "accepted": true
+    },
+    {
+      "id": "countdown_246",
+      "text": "<|channel>81-4=77\n<channel|>8/2=49\n77-49=28<turn|>",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_247",
+      "text": "<|channel>98-90=\n<channel|>8+35=43<turn|>",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_248",
+      "text": "<|channel>68+83=15\n<channel|>151-96=5<|tool_response>",
+      "ok": false,
+      "why": "operand 151 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_249",
+      "text": "",
+      "ok": false,
+      "zero_partition": true
+    }
+  ]
+}

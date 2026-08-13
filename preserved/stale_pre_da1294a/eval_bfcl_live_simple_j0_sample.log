@@ -1,0 +1,40 @@
+[eval] task=bfcl_live_simple variant=j0 emission=sample bound=0.1
+2026-07-31 09:56:02.420148: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+  [10/130] CS=1.000 schema=1.000 acc=0.438 nonempty=1.000
+  [20/130] CS=1.000 schema=1.000 acc=0.419 nonempty=1.000
+  [30/130] CS=1.000 schema=1.000 acc=0.431 nonempty=1.000
+  [40/130] CS=1.000 schema=1.000 acc=0.379 nonempty=1.000
+  [50/130] CS=1.000 schema=1.000 acc=0.366 nonempty=0.880
+  [60/130] CS=1.000 schema=1.000 acc=0.402 nonempty=0.867
+  [70/130] CS=0.986 schema=0.986 acc=0.442 nonempty=0.871
+  [80/130] CS=0.988 schema=0.988 acc=0.403 nonempty=0.887
+  [90/130] CS=0.989 schema=0.989 acc=0.385 nonempty=0.878
+  [100/130] CS=0.990 schema=0.990 acc=0.419 nonempty=0.890
+  [110/130] CS=0.991 schema=0.991 acc=0.370 nonempty=0.891
+  [120/130] CS=0.992 schema=0.983 acc=0.332 nonempty=0.867
+  [130/130] CS=0.992 schema=0.977 acc=0.340 nonempty=0.869
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: j0
+emission: sample
+n: 130
+cs: 129
+cs_rate: 0.9923
+schema_ok: 127
+schema_valid_rate: 0.9769
+parsed: 127
+nonempty: 113
+nonempty_rate: 0.8692
+arg_correct: 97
+arg_total: 285
+arg_accuracy: 0.3404
+exact_calls: 32
+exact_call_rate: 0.2462
+skipped_by_reason: {}
+zero_partition: 1
+elapsed_seconds: 5523.7
+
+wrote artifacts/eval_bfcl_live_simple_j0_sample.json

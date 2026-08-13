@@ -1,0 +1,1791 @@
+{
+  "task": "sudoku",
+  "variant": "mask",
+  "emission": "sample",
+  "confidence": "mf",
+  "entropy_bound": 0.1,
+  "think": false,
+  "seed": 0,
+  "n": 250,
+  "cs": 1,
+  "cs_rate": 0.004,
+  "solved": 51,
+  "solve_rate": 0.204,
+  "zero_partition": 0,
+  "oom": 0,
+  "skipped_by_reason": {},
+  "failure_reasons": {
+    "overwrote the given at (0,0)": 52,
+    "overwrote the given at (1,1)": 26,
+    "overwrote the given at (1,0)": 23,
+    "overwrote the given at (0,1)": 18,
+    "ok": 51,
+    "overwrote the given at (2,0)": 8,
+    "overwrote the given at (2,1)": 4,
+    "col 0": 4,
+    "col 2": 10,
+    "overwrote the given at (0,2)": 18,
+    "overwrote the given at (1,2)": 6,
+    "col 1": 11,
+    "overwrote the given at (1,3)": 4,
+    "overwrote the given at (2,2)": 6,
+    "only 14 digits": 1,
+    "row 1": 1,
+    "only 15 digits": 2,
+    "row 0": 3,
+    "only 13 digits": 2
+  },
+  "elapsed_seconds": 2699.5,
+  "rows": [
+    {
+      "id": "sudoku4_0",
+      "text": "<|channel>124\n4321\n2413\n12422\n\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_1",
+      "text": "<|channel>214334321\n3214\n14322\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_2",
+      "text": "<|channel>321\n2134\n1243\n341222\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_3",
+      "text": "<|channel>143\n4321\n1234\n3412\n1\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_4",
+      "text": "<|channel>241331432\n4123\n32411\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_5",
+      "text": "<|channel>341\n4132\n1423\n321444\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_6",
+      "text": "<|channel>231\n3142\n1324\n243111\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_7",
+      "text": "<|channel>3\n<channel|>31143212341\n41233\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_8",
+      "text": "<|channel>231\n3142\n2413\n134222\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_9",
+      "text": "<|channel>1243\n\n412\n4321\n213442\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_10",
+      "text": "<|channel>234\n4312\n3421\n214331\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_11",
+      "text": "<|channel>324\n2413\n3241\n41322211",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_12",
+      "text": "<|channel>2314 1423\n3241\n413222\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_13",
+      "text": "<|channel>3124\n2431\n1243\n43122\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_14",
+      "text": "<|channel>1342111233\n4312\n21344\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_15",
+      "text": "<|channel>213\n3124\n2431\n13421111",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_16",
+      "text": "<|channel>4123\n2314\n3241\n143222\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_17",
+      "text": "<|channel>241311422\n4231\n3124441",
+      "ok": false,
+      "why": "overwrote the given at (2,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_18",
+      "text": "<|channel>4312\n2134\n3241\n1423331",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_19",
+      "text": "<|channel>32411413222314\n14233\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_20",
+      "text": "<|channel>3412\n1432\n4123\n234111\n",
+      "ok": false,
+      "why": "overwrote the given at (2,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_21",
+      "text": "<|channel>24131\n124\n4231\n1342221",
+      "ok": false,
+      "why": "col 0",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_22",
+      "text": "<|channel>23113142\n1423\n231444\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_23",
+      "text": "<|channel>341\n1432\n3214\n412333\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_24",
+      "text": "<|channel>42111234\n4312\n21433\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_25",
+      "text": "<|channel>243\n3214\n4132\n2341\n1\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_26",
+      "text": "<|channel>213\n1324\n2431\n31422\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_27",
+      "text": "<|channel>2143\n3412\n4231\n1342211",
+      "ok": false,
+      "why": "col 2",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_28",
+      "text": "<|channel>14222413\n4231\n132444\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_29",
+      "text": "<|channel>321414132\n2341\n14231\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_30",
+      "text": "<|channel>41221243\n4321121344\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_31",
+      "text": "<|channel>2413\n3124\n4231\n134222\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_32",
+      "text": "<|channel>2143\n1423\n4321\n3142\n3142",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_33",
+      "text": "<|channel>213\n3142\n2431\n1324441\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_34",
+      "text": "<|channel>1423\n3241\n4132\n23141\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_35",
+      "text": "<|channel>142\n2431\n4213\n1324411\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_36",
+      "text": "<|channel>1324\n2431\n4213\n31422\n1",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_37",
+      "text": "<|channel>thought<|image>3214\n4123\n2413\n13422",
+      "ok": false,
+      "why": "col 2",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_38",
+      "text": "<|channel>321\n1243\n2134\n34122\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_39",
+      "text": "<|channel>124313412\n2134\n43211\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_40",
+      "text": "<|channel>1432\n334\n\n1324\n42133\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_41",
+      "text": "<|channel>2134\n4312\n1423\n32411\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_42",
+      "text": "<|channel>2314</h4>142314231\n314222\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_43",
+      "text": "<|channel>2341\n1432\n4213\n3124\n\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_44",
+      "text": "<|channel>3141\n132\n1243\n3421\n1\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_45",
+      "text": "<|channel>3214\n4123\n2431\n1342221",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_46",
+      "text": "<|channel>341221234\n4123\n23411231",
+      "ok": false,
+      "why": "overwrote the given at (1,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_47",
+      "text": "<|channel><|image>4132\n2134\n12433\n34211",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_48",
+      "text": "<|channel>3124\n4213\n1432\n234111\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_49",
+      "text": "<|channel>4321\n2413\n1422\n321441\n",
+      "ok": false,
+      "why": "col 1",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_50",
+      "text": "<|channel>2413\n3142\n4231\n13241\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_51",
+      "text": "<|channel>31222143\n3421\n1234441\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_52",
+      "text": "<|channel>2431\n1342\n3142\n42131\n\n",
+      "ok": false,
+      "why": "col 2",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_53",
+      "text": "<|channel>123\n3241\n2314\n14322\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_54",
+      "text": "<|channel>3142\n4213\n2431\n132444\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_55",
+      "text": "<|channel>314224231\n2314\n142313\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_56",
+      "text": "<|channel>1243\n3142\n4321\n21344\n\n",
+      "ok": false,
+      "why": "col 1",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_57",
+      "text": "<|channel>01432\n3241\n2314\n412311",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_58",
+      "text": "<|channel>413\n3142\n1324\n423111\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_59",
+      "text": "<|channel>1234\n342114123\n2314441",
+      "ok": false,
+      "why": "overwrote the given at (2,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_60",
+      "text": "<|channel>314224231\n2314\n142331\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_61",
+      "text": "<|channel>213\n1324\n2341\n1423\n123",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_62",
+      "text": "<|channel>412\n1234\n4321\n21431111",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_63",
+      "text": "<|channel>2143\n4321\n1432\n321444\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_64",
+      "text": "<|channel>4132\n231\n\n1243\n34211\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,3)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_65",
+      "text": "<|channel>3142\n4213\n2431\n1324441",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_66",
+      "text": "<|channel>4321\n2134\n3412\n12434\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_67",
+      "text": "<|channel>231\n3124\n2413\n1342\n11342",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_68",
+      "text": "<|channel>2143\n4321\n3214\n14322\n1",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_69",
+      "text": "<|channel>213443421\n1243\n43121\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_70",
+      "text": "<|channel>1234\n4321\n2413\n3142\n\n43 I see an error. \nWait, let, let, let, \n        Wait, \n        _\n",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_71",
+      "text": "<|channel>4231\n3124\n1342\n24131\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_72",
+      "text": "<|channel>413\n\n124\n1342\n423111\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_73",
+      "text": "<|channel>123\n3241\n2314\n143222\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_74",
+      "text": "<|channel>314\n4132\n1243\n34211\n\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_75",
+      "text": "<|channel>214313421\n4312\n134444\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_76",
+      "text": "<|channel>231\n1324\n2413\n314221\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_77",
+      "text": "<|channel>2431\n1342\n3124\n42133\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_78",
+      "text": "<|channel>1423\n2341\n4132\n3214\n2143",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_79",
+      "text": "<|channel>3214\n4123\n1423\n234111\n",
+      "ok": false,
+      "why": "col 2",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_80",
+      "text": "<|channel>4321\n1234\n3142\n24133\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_81",
+      "text": "<|channel>4213\n3214\n1342\n243111\n",
+      "ok": false,
+      "why": "col 1",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_82",
+      "text": "<|channel>2134\n4312\n1423\n324111\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_83",
+      "text": "<|channel>321414123\n1342\n2431111",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_84",
+      "text": "<|channel>4123\n234111432\n321441\n",
+      "ok": false,
+      "why": "overwrote the given at (2,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_85",
+      "text": "<|channel>1234\n342\n\n4312\n21431\n\n",
+      "ok": false,
+      "why": "overwrote the given at (2,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_86",
+      "text": "<|channel>2341\n1423\n4132\n32144\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_87",
+      "text": "<|channel>341\n4123\n3412\n123411\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_88",
+      "text": "<|channel>312\n2314\n1243\n34211\n\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_89",
+      "text": "<|channel>43111342\n4213\n31244\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_90",
+      "text": "<|channel>1243\n4321\n2134\n34122\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_91",
+      "text": "<|channel>3412\n1243\n4321\n21344\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_92",
+      "text": "<|channel>24333412\n2134\n43211112",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_93",
+      "text": "<|channel>2341\n4132\n1423\n321444\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_94",
+      "text": "<|channel>431\n1342\n4213\n132411\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_95",
+      "text": "<|channel>341222134\n4321\n124333\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_96",
+      "text": "<|channel>2431\n134224213\n312441\n",
+      "ok": false,
+      "why": "overwrote the given at (2,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_97",
+      "text": "<|channel>        241313124\n4231\n134222",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_98",
+      "text": "<|channel>4132\n3241\n1423\n231444\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_99",
+      "text": "<|channel>4123\n6214\n1432\n23411\n1",
+      "ok": false,
+      "why": "col 0",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_100",
+      "text": "<|channel>3142\n\n431\n1324\n42133\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_101",
+      "text": "<|channel>thought\n3\n211123414123\n23411",
+      "ok": false,
+      "why": "overwrote the given at (2,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_102",
+      "text": "<|channel>421313412\n2413\n132444\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_103",
+      "text": "<|channel>2413\n3124\n1342\n423111\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_104",
+      "text": "<|channel>423\n3241\n4132\n23144412",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_105",
+      "text": "<|channel>4312\n2134\n1423\n32411\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_106",
+      "text": "<channel|>1\n<channel|>4214413\n312444\n",
+      "ok": false,
+      "why": "only 14 digits",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_107",
+      "text": "<|channel>###413222341\n1423\n3214\n314",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_108",
+      "text": "<|channel>213\n1324\n3142\n243111\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_109",
+      "text": "<|channel>341221234\n2341\n41233\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_110",
+      "text": "<|channel>423113142\n1423\n23144\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_111",
+      "text": "<|channel>3124\n2431\n1342\n42131\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_112",
+      "text": "<|channel>31422\n431\n1324\n42133\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_113",
+      "text": "<|channel>3412\n\n134\n1243\n43122\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_114",
+      "text": "<|channel>341222134\n1243\n432111\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_115",
+      "text": "<|channel>431222143\n3421\n12344\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_116",
+      "text": "<|channel>12433\n412\n2134\n432111\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_117",
+      "text": "<|channel>3412\n4213\n2431\n13244\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_118",
+      "text": "<|channel>13\n2124\n\n11324\n423111\n",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_119",
+      "text": "<|channel>43223214\n2143\n432111\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_120",
+      "text": "<|channel>413\n4321\n3\n24\n143222\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_121",
+      "text": "<|channel>4123\n3241\n2314\n143222\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_122",
+      "text": "<|channel>3241\n\n432\n4123\n23144\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_123",
+      "text": "<|channel>2134\n3421\n1342\n42131\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_124",
+      "text": "<|channel>241\n142334132\n2314\n\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_125",
+      "text": "<|channel>4213\n\n12\n\n2431\n134222\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_126",
+      "text": "<|channel>314224132\n2341\n142311\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_127",
+      "text": "<|channel>3142\n4231\n2413\n13244\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_128",
+      "text": "<|channel>3241\n4132\n11423\n231441",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_129",
+      "text": "<|channel>4312\n2\n3411423\n324111\n",
+      "ok": false,
+      "why": "overwrote the given at (1,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_130",
+      "text": "<|channel>432\n2314\n3241\n41231111",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_131",
+      "text": "<|channel>thought\n1423\n4214\n3122\n2341\n",
+      "ok": false,
+      "why": "row 1",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_132",
+      "text": "<|channel>13223241\n1432\n231444\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_133",
+      "text": "<|channel>413\n31422\n4321\n12344\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_134",
+      "text": "<|channel>3142  2431\n1324\n42131\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_135",
+      "text": "<|channel>2143\n3124\n4312\n124313\n",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_136",
+      "text": "<|channel>123\n3241\n2314\n142333\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_137",
+      "text": "<|channel>12341431222143\n342111\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_138",
+      "text": "<|channel>4231\n3142\n2314\n14231\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_139",
+      "text": "<|channel>431\n1342\n4213\n13244\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_140",
+      "text": "<|channel>342\n4312\n2413\n31244\n\n2",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_141",
+      "text": "<|channel>34111423\n3241\n413222\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_142",
+      "text": "<|channel>231444132\n3421\n12433\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,3)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_143",
+      "text": "<|channel>31241143224321\n21433\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_144",
+      "text": "<|channel>1342\n4123\n2431\n3124\n2342",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_145",
+      "text": "<|channel>14\n\n22314\n3421\n12431\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_146",
+      "text": "<|channel>3124\n2413\n4231\n1342221",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_147",
+      "text": "<|channel>14322321444321\n214331\n",
+      "ok": false,
+      "why": "overwrote the given at (1,3)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_148",
+      "text": "<|channel>3241\n4231\n1423\n231444\n",
+      "ok": false,
+      "why": "col 1",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_149",
+      "text": "<|channel>2143\n3421\n4231\n132444\n",
+      "ok": false,
+      "why": "col 2",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_150",
+      "text": "<|channel>24114132\n1324124131\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_151",
+      "text": "<|channel>1322341-3241142341322341 1423",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_152",
+      "text": "<|channel>412\n1243\n2134\n4321\n\n\n\n",
+      "ok": false,
+      "why": "only 15 digits",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_153",
+      "text": "<|channel>234\n4312\n3421\n214311\n2",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_154",
+      "text": "<|channel>123\n3241\n2341\n1432\n1\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_155",
+      "text": "<|channel>14322\n314\n4213\n314222\n",
+      "ok": false,
+      "why": "col 2",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_156",
+      "text": "<|channel>142333214\n2341\n412313\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_157",
+      "text": "<|channel>4123\n3214\n1423\n2341111",
+      "ok": false,
+      "why": "col 2",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_158",
+      "text": "<|channel>1324  \n21313142\n24311\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_159",
+      "text": "<|channel>4132\n324111423\n2314411",
+      "ok": false,
+      "why": "overwrote the given at (2,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_160",
+      "text": "<|channel>2341\n3124\n4213\n1342221",
+      "ok": false,
+      "why": "col 1",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_161",
+      "text": "<|channel>3412\n1243\n2134\n42211\n\n",
+      "ok": false,
+      "why": "col 1",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_162",
+      "text": "<|channel>1143\n4321\n3412\n21344\n\n",
+      "ok": false,
+      "why": "row 0",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_163",
+      "text": "<|channel>3241\n4132\n1432\n2341111",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_164",
+      "text": "<|channel>2431\n1342\n4213\n312444\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_165",
+      "text": "<|channel>143\n3412\n1324\n42311\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_166",
+      "text": "<|channel>2341\n14\n3\n4132\n32144\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,3)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_167",
+      "text": "<|channel>1342\n443\n\n3214\n41231\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_168",
+      "text": "<|channel>32412431\n4312\n124313\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_169",
+      "text": "<|channel>2134\n1423\n3241\n413222\n",
+      "ok": false,
+      "why": "col 1",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_170",
+      "text": "<|channel>43211\n24313412\n21433\n\n",
+      "ok": false,
+      "why": "overwrote the given at (2,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_171",
+      "text": "<|channel>231\n1342\n2413\n31244412",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_172",
+      "text": "<|channel>312\n\n14313421\n12344\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_173",
+      "text": "<|channel>3241\n\n\n23\n1432\n2314411",
+      "ok": false,
+      "why": "overwrote the given at (1,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_174",
+      "text": "<|channel>thought\n<channel|>4132\n2314\n3241\n1423<turn|>",
+      "ok": true,
+      "why": "ok",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_175",
+      "text": "<|channel>124\n4231\n2413\n13422211",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_176",
+      "text": "<|channel>314\n4123\n1243\n34122\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_177",
+      "text": "<|channel>13422243114123\n32144\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_178",
+      "text": "<|channel>3124\n1423\n4132\n2341111",
+      "ok": false,
+      "why": "col 1",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_179",
+      "text": "<|channel>432\n2543\n3142\n24133\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_180",
+      "text": "<|channel>142\n4231\n4321\n1324\n2431",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_181",
+      "text": "<|channel>31221243\n3124\n24311\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_182",
+      "text": "<|channel>3142\n2431\n4213\n13244\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_183",
+      "text": "<|channel>1243\n3421\n2134\n431221\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_184",
+      "text": "<|channel>214\n142332341\n41322\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_185",
+      "text": "<|channel>1423\n3421\n4132\n2314\n\n\n",
+      "ok": false,
+      "why": "col 1",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_186",
+      "text": "<|channel>3241\n4132\n2314\n14233\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_187",
+      "text": "<|channel>4321\n21433\n3412\n123444",
+      "ok": false,
+      "why": "overwrote the given at (2,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_188",
+      "text": "<|channel>314  4123\n1432\n324111\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_189",
+      "text": "<|channel>234111423\n4213\n314222\n",
+      "ok": false,
+      "why": "overwrote the given at (2,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_190",
+      "text": "<|channel>\n\n1432\n3241\n1423\n2314\n\n",
+      "ok": false,
+      "why": "col 0",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_191",
+      "text": "<|channel>23443412\n4312\n21433\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_192",
+      "text": "<|channel>232\n4213\n3421\n21344211",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_193",
+      "text": "<|channel>234114123\n1234\n3412222",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_194",
+      "text": "<|channel>43\n111423\n2341\n42133\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_195",
+      "text": "<|channel>132  234111423\n32144411",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_196",
+      "text": "<|channel>3241\n1432\n2143\n412311\n",
+      "ok": false,
+      "why": "overwrote the given at (2,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_197",
+      "text": "<|channel>1342\n4231\n3124\n241311\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_198",
+      "text": "<|channel>312442311243431222\n111",
+      "ok": false,
+      "why": "col 0",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_199",
+      "text": "<|channel>1224\n2413\n4231\n34222\n\n",
+      "ok": false,
+      "why": "row 0",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_200",
+      "text": "<|channel>32144143224321\n2143311",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_201",
+      "text": "<|channel>1342\n3421\n4123\n23144\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_202",
+      "text": "<|channel>4213\n1324\n2431\n31422\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_203",
+      "text": "<|channel>3214\n4132\n2341\n142311\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_204",
+      "text": "<|channel>421333142\n2431\n132444\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_205",
+      "text": "<|channel>431\n1324\n\n3142\n421313\n",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_206",
+      "text": "<|channel>4132\n1314\n1243\n34211\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_207",
+      "text": "<|channel>14334321\n1243\n34122\n\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_208",
+      "text": "<|channel>312414123\n3241\n143222\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_209",
+      "text": "<|channel>1243\n4312\n3142\n2431111",
+      "ok": false,
+      "why": "col 2",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_210",
+      "text": "<|channel>1423\n321442341\n1432111",
+      "ok": false,
+      "why": "overwrote the given at (2,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_211",
+      "text": "<|channel>2341\n\n423\n3214\n413222\n",
+      "ok": false,
+      "why": "overwrote the given at (1,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_212",
+      "text": "<|channel>412312341\n3412\n12344\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_213",
+      "text": "<|channel>1234\n3421\n4132\n24133\n1",
+      "ok": false,
+      "why": "overwrote the given at (2,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_214",
+      "text": "<|channel>34224213\n3124\n2431\n1\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_215",
+      "text": "<|channel>1243\n4312\n3421\n21344\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_216",
+      "text": "<|channel>3124\n142314132\n234111\n",
+      "ok": false,
+      "why": "overwrote the given at (2,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_217",
+      "text": "<|channel>243\n4321\n2134\n341222\n2",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_218",
+      "text": "<|channel>4132\n3241\n2413\n13244\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_219",
+      "text": "<|channel>2431\n1342\n4123\n32144\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_220",
+      "text": "<|channel>2143\n4321\n3214\n143221\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_221",
+      "text": "<|channel>314224231\n1423\n23144\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_222",
+      "text": "<|channel>2311342224133124411\n21",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_223",
+      "text": "<|channel>3241\n1324\n4132\n22141\n\n",
+      "ok": false,
+      "why": "col 1",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_224",
+      "text": "<|channel>1432\n3241\n2314\n4123111",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_225",
+      "text": "<|channel>1234\n331\n\n3241\n14233\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_226",
+      "text": "<|channel>234\n4312\n2143\n342111\n2",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_227",
+      "text": "<|channel>3\n<channel|>\n141\n\n\n2314\n143222\n",
+      "ok": false,
+      "why": "only 13 digits",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_228",
+      "text": "<|channel>4123\n\n\n14\n3241\n143222\n",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_229",
+      "text": "<|channel>1432\n2314\n3241\n41231\n\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_230",
+      "text": "<|channel>134\n3421\n4213\n134222\n1",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_231",
+      "text": "<|channel>4123\n2341\n1234\n341222\n",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_232",
+      "text": "<|channel>3241\n2143\n4312\n12344\n\n",
+      "ok": false,
+      "why": "col 1",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_233",
+      "text": "<|channel>4312\n2143\n1432\n324111\n",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_234",
+      "text": "<|channel>142\n243111324\n42131111",
+      "ok": false,
+      "why": "overwrote the given at (0,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_235",
+      "text": "<|channel>31422\n43111324\n42133\n\n",
+      "ok": false,
+      "why": "overwrote the given at (2,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_236",
+      "text": "<|channel>3142\n4213\n1324\n24311\n1",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_237",
+      "text": "<|channel>123\n3214\n2341\n14233\n\n1",
+      "ok": false,
+      "why": "overwrote the given at (1,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_238",
+      "text": "<|channel>14231\n<channel|>1222143\n3421\n11",
+      "ok": false,
+      "why": "only 13 digits",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_239",
+      "text": "<|channel>1243\n43\n2\n2134\n34122\n\n",
+      "ok": false,
+      "why": "overwrote the given at (2,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_240",
+      "text": "<|channel>23442413\n4231\n312444\n2",
+      "ok": false,
+      "why": "row 0",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_241",
+      "text": "<|channel>13422421312134\n34211\n\n",
+      "ok": false,
+      "why": "overwrote the given at (1,1)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_242",
+      "text": "<|channel>123412413\n3142\n42311\n\n",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_243",
+      "text": "<|channel>324\n2431\n4213\n31422211",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_244",
+      "text": "<|channel>3412\n2143\n1234\n431222\n",
+      "ok": false,
+      "why": "col 2",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_245",
+      "text": "<|channel>132\n2314\n1423\n3241\n\n\n\n",
+      "ok": false,
+      "why": "only 15 digits",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_246",
+      "text": "<|channel>31244\n23111342\n241313\n",
+      "ok": false,
+      "why": "overwrote the given at (2,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_247",
+      "text": "<|channel>231\n1342\n3124\n2413111\n",
+      "ok": false,
+      "why": "overwrote the given at (0,2)",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_248",
+      "text": "<|channel>4213\n1324\n2413\n314222\n",
+      "ok": false,
+      "why": "col 2",
+      "accepted": false
+    },
+    {
+      "id": "sudoku4_249",
+      "text": "<|channel>342\n2314\n3241\n41231111",
+      "ok": false,
+      "why": "overwrote the given at (0,0)",
+      "accepted": false
+    }
+  ]
+}

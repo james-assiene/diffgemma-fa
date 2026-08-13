@@ -1,0 +1,46 @@
+[eval] task=bfcl_live_simple variant=j0 emission=map bound=0.5
+2026-08-03 03:42:00.340761: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+  [10/130] CS=1.000 schema=1.000 acc=0.688 nonempty=1.000
+  [20/130] CS=1.000 schema=1.000 acc=0.677 nonempty=1.000
+  [30/130] CS=1.000 schema=1.000 acc=0.726 nonempty=1.000
+  [40/130] CS=1.000 schema=1.000 acc=0.697 nonempty=1.000
+  [50/130] CS=1.000 schema=1.000 acc=0.656 nonempty=0.880
+  [60/130] CS=1.000 schema=1.000 acc=0.673 nonempty=0.867
+  [70/130] CS=1.000 schema=1.000 acc=0.687 nonempty=0.886
+  [80/130] CS=1.000 schema=1.000 acc=0.647 nonempty=0.900
+  [90/130] CS=1.000 schema=1.000 acc=0.652 nonempty=0.889
+  [100/130] CS=1.000 schema=1.000 acc=0.675 nonempty=0.900
+  [110/130] CS=1.000 schema=1.000 acc=0.647 nonempty=0.891
+  [120/130] CS=1.000 schema=1.000 acc=0.634 nonempty=0.883
+W0803 05:27:54.033465 1566371 hlo_rematerialization.cc:3282] Can't reduce memory use below 17.46GiB (18749587141 bytes) by rematerialization; only reduced to 28.23GiB (30307100835 bytes), down from 28.35GiB (30441167867 bytes) originally
+W0803 05:28:14.566323 1566371 bfc_allocator.cc:590] Allocator (GPU_0_bfc) ran out of memory trying to allocate 26.73GiB (rounded to 28697675264) from the lower end requested by op 
+If this is caused by memory fragmentation, the environment variable 'TF_GPU_ALLOCATOR=cuda_malloc_async' may improve the situation.
+Current allocation summary follows.
+W0803 05:28:14.567516 1566371 bfc_allocator.cc:601] ********************************************************************************___________________*
+  [130/130] CS=0.992 schema=0.992 acc=0.646 nonempty=0.885
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: j0
+emission: map
+n: 130
+cs: 129
+cs_rate: 0.9923
+schema_ok: 129
+schema_valid_rate: 0.9923
+parsed: 129
+nonempty: 115
+nonempty_rate: 0.8846
+arg_correct: 186
+arg_total: 288
+arg_accuracy: 0.6458
+exact_calls: 66
+exact_call_rate: 0.5077
+skipped_by_reason: {}
+zero_partition: 0
+oom: 1
+elapsed_seconds: 6721.2
+
+wrote artifacts/exp_marmap_b0.5.json

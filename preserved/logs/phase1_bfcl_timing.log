@@ -1,0 +1,38 @@
+[data] 1351 records from 4 splits
+2026-07-27 19:59:29.383398: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+[vocab] built in 3.40s, 262141 tokens
+  [100/1351] 100 schemas, 100 ok, 37.7s compile so far
+  [200/1351] 200 schemas, 198 ok, 90.5s compile so far
+  [300/1351] 428 schemas, 426 ok, 166.3s compile so far
+  [400/1351] 919 schemas, 911 ok, 434.5s compile so far
+  [500/1351] 1393 schemas, 1384 ok, 631.9s compile so far
+  [600/1351] 1743 schemas, 1734 ok, 838.8s compile so far
+  [700/1351] 2104 schemas, 2095 ok, 1018.8s compile so far
+  [800/1351] 2523 schemas, 2514 ok, 1283.7s compile so far
+  [900/1351] 2911 schemas, 2902 ok, 1447.4s compile so far
+  [1000/1351] 3361 schemas, 3352 ok, 1674.2s compile so far
+  [1100/1351] 3723 schemas, 3714 ok, 1854.4s compile so far
+  [1200/1351] 4079 schemas, 4070 ok, 2078.9s compile so far
+  [1300/1351] 4398 schemas, 4389 ok, 2208.9s compile so far
+
+===== SUMMARY =====
+n_records: 1351
+n_schemas: 4549
+n_compiled: 4538
+n_failed: 11
+failure_kinds: {'ValueError: Unsupported type: any': 11}
+seconds_total_serial: 2272.0
+seconds_mean: 0.5007
+seconds_median: 0.4229
+seconds_p50: 0.423
+seconds_p90: 0.7849
+seconds_p99: 1.6584
+seconds_max: 15.823
+states_median: 114.0
+states_max: 3573
+states_p90: 249
+nnz_median: 536925.0
+max_label_set_size_max: 261154
+min_complement_size: 987
+
+wrote /home/ubuntu/diffgemma_fa/artifacts/phase1_bfcl_timing.json

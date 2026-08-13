@@ -1,0 +1,16 @@
+[load] done
+2026-07-27 19:42:54.142807: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+[0] 43.0s blocks=3 steps=[23, 21, 23] exits=['early_stop', 'early_stop', 'early_stop'] non_acc=[0, 0, 1] chars=3795
+    channel_open=[0] channel_close=[3]
+    head='<|channel>thought\n<channel|>The invention of the printing press in the mid-15th century is widely regarded as the most influential event of the modern era. It s'
+[1] 10.8s blocks=4 steps=[15, 14, 11, 13] exits=['early_stop', 'early_stop', 'early_stop', 'early_stop'] non_acc=[0, 0, 0, 0] chars=2955
+    channel_open=[0] channel_close=[3]
+    head='<|channel>thought\n<channel|>This guide provides a deep dive into two of the most important sorting algorithms: **Quicksort** and **Merge Sort**. Both follow the'
+[2] 16.5s blocks=4 steps=[20, 17, 16, 31] exits=['early_stop', 'early_stop', 'early_stop', 'early_stop'] non_acc=[0, 0, 0, 0] chars=3719
+    channel_open=[0] channel_close=[3]
+    head='<|channel>thought\n<channel|>Here are 40 distinct countries, their capital cities, and a one-sentence fact about each:\n\n1. **Argentina (Buenos Aires):** It is ho'
+
+===== SUMMARY =====
+blocks_total: 11
+via_budget: 0  via_early_stop: 11
+max_non_accepted_on_final_step: 1

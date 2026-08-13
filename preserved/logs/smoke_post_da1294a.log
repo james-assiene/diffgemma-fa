@@ -1,0 +1,32 @@
+[eval] task=bfcl_live_simple variant=j1 emission=sample bound=0.1
+[gate] get_user_info: grammar rejects ['indent2', 'indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+2026-08-10 13:54:23.821715: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+[gate] github_star: grammar rejects ['indent2', 'indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] uber.ride: grammar rejects ['indent2', 'indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+[gate] uber.ride: grammar rejects ['indent2', 'indent4', 'tabs'] rendering(s) (verify_strict=False; the declared-narrow whitespace policy is the whole cause -- the same schema under JSON_WS accepts all five)
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: j1
+emission: sample
+n: 4
+cs: 4
+cs_rate: 1.0
+schema_ok: 4
+schema_valid_rate: 1.0
+parsed: 4
+nonempty: 4
+nonempty_rate: 1.0
+arg_correct: 4
+arg_total: 10
+arg_accuracy: 0.4
+exact_calls: 1
+exact_call_rate: 0.25
+skipped_by_reason: {}
+zero_partition: 0
+oom: 0
+elapsed_seconds: 161.3
+
+wrote artifacts/smoke_post_da1294a.json

@@ -1,0 +1,93 @@
+[note] HEAD is 4f9a6e3619e8c91ed269d9e854a496d5c642dfca, not 1aa8ccf634934dbbe4b5ad9820b24e77f2baaa19, but diffgemma_fa/
+       is identical between them -- commits since are docs/tests only.
+       Recorded in every artifact as git_commit; the code identity is
+       recorded as code_base_commit.
+=== json_headline at 4f9a6e3  2026-08-13 10:44 UTC
+=== tree fingerprint 625332b288455728c270eecf4f11e8d7  (content cf9c0d63b3bbebb88a87b6ffee803581)
+=== DGFA_DEDICATED=1  CUDA_VISIBLE_DEVICES=0
+=== DGFA_RUN_UNC=0  (1 = also re-run the 81-min unconstrained arm;
+===   section 3 argues it buys nothing. Default 0.)
+index, name, memory.used [MiB], memory.total [MiB], utilization.gpu [%]
+0, NVIDIA H100 80GB HBM3, 0 MiB, 81559 MiB, 0 %
+
+[ok] artifacts/fa/bfcl/ absent or empty -- no stale automaton can be reused
+[gate] live_simple_117-73-0: expand=True bad=[]  expand=False bad=['compact', 'spaced', 'indent2', 'indent4', 'tabs']
+[gate] live_simple_122-78-0: expand=True bad=[]  expand=False bad=['compact', 'spaced', 'indent2', 'indent4', 'tabs']
+[ok] preflight A5: both wildcard records compile clean at this commit and still fail without --expand-wildcard (control non-vacuous)
+
+=== 10:44 smoke_unc_repro
+    diffgemma_fa.eval.run --task bfcl_live_simple --variant unconstrained --emission sample --confidence mf --entropy-bound 0.1 --whitespace stock --dtype float64 --expand-wildcard --prompt-style stock --temp stock --seed 0 --offset 0 --n 4 --max-new-tokens 256 --nonempty
+    cfg: variant=unconstrained emission=sample conf=mf bound=0.1 ws=stock fence=False ci=False expand_wildcard=True dtype=float64 seed=0 offset=0 temp=stock prompt=stock nonempty=True commit=4f9a6e3 code_base=1aa8ccf
+    n=4 avail=4 skips={} cs=0.0 zp=0 oom=0 schema=0.25 (1/4) arg=0.9 (9/10) exact=0.75  2.4 min
+      schema-invalid: ['live_simple_1-1-0', 'live_simple_2-2-0', 'live_simple_3-2-1']
+[arm 0] unconstrained text reproduction: 4 identical, 0 different, 0 not in the published artifact
+[ok] arm 0: the unconstrained decode reproduces verbatim on 4 of 4 records, so the published baseline row is a HEAD number and the 81-minute re-run buys nothing. 4 records detects a systematic change, not a rare one -- say so if you quote this.
+
+[archived] wrote artifacts/stale_pre_15cdc47_json/README.txt
+[archived] exp_e5_grammar130_map.json -> artifacts/stale_pre_15cdc47_json
+[archived] exp_e5_grammar130_map.log -> artifacts/stale_pre_15cdc47_json
+[note] HEAD moved 4f9a6e3619e8c91ed269d9e854a496d5c642dfca -> c5e5c715a5c0a0960084b38b3dcfe97cb95ba5ea. NOT a stop: attribution
+       rides the .py fingerprint above, which a code commit cannot
+       avoid tripping (the edit changes an mtime before the commit
+       exists). Recorded into every artifact as git_head_at_write.
+=== 10:47 exp_e5_grammar130_map
+    diffgemma_fa.eval.run --task bfcl_live_simple --variant j0 --emission map --confidence mf --entropy-bound 0.1 --whitespace pretty --fence --ci-enums --dtype float64 --expand-wildcard --prompt-style stock --temp stock --seed 0 --offset 0 --n 130 --max-new-tokens 256 --nonempty
+    cfg: variant=j0 emission=map conf=mf bound=0.1 ws=pretty fence=True ci=True expand_wildcard=True dtype=float64 seed=0 offset=0 temp=stock prompt=stock nonempty=True commit=4f9a6e3 code_base=1aa8ccf
+    n=130 avail=130 skips={} cs=1.0 zp=0 oom=0 schema=1.0 (130/130) arg=0.6632 (193/291) exact=0.5308  106.2 min
+[ok] exp_e5_grammar130_map avail=130 n=130 skips={} expand_wildcard=True
+[ok] HARD STOP 1 PASSED: exp_e5_grammar130_map schema_ok=130 of
+     n=130 (schema_valid_rate=1.0), against a published 129/130.
+     The wildcard record live_simple_122-78-0 now decodes to a
+     well-formed object. Check cs_rate on the cfg line above: the claim
+     is schema validity AND CS 1.000, not either alone.
+[ok] exp_e5_grammar130_map zero_partition=0
+
+=== ARM 2 (unconstrained baseline, 81 min) NOT RUN -- section 3.
+=== docs/RESULTS.md's baseline row (0.631 / 0.000 / 0.639 / 0.500) is
+=== today's scorer applied to artifacts/
+===   eval_bfcl_live_simple_unconstrained_sample.json,
+=== and that artifact is grammar-invariant: both wildcard records are
+=== schema-valid and unaccepted under BOTH grammars, and both were
+=== already inside its pre-gate n=130. Set DGFA_RUN_UNC=1 to override.
+
+
+ALL DONE 2026-08-13 12:34 UTC
+code base 1aa8ccf634934dbbe4b5ad9820b24e77f2baaa19 (diffgemma_fa/ identical); HEAD at launch
+4f9a6e3619e8c91ed269d9e854a496d5c642dfca, HEAD now c5e5c715a5c0a0960084b38b3dcfe97cb95ba5ea
+tree fingerprint still 625332b288455728c270eecf4f11e8d7
+
+WHAT MAY BE CLAIMED FROM THIS:
+  * The headline PAIR is legitimate. The constrained row is now post-fix
+    at n=130; the unconstrained row is grammar-INVARIANT (both wildcard
+    records are schema-valid and unaccepted under either grammar, and
+    both were already inside its pre-gate n=130), so it is the same
+    number under the fixed grammar rather than a stale one.
+  * McNemar for constrained vs unconstrained is recomputable on CPU from
+    the two per-record `rows` lists over the same 130 records. No GPU.
+
+WHAT MAY NOT:
+  * Any pairing of this row against the OTHER constrained rows.
+    j0-sample, j1-sample, j2-sample, j0-map and mask-sample are all
+    pre-15cdc47 and decoded records 117 and 122 under a grammar that
+    rejects the correct object. The constrained block of the table now
+    straddles two grammars. Restrict those pairs to the 128 common
+    records using the `rows` list each artifact already stores -- CPU
+    only -- or re-run the partners (~6.4 GPU-hours). Do not average
+    two grammars.
+  * That this re-run isolates the wildcard fix. Four commits touched the
+    j0/map emission path since 2026-07-31 (da1294a, b58fd84, a41bf74,
+    1aa8ccf). It is a HEAD measurement, not a one-variable delta.
+
+STATE OF artifacts/ THAT A RESULTS.md REGENERATION MUST HANDLE:
+  * Twelve tags were archived to artifacts/stale_pre_1aa8ccf/ by the
+    aborted queue and only task_sudoku_mask was re-run, so
+    eval_bfcl_live_simple_mask_sample, task_countdown_mask,
+    task_sudoku_j1_sample, exp_marmap_b{0.01,0.1,0.5}, exp_h2_marmap,
+    exp_h2_{stock,grammar}_j1, exp_oomfix_j0 and exp_f64_ws_only_j1 have
+    NO artifact in artifacts/ at all. scripts/phase5_report.py will drop
+    those rows silently.
+  * scripts/phase5_report.py reads the STORED accuracy fields of
+    each artifact and does not apply the 2026-08-08 rescoring, so any
+    surviving pre-e2be58c row is on the old scorer while the row this
+    queue wrote is on the new one. Rescore from `rows` first, or the
+    regenerated table silently mixes two scorers.

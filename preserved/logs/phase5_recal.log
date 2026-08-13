@@ -1,0 +1,15 @@
+[preflight] GPU 0 free (0 MiB used)
+=== 23:09 smoke_b0.003
+    diffgemma_fa.eval.run --task bfcl_live_simple --variant j0 --emission map --confidence mar --whitespace pretty --fence --ci-enums --dtype float64 --prompt-style stock --temp stock --seed 0 --offset 0 --max-new-tokens 256 --nonempty --entropy-bound 0.003 --n 4
+    cfg: variant=j0 emission=map conf=mar bound=0.003 ws=pretty fence=True ci=True dtype=float64 seed=0 offset=0 temp=stock prompt=stock nonempty=True task=bfcl_live_simple
+    n=4 avail=4 cs=1.0 schema=1.0 arg=0.8 (8/10) exact=0.75 zp=0 oom=0 skipped=0  3.7 min
+[gate ok] artifacts/smoke_b0.003.json
+=== 23:14 exp_marmap_b0.003
+    diffgemma_fa.eval.run --task bfcl_live_simple --variant j0 --emission map --confidence mar --whitespace pretty --fence --ci-enums --dtype float64 --prompt-style stock --temp stock --seed 0 --offset 0 --max-new-tokens 256 --nonempty --entropy-bound 0.003 --n 130
+    cfg: variant=j0 emission=map conf=mar bound=0.003 ws=pretty fence=True ci=True dtype=float64 seed=0 offset=0 temp=stock prompt=stock nonempty=True task=bfcl_live_simple
+    n=128 avail=130 cs=1.0 schema=1.0 arg=0.6481 (186/287) exact=0.4922 zp=0 oom=0 skipped=2  123.2 min
+      excluded: live_simple_117-73-0 (compile:ValueError)
+      excluded: live_simple_122-78-0 (compile:ValueError)
+[gate ok] artifacts/exp_marmap_b0.003.json
+=== 01:18 exp_marmap_b1.0
+    diffgemma_fa.eval.run --task bfcl_live_simple --variant j0 --emission map --confidence mar --whitespace pretty --fence --ci-enums --dtype float64 --prompt-style stock --temp stock --seed 0 --offset 0 --max-new-tokens 256 --nonempty --entropy-bound 1.0 --n 130

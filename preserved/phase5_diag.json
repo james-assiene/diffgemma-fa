@@ -1,0 +1,310 @@
+{
+  "variant": "j0",
+  "emission": "map",
+  "rows": [
+    {
+      "bound": 0.1,
+      "n": 2,
+      "accepted": 2,
+      "parsed": 2,
+      "nonempty_args": 2,
+      "arg_correct": 0,
+      "arg_total": 4,
+      "steps": [],
+      "examples": [
+        "{\"user_id\":1}<turn|>",
+        "{\"repos\":\":\"}<turn|>"
+      ],
+      "trace": [
+        {
+          "step": 0,
+          "n_accepted": 57,
+          "mean_entropy": 0.30296075344085693,
+          "emit": "{\"user_id\":7}"
+        },
+        {
+          "step": 1,
+          "n_accepted": 36,
+          "mean_entropy": 0.16706101596355438,
+          "emit": "{\"user_id\":7}"
+        },
+        {
+          "step": 2,
+          "n_accepted": 79,
+          "mean_entropy": 0.07805310189723969,
+          "emit": "{\"user_id\":7}"
+        },
+        {
+          "step": 3,
+          "n_accepted": 95,
+          "mean_entropy": 0.011576695367693901,
+          "emit": "{\"user_id\":7}"
+        },
+        {
+          "step": 4,
+          "n_accepted": 129,
+          "mean_entropy": 0.013023583218455315,
+          "emit": "{\"user_id\":7}"
+        },
+        {
+          "step": 5,
+          "n_accepted": 106,
+          "mean_entropy": 0.021331608295440674,
+          "emit": "{\"user_id\":7}"
+        },
+        {
+          "step": 6,
+          "n_accepted": 209,
+          "mean_entropy": 0.02270529791712761,
+          "emit": "{\"user_id\":0}"
+        },
+        {
+          "step": 7,
+          "n_accepted": 221,
+          "mean_entropy": 0.023181263357400894,
+          "emit": "{\"user_id\":7}"
+        },
+        {
+          "step": 8,
+          "n_accepted": 218,
+          "mean_entropy": 0.03554293513298035,
+          "emit": "{\"user_id\":0}"
+        },
+        {
+          "step": 9,
+          "n_accepted": 227,
+          "mean_entropy": 0.01643950492143631,
+          "emit": "{\"user_id\":7}"
+        },
+        {
+          "step": 10,
+          "n_accepted": 235,
+          "mean_entropy": 0.009819082915782928,
+          "emit": "{\"user_id\":0}"
+        },
+        {
+          "step": 11,
+          "n_accepted": 242,
+          "mean_entropy": 0.004439674783498049,
+          "emit": "{\"user_id\":0}"
+        },
+        {
+          "step": 12,
+          "n_accepted": 254,
+          "mean_entropy": 0.002870263298973441,
+          "emit": "{\"user_id\":0}"
+        },
+        {
+          "step": 13,
+          "n_accepted": 256,
+          "mean_entropy": 0.002922879299148917,
+          "emit": "{\"user_id\":0}"
+        },
+        {
+          "step": 14,
+          "n_accepted": 256,
+          "mean_entropy": 0.003488025860860944,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 15,
+          "n_accepted": 256,
+          "mean_entropy": 0.004840237088501453,
+          "emit": "{\"user_id\":0}"
+        },
+        {
+          "step": 16,
+          "n_accepted": 256,
+          "mean_entropy": 0.002432951470836997,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 17,
+          "n_accepted": 256,
+          "mean_entropy": 0.00015680596698075533,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 18,
+          "n_accepted": 256,
+          "mean_entropy": 7.984119292814285e-05,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 19,
+          "n_accepted": 256,
+          "mean_entropy": 7.489688141504303e-05,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 20,
+          "n_accepted": 256,
+          "mean_entropy": 0.00024103911709971726,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 21,
+          "n_accepted": 256,
+          "mean_entropy": 2.576113911345601e-05,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 22,
+          "n_accepted": 256,
+          "mean_entropy": 3.6694444133900106e-05,
+          "emit": "{\"user_id\":6}"
+        },
+        {
+          "step": 23,
+          "n_accepted": 256,
+          "mean_entropy": 6.926322384970263e-05,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 24,
+          "n_accepted": 256,
+          "mean_entropy": 2.6347657694714144e-05,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 25,
+          "n_accepted": 256,
+          "mean_entropy": 3.738704981515184e-05,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 26,
+          "n_accepted": 256,
+          "mean_entropy": 2.203765689046122e-05,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 27,
+          "n_accepted": 256,
+          "mean_entropy": 3.584999285521917e-05,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 28,
+          "n_accepted": 256,
+          "mean_entropy": 9.787680028239265e-06,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 29,
+          "n_accepted": 256,
+          "mean_entropy": 9.106461220653728e-06,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 30,
+          "n_accepted": 256,
+          "mean_entropy": 2.2899857867741957e-05,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 31,
+          "n_accepted": 256,
+          "mean_entropy": 5.908544153498951e-06,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 32,
+          "n_accepted": 256,
+          "mean_entropy": 8.176786650437862e-06,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 33,
+          "n_accepted": 256,
+          "mean_entropy": 2.9020331567153335e-05,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 34,
+          "n_accepted": 256,
+          "mean_entropy": 8.6137197286007e-06,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 35,
+          "n_accepted": 256,
+          "mean_entropy": 4.595392510964302e-06,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 36,
+          "n_accepted": 256,
+          "mean_entropy": 2.2596786948270164e-05,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 37,
+          "n_accepted": 256,
+          "mean_entropy": 4.933111995342188e-06,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 38,
+          "n_accepted": 256,
+          "mean_entropy": 8.717884156794753e-06,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 39,
+          "n_accepted": 256,
+          "mean_entropy": 5.302234058035538e-06,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 40,
+          "n_accepted": 256,
+          "mean_entropy": 6.883423338877037e-06,
+          "emit": "{\"user_id\":0}"
+        },
+        {
+          "step": 41,
+          "n_accepted": 256,
+          "mean_entropy": 6.909069725224981e-06,
+          "emit": "{\"user_id\":8}"
+        },
+        {
+          "step": 42,
+          "n_accepted": 256,
+          "mean_entropy": 3.349137614350184e-06,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 43,
+          "n_accepted": 256,
+          "mean_entropy": 5.338359187589958e-06,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 44,
+          "n_accepted": 256,
+          "mean_entropy": 4.1864486775011756e-06,
+          "emit": "{\"user_id\":0}"
+        },
+        {
+          "step": 45,
+          "n_accepted": 256,
+          "mean_entropy": 6.04703416229313e-07,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 46,
+          "n_accepted": 256,
+          "mean_entropy": 2.6878996095547336e-07,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 47,
+          "n_accepted": 256,
+          "mean_entropy": 1.7658366857631336e-07,
+          "emit": "{\"user_id\":1}"
+        }
+      ]
+    }
+  ]
+}

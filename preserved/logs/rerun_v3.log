@@ -1,0 +1,97 @@
+=== 13:53 smoke_post_da1294a
+    diffgemma_fa.eval.run --task bfcl_live_simple --variant j1 --emission sample --confidence mf --entropy-bound 0.1 --whitespace stock --dtype float64 --prompt-style stock --temp stock --seed 0 --offset 0 --n 4 --max-new-tokens 256 --nonempty
+    cfg: variant=j1 emission=sample conf=mf bound=0.1 ws=stock fence=False ci=False dtype=float64 seed=0 offset=0 temp=stock prompt=stock nonempty=True
+    n=4 avail=4 cs=1.0 schema=1.0 arg=0.4 (4/10) exact=0.25 zp=0 oom=0 skipped=0  2.7 min
+=== 13:57 smoke_post_da1294a_mar
+    diffgemma_fa.eval.run --task bfcl_live_simple --variant j0 --emission map --confidence mar --entropy-bound 0.1 --whitespace pretty --fence --ci-enums --dtype float64 --prompt-style stock --temp stock --seed 0 --offset 0 --n 4 --max-new-tokens 256 --nonempty
+    cfg: variant=j0 emission=map conf=mar bound=0.1 ws=pretty fence=True ci=True dtype=float64 seed=0 offset=0 temp=stock prompt=stock nonempty=True
+    n=4 avail=4 cs=1.0 schema=1.0 arg=0.8 (8/10) exact=0.75 zp=0 oom=0 skipped=0  3.2 min
+[archived] eval_bfcl_live_simple_mask_sample
+[archived] eval_bfcl_live_simple_mask_sample.log
+[archived] eval_bfcl_live_simple_j1_sample
+[archived] eval_bfcl_live_simple_j1_sample.log
+[archived] eval_bfcl_live_simple_j0_sample
+[archived] eval_bfcl_live_simple_j0_sample.log
+[archived] eval_bfcl_live_simple_j2_sample
+[archived] eval_bfcl_live_simple_j2_sample.log
+[archived] exp_marmap_b0.1
+[archived] exp_marmap_b0.1.log
+[archived] exp_marmap_b0.01
+[archived] exp_marmap_b0.01.log
+[archived] exp_marmap_b0.5
+[archived] exp_marmap_b0.5.log
+[archived] exp_h2_marmap
+[archived] exp_h2_marmap.log
+[archived] task_countdown_j0sample_refixed
+=== 14:00 task_countdown_j0sample_refixed
+    diffgemma_fa.eval.run_tasks --task countdown --variant j0 --emission sample --confidence mf --entropy-bound 0.1 --n 250 --seed 0 --max-new-tokens 256
+    cfg: variant=j0 emission=sample conf=mf bound=0.1 ws=None fence=None ci=None dtype=None seed=0 offset=None temp=None prompt=None nonempty=None
+    n=250 avail=250 cs=1.0 schema=None arg=None (None/None) exact=None zp=0 oom=0 skipped=0  46.1 min
+[ok] Countdown zero_partition=0 -- da1294a confirmed end to end
+=== 14:47 eval_bfcl_live_simple_mask_sample
+    diffgemma_fa.eval.run --task bfcl_live_simple --variant mask --emission sample --whitespace stock --dtype float64 --confidence mf --entropy-bound 0.1 --prompt-style stock --temp stock --seed 0 --offset 0 --n 130 --max-new-tokens 256 --nonempty
+    cfg: variant=mask emission=sample conf=mf bound=0.1 ws=stock fence=False ci=False dtype=float64 seed=0 offset=0 temp=stock prompt=stock nonempty=True
+    n=128 avail=130 cs=0.0 schema=0.3828 arg=0.2822 (81/287) exact=0.2734 zp=0 oom=0 skipped=2  83.1 min
+      excluded: live_simple_117-73-0 (compile:ValueError)
+      excluded: live_simple_122-78-0 (compile:ValueError)
+=== 16:11 eval_bfcl_live_simple_j1_sample
+    diffgemma_fa.eval.run --task bfcl_live_simple --variant j1 --emission sample --whitespace stock --dtype float64 --confidence mf --entropy-bound 0.1 --prompt-style stock --temp stock --seed 0 --offset 0 --n 130 --max-new-tokens 256 --nonempty
+    cfg: variant=j1 emission=sample conf=mf bound=0.1 ws=stock fence=False ci=False dtype=float64 seed=0 offset=0 temp=stock prompt=stock nonempty=True
+    n=128 avail=130 cs=1.0 schema=1.0 arg=0.3868 (111/287) exact=0.2969 zp=0 oom=0 skipped=2  79.8 min
+      excluded: live_simple_117-73-0 (compile:ValueError)
+      excluded: live_simple_122-78-0 (compile:ValueError)
+=== 17:32 eval_bfcl_live_simple_j0_sample
+    diffgemma_fa.eval.run --task bfcl_live_simple --variant j0 --emission sample --whitespace stock --dtype float64 --confidence mf --entropy-bound 0.1 --prompt-style stock --temp stock --seed 0 --offset 0 --n 130 --max-new-tokens 256 --nonempty
+    cfg: variant=j0 emission=sample conf=mf bound=0.1 ws=stock fence=False ci=False dtype=float64 seed=0 offset=0 temp=stock prompt=stock nonempty=True
+    n=128 avail=130 cs=1.0 schema=1.0 arg=0.324 (93/287) exact=0.2422 zp=0 oom=0 skipped=2  81.1 min
+      excluded: live_simple_117-73-0 (compile:ValueError)
+      excluded: live_simple_122-78-0 (compile:ValueError)
+=== 18:54 eval_bfcl_live_simple_j2_sample
+    diffgemma_fa.eval.run --task bfcl_live_simple --variant j2 --emission sample --whitespace stock --dtype float64 --confidence mf --entropy-bound 0.1 --prompt-style stock --temp stock --seed 0 --offset 0 --n 130 --max-new-tokens 256 --nonempty
+    cfg: variant=j2 emission=sample conf=mf bound=0.1 ws=stock fence=False ci=False dtype=float64 seed=0 offset=0 temp=stock prompt=stock nonempty=True
+    n=128 avail=130 cs=1.0 schema=1.0 arg=0.3798 (109/287) exact=0.2734 zp=0 oom=0 skipped=2  81.2 min
+      excluded: live_simple_117-73-0 (compile:ValueError)
+      excluded: live_simple_122-78-0 (compile:ValueError)
+=== 20:17 exp_marmap_b0.1
+    diffgemma_fa.eval.run --task bfcl_live_simple --whitespace pretty --fence --ci-enums --dtype float64 --variant j0 --emission map --confidence mar --prompt-style stock --temp stock --seed 0 --max-new-tokens 256 --nonempty --entropy-bound 0.1 --offset 0 --n 130
+    cfg: variant=j0 emission=map conf=mar bound=0.1 ws=pretty fence=True ci=True dtype=float64 seed=0 offset=0 temp=stock prompt=stock nonempty=True
+    n=128 avail=130 cs=1.0 schema=1.0 arg=0.6899 (198/287) exact=0.5469 zp=0 oom=0 skipped=2  102.0 min
+      excluded: live_simple_117-73-0 (compile:ValueError)
+      excluded: live_simple_122-78-0 (compile:ValueError)
+=== 22:00 exp_marmap_b0.01
+    diffgemma_fa.eval.run --task bfcl_live_simple --whitespace pretty --fence --ci-enums --dtype float64 --variant j0 --emission map --confidence mar --prompt-style stock --temp stock --seed 0 --max-new-tokens 256 --nonempty --entropy-bound 0.01 --offset 0 --n 130
+    cfg: variant=j0 emission=map conf=mar bound=0.01 ws=pretty fence=True ci=True dtype=float64 seed=0 offset=0 temp=stock prompt=stock nonempty=True
+    n=128 avail=130 cs=1.0 schema=1.0 arg=0.6655 (191/287) exact=0.5312 zp=0 oom=0 skipped=2  102.3 min
+      excluded: live_simple_117-73-0 (compile:ValueError)
+      excluded: live_simple_122-78-0 (compile:ValueError)
+=== 23:43 exp_marmap_b0.5
+    diffgemma_fa.eval.run --task bfcl_live_simple --whitespace pretty --fence --ci-enums --dtype float64 --variant j0 --emission map --confidence mar --prompt-style stock --temp stock --seed 0 --max-new-tokens 256 --nonempty --entropy-bound 0.5 --offset 0 --n 130
+    cfg: variant=j0 emission=map conf=mar bound=0.5 ws=pretty fence=True ci=True dtype=float64 seed=0 offset=0 temp=stock prompt=stock nonempty=True
+    n=128 avail=130 cs=1.0 schema=1.0 arg=0.6725 (193/287) exact=0.5234 zp=0 oom=0 skipped=2  102.5 min
+      excluded: live_simple_117-73-0 (compile:ValueError)
+      excluded: live_simple_122-78-0 (compile:ValueError)
+=== 01:27 exp_h2_marmap
+    diffgemma_fa.eval.run --task bfcl_live_simple --whitespace pretty --fence --ci-enums --dtype float64 --variant j0 --emission map --confidence mar --prompt-style stock --temp stock --seed 0 --max-new-tokens 256 --nonempty --entropy-bound 0.1 --offset 130 --n 128
+    cfg: variant=j0 emission=map conf=mar bound=0.1 ws=pretty fence=True ci=True dtype=float64 seed=0 offset=130 temp=stock prompt=stock nonempty=True
+    n=128 avail=128 cs=1.0 schema=1.0 arg=0.5198 (118/227) exact=0.4766 zp=0 oom=0 skipped=0  80.9 min
+ALL DONE 02:49
+
+STILL INVALID AFTER THIS QUEUE -- affected, not re-run, do not cite:
+  exp_oomfix_j0, exp_oomfix_j1, exp_f64_grammar130_s1, exp_f64_ws_only_j1,
+  exp_h2_grammar_j1, exp_h2_stock_j1        (BFCL sample, pretty bundle)
+  task_sudoku_{j0_sample,j1_sample,j2,mask}, task_countdown_mask
+  exp_e5_grammar130_{j0,s1} (float32; NOT reproducible -- eval/run.py
+    cannot pass allow_unsafe_float32, so --dtype float32 now raises.
+    Withdraw them rather than re-running.)
+  smoke_after_zdetector (j1/sample, n=8)
+  exp_e{0,2,4,5,6}_* and exp_mar_ctrl_mf (n=30), phase4_e2e_sample,
+    phase5_{calibrate_j1,sweep_fixed,final,header,nonempty,ws,diag_j1}
+    -- the phase5 set is what calibrated entropy_bound=0.1, which every
+    arm above inherits.
+
+CPU follow-up before regenerating docs/RESULTS.md:
+  scripts/phase5_report.py reads each artifact's STORED accuracy fields
+  and does not apply the 2026-08-08 rescoring. The two exempt rows
+  (unconstrained-sample, j0-map) still hold pre-audit numbers, the new
+  rows hold post-audit ones. Rescore the exempt artifacts from their
+  own `rows` first, or the regenerated table mixes two scorers.

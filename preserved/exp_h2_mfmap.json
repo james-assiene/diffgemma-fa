@@ -1,0 +1,2810 @@
+{
+  "task": "bfcl_live_simple",
+  "variant": "j0",
+  "emission": "map",
+  "entropy_bound": 0.1,
+  "nonempty_strings": true,
+  "seed": 0,
+  "offset": 130,
+  "prompt_style": "stock",
+  "confidence": "mf",
+  "temp": "stock",
+  "dtype": "float64",
+  "whitespace": "pretty",
+  "fence": true,
+  "ci_enums": true,
+  "records_available": 128,
+  "skipped_by_reason": {},
+  "zero_partition": 0,
+  "oom": 0,
+  "oom_records": [],
+  "zero_partition_records": [],
+  "elapsed_seconds": 4144.5,
+  "n": 128,
+  "cs": 128,
+  "cs_rate": 1.0,
+  "schema_ok": 128,
+  "schema_valid_rate": 1.0,
+  "parsed": 128,
+  "nonempty": 111,
+  "nonempty_rate": 0.8672,
+  "arg_correct": 119,
+  "arg_total": 227,
+  "arg_accuracy": 0.5242,
+  "exact_calls": 62,
+  "exact_call_rate": 0.4844,
+  "per_key": [
+    {
+      "key": "url",
+      "want": "https://192.120.45.67/sedgeapi/v1/cisco-nir/api/api/telemetry/flowrules/interfac",
+      "got": "http://192.120.45.67/api/Network1/pod/10/node/12/ethernet/statistics",
+      "ok": false
+    },
+    {
+      "key": "params",
+      "want": "{'fabricName': 'Network1', 'nodeId': 12, 'podId': 10, 'interfaceType': 'ethernet",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "url",
+      "want": "https://192.120.45.67/sedgeapi/v1/cisco-nir/api/api/telemetry/flowrules/interfac",
+      "got": "https://192.120.45.67/api/v1/fabric/Network1/pod/10/node/12/interface/Ethernet",
+      "ok": false
+    },
+    {
+      "key": "params",
+      "want": "{'fabricName': 'Network1', 'nodeId': 12, 'podId': 10, 'interfaceType': 'ethernet",
+      "got": "{'infoType': 'Speed'}",
+      "ok": false
+    },
+    {
+      "key": "url",
+      "want": "https://example.com/device-connector-versions.json",
+      "got": "https://example.com/device-connector-versions.json",
+      "ok": true
+    },
+    {
+      "key": "url",
+      "want": "https://api.example.com/recommendations",
+      "got": "https://api.example.com/recommendations",
+      "ok": true
+    },
+    {
+      "key": "params",
+      "want": "{'advisoryId': 'dac'}",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "url",
+      "want": "https://api.insights.com/groups",
+      "got": "https://api.insights.com/groups",
+      "ok": true
+    },
+    {
+      "key": "params",
+      "want": "{'limit': 20, 'sort': 'desc'}",
+      "got": "{'limit': 20, 'sort': 'desc'}",
+      "ok": true
+    },
+    {
+      "key": "url",
+      "want": "https://api.example.com/v1/data",
+      "got": "https://api.example.com/v1/data",
+      "ok": true
+    },
+    {
+      "key": "params",
+      "want": "{'limit': 50}",
+      "got": "{'limit': 50}",
+      "ok": true
+    },
+    {
+      "key": "url",
+      "want": "https://192.168.1.1/api/v1/applications/topologies",
+      "got": "https://192.168.1.1/api/v1/applications/topologies",
+      "ok": true
+    },
+    {
+      "key": "params",
+      "want": "{'filter': 'accountName:AcmeCorp AND applicationName:SalesApp'}",
+      "got": "{'filter': 'accountName:AcmeCorp AND applicationName:SalesApp'}",
+      "ok": true
+    },
+    {
+      "key": "identifier",
+      "want": "Alice-One-one-One",
+      "got": "Alice-One-one-One",
+      "ok": true
+    },
+    {
+      "key": "dateOrTime",
+      "want": "2023-11-01T20:00:00",
+      "got": "2023-11-01T20:00:00",
+      "ok": true
+    },
+    {
+      "key": "timezone",
+      "want": "Europe/London",
+      "got": "Europe/London",
+      "ok": true
+    },
+    {
+      "key": "identifier",
+      "want": "Bob-123",
+      "got": "Bob-123",
+      "ok": true
+    },
+    {
+      "key": "dateOrTime",
+      "want": "2023-11-01T16:00:00",
+      "got": "2023-11-01 16:00",
+      "ok": false
+    },
+    {
+      "key": "timezone",
+      "want": "Europe/London",
+      "got": "Europe/London",
+      "ok": true
+    },
+    {
+      "key": "url",
+      "want": "https://192.168.1.1/sedgeapi/v1/cisco-nir/api/api/v1/anomalies/summary",
+      "got": "https://192.168.1.1/sedgeapi/v1/cisco-nir/api/api/v1/anomalies/summary",
+      "ok": true
+    },
+    {
+      "key": "params",
+      "want": "{'fabric': 'network222'}",
+      "got": "{'fabric': 'network222'}",
+      "ok": true
+    },
+    {
+      "key": "user_name",
+      "want": "Emily",
+      "got": "Emily",
+      "ok": true
+    },
+    {
+      "key": "partner_name",
+      "want": "Jeff",
+      "got": "Jeff",
+      "ok": true
+    },
+    {
+      "key": "relationship",
+      "want": "husband",
+      "got": "husband",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "docker --version",
+      "got": "docker --version",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "dir Desktop",
+      "got": "dir Desktop",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "docker ps",
+      "got": "docker ps",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "taskkill /F /IM firefox.exe",
+      "got": "taskkill /F /IM firefox.exe",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "dir C:\\",
+      "got": "LIST",
+      "ok": false
+    },
+    {
+      "key": "command",
+      "want": "start https://huggingface.co",
+      "got": "start https://huggingface.co",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "taskkill /F /IM timer.exe",
+      "got": "taskkill /F /IM timer.exe",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "dir C:\\",
+      "got": "ls",
+      "ok": false
+    },
+    {
+      "key": "command",
+      "want": "echo hi",
+      "got": "echo hi",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "shutdown /s /t 0",
+      "got": "shutdown /s /t 0",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "netsh wlan disconnect",
+      "got": "netsh wlan disconnect",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "dir D:\\\\ && echo testing.txt",
+      "got": "dir D:\\ && echo",
+      "ok": false
+    },
+    {
+      "key": "command",
+      "want": "del \"%userprofile%\\Desktop\\putty.lnk\"",
+      "got": "del \"%user",
+      "ok": false
+    },
+    {
+      "key": "command",
+      "want": "start https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "got": "start https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "date /t",
+      "got": "date",
+      "ok": false
+    },
+    {
+      "key": "command",
+      "want": "dir C:\\",
+      "got": "dir C",
+      "ok": false
+    },
+    {
+      "key": "command",
+      "want": "echo %time%",
+      "got": "echo %time",
+      "ok": false
+    },
+    {
+      "key": "command",
+      "want": "taskkill /IM code.exe /F",
+      "got": "taskkill /F /IM code.exe",
+      "ok": false
+    },
+    {
+      "key": "command",
+      "want": "timeout 10",
+      "got": "timeout 10",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "start microsoft.windows.camera:",
+      "got": "start microsoft.windows.camera:",
+      "ok": true
+    },
+    {
+      "key": "items",
+      "want": "['Blue square', 'Red square', 'Green square', 'Yellow square', 'Superman logo', ",
+      "got": "['Blue square', 'Red square', 'Green square', 'Yellow square', 'Superman logo', ",
+      "ok": true
+    },
+    {
+      "key": "items",
+      "want": "['Red and blue circle logo', 'Red and yellow circle logo', 'Green circle logo', ",
+      "got": "['Red and blue circle logo', 'Red and yellow circle logo', 'Green circle logo', ",
+      "ok": true
+    },
+    {
+      "key": "items",
+      "want": "['red logo', 'yellow rectangle', 'white text', 'Lego characters', 'movie title',",
+      "got": "['red logo', 'yellow rectangle', 'white text', 'Lego characters', 'movie title',",
+      "ok": true
+    },
+    {
+      "key": "copyright_content",
+      "want": "Coca-Cola logo",
+      "got": "Coca-Cola logo",
+      "ok": true
+    },
+    {
+      "key": "copyright_holder",
+      "want": "The Coca-Cola Company",
+      "got": "The Coca-Cola Company",
+      "ok": true
+    },
+    {
+      "key": "confidence_score",
+      "want": "100.0",
+      "got": "1.0",
+      "ok": false
+    },
+    {
+      "key": "data",
+      "want": "[{'name': '\u674e\u96f7', 'age': 18}, {'name': '\u674e\u4e3d', 'age': 21}]",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "command",
+      "want": "echo %time%",
+      "got": "echo %time%",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "tasklist /FI \"IMAGENAME eq Code.exe\"",
+      "got": "tasklist /FI \"IMAGENAME eq Code.exe\"",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "docker start",
+      "got": "docker start",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "d:/playground/pc_contoller/env/Scripts/python.exe d:/playground/pc_contoller/tes",
+      "got": "d:/playground/pc_contoller/env/Scripts/python.exe d:/playground/pc_contoller/tes",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "dir C:\\",
+      "got": "dir C:\\",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "echo %date%",
+      "got": "echo %date%",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "docker ps",
+      "got": "docker ps",
+      "ok": true
+    },
+    {
+      "key": "command",
+      "want": "start calc",
+      "got": "start calc",
+      "ok": true
+    },
+    {
+      "key": "service_id",
+      "want": "2",
+      "got": "1",
+      "ok": false
+    },
+    {
+      "key": "service_id",
+      "want": "2",
+      "got": "1",
+      "ok": false
+    },
+    {
+      "key": "service_id",
+      "want": "2",
+      "got": "1",
+      "ok": false
+    },
+    {
+      "key": "service_id",
+      "want": "1",
+      "got": "1",
+      "ok": true
+    },
+    {
+      "key": "service_id",
+      "want": "2",
+      "got": "1",
+      "ok": false
+    },
+    {
+      "key": "service_id",
+      "want": "2",
+      "got": "1",
+      "ok": false
+    },
+    {
+      "key": "province_id",
+      "want": "2",
+      "got": "1",
+      "ok": false
+    },
+    {
+      "key": "service_id",
+      "want": "2",
+      "got": "0",
+      "ok": false
+    },
+    {
+      "key": "province_id",
+      "want": "1",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "rating",
+      "want": "4.0",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "service_id",
+      "want": "2",
+      "got": "0",
+      "ok": false
+    },
+    {
+      "key": "district_name",
+      "want": "Chatuchak",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "rating",
+      "want": "4.5",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "service_id",
+      "want": "2",
+      "got": "0",
+      "ok": false
+    },
+    {
+      "key": "province_id",
+      "want": "1",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "district_name",
+      "want": "Khlong Sam Wa",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "sub_district_name",
+      "want": "Sai Kong",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "rating",
+      "want": "4.5",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "avg_rating",
+      "want": "2.0",
+      "got": "4.5",
+      "ok": false
+    },
+    {
+      "key": "province_id",
+      "want": "1",
+      "got": "12",
+      "ok": false
+    },
+    {
+      "key": "service_id",
+      "want": "1",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "service_id",
+      "want": "1",
+      "got": "0",
+      "ok": false
+    },
+    {
+      "key": "province_id",
+      "want": "1",
+      "got": "83",
+      "ok": false
+    },
+    {
+      "key": "rating",
+      "want": "4.0",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "service_id",
+      "want": "2",
+      "got": "0",
+      "ok": false
+    },
+    {
+      "key": "province_id",
+      "want": "3",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "rating",
+      "want": "4.5",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "start_available_date",
+      "want": "2023-09-30",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "service_id",
+      "want": "2",
+      "got": "0",
+      "ok": false
+    },
+    {
+      "key": "province_id",
+      "want": "3",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "rating",
+      "want": "4.5",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "start_available_date",
+      "want": "2024-03-12 16:00:00",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "end_available_date",
+      "want": "2024-03-12 18:00:00",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "service_id",
+      "want": "2",
+      "got": "0",
+      "ok": false
+    },
+    {
+      "key": "province_id",
+      "want": "3",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "rating",
+      "want": "4.5",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "start_available_date",
+      "want": "2024-03-12",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "end_available_date",
+      "want": "2024-03-12",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "service_id",
+      "want": "2",
+      "got": "3",
+      "ok": false
+    },
+    {
+      "key": "province_id",
+      "want": "2",
+      "got": "1",
+      "ok": false
+    },
+    {
+      "key": "district_name",
+      "want": "Sankampang",
+      "got": "toronto",
+      "ok": false
+    },
+    {
+      "key": "sub_district_name",
+      "want": "Ton Pao",
+      "got": "north york",
+      "ok": false
+    },
+    {
+      "key": "rating",
+      "want": "4.5",
+      "got": "4.5",
+      "ok": true
+    },
+    {
+      "key": "data",
+      "want": "[{'name': 'Chester', 'age': 42}, {'name': 'Jane', 'age': 43}]",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "identifier",
+      "want": "ACHD",
+      "got": "ACHD",
+      "ok": true
+    },
+    {
+      "key": "include_images",
+      "want": "True",
+      "got": "True",
+      "ok": true
+    },
+    {
+      "key": "identifier",
+      "want": "3pak7",
+      "got": "3pak7",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Pacifica",
+      "got": "Pacifica",
+      "ok": true
+    },
+    {
+      "key": "date",
+      "want": "2023-04-11",
+      "got": "2023-04-11",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "New York",
+      "got": "YYY-MM-DD format",
+      "ok": false
+    },
+    {
+      "key": "date",
+      "want": "2023-03-08",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "city",
+      "want": "Martinez",
+      "got": "Martinez",
+      "ok": true
+    },
+    {
+      "key": "date",
+      "want": "2023-04-25",
+      "got": "2023-04-25",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Palo Alto",
+      "got": "Palo Alto",
+      "ok": true
+    },
+    {
+      "key": "date",
+      "want": "2023-04-25",
+      "got": "2023-04-25",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Alameda",
+      "got": "Alameda",
+      "ok": true
+    },
+    {
+      "key": "date",
+      "want": "2023-04-27",
+      "got": "2023-04-27",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Stinson Beach",
+      "got": "Stinson Beach",
+      "ok": true
+    },
+    {
+      "key": "date",
+      "want": "2023-04-05",
+      "got": "2023-04-05",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Healdsburg",
+      "got": "Healdsburg",
+      "ok": true
+    },
+    {
+      "key": "date",
+      "want": "2023-03-02",
+      "got": "2023-03-02",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Marshall",
+      "got": "Marshall, MN",
+      "ok": false
+    },
+    {
+      "key": "date",
+      "want": "2023-03-05",
+      "got": "2023-03-05",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Fremont",
+      "got": "Fremont",
+      "ok": true
+    },
+    {
+      "key": "date",
+      "want": "2023-03-01",
+      "got": "2023-03-01",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Campbell",
+      "got": "Campbell",
+      "ok": true
+    },
+    {
+      "key": "date",
+      "want": "2023-03-04",
+      "got": "2023-03-04",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Foster City",
+      "got": "Foster City",
+      "ok": true
+    },
+    {
+      "key": "date",
+      "want": "2023-04-25",
+      "got": "2023-04-25",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Washington",
+      "got": "Washington, DC",
+      "ok": false
+    },
+    {
+      "key": "date",
+      "want": "2023-03-01",
+      "got": "2023-03-01",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Rutherford",
+      "got": "Rutherford, NJ",
+      "ok": false
+    },
+    {
+      "key": "date",
+      "want": "2023-04-22",
+      "got": "2023-04-22",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Berkeley",
+      "got": "Berkeley",
+      "ok": true
+    },
+    {
+      "key": "date",
+      "want": "2023-04-29",
+      "got": "2023-04-29",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "London",
+      "got": "London, England",
+      "ok": false
+    },
+    {
+      "key": "date",
+      "want": "2023-03-05",
+      "got": "2023-03-05",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Sacramento",
+      "got": "Sacramento",
+      "ok": true
+    },
+    {
+      "key": "date",
+      "want": "2023-04-22",
+      "got": "2023-04-22",
+      "ok": true
+    },
+    {
+      "key": "directed_by",
+      "want": "Quentin Tarantino",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "cast",
+      "want": "Duane Whitaker",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "directed_by",
+      "want": "David Leitch",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "cast",
+      "want": "Lori Pelenise Tuisano",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "genre",
+      "want": "Drama",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "genre",
+      "want": "Comedy",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "cast",
+      "want": "James Corden",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "directed_by",
+      "want": "Edgar Wright",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "genre",
+      "want": "Comedy",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "directed_by",
+      "want": "Tim Burton",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "genre",
+      "want": "Offbeat",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "directed_by",
+      "want": "Nitesh Tiwari",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "genre",
+      "want": "Comedy",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "genre",
+      "want": "Fantasy",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "directed_by",
+      "want": "David Leitch",
+      "got": "David Leitch",
+      "ok": true
+    },
+    {
+      "key": "genre",
+      "want": "Action",
+      "got": "action",
+      "ok": true
+    },
+    {
+      "key": "cast",
+      "want": "Alex King",
+      "got": "Alex King",
+      "ok": true
+    },
+    {
+      "key": "directed_by",
+      "want": "Nitesh Tiwari",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "directed_by",
+      "want": "Paul Downs Colaizzo",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "cast",
+      "want": "Michaela Watkins",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "directed_by",
+      "want": "Simon Curtis",
+      "got": "Simon Curtis",
+      "ok": true
+    },
+    {
+      "key": "genre",
+      "want": "Drama",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "cast",
+      "want": "McKinley Belcher III",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "directed_by",
+      "want": "Alexander Mackendrick",
+      "got": "Alexander Mackendrick",
+      "ok": true
+    },
+    {
+      "key": "genre",
+      "want": "Thriller",
+      "got": "thriller",
+      "ok": true
+    },
+    {
+      "key": "directed_by",
+      "want": "James Gray",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "directed_by",
+      "want": "Thurop Van Orman",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "cast",
+      "want": "Sterling K. Brown",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "genre",
+      "want": "Fantasy",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "directed_by",
+      "want": "Tim Burton",
+      "got": "Tim Burton",
+      "ok": true
+    },
+    {
+      "key": "genre",
+      "want": "Offbeat",
+      "got": "Offbeat",
+      "ok": true
+    },
+    {
+      "key": "cast",
+      "want": "Johnny Depp",
+      "got": "Johnny Depp",
+      "ok": true
+    },
+    {
+      "key": "directed_by",
+      "want": "Kirill Mikhanovsky",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "genre",
+      "want": "Comedy-drama",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "text",
+      "want": "I am a pretty girl",
+      "got": "Soy una chica bonita",
+      "ok": false
+    },
+    {
+      "key": "language",
+      "want": "es-ES",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "text",
+      "want": "\u6211\u7231\u5b66\u4e60",
+      "got": "\u6211\u7231\u5b66\u4e60",
+      "ok": true
+    },
+    {
+      "key": "language",
+      "want": "zh-CN",
+      "got": "zh-CN",
+      "ok": true
+    },
+    {
+      "key": "gender",
+      "want": "male",
+      "got": "male",
+      "ok": true
+    },
+    {
+      "key": "format",
+      "want": "wav",
+      "got": "wav",
+      "ok": true
+    },
+    {
+      "key": "text",
+      "want": "I am a pretty girl",
+      "got": "I am a pretty girl",
+      "ok": true
+    },
+    {
+      "key": "anchor",
+      "want": "user",
+      "got": "All",
+      "ok": false
+    },
+    {
+      "key": "song_id",
+      "want": "wjeiruhuq_roar",
+      "got": "wjeiruhuq_roar",
+      "ok": true
+    },
+    {
+      "key": "artist",
+      "want": "Katy Perry",
+      "got": "Katy Perry",
+      "ok": true
+    },
+    {
+      "key": "quality",
+      "want": "high",
+      "got": "high",
+      "ok": true
+    },
+    {
+      "key": "event_identifier",
+      "want": "456123",
+      "got": "456123",
+      "ok": true
+    },
+    {
+      "key": "new_datetime",
+      "want": "2022-10-30T16:30:00Z",
+      "got": "2022-10-27 16:30:00",
+      "ok": false
+    },
+    {
+      "key": "event_identifier",
+      "want": "med123",
+      "got": "med123",
+      "ok": true
+    },
+    {
+      "key": "new_datetime",
+      "want": "2021-04-15T13:45:00Z",
+      "got": "2021-04-15T13:45:00Z",
+      "ok": true
+    },
+    {
+      "key": "departure_location",
+      "want": "Paris, France",
+      "got": "Paris, France",
+      "ok": true
+    },
+    {
+      "key": "departure_time",
+      "want": "12/03/2023 15:00",
+      "got": "2023-03-12 15:00:00",
+      "ok": false
+    },
+    {
+      "key": "departure_location",
+      "want": "New York, NY",
+      "got": " provided (",
+      "ok": false
+    },
+    {
+      "key": "departure_time",
+      "want": "20/06/2022 17:00",
+      "got": ", 2022) is in the past. Additionally, I do not have the capability to book fligh",
+      "ok": false
+    },
+    {
+      "key": "query",
+      "want": "track:Friends artist:Marshmello",
+      "got": "Friends by Marshmello",
+      "ok": false
+    },
+    {
+      "key": "query",
+      "want": "track:Dil Nu artist:Maninder Buttar",
+      "got": "Dil Nu by Maninder Buttar",
+      "ok": false
+    },
+    {
+      "key": "query",
+      "want": "track:Wrecking Ball artist:Miley Cyrus",
+      "got": "Wrecking Ball by Miley Cyrus",
+      "ok": false
+    },
+    {
+      "key": "query",
+      "want": "track:Dil Nu artist:Maninder Buttar",
+      "got": "Dil Nu by Maninder Buttar",
+      "ok": false
+    },
+    {
+      "key": "query",
+      "want": "track:Shape of You artist:Ed Sheeran",
+      "got": "Shape of You",
+      "ok": false
+    },
+    {
+      "key": "query",
+      "want": "Baby Shark",
+      "got": "Baby Shark",
+      "ok": true
+    },
+    {
+      "key": "query",
+      "want": "Johnny Johnny Yes Papa",
+      "got": "Johnny Johnny Yes papa",
+      "ok": true
+    },
+    {
+      "key": "volume",
+      "want": "20",
+      "got": "20",
+      "ok": true
+    },
+    {
+      "key": "volume",
+      "want": "30",
+      "got": "30",
+      "ok": true
+    },
+    {
+      "key": "volume",
+      "want": "70",
+      "got": "70",
+      "ok": true
+    },
+    {
+      "key": "departure_location",
+      "want": "JFK",
+      "got": "JFK",
+      "ok": true
+    },
+    {
+      "key": "departure_date",
+      "want": "16/03/2024",
+      "got": "2024-03-16",
+      "ok": false
+    },
+    {
+      "key": "departure_time",
+      "want": "14:00",
+      "got": "14:00",
+      "ok": true
+    },
+    {
+      "key": "departure_location",
+      "want": "New York, NY",
+      "got": " ",
+      "ok": false
+    },
+    {
+      "key": "departure_time",
+      "want": "15/03/2024",
+      "got": " ",
+      "ok": false
+    },
+    {
+      "key": "uuid",
+      "want": "12",
+      "got": "12",
+      "ok": true
+    },
+    {
+      "key": "excludeInactive",
+      "want": "True",
+      "got": "True",
+      "ok": true
+    },
+    {
+      "key": "onlyRoot",
+      "want": "True",
+      "got": "True",
+      "ok": true
+    },
+    {
+      "key": "user_message",
+      "want": "Hey bunny, How are you doing",
+      "got": "I'm doing great, thank you for asking! How are things with you?",
+      "ok": false
+    },
+    {
+      "key": "restaurants",
+      "want": "McDonald's",
+      "got": ":McDonald's",
+      "ok": false
+    },
+    {
+      "key": "items",
+      "want": "['Big Mac', 'McFlurry']",
+      "got": "['Big Mac', 'McFlurry']",
+      "ok": true
+    },
+    {
+      "key": "quantities",
+      "want": "[2, 1]",
+      "got": "[2, 1]",
+      "ok": true
+    },
+    {
+      "key": "flight_id",
+      "want": "6E123",
+      "got": "6E123",
+      "ok": true
+    },
+    {
+      "key": "passenger_name",
+      "want": "Karan",
+      "got": "Karan",
+      "ok": true
+    },
+    {
+      "key": "ticket_number",
+      "want": "IND4567",
+      "got": "IND4567",
+      "ok": true
+    },
+    {
+      "key": "airlines",
+      "want": "Indigo",
+      "got": "Indigo",
+      "ok": true
+    },
+    {
+      "key": "person_name",
+      "want": "Karan",
+      "got": "Karan",
+      "ok": true
+    },
+    {
+      "key": "ticket_number",
+      "want": "IND4567",
+      "got": "IND4567",
+      "ok": true
+    },
+    {
+      "key": "restaurants",
+      "want": "McDonald's",
+      "got": "McDonald's",
+      "ok": true
+    },
+    {
+      "key": "items",
+      "want": "['burgers', 'chicken wings']",
+      "got": "['burgers', 'chicken wings']",
+      "ok": true
+    },
+    {
+      "key": "quantities",
+      "want": "[5, 6]",
+      "got": "[5, 6]",
+      "ok": true
+    },
+    {
+      "key": "user_id",
+      "want": "U123",
+      "got": "U123",
+      "ok": true
+    },
+    {
+      "key": "status",
+      "want": "pending",
+      "got": "pending",
+      "ok": true
+    },
+    {
+      "key": "user_id",
+      "want": "U123456",
+      "got": "U123456",
+      "ok": true
+    },
+    {
+      "key": "statement",
+      "want": "I have had submit a compaint and I like to check its status",
+      "got": "The user is asking aQuestion that needs an answer.",
+      "ok": false
+    },
+    {
+      "key": "statement",
+      "want": "Can you tell me what is the minimum package arrival time?",
+      "got": "The user is asking aQuestion.",
+      "ok": false
+    }
+  ],
+  "rows": [
+    {
+      "id": "live_simple_130-84-0",
+      "fn": "requests.get",
+      "text": "<|channel>```\n<channel|>{\n  \"url\": \"http://192.120.45.67/api/Network1/pod/10/node/12/ethernet/statistics\",\n  \"params\": {}\n}\n```",
+      "parsed": {
+        "url": "http://192.120.45.67/api/Network1/pod/10/node/12/ethernet/statistics",
+        "params": {}
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_131-84-1",
+      "fn": "requests.get",
+      "text": "<|channel>```\n<channel|>{\n  \"url\": \"https://192.120.45.67/api/v1/fabric/Network1/pod/10/node/12/interface/Ethernet\",\n  \"params\": {\n    \"infoType\": \"Speed\"\n  }\n}\n```<turn|>",
+      "parsed": {
+        "url": "https://192.120.45.67/api/v1/fabric/Network1/pod/10/node/12/interface/Ethernet",
+        "params": {
+          "infoType": "Speed"
+        }
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_132-85-0",
+      "fn": "requests.get",
+      "text": "<|channel>```\n<channel|>{\n  \"url\": \"https://example.com/device-connector-versions.json\",\n  \"params\": {}\n}\n```",
+      "parsed": {
+        "url": "https://example.com/device-connector-versions.json",
+        "params": {}
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_133-86-0",
+      "fn": "requests.get",
+      "text": "<|channel>```\n<channel|>{\n  \"url\": \"https://api.example.com/recommendations\",\n  \"params\": {}}",
+      "parsed": {
+        "url": "https://api.example.com/recommendations",
+        "params": {}
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_134-87-0",
+      "fn": "requests.get",
+      "text": "<|channel>```\n<channel|>{\n  \"url\": \"https://api.insights.com/groups\",\n  \"params\": {\n    \"limit\": 20,\n    \"sort\": \"desc\"\n  }\n}\n```",
+      "parsed": {
+        "url": "https://api.insights.com/groups",
+        "params": {
+          "limit": 20,
+          "sort": "desc"
+        }
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_135-88-0",
+      "fn": "requests.get",
+      "text": "<|channel>```\n<channel|>{\n  \"url\": \"https://api.example.com/v1/data\",\n  \"params\": {\n    \"limit\": 50\n  }\n}\n```",
+      "parsed": {
+        "url": "https://api.example.com/v1/data",
+        "params": {
+          "limit": 50
+        }
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_136-89-0",
+      "fn": "requests.get",
+      "text": "<|channel>```\n<channel|>{\n  \"url\": \"https://192.168.1.1/api/v1/applications/topologies\",\n  \"params\": {\n    \"filter\": \"accountName:AcmeCorp AND applicationName:SalesApp\"\n  }\n}\n```",
+      "parsed": {
+        "url": "https://192.168.1.1/api/v1/applications/topologies",
+        "params": {
+          "filter": "accountName:AcmeCorp AND applicationName:SalesApp"
+        }
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_137-90-0",
+      "fn": "reschedule",
+      "text": "<|channel>```\n<channel|>{\n  \"identifier\": \"Alice-One-one-One\",\n  \"dateOrTime\": \"2023-11-01T20:00:00\",\n  \"timezone\": \"Europe/London\"\n}\n```",
+      "parsed": {
+        "identifier": "Alice-One-one-One",
+        "dateOrTime": "2023-11-01T20:00:00",
+        "timezone": "Europe/London"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_138-91-0",
+      "fn": "reschedule",
+      "text": "<|channel>```\n<channel|>{\n  \"identifier\": \"Bob-123\",\n  \"dateOrTime\": \"2023-11-01 16:00\",\n  \"timezone\": \"Europe/London\"\n}\n```",
+      "parsed": {
+        "identifier": "Bob-123",
+        "dateOrTime": "2023-11-01 16:00",
+        "timezone": "Europe/London"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_139-92-0",
+      "fn": "requests.get",
+      "text": "<|channel>```\n<channel|>{\n  \"url\": \"https://192.168.1.1/sedgeapi/v1/cisco-nir/api/api/v1/anomalies/summary\",\n  \"params\": {\n    \"fabric\": \"network222\"\n  }\n}\n```",
+      "parsed": {
+        "url": "https://192.168.1.1/sedgeapi/v1/cisco-nir/api/api/v1/anomalies/summary",
+        "params": {
+          "fabric": "network222"
+        }
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_140-93-0",
+      "fn": "greet_partner",
+      "text": "<|channel>json {{\n<channel|>{\"user_name\": \"Emily\",\n  \"partner_name\": \"Jeff\",\n  \"relationship\": \"husband\"\n}\n```",
+      "parsed": {
+        "user_name": "Emily",
+        "partner_name": "Jeff",
+        "relationship": "husband"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_141-94-0",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"docker --version\",\n  \"unit\": \"seconds\"\n}\n```",
+      "parsed": {
+        "command": "docker --version",
+        "unit": "seconds"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_142-94-1",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"dir Desktop\"}",
+      "parsed": {
+        "command": "dir Desktop"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_143-95-0",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"docker ps\",\n  \"unit\": \"seconds\"\n}\n```",
+      "parsed": {
+        "command": "docker ps",
+        "unit": "seconds"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_144-95-1",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"taskkill /F /IM firefox.exe\",\n  \"unit\": \"seconds\"\n}\n```",
+      "parsed": {
+        "command": "taskkill /F /IM firefox.exe",
+        "unit": "seconds"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_145-95-2",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"LIST\"}",
+      "parsed": {
+        "command": "LIST"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_146-95-3",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"start https://huggingface.co\",\n  \"unit\": \"milliseconds\"\n}\n```",
+      "parsed": {
+        "command": "start https://huggingface.co",
+        "unit": "milliseconds"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_147-95-4",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"taskkill /F /IM timer.exe\"}",
+      "parsed": {
+        "command": "taskkill /F /IM timer.exe"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_148-95-5",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"ls\"}",
+      "parsed": {
+        "command": "ls"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_149-95-6",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"echo hi\"}",
+      "parsed": {
+        "command": "echo hi"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_150-95-7",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"shutdown /s /t 0\",\n  \"unit\": \"seconds\"\n}\n```",
+      "parsed": {
+        "command": "shutdown /s /t 0",
+        "unit": "seconds"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_151-95-8",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"netsh wlan disconnect\",\n  \"unit\": \"seconds\"\n}\n```",
+      "parsed": {
+        "command": "netsh wlan disconnect",
+        "unit": "seconds"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_152-95-9",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"dir D:\\\\ && echo\"}",
+      "parsed": {
+        "command": "dir D:\\ && echo"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_153-95-10",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"del \\\"%user\"}",
+      "parsed": {
+        "command": "del \"%user"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_154-95-11",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"start https://www.youtube.com/watch?v=dQw4w9WgXcQ\"}",
+      "parsed": {
+        "command": "start https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_155-95-12",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\"command\": \"date\", \"unit\": \"seconds\"}\n```",
+      "parsed": {
+        "command": "date",
+        "unit": "seconds"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_156-95-13",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"dir C\"}",
+      "parsed": {
+        "command": "dir C"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_157-95-14",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"echo %time\"}",
+      "parsed": {
+        "command": "echo %time"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_158-95-15",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"taskkill /F /IM code.exe\",\n  \"unit\": \"seconds\"\n}\n```",
+      "parsed": {
+        "command": "taskkill /F /IM code.exe",
+        "unit": "seconds"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_159-95-16",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"timeout 10\",\n  \"unit\": \"seconds\"\n}\n```",
+      "parsed": {
+        "command": "timeout 10",
+        "unit": "seconds"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_160-95-17",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"start microsoft.windows.camera:\",\n  \"unit\": \"seconds\"\n}\n```",
+      "parsed": {
+        "command": "start microsoft.windows.camera:",
+        "unit": "seconds"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_161-96-0",
+      "fn": "get_items",
+      "text": "<|channel>json\n\n{\n<channel|>{\"items\": [\n    \"Blue square\",\n    \"Red square\",\n    \"Green square\",\n    \"Yellow square\",\n    \"Superman logo\",\n    \"Iron Man logo\",\n    \"Hulk logo\",\n    \"Batman logo\",\n    \"Fist\",\n    \"Bat\",\n    \"Face mask\",\n    \"Outline\"\n  ]\n}\n```",
+      "parsed": {
+        "items": [
+          "Blue square",
+          "Red square",
+          "Green square",
+          "Yellow square",
+          "Superman logo",
+          "Iron Man logo",
+          "Hulk logo",
+          "Batman logo",
+          "Fist",
+          "Bat",
+          "Face mask",
+          "Outline"
+        ]
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_162-96-1",
+      "fn": "get_items",
+      "text": "<|channel>```\n<channel|>{\n  \"items\": [\n    \"Red and blue circle logo\",\n    \"Red and yellow circle logo\",\n    \"Green circle logo\",\n    \"Black circle logo\"\n  ]\n}\n```<turn|>",
+      "parsed": {
+        "items": [
+          "Red and blue circle logo",
+          "Red and yellow circle logo",
+          "Green circle logo",
+          "Black circle logo"
+        ]
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_163-96-2",
+      "fn": "get_items",
+      "text": "<|channel>```\n<channel|>{\n  \"items\": [\n    \"red logo\",\n    \"yellow rectangle\",\n    \"white text\",\n    \"Lego characters\",\n    \"movie title\",\n    \"release date\",\n    \"actor names\"\n  ]\n}\n```<turn|>",
+      "parsed": {
+        "items": [
+          "red logo",
+          "yellow rectangle",
+          "white text",
+          "Lego characters",
+          "movie title",
+          "release date",
+          "actor names"
+        ]
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_164-97-0",
+      "fn": "get_copyright_info",
+      "text": "<|channel>```\n<channel|>{\n  \"copyright_content\": \"Coca-Cola logo\",\n  \"copyright_holder\": \"The Coca-Cola Company\",\n  \"confidence_score\": 1.0\n}\n```<turn|>",
+      "parsed": {
+        "copyright_content": "Coca-Cola logo",
+        "copyright_holder": "The Coca-Cola Company",
+        "confidence_score": 1.0
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_165-98-0",
+      "fn": "extractor.extract_information",
+      "text": "<|channel>```\n<channel|>{\n  \"data\":[]}",
+      "parsed": {
+        "data": []
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_166-99-0",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"echo %time%\"\n}\n```",
+      "parsed": {
+        "command": "echo %time%"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_167-99-1",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"tasklist /FI \\\"IMAGENAME eq Code.exe\\\"\"\n}\n```<turn|>",
+      "parsed": {
+        "command": "tasklist /FI \"IMAGENAME eq Code.exe\""
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_168-99-2",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"docker start\"\n}\n```",
+      "parsed": {
+        "command": "docker start"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_169-99-3",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"d:/playground/pc_contoller/env/Scripts/python.exe d:/playground/pc_contoller/test.py\"\n}\n```",
+      "parsed": {
+        "command": "d:/playground/pc_contoller/env/Scripts/python.exe d:/playground/pc_contoller/test.py"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_170-99-4",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"dir C:\\\\\"\n}\n```",
+      "parsed": {
+        "command": "dir C:\\"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_171-99-5",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"echo %date%\"\n}\n```",
+      "parsed": {
+        "command": "echo %date%"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_172-99-6",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"docker ps\"\n}\n```",
+      "parsed": {
+        "command": "docker ps"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_173-99-7",
+      "fn": "cmd_controller.execute",
+      "text": "<|channel>```\n<channel|>{\n  \"command\": \"start calc\"\n}\n```",
+      "parsed": {
+        "command": "start calc"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_174-100-0",
+      "fn": "get_service_id",
+      "text": "<|channel>```\n<channel|>{\n  \"service_id\":1}",
+      "parsed": {
+        "service_id": 1
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_175-101-0",
+      "fn": "get_service_id",
+      "text": "<|channel>```\n<channel|>{\n  \"service_id\":1}",
+      "parsed": {
+        "service_id": 1
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_176-102-0",
+      "fn": "get_service_id",
+      "text": "<|channel>```\n<channel|>{\n  \"service_id\":1}",
+      "parsed": {
+        "service_id": 1
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_177-103-0",
+      "fn": "get_service_id",
+      "text": "<|channel>```\n<channel|>{\n  \"service_id\":1}",
+      "parsed": {
+        "service_id": 1
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_178-103-1",
+      "fn": "get_service_id",
+      "text": "<|channel>```\n<channel|>{\n  \"service_id\":1}",
+      "parsed": {
+        "service_id": 1
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_179-104-0",
+      "fn": "get_service_id",
+      "text": "<|channel>```\n<channel|>{\n  \"service_id\":1,\"province_id\":1}<turn|>",
+      "parsed": {
+        "service_id": 1,
+        "province_id": 1
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_180-105-0",
+      "fn": "get_service_id",
+      "text": "<|channel>```\n<channel|>{\n  \"service_id\":0}",
+      "parsed": {
+        "service_id": 0
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_181-106-0",
+      "fn": "get_service_id",
+      "text": "<|channel>```\n<channel|>{\n  \"service_id\":0}",
+      "parsed": {
+        "service_id": 0
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_182-107-0",
+      "fn": "get_service_providers",
+      "text": "<|channel>```\n<channel|>{\n  \"service_id\":0}",
+      "parsed": {
+        "service_id": 0
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_183-108-0",
+      "fn": "getDataForProfessional",
+      "text": "<|channel>```\n<channel|>{\n  \"avg_rating\": 4.5,\n  \"province_id\": 12}",
+      "parsed": {
+        "avg_rating": 4.5,
+        "province_id": 12
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_184-109-0",
+      "fn": "getDataForProfessional",
+      "text": "<|channel>```\n<channel|>{\n  \"service_id\":0,\"province_id\":83}",
+      "parsed": {
+        "service_id": 0,
+        "province_id": 83
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_185-110-0",
+      "fn": "get_service_providers",
+      "text": "<|channel>```\n<channel|>{\n  \"service_id\":0}",
+      "parsed": {
+        "service_id": 0
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_186-111-0",
+      "fn": "get_service_providers",
+      "text": "<|channel>```\n<channel|>{\n  \"service_id\":0}",
+      "parsed": {
+        "service_id": 0
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_187-112-0",
+      "fn": "get_service_providers",
+      "text": "<|channel>```\n<channel|>{\n  \"service_id\":0}",
+      "parsed": {
+        "service_id": 0
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_188-113-0",
+      "fn": "getDataForProfessional",
+      "text": "<|channel>```json {\":  \"service\n<channel|>{ \"service_id\":3,\n  \"province_id\": 1,\n  \"district_name\": \"toronto\",\n  \"sub_district_name\": \"north york\",\n  \"start_available_date\": \"2024-02-21\",\n  \"end_available_date\": \"2024-02-28\",\n  \"has_late_check_in\": true,\n  \"rating\": 4.5\n}\n```<turn|>",
+      "parsed": {
+        "service_id": 3,
+        "province_id": 1,
+        "district_name": "toronto",
+        "sub_district_name": "north york",
+        "start_available_date": "2024-02-21",
+        "end_available_date": "2024-02-28",
+        "has_late_check_in": true,
+        "rating": 4.5
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_189-114-0",
+      "fn": "extractor.extract_information",
+      "text": "<|channel>```\n<channel|>{\n  \"data\": []\n}\n```<turn|>",
+      "parsed": {
+        "data": []
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_190-115-0",
+      "fn": "raptor.mpn.specs",
+      "text": "<|channel>```\n<channel|>{\n  \"identifier\": \"ACHD\",\n  \"search_type\": \"MPN\",\n  \"include_images\": true\n}\n```",
+      "parsed": {
+        "identifier": "ACHD",
+        "search_type": "MPN",
+        "include_images": true
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_191-115-1",
+      "fn": "raptor.mpn.specs",
+      "text": "<|channel>```\n<channel|>{\n  \"identifier\": \"3pak7\",\n  \"search_type\": \"mpn\",\n  \"include_images\": false\n}\n```",
+      "parsed": {
+        "identifier": "3pak7",
+        "search_type": "mpn",
+        "include_images": false
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_192-116-0",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>jsonjson{\n<channel|>{\"city\": \"Pacifica\",\n  \"date\": \"2023-04-11\"\n}\n```",
+      "parsed": {
+        "city": "Pacifica",
+        "date": "2023-04-11"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_193-116-1",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel> city should be New York and\n<channel|>{\"city\":\"YYY-MM-DD format\"}",
+      "parsed": {
+        "city": "YYY-MM-DD format"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_194-116-2",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>```\n<channel|>{\n  \"city\": \"Martinez\",\n  \"date\": \"2023-04-25\"\n}\n```<turn|>",
+      "parsed": {
+        "city": "Martinez",
+        "date": "2023-04-25"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_195-116-3",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>```\n<channel|>{\n  \"city\": \"Palo Alto\",\n  \"date\": \"2023-04-25\"\n}\n```<turn|>",
+      "parsed": {
+        "city": "Palo Alto",
+        "date": "2023-04-25"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_196-116-4",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>```\n<channel|>{\n  \"city\": \"Alameda\",\n  \"date\": \"2023-04-27\"\n}\n```",
+      "parsed": {
+        "city": "Alameda",
+        "date": "2023-04-27"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_197-116-5",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>```\n<channel|>{\n  \"city\": \"Stinson Beach\",\n  \"date\": \"2023-04-05\"\n}\n```",
+      "parsed": {
+        "city": "Stinson Beach",
+        "date": "2023-04-05"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_198-116-6",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>```\n<channel|>{\n  \"city\": \"Healdsburg\",\n  \"date\": \"2023-03-02\"\n}\n```",
+      "parsed": {
+        "city": "Healdsburg",
+        "date": "2023-03-02"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_199-116-7",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>```\n<channel|>{\"city\": \"Marshall, MN\", \"date\": \"2023-03-05\"}\n```",
+      "parsed": {
+        "city": "Marshall, MN",
+        "date": "2023-03-05"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_200-116-8",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>```\n<channel|>{\n  \"city\": \"Fremont\",\n  \"date\": \"2023-03-01\"\n}\n```",
+      "parsed": {
+        "city": "Fremont",
+        "date": "2023-03-01"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_201-116-9",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>jsonjson{\n<channel|>{\"city\": \"Campbell\",\n  \"date\": \"2023-03-04\"\n}\n```<turn|>",
+      "parsed": {
+        "city": "Campbell",
+        "date": "2023-03-04"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_202-116-10",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>```\n<channel|>{\n  \"city\": \"Foster City\",\n  \"date\": \"2023-04-25\"\n}\n```",
+      "parsed": {
+        "city": "Foster City",
+        "date": "2023-04-25"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_203-116-11",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>```\n<channel|>{\n  \"city\": \"Washington, DC\",\n  \"date\": \"2023-03-01\"\n}\n```<turn|>",
+      "parsed": {
+        "city": "Washington, DC",
+        "date": "2023-03-01"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_204-116-12",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>```\n<channel|>{\n  \"city\": \"Rutherford, NJ\",\n  \"date\": \"2023-04-22\"\n}\n```",
+      "parsed": {
+        "city": "Rutherford, NJ",
+        "date": "2023-04-22"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_205-116-13",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>```\n<channel|>{\"city\": \"Berkeley\", \"date\": \"2023-04-29\"}\n```",
+      "parsed": {
+        "city": "Berkeley",
+        "date": "2023-04-29"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_206-116-14",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>```\n<channel|>{\n  \"city\": \"London, England\",\n  \"date\": \"2023-03-05\"\n}\n```",
+      "parsed": {
+        "city": "London, England",
+        "date": "2023-03-05"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_207-116-15",
+      "fn": "Weather_1_GetWeather",
+      "text": "<|channel>```\n<channel|>{\n  \"city\": \"Sacramento\",\n  \"date\": \"2023-04-22\"\n}\n```",
+      "parsed": {
+        "city": "Sacramento",
+        "date": "2023-04-22"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_208-117-0",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```json\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_209-117-1",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```json\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_210-117-2",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```json\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_211-117-3",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```json\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_212-117-4",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```json\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_213-117-5",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```json\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_214-117-6",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```json\n<channel|>{}<turn|>",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_215-117-7",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```json\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_216-117-8",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```\n<channel|>{\n  \"directed_by\": \"David Leitch\",\n  \"genre\": \"action\",\n  \"cast\": \"Alex King\"\n}\n```<turn|>",
+      "parsed": {
+        "directed_by": "David Leitch",
+        "genre": "action",
+        "cast": "Alex King"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_217-117-9",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```json\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_218-117-10",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```json\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_219-117-11",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```\n<channel|>{\n  \"directed_by\": \"Simon Curtis\"}",
+      "parsed": {
+        "directed_by": "Simon Curtis"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_220-117-12",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```\n<channel|>{\n  \"directed_by\": \"Alexander Mackendrick\",\n  \"genre\": \"thriller\",\n  \"cast\": \"\"\n}\n```",
+      "parsed": {
+        "directed_by": "Alexander Mackendrick",
+        "genre": "thriller",
+        "cast": ""
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_221-117-13",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>json\n<channel|>{}<turn|>",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_222-117-14",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_223-117-15",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```json\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_224-117-16",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```\n<channel|>{\n  \"directed_by\": \"Tim Burton\",\n  \"genre\": \"Offbeat\",\n  \"cast\": \"Johnny Depp\"\n}\n```",
+      "parsed": {
+        "directed_by": "Tim Burton",
+        "genre": "Offbeat",
+        "cast": "Johnny Depp"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_225-117-17",
+      "fn": "Movies_3_FindMovies",
+      "text": "<|channel>```json\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_226-118-0",
+      "fn": "text_to_speech.convert",
+      "text": "<|channel>```\n<channel|>{\n  \"text\": \"Soy una chica bonita\"}",
+      "parsed": {
+        "text": "Soy una chica bonita"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_227-118-1",
+      "fn": "text_to_speech.convert",
+      "text": "<|channel>```\n<channel|>{\n  \"text\": \"\u6211\u7231\u5b66\u4e60\",\n  \"language\": \"zh-CN\",\n  \"gender\": \"male\",\n  \"format\": \"wav\",\n  \"speed\": 1.0\n}\n```<turn|>",
+      "parsed": {
+        "text": "\u6211\u7231\u5b66\u4e60",
+        "language": "zh-CN",
+        "gender": "male",
+        "format": "wav",
+        "speed": 1.0
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_228-119-0",
+      "fn": "text_to_speech.convert",
+      "text": "<|channel>```\n<channel|>{\n  \"text\": \"I am a pretty girl\",\n  \"language\": \"en-US\",\n  \"gender\": \"female\",\n  \"speed\": 1.0\n}\n```<turn|>",
+      "parsed": {
+        "text": "I am a pretty girl",
+        "language": "en-US",
+        "gender": "female",
+        "speed": 1.0
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_229-120-0",
+      "fn": "requests.get",
+      "text": "<|channel>```\n<channel|>{\n  \"anchor\": \"All\"}",
+      "parsed": {
+        "anchor": "All"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_230-121-0",
+      "fn": "play_song",
+      "text": "<|channel>```\n<channel|>{\n  \"song_id\": \"wjeiruhuq_roar\",\n  \"artist\": \"Katy Perry\",\n  \"quality\": \"high\",\n  \"device_id\": \"\"\n}\n```",
+      "parsed": {
+        "song_id": "wjeiruhuq_roar",
+        "artist": "Katy Perry",
+        "quality": "high",
+        "device_id": ""
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_231-122-0",
+      "fn": "reschedule_event",
+      "text": "<|channel>```\n<channel|>{\n  \"event_identifier\": \"456123\",\n  \"new_datetime\": \"2022-10-27 16:30:00\"\n}\n```",
+      "parsed": {
+        "event_identifier": "456123",
+        "new_datetime": "2022-10-27 16:30:00"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_232-122-1",
+      "fn": "reschedule_event",
+      "text": "<|channel>```\n<channel|>{\n  \"event_identifier\": \"med123\",\n  \"new_datetime\": \"2021-04-15T13:45:00Z\"\n}\n```",
+      "parsed": {
+        "event_identifier": "med123",
+        "new_datetime": "2021-04-15T13:45:00Z"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_233-123-0",
+      "fn": "book_flight",
+      "text": "<|channel>```\n<channel|>{\n  \"departure_location\": \"Paris, France\",\n  \"departure_time\": \"2023-03-12 15:00:00\",\n  \"return_time\": \"\"\n}\n```",
+      "parsed": {
+        "departure_location": "Paris, France",
+        "departure_time": "2023-03-12 15:00:00",
+        "return_time": ""
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_234-123-1",
+      "fn": "book_flight",
+      "text": "<|channel>I'm sorry, but I cannot\n<channel|>{\"departure_location\":\" provided (\",\"departure_time\":\", 2022) is in the past. Additionally, I do not have the capability to book flights directly\"}",
+      "parsed": {
+        "departure_location": " provided (",
+        "departure_time": ", 2022) is in the past. Additionally, I do not have the capability to book flights directly"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_235-124-0",
+      "fn": "play_spotify_song",
+      "text": "<|channel>```\n<channel|>{\n  \"query\": \"Friends by Marshmello\",\n  \"shuffle\": false,\n  \"volume\": 505\n}\n```<turn|>",
+      "parsed": {
+        "query": "Friends by Marshmello",
+        "shuffle": false,
+        "volume": 505
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_236-124-1",
+      "fn": "play_spotify_song",
+      "text": "<|channel>```\n<channel|>{\n  \"query\": \"Dil Nu by Maninder Buttar\",\n  \"shuffle\": false,\n  \"volume\": 555\n}\n```",
+      "parsed": {
+        "query": "Dil Nu by Maninder Buttar",
+        "shuffle": false,
+        "volume": 555
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_237-125-0",
+      "fn": "play_spotify_song",
+      "text": "<|channel>```\n<channel|>{\n  \"query\": \"Wrecking Ball by Miley Cyrus\",\n  \"device_id\": \"\",\n  \"play\": true\n}\n```",
+      "parsed": {
+        "query": "Wrecking Ball by Miley Cyrus",
+        "device_id": "",
+        "play": true
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_238-125-1",
+      "fn": "play_spotify_song",
+      "text": "<|channel>```\n<channel|>{\n  \"query\": \"Dil Nu by Maninder Buttar\",\n  \"device_id\": \"\",\n  \"play\": true\n}\n```",
+      "parsed": {
+        "query": "Dil Nu by Maninder Buttar",
+        "device_id": "",
+        "play": true
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_239-125-2",
+      "fn": "play_spotify_song",
+      "text": "<|channel>```\n<channel|>{\n  \"query\": \"Shape of You\",\n  \"device_id\": \"\",\n  \"play\": true\n}\n```",
+      "parsed": {
+        "query": "Shape of You",
+        "device_id": "",
+        "play": true
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_240-125-3",
+      "fn": "play_spotify_song",
+      "text": "<|channel>```\n<channel|>{\n  \"query\": \"Baby Shark\",\n  \"device_id\": \"\",\n  \"play\": true\n}\n```",
+      "parsed": {
+        "query": "Baby Shark",
+        "device_id": "",
+        "play": true
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_241-125-4",
+      "fn": "play_spotify_song",
+      "text": "<|channel>```\n<channel|>{\n  \"query\": \"Johnny Johnny Yes papa\",\n  \"device_id\": \"\",\n  \"play\": true\n}\n```",
+      "parsed": {
+        "query": "Johnny Johnny Yes papa",
+        "device_id": "",
+        "play": true
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_242-126-0",
+      "fn": "set_volume",
+      "text": "<|channel>```\n<channel|>{\n  \"volume\": 20\n}\n```",
+      "parsed": {
+        "volume": 20
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_243-126-1",
+      "fn": "set_volume",
+      "text": "<|channel>```\n<channel|>{\n  \"volume\": 30\n}\n```",
+      "parsed": {
+        "volume": 30
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_244-126-2",
+      "fn": "set_volume",
+      "text": "<|channel>**:```\n<channel|>{\n  \"volume\": 70\n}\n```<turn|>",
+      "parsed": {
+        "volume": 70
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_245-127-0",
+      "fn": "book_flight",
+      "text": "<|channel>```\n<channel|>{\n  \"departure_location\": \"JFK\",\n  \"departure_date\": \"2024-03-16\",\n  \"departure_time\": \"14:00\"\n}\n```",
+      "parsed": {
+        "departure_location": "JFK",
+        "departure_date": "2024-03-16",
+        "departure_time": "14:00"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_246-128-0",
+      "fn": "book_flight",
+      "text": "<|channel> de\n<channel|>{\"departure_location\":\" \",\"departure_time\":\" \"}",
+      "parsed": {
+        "departure_location": " ",
+        "departure_time": " "
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_247-129-0",
+      "fn": "version_api.VersionApi.get_version",
+      "text": "<|channel> de\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_248-130-0",
+      "fn": "acl_api.AclApi.retrieve_projects",
+      "text": "<|channel>```\n<channel|>{\n  \"uuid\": \"12\",\n  \"excludeInactive\": true,\n  \"onlyRoot\": true\n}\n```",
+      "parsed": {
+        "uuid": "12",
+        "excludeInactive": true,
+        "onlyRoot": true
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_249-131-0",
+      "fn": "chat_with_friend",
+      "text": "<|channel>```\n<channel|>{\n  \"user_message\": \"I'm doing great, thank you for asking! How are things with you?\"\n}\n```<turn|>",
+      "parsed": {
+        "user_message": "I'm doing great, thank you for asking! How are things with you?"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_250-132-0",
+      "fn": "uber.eat.order",
+      "text": "<|channel>```\n<channel|>{\n  \"restaurants\":\":McDonald's\",\n  \"items\": [\"Big Mac\", \"McFlurry\"],\n  \"quantities\": [2, 1]\n}\n```",
+      "parsed": {
+        "restaurants": ":McDonald's",
+        "items": [
+          "Big Mac",
+          "McFlurry"
+        ],
+        "quantities": [
+          2,
+          1
+        ]
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_251-133-0",
+      "fn": "flight.status.check",
+      "text": "<|channel>```\n<channel|>{\n  \"flight_id\": \"6E123\",\n  \"passenger_name\": \"Karan\",\n  \"ticket_number\": \"IND4567\"\n}\n```<turn|>",
+      "parsed": {
+        "flight_id": "6E123",
+        "passenger_name": "Karan",
+        "ticket_number": "IND4567"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_252-134-0",
+      "fn": "flight.status.check",
+      "text": "<|channel>```\n<channel|>{\n  \"airlines\":\n     \"Indigo\"\n  ,\n  \"person_name\": \"Karan\",\n  \"ticket_number\": \"IND4567\"\n}\n```",
+      "parsed": {
+        "airlines": "Indigo",
+        "person_name": "Karan",
+        "ticket_number": "IND4567"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_253-135-0",
+      "fn": "uber.eat.order",
+      "text": "<|channel>```\n<channel|>{\n  \"restaurants\":\"McDonald's\",\n  \"items\": [\"burgers\", \"chicken wings\"],\n  \"quantities\": [5, 6]\n}\n```<turn|>",
+      "parsed": {
+        "restaurants": "McDonald's",
+        "items": [
+          "burgers",
+          "chicken wings"
+        ],
+        "quantities": [
+          5,
+          6
+        ]
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_254-136-0",
+      "fn": "user.mandates",
+      "text": "<|channel>```\n<channel|>{\n  \"user_id\": \"U123\",\n  \"status\": \"pending\"\n}\n```",
+      "parsed": {
+        "user_id": "U123",
+        "status": "pending"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_255-136-1",
+      "fn": "user.mandates",
+      "text": "<|channel>```\n<channel|>{\n  \"user_id\": \"U123456\",\n  \"status\": \"active\"\n}\n```",
+      "parsed": {
+        "user_id": "U123456",
+        "status": "active"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_256-137-0",
+      "fn": "answer_question",
+      "text": "<|channel>```\n<channel|>{\n  \"statement\": \"The user is asking aQuestion that needs an answer.\",\n  \"urgency\": \"medium\",\n  \"language\": \"english\"\n}\n```",
+      "parsed": {
+        "statement": "The user is asking aQuestion that needs an answer.",
+        "urgency": "medium",
+        "language": "english"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_257-137-1",
+      "fn": "answer_question",
+      "text": "<|channel>```\n<channel|>{\n  \"statement\": \"The user is asking aQuestion.\",\n  \"urgency\": \"medium\",\n  \"language\": \"english\"\n}\n```",
+      "parsed": {
+        "statement": "The user is asking aQuestion.",
+        "urgency": "medium",
+        "language": "english"
+      },
+      "accepted": true,
+      "schema_ok": true
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+[data] 258 records, 258 ground-truth entries
+2026-07-27 20:14:45.597964: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+  [25/258] fa=25 gt 36/36 samples 500/500
+  [50/258] fa=50 gt 59/67 samples 1000/1000
+  [75/258] fa=75 gt 83/98 samples 1500/1500
+  [100/258] fa=100 gt 118/136 samples 2000/2000
+  [125/258] fa=123 gt 146/171 samples 2460/2460
+  [150/258] fa=148 gt 165/206 samples 2960/2960
+  [175/258] fa=173 gt 192/244 samples 3460/3460
+  [200/258] fa=198 gt 225/282 samples 3960/3960
+  [225/258] fa=223 gt 264/321 samples 4460/4460
+  [250/258] fa=248 gt 300/360 samples 4960/4960
+
+===== SUMMARY =====
+split: BFCL_v4_live_simple.json
+records_considered: 258
+elapsed_seconds: 1088.8
+stats: {'fa_compiled': 256, 'samples': 5120, 'sample_valid_json': 5120, 'gt_total': 371, 'gt_prefix_viable': 311, 'gt_accepted': 311, 'gt_rejected': 60}
+skipped_by_reason: {'compile_failed:ValueError': 2}
+n_dfa: 256
+n_nfa: 0
+states_max: 333
+states_mean: 83.2
+dedup_ratio_mean: 1.678
+min_ratio_mean: 1.1054
+min_ratio_max: 9.286
+k_max_max: 1585
+n_failures: 60
+
+first failures:
+  live_simple_30-8-0 aws.lexv2_models.list_exports: rejected
+     {"botId":"my-bot-id","botVersion":"v2","sortBy":"ASC","filterName":null,"filterOperator":"EQ","filterValue":null,"maxResults":50,"nextToken"
+  live_simple_31-8-1 aws.lexv2_models.list_exports: rejected
+     {"botId":"B12345","botVersion":"v1","sortBy":"DESC","filterName":null,"filterOperator":"EQ","filterValue":null,"maxResults":50,"nextToken":n
+  live_simple_40-17-0 ThinQ_Connect: rejected
+     {"body":{"airConJobMode":["AIR_CLEAN"],"windStrength":["HIGH"],"monitoringEnabled":[true],"airCleanOperationMode":["POWER_ON"],"powerSaveEna
+  live_simple_41-17-1 ThinQ_Connect: rejected
+     {"body":{"airConJobMode":["AIR_DRY"],"windStrength":["MID",""],"monitoringEnabled":["",false],"airCleanOperationMode":["POWER_OFF",""],"powe
+  live_simple_42-17-2 ThinQ_Connect: rejected
+     {"body":{"airConJobMode":["","COOL"],"windStrength":["","MID"],"monitoringEnabled":["",false],"airCleanOperationMode":["POWER_OFF",""],"powe
+  live_simple_43-17-3 ThinQ_Connect: rejected
+     {"body":{"airConJobMode":["","COOL"],"windStrength":["HIGH"],"monitoringEnabled":["",false],"airCleanOperationMode":["POWER_OFF",""],"powerS
+  live_simple_44-18-0 ThinQ_Connect: rejected
+     {"body":{"currentJobMode":["","COOL"],"windStrength":["","MID"],"monitoringEnabled":["",false],"airCleanOperationMode":["STOP",""],"airConOp
+  live_simple_45-18-1 ThinQ_Connect: rejected
+     {"body":{"currentJobMode":["","COOL"],"windStrength":["","MID"],"monitoringEnabled":["",false],"airCleanOperationMode":["START"],"airConOper
+
+wrote /home/ubuntu/diffgemma_fa/artifacts/phase1_roundtrip.json

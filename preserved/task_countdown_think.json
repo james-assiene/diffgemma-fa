@@ -1,0 +1,1796 @@
+{
+  "task": "countdown",
+  "variant": "j0",
+  "emission": "map",
+  "confidence": "mf",
+  "entropy_bound": 0.1,
+  "think": true,
+  "seed": 0,
+  "n": 250,
+  "cs": 250,
+  "cs_rate": 1.0,
+  "solved": 0,
+  "solve_rate": 0.0,
+  "zero_partition": 0,
+  "oom": 0,
+  "skipped_by_reason": {},
+  "failure_reasons": {
+    "unparsable step": 111,
+    "operand 1 not available": 69,
+    "operand 7 not available": 8,
+    "operand 2 not available": 11,
+    "operand 6 not available": 6,
+    "operand 3 not available": 6,
+    "operand 4 not available": 6,
+    "operand 69 not available": 1,
+    "arithmetic": 2,
+    "operand 0 not available": 9,
+    "operand 46 not available": 1,
+    "operand 42 not available": 1,
+    "operand 5 not available": 2,
+    "operand 9 not available": 3,
+    "operand 8 not available": 5,
+    "operand 90 not available": 1,
+    "operand 25 not available": 1,
+    "operand 86 not available": 1,
+    "operand 35 not available": 1,
+    "operand 29 not available": 1,
+    "operand 48 not available": 1,
+    "final 47 != target 31": 1,
+    "operand 44 not available": 1,
+    "operand 47 not available": 1
+  },
+  "elapsed_seconds": 5366.4,
+  "rows": [
+    {
+      "id": "countdown_0",
+      "text": "<|channel>79-60=19\n<channel|>9+17=36<turn|>",
+      "ok": false,
+      "why": "unparsable step: '9+17=36<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_1",
+      "text": "<|channel>0-34=46\n<channel|>6+11=5<turn|>",
+      "ok": false,
+      "why": "unparsable step: '6+11=5<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_2",
+      "text": "<|channel> de\n<channel|>1 *1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_3",
+      "text": "<|channel>98-96=2234-2=32\n<channel|>2+1=33<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2+1=33<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_4",
+      "text": "<|channel>49-46=3\n<channel|>6/4=14<turn|>",
+      "ok": false,
+      "why": "unparsable step: '6/4=14<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_5",
+      "text": "<|channel> de\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_6",
+      "text": "<|channel>\u8fd0\u52a8\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_7",
+      "text": "<|channel>84+83=167\n<channel|>67-72=9<turn|>",
+      "ok": false,
+      "why": "unparsable step: '67-72=9<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_8",
+      "text": "<|channel>8-45=33\n<channel|>3+50=73<turn|>",
+      "ok": false,
+      "why": "unparsable step: '3+50=73<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_9",
+      "text": "<|channel>To reach 62 using the numbers 26, 92, 12, and 3:\n\n1. Multiply 3 by 12 to get 36\n<channel|>2-4=3<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2-4=3<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_10",
+      "text": "<|channel> de\n<channel|>1 -0=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_11",
+      "text": "<|channel> de\n<channel|>1*0=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_12",
+      "text": "<|channel>Alternative7+30=67\n<channel|>7+1=68",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_13",
+      "text": "<|channel>51+54=105Best105-63=42\n<channel|>2+57=99<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2+57=99<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_14",
+      "text": "<|channel>1 * 8=248\n<channel|>48 - 38=210<turn|>",
+      "ok": false,
+      "why": "unparsable step: '48 - 38=210<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_15",
+      "text": "<|channel>80-54=26\n<channel|>6+51=77<turn|>",
+      "ok": false,
+      "why": "unparsable step: '6+51=77<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_16",
+      "text": "<|channel>0-67=23\n<channel|>3+60=83<turn|>",
+      "ok": false,
+      "why": "unparsable step: '3+60=83<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_17",
+      "text": "<|channel>\u8fd0\u52a8\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_18",
+      "text": "<|channel> a\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_19",
+      "text": "<|channel>48-6=42218/6=3\n<channel|>2+3=45",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_20",
+      "text": "<|channel> you\n<channel|>1 -0=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_21",
+      "text": "<|channel>9+1=10\n<channel|>0*9=90<|tool_response>",
+      "ok": false,
+      "why": "unparsable step: '0*9=90<|tool_response>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_22",
+      "text": "<|channel> de\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_23",
+      "text": "<|channel>93-81=12\n<channel|>6/12=3",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_24",
+      "text": "<|channel> a\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_25",
+      "text": "<|channel> de\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_26",
+      "text": "<|channel>55+69=124\n<channel|>24-38=8<turn|>",
+      "ok": false,
+      "why": "unparsable step: '24-38=8<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_27",
+      "text": "<|channel>56-11=45\n<channel|>3-24=69",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_28",
+      "text": "<|channel>91-7=84\n<channel|>4-36=48",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_29",
+      "text": "<|channel>98+71=169\n<channel|>69-78=91",
+      "ok": false,
+      "why": "operand 69 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_30",
+      "text": "<|channel>96-19=77\n<channel|>7-1=76",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_31",
+      "text": "<|channel>e\n<channel|>1 *1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_32",
+      "text": "<|channel>25*3=75\n<channel|>5-48=2<turn|>",
+      "ok": false,
+      "why": "unparsable step: '5-48=2<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_33",
+      "text": "<|channel>95-43=52\n<channel|>2-33=19",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_34",
+      "text": "<|channel>70/35=2\n<channel|>1-2=49<turn|>",
+      "ok": false,
+      "why": "unparsable step: '1-2=49<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_35",
+      "text": "<|channel>92+6=98\n<channel|>8/7=14<turn|>",
+      "ok": false,
+      "why": "unparsable step: '8/7=14<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_36",
+      "text": "<|channel>thought\n<channel|>14-4=5<turn|>",
+      "ok": false,
+      "why": "unparsable step: '14-4=5<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_37",
+      "text": "<|channel>98-97=1\n<channel|>7+1=58<turn|>",
+      "ok": false,
+      "why": "unparsable step: '7+1=58<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_38",
+      "text": "<|channel>87\n<channel|>3*7=1",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_39",
+      "text": "<|channel>94-7=87\n<channel|>7+24=111",
+      "ok": false,
+      "why": "arithmetic: 7+24 = 31, claimed 111",
+      "accepted": true
+    },
+    {
+      "id": "countdown_40",
+      "text": "<|channel>e\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_41",
+      "text": "<|channel>10*4=40\n<channel|>0+57=97",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_42",
+      "text": "<|channel> de\n<channel|>1 -0=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_43",
+      "text": "<|channel>64-61=3\n<channel|>7/3=19",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_44",
+      "text": "<|channel>73-67=6\n<channel|>2+28=80",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_45",
+      "text": "<|channel>4+\n<channel|>7 +6=1",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_46",
+      "text": "<|channel>61+85=146\n<channel|>46-11=135",
+      "ok": false,
+      "why": "operand 46 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_47",
+      "text": "<|channel>4-13=31\n<channel|>1+47=78<turn|>",
+      "ok": false,
+      "why": "unparsable step: '1+47=78<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_48",
+      "text": "<|channel>55+22=77  77-7=70\n<channel|>0/5=14<turn|>",
+      "ok": false,
+      "why": "unparsable step: '0/5=14<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_49",
+      "text": "<|channel> you\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_50",
+      "text": "<|channel>4-66=8\n<channel|>9-8=31<turn|>",
+      "ok": false,
+      "why": "unparsable step: '9-8=31<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_51",
+      "text": "<|channel>72+70=142\n<channel|>42-82=60",
+      "ok": false,
+      "why": "operand 42 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_52",
+      "text": "<|channel>50+50=100let100-23=77\n<channel|>7+38=11<turn|>",
+      "ok": false,
+      "why": "unparsable step: '7+38=11<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_53",
+      "text": "<|channel> a\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_54",
+      "text": "<|channel>97-76=21299-25=4\n<channel|>1+5=26",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_55",
+      "text": "<|channel>51-15=36\n<channel|>6-11=25",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_56",
+      "text": "<|channel>68-52=16\n<channel|>6+20=36",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_57",
+      "text": "<|channel>70+15=85\n<channel|>5-6=79",
+      "ok": false,
+      "why": "operand 5 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_58",
+      "text": "<|channel>85-81=444+25=29\n<channel|>9-1=28<turn|>",
+      "ok": false,
+      "why": "unparsable step: '9-1=28<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_59",
+      "text": "<|channel>3-85=8  8*9=72\n<channel|>2-4=68",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_60",
+      "text": "<|channel> * 12=108\n<channel|>0\n-10=98<turn|>",
+      "ok": false,
+      "why": "unparsable step: '0'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_61",
+      "text": "<|channel>82 / 2 is not possible as there is no 2.:But 82 - 31 = 51, and 51 - 10 = 41.\n\n82 - 31= 51\n<channel|>1 - 10=441",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_62",
+      "text": "<|channel>33+46=79\n<channel|>9-31=48",
+      "ok": false,
+      "why": "operand 9 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_63",
+      "text": "<|channel> you\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_64",
+      "text": "<|channel>27 * 2 = 54 (Wait, I don't have a 2) Let's try: 27 + 11 = 38 38 + 17 = 55\n\n27 + 11=38\n<channel|>8 + 17=55",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_65",
+      "text": "<|channel>6-40=666*4=24\n<channel|>4+19=4",
+      "ok": false,
+      "why": "arithmetic: 4+19 = 23, claimed 4",
+      "accepted": true
+    },
+    {
+      "id": "countdown_66",
+      "text": "<|channel>88+7=95556/28=2\n<channel|>5-2=92",
+      "ok": false,
+      "why": "operand 5 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_67",
+      "text": "<|channel>51+75=126\n<channel|>26+9=13<turn|>",
+      "ok": false,
+      "why": "unparsable step: '26+9=13<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_68",
+      "text": "<|channel> de\n<channel|>1-1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_69",
+      "text": "<|channel>68-34=34\n<channel|>4+17=51<turn|>",
+      "ok": false,
+      "why": "unparsable step: '4+17=51<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_70",
+      "text": "<|channel>87-86=1143-1=42\n<channel|>2+4=46<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2+4=46<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_71",
+      "text": "<|channel>38*5=190\n<channel|>90-84=106",
+      "ok": false,
+      "why": "operand 90 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_72",
+      "text": "<|channel>85+64=149\n<channel|>49-34=11<turn|>",
+      "ok": false,
+      "why": "unparsable step: '49-34=11<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_73",
+      "text": "<|channel>78+20=98\n<channel|>8+11=10<turn|>",
+      "ok": false,
+      "why": "unparsable step: '8+11=10<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_74",
+      "text": "<|channel>thought\n<channel|>97-2=95<turn|>",
+      "ok": false,
+      "why": "unparsable step: '97-2=95<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_75",
+      "text": "<|channel>56+11=67\n<channel|>7-5=62<|tool_response>",
+      "ok": false,
+      "why": "unparsable step: '7-5=62<|tool_response>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_76",
+      "text": "<|channel>To reach the target number of 21 using the numbers 49, 6, and 34:\n\n1. Subtract 6 from 49 to get 43\n<channel|>2-4=3<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2-4=3<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_77",
+      "text": "<|channel>47-13=34\n<channel|>2/4=1",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_78",
+      "text": "<|channel>94-5=89\n<channel|>9-2=87<turn|>",
+      "ok": false,
+      "why": "unparsable step: '9-2=87<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_79",
+      "text": "<|channel>73-70=\n<channel|>76/3=2",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_80",
+      "text": "<|channel> de\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_81",
+      "text": "<|channel>2+53=125\n<channel|>25-90=35",
+      "ok": false,
+      "why": "operand 25 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_82",
+      "text": "<|channel>e\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_83",
+      "text": "<|channel>48/48=\n<channel|>0+19=19<turn|>",
+      "ok": false,
+      "why": "unparsable step: '0+19=19<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_84",
+      "text": "<|channel>2*3=186\n<channel|>86-32=154",
+      "ok": false,
+      "why": "operand 86 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_85",
+      "text": "<|channel>3*27=81\n<channel|>1-3=78<turn|>",
+      "ok": false,
+      "why": "unparsable step: '1-3=78<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_86",
+      "text": "<|channel> administrators\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_87",
+      "text": "<|channel>61-27=34\n<channel|>4-16=18<turn|>",
+      "ok": false,
+      "why": "unparsable step: '4-16=18<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_88",
+      "text": "<|channel>9\n<channel|>2*1=0",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_89",
+      "text": "<|channel>98-71=27  27+25=52  90-52=38\n<channel|>8+50=88",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_90",
+      "text": "<|channel> a\n<channel|>1 *1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_91",
+      "text": "<|channel>73-29=44\n<channel|>0-35=55",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_92",
+      "text": "<|channel>78-19=59\n<channel|>9-16=43<turn|>",
+      "ok": false,
+      "why": "unparsable step: '9-16=43<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_93",
+      "text": "<|channel> a\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_94",
+      "text": "<|channel>54-12=42  42+7=49\n<channel|>9-1=48",
+      "ok": false,
+      "why": "operand 9 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_95",
+      "text": "<|channel>87/3=29\n<channel|>9+27=56",
+      "ok": false,
+      "why": "operand 9 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_96",
+      "text": "<|channel>82+56=1388138-45=93\n<channel|>3-9=84<turn|>",
+      "ok": false,
+      "why": "unparsable step: '3-9=84<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_97",
+      "text": "<|channel>9\n<channel|>2 -1=8<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2 -1=8<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_98",
+      "text": "<|channel>51+25=76652/26 (not available) Let's try again::51+52=103\n<channel|>0\n-25=78<turn|>",
+      "ok": false,
+      "why": "unparsable step: '0'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_99",
+      "text": "<|channel>87-83=4\n<channel|>8-4=84<turn|>",
+      "ok": false,
+      "why": "unparsable step: '8-4=84<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_100",
+      "text": "<|channel>90-18=72\n<channel|>2-11=61<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2-11=61<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_101",
+      "text": "<|channel> de\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_102",
+      "text": "<|channel>27+32=59  59-57=2\n<channel|>2-19=53<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2-19=53<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_103",
+      "text": "<|channel> de\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_104",
+      "text": "<|channel>98-82=16\n<channel|>6+16=32<turn|>",
+      "ok": false,
+      "why": "unparsable step: '6+16=32<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_105",
+      "text": "<|channel>63-38=25\n<channel|>5-6=1<turn|>",
+      "ok": false,
+      "why": "unparsable step: '5-6=1<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_106",
+      "text": "<|channel>To reach the number 77 using the numbers 80, 55, 53, and 74, we can use the following steps:\n\n80 + 55= 135\n<channel|>35 - 53=782",
+      "ok": false,
+      "why": "operand 35 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_107",
+      "text": "<|channel>98/2=49\n<channel|>8-94=4<turn|>",
+      "ok": false,
+      "why": "unparsable step: '8-94=4<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_108",
+      "text": "<|channel>40/10=\n<channel|>4+17=21<turn|>",
+      "ok": false,
+      "why": "unparsable step: '4+17=21<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_109",
+      "text": "<|channel> administrators\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_110",
+      "text": "<|channel>thought\n<channel|>0+9=3",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_111",
+      "text": "<|channel>75+9=84\n<channel|>4-81=3",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_112",
+      "text": "<|channel>73-70=3\n<channel|>0+3=7<turn|>",
+      "ok": false,
+      "why": "unparsable step: '0+3=7<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_113",
+      "text": "<|channel>25+23=48\n<channel|>6-14=52",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_114",
+      "text": "<|channel>\u3044\u304f0-14=56\n<channel|>6-14=42<|tool_response>",
+      "ok": false,
+      "why": "unparsable step: '6-14=42<|tool_response>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_115",
+      "text": "<|channel>86+15=1011101-17=84\n<channel|>4+38=122<turn|>",
+      "ok": false,
+      "why": "unparsable step: '4+38=122<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_116",
+      "text": "<|channel>thought\n<channel|>0 *\n7=4<turn|>",
+      "ok": false,
+      "why": "unparsable step: '0 *'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_117",
+      "text": "<|channel>36-15=21\n<channel|>1-7=14<turn|>",
+      "ok": false,
+      "why": "unparsable step: '1-7=14<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_118",
+      "text": "<|channel>8+86=164\n<channel|>64-7=1<turn|>",
+      "ok": false,
+      "why": "unparsable step: '64-7=1<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_119",
+      "text": "<|channel>E\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_120",
+      "text": "<|channel>78+64=142\n<channel|>42-57=85<turn|>",
+      "ok": false,
+      "why": "unparsable step: '42-57=85<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_121",
+      "text": "<|channel> you\n<channel|>1 *1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_122",
+      "text": "<|channel>33+53=86680/5 (no 5):Let's try:\n<channel|>0+33=113",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_123",
+      "text": "<|channel>52/4=13\n<channel|>3+69=82",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_124",
+      "text": "<|channel>94-3=91\n<channel|>1-21=70<turn|>",
+      "ok": false,
+      "why": "unparsable step: '1-21=70<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_125",
+      "text": "<|channel>3-92=1\n<channel|>7-1=86<turn|>",
+      "ok": false,
+      "why": "unparsable step: '7-1=86<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_126",
+      "text": "<|channel>30+21=51\n<channel|>1-10=4<turn|>",
+      "ok": false,
+      "why": "unparsable step: '1-10=4<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_127",
+      "text": "<|channel>27-23=4  6-4=\n<channel|>6*2=12<turn|>",
+      "ok": false,
+      "why": "unparsable step: '6*2=12<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_128",
+      "text": "<|channel>60+60=120\n<channel|>20-50=7<turn|>",
+      "ok": false,
+      "why": "unparsable step: '20-50=7<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_129",
+      "text": "<|channel>65+64=129\n<channel|>29-48=81",
+      "ok": false,
+      "why": "operand 29 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_130",
+      "text": "<|channel>92-39=53\n<channel|>3+2=5<|tool_response>",
+      "ok": false,
+      "why": "unparsable step: '3+2=5<|tool_response>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_131",
+      "text": "<|channel> de\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_132",
+      "text": "<|channel>75+20=95\n<channel|>5-17=78<turn|>",
+      "ok": false,
+      "why": "unparsable step: '5-17=78<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_133",
+      "text": "<|channel>To reach 36 using the numbers 54, 25, 20, and 2:\n\n54 - 25=29\n<channel|>9 + 20=4<turn|>",
+      "ok": false,
+      "why": "unparsable step: '9 + 20=4<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_134",
+      "text": "<|channel> de\n<channel|>1 *1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_135",
+      "text": "<|channel>To reach the result of 31 using the numbers 43, 40, 59, and 7, we can use the following steps:\n\n1. Multiply 7 by 40 to get 280\n<channel|>2-4=5<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2-4=5<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_136",
+      "text": "<|channel>83+3=86\n<channel|>6-79=7<turn|>",
+      "ok": false,
+      "why": "unparsable step: '6-79=7<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_137",
+      "text": "<|channel> de\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_138",
+      "text": "<|channel>50-5=45\n<channel|>5+11=5<turn|>",
+      "ok": false,
+      "why": "unparsable step: '5+11=5<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_139",
+      "text": "<|channel>75-67=8\n<channel|>8+8=36<turn|>",
+      "ok": false,
+      "why": "unparsable step: '8+8=36<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_140",
+      "text": "<|channel>63-42=21\n<channel|>1+30=51",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_141",
+      "text": "<|channel>60+3=63Best35/14=2\n<channel|>3-2=61<turn|>",
+      "ok": false,
+      "why": "unparsable step: '3-2=61<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_142",
+      "text": "<|channel>84-33=51\n<channel|>1-29=222",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_143",
+      "text": "<|channel> de\n<channel|>1 *1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_144",
+      "text": "<|channel> states\n<channel|>1 -0=0",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_145",
+      "text": "<|channel>\u8fd0\u52a8\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_146",
+      "text": "<|channel>6\n<channel|>3+0=9<turn|>",
+      "ok": false,
+      "why": "unparsable step: '3+0=9<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_147",
+      "text": "<|channel> run\n<channel|>1*1=0",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_148",
+      "text": "<|channel>94+75=169\n<channel|>69-50=11<turn|>",
+      "ok": false,
+      "why": "unparsable step: '69-50=11<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_149",
+      "text": "<|channel> de\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_150",
+      "text": "<|channel>78-57=21\n<channel|>1+66=87<|tool_response>",
+      "ok": false,
+      "why": "unparsable step: '1+66=87<|tool_response>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_151",
+      "text": "<|channel>1+62=93\u0634\u0627\u0639\u063193+55=148\n<channel|>48-86=62",
+      "ok": false,
+      "why": "operand 48 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_152",
+      "text": "<|channel>3\n<channel|>14*2=1",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_153",
+      "text": "<|channel>:**\n<channel|>27+20=47",
+      "ok": false,
+      "why": "final 47 != target 31",
+      "accepted": true
+    },
+    {
+      "id": "countdown_154",
+      "text": "<|channel> de\n<channel|>1*0=0",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_155",
+      "text": "<|channel>90-20=70\n<channel|>0-5=65<turn|>",
+      "ok": false,
+      "why": "unparsable step: '0-5=65<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_156",
+      "text": "<|channel>87-53=34  34-11=23\n<channel|>3+1=24<turn|>",
+      "ok": false,
+      "why": "unparsable step: '3+1=24<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_157",
+      "text": "<|channel>56-45=11\n<channel|>1-36=5",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_158",
+      "text": "<|channel> de\n<channel|>1-1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_159",
+      "text": "<|channel>70+15=85\n<channel|>5-73=12<turn|>",
+      "ok": false,
+      "why": "unparsable step: '5-73=12<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_160",
+      "text": "<|channel> reach the target 57 using the numbers 76, 65, and 68, we can use the following steps:\n\n76 - 65= 11\n<channel|>8 - 11=557<|tool_response>",
+      "ok": false,
+      "why": "unparsable step: '8 - 11=557<|tool_response>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_161",
+      "text": "<|channel>52+78=130 enak130-59=71\n<channel|>1-38=3<turn|>",
+      "ok": false,
+      "why": "unparsable step: '1-38=3<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_162",
+      "text": "<|channel> de\n<channel|>1 *1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_163",
+      "text": "<|channel> de\n<channel|>1*0=0",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_164",
+      "text": "<|channel>75/5=15\n<channel|>5+4=19<turn|>",
+      "ok": false,
+      "why": "unparsable step: '5+4=19<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_165",
+      "text": "<|channel>75-43=32\n<channel|>4/2=17",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_166",
+      "text": "<|channel>7\n<channel|>2*0=7",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_167",
+      "text": "<|channel>39+17=56\n<channel|>6+6=6",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_168",
+      "text": "<|channel>50 - 38 = 12\n<channel|>7 - 5=2",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_169",
+      "text": "<|channel>86+42=128\n<channel|>28-49=7<turn|>",
+      "ok": false,
+      "why": "unparsable step: '28-49=7<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_170",
+      "text": "<|channel>e\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_171",
+      "text": "<|channel>71+56=127        127-40=87\n<channel|>7+9=96",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_172",
+      "text": "<|channel>48+39=87\n<channel|>7-37=50<turn|>",
+      "ok": false,
+      "why": "unparsable step: '7-37=50<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_173",
+      "text": "<|channel>83-70=13\n<channel|>2-28=2<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2-28=2<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_174",
+      "text": "<|channel>e\n<channel|>1*0=0",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_175",
+      "text": "<|channel>10 * 4=40\n<channel|>0 + 3=43<turn|>",
+      "ok": false,
+      "why": "unparsable step: '0 + 3=43<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_176",
+      "text": "<|channel>84+10=94 enak57-31=26\u0634\u0627\u0639\u063194+26=120\n\n120-20 (not available)\n\nWait, let me try another way:\n<channel|>4-10=7<turn|>",
+      "ok": false,
+      "why": "unparsable step: '4-10=7<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_177",
+      "text": "<|channel>8 * 9=72\n<channel|>2-13=59<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2-13=59<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_178",
+      "text": "<|channel>e\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_179",
+      "text": "<|channel>40+23=63363-1=62662-4=58 (Wait, 4 is not a number. Let's try again.)\n\n40+23=63363-1=60\n<channel|>0-1=54",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_180",
+      "text": "<|channel>6-2=74\n<channel|>4-32=4<turn|>",
+      "ok": false,
+      "why": "unparsable step: '4-32=4<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_181",
+      "text": "<|channel>45-42=3Best3*3=\n<channel|>9*3=27<turn|>",
+      "ok": false,
+      "why": "unparsable step: '9*3=27<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_182",
+      "text": "<|channel>76+76=152\n<channel|>52-98=54<turn|>",
+      "ok": false,
+      "why": "unparsable step: '52-98=54<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_183",
+      "text": "<|channel>75-43=32\n<channel|>2-22=10<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2-22=10<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_184",
+      "text": "<|channel>84-46=38\n<channel|>8-31=7",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_185",
+      "text": "<|channel>2+6=98\n<channel|>1-18=3",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_186",
+      "text": "<|channel>thought\n<channel|>0+4=91",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_187",
+      "text": "<|channel>46-23=23\n<channel|>3+69=92",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_188",
+      "text": "<|channel> anything\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_189",
+      "text": "<|channel>42+12=54\n<channel|>4+6=60",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_190",
+      "text": "<|channel> de\n<channel|>1 *1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_191",
+      "text": "<|channel>42+49=91\n<channel|>3-91=2<turn|>",
+      "ok": false,
+      "why": "unparsable step: '3-91=2<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_192",
+      "text": "<|channel>59-51=8\n<channel|>0-16=74",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_193",
+      "text": "<|channel>90-83=7\n<channel|>2-7=35<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2-7=35<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_194",
+      "text": "<|channel> de\n<channel|>1*1=0",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_195",
+      "text": "<|channel>8+34=64\n<channel|>4-26=38",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_196",
+      "text": "<|channel>50-12=38\n<channel|>2/12=6<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2/12=6<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_197",
+      "text": "<|channel>\n\n restTo reach 81 using the numbers 78, 79, 65, and 42:\n\n79 + 65 = 144\n<channel|>44 - 78=166",
+      "ok": false,
+      "why": "operand 44 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_198",
+      "text": "<|channel>99-88=11\n<channel|>1*2=22",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_199",
+      "text": "<|channel>80-48=32\n<channel|>2+21=5<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2+21=5<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_200",
+      "text": "<|channel> you\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_201",
+      "text": "<|channel>73-66=7\n<channel|>1+7=688",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_202",
+      "text": "<|channel>83+9=92  Wait, I don't have a 9. Let's try again.\n<channel|>3+1=84",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_203",
+      "text": "<|channel> de\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_204",
+      "text": "<|channel>24-13=11\n<channel|>2-11=21<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2-11=21<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_205",
+      "text": "<|channel> you\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_206",
+      "text": "<|channel>e\n<channel|>1 -0=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_207",
+      "text": "<|channel>77-11=66\n<channel|>6+10=76<turn|>",
+      "ok": false,
+      "why": "unparsable step: '6+10=76<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_208",
+      "text": "<|channel>\u8fd0\u52a8\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_209",
+      "text": "<|channel>36+41=77\n<channel|>7+29=106",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_210",
+      "text": "<|channel>26\n<channel|>3*7=1",
+      "ok": false,
+      "why": "operand 7 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_211",
+      "text": "<|channel>47+45=92\n<channel|>2-9=87",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_212",
+      "text": "<|channel> de\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_213",
+      "text": "<|channel>79+45=124,124-56=68 (doesn't reach 90)\n\nLet's try: 79-45=24\n<channel|>4+56=8",
+      "ok": false,
+      "why": "operand 4 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_214",
+      "text": "<|channel>90 / 9=10041-25=16\n<channel|>6+10=26<turn|>",
+      "ok": false,
+      "why": "unparsable step: '6+10=26<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_215",
+      "text": "<|channel>e\n<channel|>1 *1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_216",
+      "text": "<|channel>61-44=17\n<channel|>8-21=1<turn|>",
+      "ok": false,
+      "why": "unparsable step: '8-21=1<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_217",
+      "text": "<|channel>85+25=1100110-26=84\n<channel|>4+2=86<turn|>",
+      "ok": false,
+      "why": "unparsable step: '4+2=86<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_218",
+      "text": "<|channel>10 * 8=80\n<channel|>0-30=50",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_219",
+      "text": "<|channel>18 * 5=90\n<channel|>0-18=72<turn|>",
+      "ok": false,
+      "why": "unparsable step: '0-18=72<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_220",
+      "text": "<|channel>88-30=58 58+4=62  62+6=68 68/4 is not possible (Wait, let me try another way)\n\n88/4=22\n<channel|>2-6=16",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_221",
+      "text": "<|channel>e\n<channel|>1-1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_222",
+      "text": "<|channel> administrators\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_223",
+      "text": "<|channel>45 * 20=900\n\n900-26=874\n<channel|>74+15=8<turn|>",
+      "ok": false,
+      "why": "unparsable step: '74+15=8<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_224",
+      "text": "<|channel>84+51=135\n<channel|>35/3=4<turn|>",
+      "ok": false,
+      "why": "unparsable step: '35/3=4<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_225",
+      "text": "<|channel> de\n<channel|>1*0=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_226",
+      "text": "<|channel>2 / (26 / 13)=46626 / 13=2\n<channel|>2 / 2=46",
+      "ok": false,
+      "why": "operand 2 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_227",
+      "text": "<|channel>5\n<channel|>6*47=5",
+      "ok": false,
+      "why": "operand 47 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_228",
+      "text": "<|channel>56+56=112\n<channel|>12-10=102<turn|>",
+      "ok": false,
+      "why": "unparsable step: '12-10=102<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_229",
+      "text": "<|channel>48+31=79\n<channel|>9-28=51<turn|>",
+      "ok": false,
+      "why": "unparsable step: '9-28=51<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_230",
+      "text": "<|channel>thought\n<channel|>0+0=1",
+      "ok": false,
+      "why": "operand 0 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_231",
+      "text": "<|channel>43-57=-14\n<channel|>2-14=18<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2-14=18<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_232",
+      "text": "<|channel>1+68=109\n<channel|>89-18=91<turn|>",
+      "ok": false,
+      "why": "unparsable step: '89-18=91<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_233",
+      "text": "<|channel> de\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_234",
+      "text": "<|channel>e\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_235",
+      "text": "<|channel> de\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_236",
+      "text": "<|channel>8-\n<channel|>6 *6=0",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_237",
+      "text": "<|channel>98-92=6\n<channel|>7+6=33<turn|>",
+      "ok": false,
+      "why": "unparsable step: '7+6=33<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_238",
+      "text": "<|channel>63+9=72  72+68=140\n<channel|>40-60=80<turn|>",
+      "ok": false,
+      "why": "unparsable step: '40-60=80<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_239",
+      "text": "<|channel>24+24=48\n<channel|>8+1=49<turn|>",
+      "ok": false,
+      "why": "unparsable step: '8+1=49<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_240",
+      "text": "<|channel>44+34=78\n<channel|>8-46=32",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_241",
+      "text": "<|channel>26-15=11\n<channel|>9-36=1<turn|>",
+      "ok": false,
+      "why": "unparsable step: '9-36=1<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_242",
+      "text": "<|channel> you\n<channel|>1 -1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_243",
+      "text": "<|channel>51-24=27\n<channel|>7-13=14<turn|>",
+      "ok": false,
+      "why": "unparsable step: '7-13=14<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_244",
+      "text": "<|channel> de\n<channel|>1*1=1",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_245",
+      "text": "<|channel> particular64-35=29929+11=40\n<channel|>0+9=49<turn|>",
+      "ok": false,
+      "why": "unparsable step: '0+9=49<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_246",
+      "text": "<|channel>81-4=77\n<channel|>8/2=49",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": true
+    },
+    {
+      "id": "countdown_247",
+      "text": "<|channel>98-90=8\n<channel|>5+8=43<turn|>",
+      "ok": false,
+      "why": "unparsable step: '5+8=43<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_248",
+      "text": "<|channel>8\n<channel|>1 -3=4<turn|>",
+      "ok": false,
+      "why": "unparsable step: '1 -3=4<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_249",
+      "text": "<|channel>64-22=42\n<channel|>2-20=22<turn|>",
+      "ok": false,
+      "why": "unparsable step: '2-20=22<turn|>'",
+      "accepted": true
+    }
+  ]
+}

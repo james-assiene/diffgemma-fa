@@ -1,0 +1,152 @@
+{
+  "device": "NVIDIA H100 80GB HBM3 (gpu)",
+  "jax": "0.11.0",
+  "model_flops_per_step": 2048000000000.0,
+  "launch_counts": [
+    {
+      "L": 16,
+      "S": 64,
+      "tree_while": 0,
+      "chain_while": 1,
+      "tree_dot": 4,
+      "chain_dot": 1,
+      "tree_fusion": 14,
+      "chain_fusion": 4,
+      "tree_hlo_lines": 243,
+      "chain_hlo_lines": 94,
+      "log2L": 4
+    },
+    {
+      "L": 32,
+      "S": 64,
+      "tree_while": 0,
+      "chain_while": 1,
+      "tree_dot": 5,
+      "chain_dot": 1,
+      "tree_fusion": 17,
+      "chain_fusion": 4,
+      "tree_hlo_lines": 283,
+      "chain_hlo_lines": 94,
+      "log2L": 5
+    },
+    {
+      "L": 64,
+      "S": 64,
+      "tree_while": 0,
+      "chain_while": 1,
+      "tree_dot": 6,
+      "chain_dot": 1,
+      "tree_fusion": 20,
+      "chain_fusion": 4,
+      "tree_hlo_lines": 323,
+      "chain_hlo_lines": 94,
+      "log2L": 6
+    },
+    {
+      "L": 128,
+      "S": 64,
+      "tree_while": 0,
+      "chain_while": 1,
+      "tree_dot": 7,
+      "chain_dot": 1,
+      "tree_fusion": 23,
+      "chain_fusion": 4,
+      "tree_hlo_lines": 363,
+      "chain_hlo_lines": 94,
+      "log2L": 7
+    },
+    {
+      "L": 256,
+      "S": 64,
+      "tree_while": 0,
+      "chain_while": 1,
+      "tree_dot": 8,
+      "chain_dot": 1,
+      "tree_fusion": 26,
+      "chain_fusion": 4,
+      "tree_hlo_lines": 403,
+      "chain_hlo_lines": 94,
+      "log2L": 8
+    }
+  ],
+  "scaling": [
+    {
+      "S": 64,
+      "tree_gb": 0.0084,
+      "compile_seconds": 0.0,
+      "latency_ms": 0.057,
+      "tree_flops": 268435456,
+      "pct_of_model_forward": 0.01,
+      "hlo_lines": 403,
+      "pct_of_measured_step_walltime": 0.027
+    },
+    {
+      "S": 128,
+      "tree_gb": 0.0335,
+      "compile_seconds": 0.04,
+      "latency_ms": 0.091,
+      "tree_flops": 2147483648,
+      "pct_of_model_forward": 0.1,
+      "hlo_lines": 443,
+      "pct_of_measured_step_walltime": 0.043
+    },
+    {
+      "S": 256,
+      "tree_gb": 0.134,
+      "compile_seconds": 0.06,
+      "latency_ms": 0.261,
+      "tree_flops": 17179869184,
+      "pct_of_model_forward": 0.84,
+      "hlo_lines": 485,
+      "pct_of_measured_step_walltime": 0.124
+    },
+    {
+      "S": 385,
+      "tree_gb": 0.303,
+      "compile_seconds": 0.04,
+      "latency_ms": 1.055,
+      "tree_flops": 58436224000,
+      "pct_of_model_forward": 2.85,
+      "hlo_lines": 458,
+      "pct_of_measured_step_walltime": 0.502
+    },
+    {
+      "S": 512,
+      "tree_gb": 0.5358,
+      "compile_seconds": 0.05,
+      "latency_ms": 0.95,
+      "tree_flops": 137438953472,
+      "pct_of_model_forward": 6.71,
+      "hlo_lines": 454,
+      "pct_of_measured_step_walltime": 0.452
+    },
+    {
+      "S": 1024,
+      "tree_gb": 2.1433,
+      "compile_seconds": 0.07,
+      "latency_ms": 3.874,
+      "tree_flops": 1099511627776,
+      "pct_of_model_forward": 53.69,
+      "hlo_lines": 444,
+      "pct_of_measured_step_walltime": 1.845
+    },
+    {
+      "S": 2048,
+      "tree_gb": 8.5732,
+      "compile_seconds": 0.15,
+      "latency_ms": 20.898,
+      "tree_flops": 8796093022208,
+      "pct_of_model_forward": 429.5,
+      "hlo_lines": 454,
+      "pct_of_measured_step_walltime": 9.951
+    }
+  ],
+  "crossovers": {
+    "measured_model_step_seconds": 0.21,
+    "S_where_tree_exceeds_10pct_of_measured_step": null,
+    "compute_S_where_tree_exceeds_one_model_forward": 2048,
+    "memory_S_at_8GB": 1978,
+    "memory_S_at_measured_20GB_headroom": 3128,
+    "note": "SPEC \u00a75.6: set the dispatch threshold from compute AND memory; compute binds far below the memory wall."
+  }
+}

@@ -1,0 +1,43 @@
+[eval] task=sudoku variant=j1 emission=sample n=250
+2026-08-03 19:09:39.844783: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+  [10/250] CS=1.000 solved=0.000
+  [20/250] CS=1.000 solved=0.000
+  [30/250] CS=1.000 solved=0.000
+  [40/250] CS=1.000 solved=0.000
+  [50/250] CS=1.000 solved=0.000
+  [60/250] CS=1.000 solved=0.017
+  [70/250] CS=1.000 solved=0.014
+  [80/250] CS=1.000 solved=0.013
+  [90/250] CS=1.000 solved=0.011
+  [100/250] CS=1.000 solved=0.010
+  [110/250] CS=1.000 solved=0.009
+  [120/250] CS=1.000 solved=0.017
+  [130/250] CS=1.000 solved=0.015
+  [140/250] CS=1.000 solved=0.014
+  [150/250] CS=1.000 solved=0.013
+  [160/250] CS=1.000 solved=0.013
+  [170/250] CS=1.000 solved=0.012
+  [180/250] CS=1.000 solved=0.011
+  [190/250] CS=1.000 solved=0.011
+  [200/250] CS=1.000 solved=0.015
+  [210/250] CS=1.000 solved=0.014
+  [220/250] CS=1.000 solved=0.014
+  [230/250] CS=1.000 solved=0.013
+  [240/250] CS=1.000 solved=0.013
+  [250/250] CS=1.000 solved=0.012
+
+===== RESULT =====
+task: sudoku
+variant: j1
+emission: sample
+n: 250
+cs_rate: 1.0
+solve_rate: 0.012
+zero_partition: 0
+oom: 0
+failure_reasons: {'col 1': 2, 'col 0': 52, 'row 0': 181, 'row 1': 12, 'ok': 3}
+elapsed_seconds: 2696.4
+
+wrote artifacts/task_sudoku_j1_sample.json

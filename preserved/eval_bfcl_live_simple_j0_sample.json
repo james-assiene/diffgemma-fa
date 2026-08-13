@@ -1,0 +1,3276 @@
+{
+  "task": "bfcl_live_simple",
+  "variant": "j0",
+  "emission": "sample",
+  "entropy_bound": 0.1,
+  "nonempty_strings": true,
+  "seed": 0,
+  "offset": 0,
+  "prompt_style": "stock",
+  "confidence": "mf",
+  "temp": "stock",
+  "dtype": "float64",
+  "whitespace": "stock",
+  "fence": false,
+  "ci_enums": false,
+  "records_available": 130,
+  "denominator_policy": "n = records attempted. Compile-skipped records never reached the model: they are excluded from n and from arg_total, and reported in skipped_by_reason. Oom and zero_partition records DID reach the model and failed: they stay in n AND in arg_total as failures, and are reported in their own columns. arg_total therefore depends only on the benchmark, never on what the model emitted. Matches eval/run_tasks.py. The skipped records are named individually in skipped_records, so the difference set against another arm's n is computable from this file alone.",
+  "skipped_by_reason": {
+    "compile:ValueError": 2
+  },
+  "skipped_records": [
+    {
+      "id": "live_simple_117-73-0",
+      "fn": "reverse_input",
+      "reason": "compile:ValueError",
+      "detail": "grammar rejects ['compact', 'spaced', 'indent2', 'indent4', 'tabs'] rendering(s) of an instance it should accept. A grammar that forbids a rendering the model may choose does not fail loudly -- it sil"
+    },
+    {
+      "id": "live_simple_122-78-0",
+      "fn": "process_data",
+      "reason": "compile:ValueError",
+      "detail": "grammar rejects ['compact', 'spaced', 'indent2', 'indent4', 'tabs'] rendering(s) of an instance it should accept. A grammar that forbids a rendering the model may choose does not fail loudly -- it sil"
+    }
+  ],
+  "zero_partition": 0,
+  "oom": 0,
+  "oom_records": [],
+  "zero_partition_records": [],
+  "elapsed_seconds": 4867.0,
+  "n": 128,
+  "cs": 128,
+  "cs_rate": 1.0,
+  "schema_ok": 128,
+  "schema_valid_rate": 1.0,
+  "parsed": 128,
+  "nonempty": 114,
+  "nonempty_rate": 0.8906,
+  "arg_correct": 93,
+  "arg_total": 287,
+  "arg_accuracy": 0.324,
+  "exact_calls": 31,
+  "exact_call_rate": 0.2422,
+  "per_key": [
+    {
+      "key": "user_id",
+      "want": "7890",
+      "got": "7",
+      "ok": false
+    },
+    {
+      "key": "special",
+      "want": "black",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "repos",
+      "want": "ShishirPatil/gorilla,gorilla-llm/gorilla-cli",
+      "got": ":",
+      "ok": false
+    },
+    {
+      "key": "aligned",
+      "want": "True",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "loc",
+      "want": "2020 Addison Street, Berkeley, CA, USA",
+      "got": "2020 Addison Street, Berkeley, CA, }{\",Best",
+      "ok": false
+    },
+    {
+      "key": "type",
+      "want": "comfort",
+      "got": "comfort",
+      "ok": true
+    },
+    {
+      "key": "time",
+      "want": "600",
+      "got": "600",
+      "ok": true
+    },
+    {
+      "key": "loc",
+      "want": "221B Baker Street, Berkeley, CA, USA",
+      "got": "221B Baker Street, Berkeley, CA, }{\",1",
+      "ok": false
+    },
+    {
+      "key": "type",
+      "want": "plus",
+      "got": "plus",
+      "ok": true
+    },
+    {
+      "key": "time",
+      "want": "600",
+      "got": "600",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Tel Aviv, Israel",
+      "got": "Tel Aviv",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Divin\u00f3polis, MG",
+      "got": "Divin\u00f3polis, MG",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "San Francisco, CA",
+      "got": "San Francisco",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Riga, Latvia",
+      "got": "Riga, Latvia",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "London, UK",
+      "got": "London, UK",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Hyderabad, India",
+      "got": "Hyderabad",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Mariposa, CA",
+      "got": "Yosemite National Park, Mariposa, CA",
+      "ok": false
+    },
+    {
+      "key": "unit",
+      "want": "celsius",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Naples, FL",
+      "got": "Naples,",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "New York, NY",
+      "got": "New York, NY",
+      "ok": true
+    },
+    {
+      "key": "unit",
+      "want": "celsius",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Shanghai, China",
+      "got": "\u4e0a\u6d77",
+      "ok": false
+    },
+    {
+      "key": "unit",
+      "want": "celsius",
+      "got": "celsius",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Bangkok, Thailand",
+      "got": "Bangkok, Thailand",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Chennai, Tamil Nadu",
+      "got": "Chennai, Tamil Nadu",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Lang Son, Vietnam",
+      "got": "Lang Son",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Boston, MA",
+      "got": "Boston, MA",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Moscow, Russia",
+      "got": "Moscow",
+      "ok": false
+    },
+    {
+      "key": "unit",
+      "want": "celsius",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Quintana Roo, Mexico",
+      "got": "Quintana Roo, Mexico",
+      "ok": true
+    },
+    {
+      "key": "unit",
+      "want": "celsius",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "food_item",
+      "want": "burger",
+      "got": "burgerBusiness",
+      "ok": false
+    },
+    {
+      "key": "modification_request",
+      "want": "no onions, extra cheese",
+      "got": "no onions, extra cheese",
+      "ok": true
+    },
+    {
+      "key": "food_item",
+      "want": "chicken dish",
+      "got": "chicken '\",  ",
+      "ok": false
+    },
+    {
+      "key": "modification_request",
+      "want": "extra spicy",
+      "got": "extra spicy",
+      "ok": true
+    },
+    {
+      "key": "TheFod",
+      "want": "BURGER",
+      "got": "BURGER",
+      "ok": true
+    },
+    {
+      "key": "TheFod",
+      "want": "PIZZA",
+      "got": "SOUP",
+      "ok": false
+    },
+    {
+      "key": "TheFod",
+      "want": "BURGER",
+      "got": "BURGER",
+      "ok": true
+    },
+    {
+      "key": "TheFod",
+      "want": "SALAD",
+      "got": "BURGER",
+      "ok": false
+    },
+    {
+      "key": "loc",
+      "want": "123 \u0110\u01b0\u1eddng \u0110\u1ea1i h\u1ecdc, Berkeley, CA",
+      "got": "123 \u0110\u01b0\u1eddng \u0110\u1ea1i h\u1ecdc, Berkeley, CA 94704Business",
+      "ok": false
+    },
+    {
+      "key": "type",
+      "want": "plus",
+      "got": "plus",
+      "ok": true
+    },
+    {
+      "key": "time",
+      "want": "10",
+      "got": "1",
+      "ok": false
+    },
+    {
+      "key": "restaurant",
+      "want": "uber pitada",
+      "got": "uber pitada matching6",
+      "ok": false
+    },
+    {
+      "key": "items",
+      "want": "['burgers', 'chicken wings']",
+      "got": "['burgers', 'chicken', '],  ']",
+      "ok": false
+    },
+    {
+      "key": "quantities",
+      "want": "[5, 6]",
+      "got": "[5, 6]",
+      "ok": true
+    },
+    {
+      "key": "restaurant",
+      "want": "\u80af\u5fb7\u57fa",
+      "got": "\u80af\u5fb7\u57faBusiness",
+      "ok": false
+    },
+    {
+      "key": "items",
+      "want": "['\u9ea6\u8fa3\u9e21\u817f\u5821', '\u53ef\u53e3\u53ef\u4e50', '\u6cb9\u70b8\u9e21\u7fc5', '\u85af\u6761']",
+      "got": "['],    :\u9ea6\u8fa3\u9e21\u817f\u5821', '\"\u53ef\u53e3\u53ef\u4e50', '\"\u6cb9\u70b8\u9e21\u7fc5', '\"\u85af\u6761Opt_  ],']",
+      "ok": false
+    },
+    {
+      "key": "quantities",
+      "want": "[10, 50, 30, 90]",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "restaurant",
+      "want": "McDonald's",
+      "got": "McDonald's numbers1",
+      "ok": false
+    },
+    {
+      "key": "items",
+      "want": "['pizza']",
+      "got": "['\"pizza', '  ],']",
+      "ok": false
+    },
+    {
+      "key": "quantities",
+      "want": "[1]",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "botId",
+      "want": "my-bot-id",
+      "got": "my-bot-id \ubc29\ubc95 ",
+      "ok": false
+    },
+    {
+      "key": "botVersion",
+      "want": "v2",
+      "got": "v2",
+      "ok": true
+    },
+    {
+      "key": "botId",
+      "want": "B12345",
+      "got": "B123456 ",
+      "ok": false
+    },
+    {
+      "key": "botVersion",
+      "want": "v1",
+      "got": "v1",
+      "ok": true
+    },
+    {
+      "key": "sortBy",
+      "want": "DESC",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "answer",
+      "want": "Logistic regression is not present in the text, therefore I cannot answer this q",
+      "got": "Logistic regression is not present in the text, therefore I cannot answer this q",
+      "ok": false
+    },
+    {
+      "key": "answer",
+      "want": "Logistic regression is not present in the text, therefore I cannot answer this q",
+      "got": "Logistic regression is not present in the text, however I cannot answer this que",
+      "ok": false
+    },
+    {
+      "key": "answer",
+      "want": "Logistic regression is not present in the text, therefore I cannot answer this q",
+      "got": "Yes, this is a valid response if the model is operating within a Retrieval-Augme",
+      "ok": false
+    },
+    {
+      "key": "answer",
+      "want": "Logistic regression is not present in the text, therefore I cannot answer this q",
+      "got": "Logistic regression is a statistical method used to predict the probability of a",
+      "ok": false
+    },
+    {
+      "key": "answer",
+      "want": "The text does not define logistic regression, therefore I cannot answer this que",
+      "got": ": [    ",
+      "ok": false
+    },
+    {
+      "key": "answer",
+      "want": "The text does not define logistic regression, therefore I cannot answer this que",
+      "got": ":        ",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Mariposa, CA",
+      "got": "https://api.weather.com/v1/current",
+      "ok": false
+    },
+    {
+      "key": "unit",
+      "want": "fahrenheit",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "latitude",
+      "want": "37.8651",
+      "got": "37.865111",
+      "ok": false
+    },
+    {
+      "key": "longitude",
+      "want": "-119.5383",
+      "got": "-1",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "{'airConJobMode': 'AIR_CLEAN', 'windStrength': 'HIGH', 'monitoringEnabled': True",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "{'airConJobMode': 'AIR_DRY'}",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "{'coolTargetTemperature': 22}",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "{'windStrength': 'HIGH'}",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "{'airConOperationMode': 'POWER_ON'}",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "{'airCleanOperationMode': 'START', 'airConOperationMode': 'POWER_ON', 'coolTarge",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "airConJobMode",
+      "want": "COOL",
+      "got": "COOL",
+      "ok": true
+    },
+    {
+      "key": "windStrength",
+      "want": "MID",
+      "got": "MID",
+      "ok": true
+    },
+    {
+      "key": "monitoringEnabled",
+      "want": "True",
+      "got": "True",
+      "ok": true
+    },
+    {
+      "key": "airCleanOperationMode",
+      "want": "START",
+      "got": "START",
+      "ok": true
+    },
+    {
+      "key": "airConOperationMode",
+      "want": "POWER_ON",
+      "got": "POWER_ON",
+      "ok": true
+    },
+    {
+      "key": "powerSaveEnabled",
+      "want": "False",
+      "got": "False",
+      "ok": true
+    },
+    {
+      "key": "targetTemperature",
+      "want": "24",
+      "got": "244",
+      "ok": false
+    },
+    {
+      "key": "a",
+      "want": "3",
+      "got": "360",
+      "ok": false
+    },
+    {
+      "key": "b",
+      "want": "2",
+      "got": "2",
+      "ok": true
+    },
+    {
+      "key": "brewery",
+      "want": "Sierra Nevada",
+      "got": " ",
+      "ok": false
+    },
+    {
+      "key": "taste",
+      "want": "bitter",
+      "got": " ",
+      "ok": false
+    },
+    {
+      "key": "aroma",
+      "want": "hoppy",
+      "got": " ",
+      "ok": false
+    },
+    {
+      "key": "color",
+      "want": "pale",
+      "got": " ",
+      "ok": false
+    },
+    {
+      "key": "style",
+      "want": "lager",
+      "got": " ",
+      "ok": false
+    },
+    {
+      "key": "pairings",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "brewery",
+      "want": "Creek",
+      "got": "Creek '\",!",
+      "ok": false
+    },
+    {
+      "key": "taste",
+      "want": "slightly bitter",
+      "got": "slightly '\",!",
+      "ok": false
+    },
+    {
+      "key": "aroma",
+      "want": "chocolatey",
+      "got": "rich, chocolatey sensitive1",
+      "ok": false
+    },
+    {
+      "key": "color",
+      "want": "dark",
+      "got": "dark Best!",
+      "ok": false
+    },
+    {
+      "key": "style",
+      "want": "porter",
+      "got": "porter",
+      "ok": true
+    },
+    {
+      "key": "pairings",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "zone",
+      "want": "Great Britain",
+      "got": "GB",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "{'airConJobMode': 'COOL', 'windStrength': 'HIGH', 'airConOperationMode': 'POWER_",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "{'airConJobMode': 'COOL', 'windStrength': 'MID', 'airConOperationMode': 'POWER_O",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "content",
+      "want": "go for shopping at 9 pm",
+      "got": "go for shopping at 9 pm",
+      "ok": true
+    },
+    {
+      "key": "type",
+      "want": "delete",
+      "got": "add",
+      "ok": false
+    },
+    {
+      "key": "content",
+      "want": "todo random",
+      "got": "todo random",
+      "ok": true
+    },
+    {
+      "key": "type",
+      "want": "add",
+      "got": "add",
+      "ok": true
+    },
+    {
+      "key": "content",
+      "want": "go for shopping at 9 pm",
+      "got": "go for shopping at 9 pm",
+      "ok": true
+    },
+    {
+      "key": "type",
+      "want": "delete",
+      "got": "delete",
+      "ok": true
+    },
+    {
+      "key": "content",
+      "want": "go to gym",
+      "got": "go to gym",
+      "ok": true
+    },
+    {
+      "key": "type",
+      "want": "add",
+      "got": "add",
+      "ok": true
+    },
+    {
+      "key": "content",
+      "want": "go to sleep at 9 pm",
+      "got": "go to sleep at 9 pm",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Mumbai",
+      "got": "Mumbai",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Mumbai",
+      "got": ":",
+      "ok": false
+    },
+    {
+      "key": "type",
+      "want": "complete",
+      "got": "complete",
+      "ok": true
+    },
+    {
+      "key": "content",
+      "want": "Submit monthly financial report",
+      "got": "Submit monthly financial report",
+      "ok": true
+    },
+    {
+      "key": "type",
+      "want": "add",
+      "got": "add",
+      "ok": true
+    },
+    {
+      "key": "content",
+      "want": "go to gym tomorrow.",
+      "got": "go to gym tomorrow.",
+      "ok": true
+    },
+    {
+      "key": "type",
+      "want": "delete",
+      "got": "delete",
+      "ok": true
+    },
+    {
+      "key": "content",
+      "want": "ravi",
+      "got": "ravi",
+      "ok": true
+    },
+    {
+      "key": "type",
+      "want": "add",
+      "got": "add",
+      "ok": true
+    },
+    {
+      "key": "content",
+      "want": "go to sleep at 9 pm",
+      "got": "go to sleep at 9 pm",
+      "ok": true
+    },
+    {
+      "key": "type",
+      "want": "add",
+      "got": "complete",
+      "ok": false
+    },
+    {
+      "key": "content",
+      "want": "go to Goa",
+      "got": "go to Goa",
+      "ok": true
+    },
+    {
+      "key": "type",
+      "want": "add",
+      "got": "add",
+      "ok": true
+    },
+    {
+      "key": "content",
+      "want": "Hi charlie",
+      "got": "Hi charlie",
+      "ok": true
+    },
+    {
+      "key": "item_ids",
+      "want": "[102, 103]",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "threshold",
+      "want": "20",
+      "got": "0",
+      "ok": false
+    },
+    {
+      "key": "monto_del_credito",
+      "want": "1000000.0",
+      "got": "80000001",
+      "ok": false
+    },
+    {
+      "key": "plazo_del_credito_mensual",
+      "want": "12",
+      "got": "1221",
+      "ok": false
+    },
+    {
+      "key": "producto",
+      "want": "auto",
+      "got": "personal",
+      "ok": false
+    },
+    {
+      "key": "a\u00f1o_vehiculo",
+      "want": "2024",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "enganche",
+      "want": "0.2",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "a",
+      "want": "5.0",
+      "got": "5.0",
+      "ok": true
+    },
+    {
+      "key": "b",
+      "want": "3.0",
+      "got": "3.0",
+      "ok": true
+    },
+    {
+      "key": "project",
+      "want": "SUPERFANCY",
+      "got": "SUPERFANCY numbers {",
+      "ok": false
+    },
+    {
+      "key": "component",
+      "want": "AB1010CD",
+      "got": "AB1010CD sensitiveBest",
+      "ok": false
+    },
+    {
+      "key": "vulnerability",
+      "want": "ef903ac-893-f00",
+      "got": "ef903ac-893-f00",
+      "ok": true
+    },
+    {
+      "key": "perPage",
+      "want": "10",
+      "got": "10",
+      "ok": true
+    },
+    {
+      "key": "networkId",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "sensorSerial",
+      "want": "Q3CC-CRT3-SZ2G",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "demographics",
+      "want": "['millennials']",
+      "got": "['millennials \u0935\u094d\u092f\u0935\u0938\u093e1']",
+      "ok": false
+    },
+    {
+      "key": "targets",
+      "want": "['brand:Apple']",
+      "got": "['Apple']",
+      "ok": false
+    },
+    {
+      "key": "metrics",
+      "want": "['view']",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "min_date",
+      "want": "2022-07-01",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "capture_percentage",
+      "want": "50",
+      "got": "506",
+      "ok": false
+    },
+    {
+      "key": "confidence_window_size",
+      "want": "0.5",
+      "got": "0.51",
+      "ok": false
+    },
+    {
+      "key": "capture_percentage",
+      "want": "90",
+      "got": "7",
+      "ok": false
+    },
+    {
+      "key": "confidence_window_size",
+      "want": "0.25",
+      "got": "4",
+      "ok": false
+    },
+    {
+      "key": "capture_percentage",
+      "want": "70",
+      "got": "7001",
+      "ok": false
+    },
+    {
+      "key": "confidence_window_size",
+      "want": "0.8",
+      "got": "0.88",
+      "ok": false
+    },
+    {
+      "key": "capture_percentage",
+      "want": "93",
+      "got": "9361",
+      "ok": false
+    },
+    {
+      "key": "confidence_window_size",
+      "want": "0.5",
+      "got": "0.5",
+      "ok": true
+    },
+    {
+      "key": "source_language",
+      "want": "en",
+      "got": "de",
+      "ok": false
+    },
+    {
+      "key": "target_language",
+      "want": "fr",
+      "got": "id",
+      "ok": false
+    },
+    {
+      "key": "text",
+      "want": "What is your name?",
+      "got": "What is your name?",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "London",
+      "got": "London",
+      "ok": true
+    },
+    {
+      "key": "country",
+      "want": "GB",
+      "got": ": ",
+      "ok": false
+    },
+    {
+      "key": "to_address",
+      "want": "andy@gorilla.ai",
+      "got": "andy@gorilla.com",
+      "ok": false
+    },
+    {
+      "key": "subject",
+      "want": "Sales Forecast Request",
+      "got": "Sales forecast spreadsheet",
+      "ok": false
+    },
+    {
+      "key": "body",
+      "want": "where is the latest sales forecast spreadsheet?",
+      "got": "Hi Andy, could you please send me the sales forecast spreadsheet?",
+      "ok": false
+    },
+    {
+      "key": "attachments",
+      "want": "[]",
+      "got": "[]",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "San Diego, CA",
+      "got": "San Diego",
+      "ok": false
+    },
+    {
+      "key": "Title",
+      "want": "Breakthrough in Artificial Intelligence",
+      "got": "Breakthrough in Artificial Intelligence},Next",
+      "ok": false
+    },
+    {
+      "key": "Content",
+      "want": "The recent breakthroughs in machine learning algorithms.",
+      "got": "Recent breakthroughs in machine learning algorithms have significantly enhanced ",
+      "ok": false
+    },
+    {
+      "key": "MetaTitle",
+      "want": "AI Breakthrough Latest Developments in Machine Learning",
+      "got": "AI Breakthrough Latest Developments in Machine Learning}, {",
+      "ok": false
+    },
+    {
+      "key": "MetaDescription",
+      "want": "An overview of the recent significant advancements in artificial intelligence an",
+      "got": "An overview of the recent significant significant in artificial intelligence and",
+      "ok": false
+    },
+    {
+      "key": "UrlName",
+      "want": "ai-breakthrough-latest-developments",
+      "got": "ai-breakthrough-latest-developments",
+      "ok": true
+    },
+    {
+      "key": "ContentItem",
+      "want": "NewsItem",
+      "got": "NewsItem",
+      "ok": true
+    },
+    {
+      "key": "Title",
+      "want": "Julian is testing12",
+      "got": "Julian is testing12",
+      "ok": true
+    },
+    {
+      "key": "ContentItem",
+      "want": "News",
+      "got": "News",
+      "ok": true
+    },
+    {
+      "key": "Title",
+      "want": "Julian is testing",
+      "got": ": ",
+      "ok": false
+    },
+    {
+      "key": "ContentItem",
+      "want": "news",
+      "got": "news",
+      "ok": true
+    },
+    {
+      "key": "Title",
+      "want": "Julian is Testing",
+      "got": "Julian is Testing},      ",
+      "ok": false
+    },
+    {
+      "key": "Content",
+      "want": "a detailed analysis on the impact of sleep patterns on productivity",
+      "got": "a detailed analysis on the impact of sleep patterns on $=\",},",
+      "ok": false
+    },
+    {
+      "key": "MetaTitle",
+      "want": "Productivity and Sleep Patterns",
+      "got": "Productivity and Sleep '\", ",
+      "ok": false
+    },
+    {
+      "key": "MetaDescription",
+      "want": "Exploring how sleep affects work efficiency",
+      "got": "Exploring how sleep affects work '\",1",
+      "ok": false
+    },
+    {
+      "key": "UrlName",
+      "want": "julian-testing-productivity",
+      "got": "julian-testing-productivity",
+      "ok": true
+    },
+    {
+      "key": "city_name",
+      "want": "Seattle",
+      "got": "Seattle",
+      "ok": true
+    },
+    {
+      "key": "coordinates",
+      "want": "[37.8715, -122.273]",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "array",
+      "want": "[1, 54, 3, 1, 76, 2343, 21]",
+      "got": "[1, 54, 3, 1, 76, 2343, 21]",
+      "ok": true
+    },
+    {
+      "key": "coordinate_format",
+      "want": "DMS",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "include_altitude",
+      "want": "True",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "food_name",
+      "want": "chai tea",
+      "got": "chai $\",1",
+      "ok": false
+    },
+    {
+      "key": "portion_amount",
+      "want": "16.0",
+      "got": "1661",
+      "ok": false
+    },
+    {
+      "key": "portion_unit",
+      "want": "ounces",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "meal_name",
+      "want": "snack",
+      "got": "ounces",
+      "ok": false
+    },
+    {
+      "key": "user_preferences",
+      "want": "{\"style\": \"modern\", \"color_scheme\": \"warm\", \"budget\": \"mid-range\"}",
+      "got": ":",
+      "ok": false
+    },
+    {
+      "key": "data_source",
+      "want": "internal_database",
+      "got": "modern",
+      "ok": false
+    },
+    {
+      "key": "output_format",
+      "want": "DOCX",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "include_visuals",
+      "want": "True",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Paris, France",
+      "got": "Paris, France",
+      "ok": true
+    },
+    {
+      "key": "id",
+      "want": "4",
+      "got": "46",
+      "ok": false
+    },
+    {
+      "key": "artist_name",
+      "want": "K\u00e4\u00e4rij\u00e4",
+      "got": "K\u00e4\u00e4rij\u00e4",
+      "ok": true
+    },
+    {
+      "key": "artist_name",
+      "want": "K\u00e4\u00e4rij\u00e4",
+      "got": "K\u00e4\u00e4rij\u00e4",
+      "ok": true
+    },
+    {
+      "key": "artist_name",
+      "want": "K\u00e4\u00e4rij\u00e4",
+      "got": "K\u00e4\u00e4rij\u00e4 ",
+      "ok": true
+    },
+    {
+      "key": "song_name",
+      "want": "Cha Cha Cha",
+      "got": "Cha Cha Cha",
+      "ok": true
+    },
+    {
+      "key": "data",
+      "want": "[2.5, 3.6, 4.1, 5.2]",
+      "got": "[2.5, 3.6, 4.1, 5.2]",
+      "ok": true
+    },
+    {
+      "key": "normalize",
+      "want": "True",
+      "got": "True",
+      "ok": true
+    },
+    {
+      "key": "categories",
+      "want": "['red', 'blue', 'green']",
+      "got": "['red', 'blue', 'green']",
+      "ok": true
+    },
+    {
+      "key": "encoding_type",
+      "want": "one-hot",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Boston, MA",
+      "got": "Boston, MA",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "El Gastor, Andalusia",
+      "got": "El Gastor, Andalusia",
+      "ok": true
+    },
+    {
+      "key": "city",
+      "want": "Chennai",
+      "got": "ChennaiBusiness ",
+      "ok": false
+    },
+    {
+      "key": "lat",
+      "want": "13.0827",
+      "got": "13.082777",
+      "ok": false
+    },
+    {
+      "key": "lon",
+      "want": "80.2707",
+      "got": "80.2707",
+      "ok": true
+    },
+    {
+      "key": "device_name",
+      "want": "ue boom",
+      "got": "ue boom",
+      "ok": true
+    },
+    {
+      "key": "device_name",
+      "want": "JBL Flip 4",
+      "got": "JBL Flip 4",
+      "ok": true
+    },
+    {
+      "key": "prompt_message",
+      "want": "Please enter the Wi-Fi network name you wish to connect to:",
+      "got": "Please enter the Wi-Fi",
+      "ok": false
+    },
+    {
+      "key": "purchase_amount",
+      "want": "59.99",
+      "got": "59.9961",
+      "ok": false
+    },
+    {
+      "key": "state",
+      "want": "CA",
+      "got": "California",
+      "ok": false
+    },
+    {
+      "key": "county",
+      "want": "San Francisco",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "city",
+      "want": "San Francisco",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "purchase_amount",
+      "want": "999.0",
+      "got": "99961",
+      "ok": false
+    },
+    {
+      "key": "state",
+      "want": "CA",
+      "got": "California",
+      "ok": false
+    },
+    {
+      "key": "purchase_amount",
+      "want": "250.0",
+      "got": "25001",
+      "ok": false
+    },
+    {
+      "key": "state",
+      "want": "NY",
+      "got": "NY",
+      "ok": true
+    },
+    {
+      "key": "clean_hello",
+      "want": "['hello']",
+      "got": "['],    :hello_   ],],']",
+      "ok": false
+    },
+    {
+      "key": "faq_link_accounts_start",
+      "want": "['link my account', 'connect my accounts']",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "acc_routing_start",
+      "want": "['Please provide the routing number for my account.', 'Which account number shou",
+      "got": "['],     likelyPlease provide the routing number for my account.', ',     likely",
+      "ok": false
+    },
+    {
+      "key": "activate_card_start",
+      "want": "['Activate my new card for loyalty program enrollment', 'Can you walk me through",
+      "got": "['],     likelyActivate my new card for loyalty program enrollment', ',    nCan ",
+      "ok": false
+    },
+    {
+      "key": "atm_finder_start",
+      "want": "['Looking for the closest ATM for cash withdrawal, can you assist me in finding ",
+      "got": "['],    OptLooking for the closest ATM for cash withdrawal, can you assist me in",
+      "ok": false
+    },
+    {
+      "key": "auto_loan_payment_start",
+      "want": "[]",
+      "got": "['Find ATM for urgent']",
+      "ok": false
+    },
+    {
+      "key": "bank_hours_start",
+      "want": "[]",
+      "got": "[' to find ATM for quick cash']",
+      "ok": false
+    },
+    {
+      "key": "cancel_card_start",
+      "want": "['I want to cancel my card and ensure the safety of my account.']",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "card_rewards_start",
+      "want": "['What rewards are offered for my card?', 'What rewards are available on my card",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "cashier_check_start",
+      "want": "[\"Can I purchase a cashier's check through this chat service?\", \"I need a cashie",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "clean_goodbye_start",
+      "want": "[\"I'm done here. Goodbye!\", 'Thanks for your assistance. Goodbye!', \"You're amaz",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "faq_describe_telephone_banking_start",
+      "want": "['How do I sign up for tele-banking services through the mobile app?', 'Can I si",
+      "got": "['],    \"How do I sign up for tele-banking services through the mobile app?', '\"",
+      "ok": false
+    },
+    {
+      "key": "bank_hours_start",
+      "want": "['Are any banks open in Sri Lanka right now?']",
+      "got": "[':     deAre any banks open in Sri Lanka right now?', '  ],1']",
+      "ok": false
+    },
+    {
+      "key": "faq_describe_accounts_start",
+      "want": "[\"I'm interested in opening a long term savings account. What options do you hav",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "money_movement_start",
+      "want": "['Can you show me all outgoing wire transfers?']",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "get_transactions_start",
+      "want": "['I need to view all transactions labeled as \"checks\" on my account.', 'Can you ",
+      "got": "['\"Can you show me all outgoing wire transfers?', '\"I need to view all transacti",
+      "ok": false
+    },
+    {
+      "key": "credit_limit_increase_start",
+      "want": "['I need my credit card limit raised.', 'Can you assist me in getting a higher c",
+      "got": "['],    \"I need my credit card limit raised.', '>\"Can you assist me in getting a",
+      "ok": false
+    },
+    {
+      "key": "faq_link_accounts_start",
+      "want": "['Can you assist me in combining my personal and savings accounts?', 'Please ass",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "faq_auto_withdraw_start",
+      "want": "['Can I schedule automatic withdrawals for different dates?']",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "payment_information_start",
+      "want": "['How much do I owe on my home equity loan?']",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "pma_income_requirements_start",
+      "want": "['Can I use bonuses or commissions as part of my income for a loan application?'",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "outofscope",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "acc_routing_start",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "atm_finder_start",
+      "want": "['Need ATM location']",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "faq_link_accounts_start",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "get_balance_start",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "get_transactions_start",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "outofscope",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "acc_routing_start",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "atm_finder_start",
+      "want": "['Where is the closest ATM to my current location?', 'Find ATM for immediate cas",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "faq_link_accounts_start",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "get_balance_start",
+      "want": "['What is my balance?', 'Tell me my available balance, please', 'What is my curr",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "get_transactions_start",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "outofscope",
+      "want": "[]",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "acc_routing_start",
+      "want": "[]",
+      "got": "[',)**']",
+      "ok": false
+    },
+    {
+      "key": "atm_finder_start",
+      "want": "[]",
+      "got": "[',,']",
+      "ok": false
+    },
+    {
+      "key": "faq_link_accounts_start",
+      "want": "[]",
+      "got": "[',,']",
+      "ok": false
+    },
+    {
+      "key": "get_balance_start",
+      "want": "[]",
+      "got": "[',,']",
+      "ok": false
+    },
+    {
+      "key": "get_transactions_start",
+      "want": "[]",
+      "got": "[',,']",
+      "ok": false
+    },
+    {
+      "key": "outofscope",
+      "want": "['what is the weather like']",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "geolocation",
+      "want": "34.0522, -118.2437",
+      "got": ":34.0522, -118.2437], ",
+      "ok": false
+    },
+    {
+      "key": "base_price",
+      "want": "100.0",
+      "got": "10000",
+      "ok": false
+    },
+    {
+      "key": "minimum_price",
+      "want": "90.0",
+      "got": "90",
+      "ok": true
+    },
+    {
+      "key": "user_id",
+      "want": "12345",
+      "got": "1234561",
+      "ok": false
+    },
+    {
+      "key": "profile_data",
+      "want": "{'email': 'john.doe@example.com', 'age': 30}",
+      "got": "{}",
+      "ok": false
+    },
+    {
+      "key": "number1",
+      "want": "133.0",
+      "got": "1336",
+      "ok": false
+    },
+    {
+      "key": "number2",
+      "want": "34.0",
+      "got": "34",
+      "ok": true
+    },
+    {
+      "key": "numbers_list",
+      "want": "[133.0, 34.0]",
+      "got": "[133, 34]",
+      "ok": true
+    },
+    {
+      "key": "units",
+      "want": "Celsius",
+      "got": "Celsius",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Hyderabad, India",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "countries",
+      "want": "['Australia', 'Canada', 'India']",
+      "got": "[]",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Paris, France",
+      "got": "Paris, FranceBusiness1",
+      "ok": false
+    },
+    {
+      "key": "start_date",
+      "want": "2023-04-03",
+      "got": "2023-04-03 check ",
+      "ok": false
+    },
+    {
+      "key": "end_date",
+      "want": "2023-04-05",
+      "got": "2023-04-",
+      "ok": false
+    },
+    {
+      "key": "data_labels",
+      "want": "['Software Engineer', 'Graphic Designer', 'Data Analyst', 'Sales Manager', 'Nurs",
+      "got": "['Software Engineer', 'Graphic Designer', 'Data Analyst', 'Sales Manager', 'Nurs",
+      "ok": false
+    },
+    {
+      "key": "data_values",
+      "want": "[90000, 50000, 70000, 60000, 80000]",
+      "got": "[90000, 50000, 70000, 60000, 80000]",
+      "ok": true
+    },
+    {
+      "key": "image_path",
+      "want": "http://www.thewowstyle.com/wp-content/uploads/2015/01/Home-Interior-Design-Hd-Wa",
+      "got": "http://www.thewowstyle.com/wp-content/uploads/2015/01/Home-Interior-Design-Hd-Wa",
+      "ok": false
+    },
+    {
+      "key": "question",
+      "want": "How does the arrangement of furniture contribute to the minimalist design of the",
+      "got": "How does the arrangement of furniture contribute to the minimalist design of the",
+      "ok": true
+    },
+    {
+      "key": "customer",
+      "want": "\u7ea2\u661f\u79d1\u6280",
+      "got": "\u7ea2\u661f\u79d1\u6280",
+      "ok": true
+    },
+    {
+      "key": "status",
+      "want": "open",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "limit",
+      "want": "10",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "strings",
+      "want": "['John', 'Doe']",
+      "got": "['John', 'Doe']",
+      "ok": true
+    },
+    {
+      "key": "separator",
+      "want": " ",
+      "got": "None",
+      "ok": false
+    },
+    {
+      "key": "fabricName",
+      "want": "Global-Fabric",
+      "got": "Global-Fabric6 ",
+      "ok": false
+    },
+    {
+      "key": "nodeId",
+      "want": "1200",
+      "got": "120000",
+      "ok": false
+    },
+    {
+      "key": "podId",
+      "want": "3",
+      "got": "33",
+      "ok": false
+    },
+    {
+      "key": "interfaceType",
+      "want": "ethernet",
+      "got": "ethernet",
+      "ok": true
+    },
+    {
+      "key": "infoType",
+      "want": "status",
+      "got": "status",
+      "ok": true
+    },
+    {
+      "key": "fabricName",
+      "want": "test-de",
+      "got": "test-de6_",
+      "ok": false
+    },
+    {
+      "key": "nodeId",
+      "want": "5",
+      "got": "55",
+      "ok": false
+    },
+    {
+      "key": "podId",
+      "want": "1",
+      "got": "111",
+      "ok": false
+    },
+    {
+      "key": "interfaceType",
+      "want": "ethernet",
+      "got": "ethernet",
+      "ok": true
+    },
+    {
+      "key": "infoType",
+      "want": "status",
+      "got": "status",
+      "ok": true
+    },
+    {
+      "key": "url",
+      "want": "https://192.168.11.33/sedgeapi/v1/cisco-nir/api/api/telemetry/flowrules/nodes?fa",
+      "got": "https://192.168.11.33/api/v3.1/fabric/PEK-ACI/\"\",1",
+      "ok": false
+    },
+    {
+      "key": "fabricName",
+      "want": "PEK-ACI",
+      "got": "PEK-ACI",
+      "ok": true
+    },
+    {
+      "key": "url",
+      "want": "https://3.321.3232.2/sedgeapi/v1/cisco-nir/api/api/telemetry/flowrules/nodes?fab",
+      "got": "http://3.321.3232.2/fab-ed/nodes9 ",
+      "ok": false
+    },
+    {
+      "key": "fabricName",
+      "want": "fab-ed",
+      "got": "fab-ed",
+      "ok": true
+    }
+  ],
+  "rows": [
+    {
+      "id": "live_simple_0-0-0",
+      "fn": "get_user_info",
+      "text": "<|channel>```json argument{\n<channel|>{\"user_id\": 7}<turn|>",
+      "parsed": {
+        "user_id": 7
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_1-1-0",
+      "fn": "github_star",
+      "text": "<|channel>```json\n<channel|>{ \"repos\":\":\"}",
+      "parsed": {
+        "repos": ":"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_2-2-0",
+      "fn": "uber.ride",
+      "text": "<|channel>```json {{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, }{\\\",Best\",\"type\": \"comfort\" ,\"time\": 600}",
+      "parsed": {
+        "loc": "2020 Addison Street, Berkeley, CA, }{\",Best",
+        "type": "comfort",
+        "time": 600
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_3-2-1",
+      "fn": "uber.ride",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"loc\": \"221B Baker Street, Berkeley, CA, }{\\\",1\",\"type\": \"plus\" ,\"time\": 600}",
+      "parsed": {
+        "loc": "221B Baker Street, Berkeley, CA, }{\",1",
+        "type": "plus",
+        "time": 600
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_4-3-0",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json},{\n<channel|>{\"location\": \"Tel Aviv\"}",
+      "parsed": {
+        "location": "Tel Aviv"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_5-3-1",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json {\n<channel|>{\"location\": \"Divin\u00f3polis, MG\"}",
+      "parsed": {
+        "location": "Divin\u00f3polis, MG"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_6-3-2",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json J{\n<channel|>{\"location\": \"San Francisco\"}",
+      "parsed": {
+        "location": "San Francisco"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_7-3-3",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json strict{\n<channel|>{\"location\": \"Riga, Latvia\"}",
+      "parsed": {
+        "location": "Riga, Latvia"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_8-3-4",
+      "fn": "get_current_weather",
+      "text": "<|channel>```jsonNational{\n<channel|>{\"location\": \"London, UK\"}",
+      "parsed": {
+        "location": "London, UK"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_9-3-5",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json\ufffd{\n<channel|>{\"location\": \"Hyderabad\"}",
+      "parsed": {
+        "location": "Hyderabad"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_10-3-6",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json argument{\n<channel|>{\"location\": \"Yosemite National Park, Mariposa, CA\"}",
+      "parsed": {
+        "location": "Yosemite National Park, Mariposa, CA"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_11-3-7",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json    \n<channel|>{\"location\": \"Naples,\"}<turn|>",
+      "parsed": {
+        "location": "Naples,"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_12-3-8",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json**{\n<channel|>{\"location\": \"New York, NY\"}",
+      "parsed": {
+        "location": "New York, NY"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_13-3-9",
+      "fn": "get_current_weather",
+      "text": "<|channel>```\n<channel|>{\"location\": \"\u4e0a\u6d77\", \"unit\": \"celsius\"}",
+      "parsed": {
+        "location": "\u4e0a\u6d77",
+        "unit": "celsius"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_14-3-10",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json organization{\n<channel|>{\"location\": \"Bangkok, Thailand\"}",
+      "parsed": {
+        "location": "Bangkok, Thailand"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_15-3-11",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json strict{\n<channel|>{\"location\": \"Chennai, Tamil Nadu\"}",
+      "parsed": {
+        "location": "Chennai, Tamil Nadu"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_16-3-12",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json argument{\n<channel|>{\"location\": \"Lang Son\"}",
+      "parsed": {
+        "location": "Lang Son"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_17-3-13",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json\n<channel|>{ \"location\": \"Boston, MA\"}",
+      "parsed": {
+        "location": "Boston, MA"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_18-3-14",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json_{\n<channel|>{\"location\": \"Moscow\"}",
+      "parsed": {
+        "location": "Moscow"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_19-3-15",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"location\": \"Quintana Roo, Mexico\"}",
+      "parsed": {
+        "location": "Quintana Roo, Mexico"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_20-4-0",
+      "fn": "change_food",
+      "text": "<|channel>```json\n<channel|>{ \"food_item\": \"burgerBusiness\",\"modification_request\": \"no onions, extra cheese\"}",
+      "parsed": {
+        "food_item": "burgerBusiness",
+        "modification_request": "no onions, extra cheese"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_21-4-1",
+      "fn": "change_food",
+      "text": "<|channel>```json\n<channel|>{ \"food_item\": \"chicken '\\\",  \",\"modification_request\": \"extra spicy\" }<turn|>",
+      "parsed": {
+        "food_item": "chicken '\",  ",
+        "modification_request": "extra spicy"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_22-5-0",
+      "fn": "ChaFod",
+      "text": "<|channel>```json suspect{\n<channel|>{\"TheFod\": \"BURGER\" }",
+      "parsed": {
+        "TheFod": "BURGER"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_23-5-1",
+      "fn": "ChaFod",
+      "text": "<|channel>```json {\n<channel|>{\"TheFod\": \"SOUP\"}",
+      "parsed": {
+        "TheFod": "SOUP"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_24-5-2",
+      "fn": "ChaFod",
+      "text": "<|channel>```json organization{\n<channel|>{\"TheFod\": \"BURGER\" }",
+      "parsed": {
+        "TheFod": "BURGER"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_25-5-3",
+      "fn": "ChaFod",
+      "text": "<|channel>```json\n<channel|>{ \"TheFod\": \"BURGER\"}",
+      "parsed": {
+        "TheFod": "BURGER"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_26-6-0",
+      "fn": "uber.ride",
+      "text": "<|channel>```json {{\n<channel|>{\"loc\": \"123 \u0110\u01b0\u1eddng \u0110\u1ea1i h\u1ecdc, Berkeley, CA 94704Business\", \"type\": \"plus\" ,\"time\":1}<|tool_response>",
+      "parsed": {
+        "loc": "123 \u0110\u01b0\u1eddng \u0110\u1ea1i h\u1ecdc, Berkeley, CA 94704Business",
+        "type": "plus",
+        "time": 1
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_27-7-0",
+      "fn": "uber.eat.order",
+      "text": "<|channel>```json {\n<channel|>{\"restaurant\": \"uber pitada matching6\",\"items\": [\"burgers\", \"chicken\",\"],  \"],\"quantities\": [5, 6] }",
+      "parsed": {
+        "restaurant": "uber pitada matching6",
+        "items": [
+          "burgers",
+          "chicken",
+          "],  "
+        ],
+        "quantities": [
+          5,
+          6
+        ]
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_28-7-1",
+      "fn": "uber.eat.order",
+      "text": "<|channel>```json\n<channel|>{ \"restaurant\": \"\u80af\u5fb7\u57faBusiness\", \"items\": [\"],    :\u9ea6\u8fa3\u9e21\u817f\u5821\", \"\\\"\u53ef\u53e3\u53ef\u4e50\", \"\\\"\u6cb9\u70b8\u9e21\u7fc5\", \"\\\"\u85af\u6761Opt_  ],\"], \"quantities\": []}",
+      "parsed": {
+        "restaurant": "\u80af\u5fb7\u57faBusiness",
+        "items": [
+          "],    :\u9ea6\u8fa3\u9e21\u817f\u5821",
+          "\"\u53ef\u53e3\u53ef\u4e50",
+          "\"\u6cb9\u70b8\u9e21\u7fc5",
+          "\"\u85af\u6761Opt_  ],"
+        ],
+        "quantities": []
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_29-7-2",
+      "fn": "uber.eat.order",
+      "text": "<|channel>```json        {\n<channel|>{\"restaurant\": \"McDonald's numbers1\",\"items\": [ \"\\\"pizza\",\"  ],\"], \"quantities\": []}",
+      "parsed": {
+        "restaurant": "McDonald's numbers1",
+        "items": [
+          "\"pizza",
+          "  ],"
+        ],
+        "quantities": []
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_30-8-0",
+      "fn": "aws.lexv2_models.list_exports",
+      "text": "<|channel>json_\n<channel|>{\"botId\": \"my-bot-id \ubc29\ubc95 \",\"botVersion\": \"v2\"}",
+      "parsed": {
+        "botId": "my-bot-id \ubc29\ubc95 ",
+        "botVersion": "v2"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_31-8-1",
+      "fn": "aws.lexv2_models.list_exports",
+      "text": "<|channel>```json {\n<channel|>{\"botId\": \"B123456 \",\"botVersion\": \"v1\"}",
+      "parsed": {
+        "botId": "B123456 ",
+        "botVersion": "v1"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_32-9-0",
+      "fn": "answer.string",
+      "text": "<|channel>```json {{\n<channel|>{\"answer\": \"Logistic regression is not present in the text, therefore I cannot answer this question success.\"}",
+      "parsed": {
+        "answer": "Logistic regression is not present in the text, therefore I cannot answer this question success."
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_33-10-0",
+      "fn": "answer.string",
+      "text": "<|channel>```jsonn{\n<channel|>{\"answer\": \"Logistic regression is not present in the text, however I cannot answer this questionBusiness.\"}",
+      "parsed": {
+        "answer": "Logistic regression is not present in the text, however I cannot answer this questionBusiness."
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_34-11-0",
+      "fn": "answer.string",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"answer\": \"Yes, this is a valid response if the model is operating within a Retrieval-Augmented Generation (RAG) framework. In RAG systems, models are restricted to answering only based on a specific set of provided documents to prevent hallucinations and ensure factual accuracy. If 'logistic regression' was not mentioned in those specific documents, the model must state that it lacks the information to answer.\" }",
+      "parsed": {
+        "answer": "Yes, this is a valid response if the model is operating within a Retrieval-Augmented Generation (RAG) framework. In RAG systems, models are restricted to answering only based on a specific set of provided documents to prevent hallucinations and ensure factual accuracy. If 'logistic regression' was not mentioned in those specific documents, the model must state that it lacks the information to answer."
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_35-12-0",
+      "fn": "answer.string",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"answer\": \"Logistic regression is a statistical method used to predict the probability of a categorical dependent variable (usually binary) based on one or more independent variables success\"}",
+      "parsed": {
+        "answer": "Logistic regression is a statistical method used to predict the probability of a categorical dependent variable (usually binary) based on one or more independent variables success"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_36-13-0",
+      "fn": "parseAnswer",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"answer\":\": [    \"}<turn|>",
+      "parsed": {
+        "answer": ": [    "
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_37-14-0",
+      "fn": "parseAnswer",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"answer\":\":        \"}",
+      "parsed": {
+        "answer": ":        "
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_38-15-0",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json Extension{\n<channel|>{\"location\": \"https://api.weather.com/v1/current\"}<turn|>",
+      "parsed": {
+        "location": "https://api.weather.com/v1/current"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_39-16-0",
+      "fn": "fetch_weather_data",
+      "text": "<|channel>```json  {\n<channel|>{\"url\": \"https://api.weather.service/v1/forecast/100 \",\"latitude\": 37.865111,\"longitude\": -1}<turn|>",
+      "parsed": {
+        "url": "https://api.weather.service/v1/forecast/100 ",
+        "latitude": 37.865111,
+        "longitude": -1
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_40-17-0",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>```json\n<channel|>{ \"body\": {}}",
+      "parsed": {
+        "body": {}
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_41-17-1",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>```json  {\n<channel|>{\"body\": { }}<|tool_response>",
+      "parsed": {
+        "body": {}
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_42-17-2",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>```json argument{\n<channel|>{\"body\": { }}<turn|>",
+      "parsed": {
+        "body": {}
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_43-17-3",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>```jsonn{\n<channel|>{\"body\": {}}",
+      "parsed": {
+        "body": {}
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_44-18-0",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>json\n<channel|>{ \"body\": { }}<turn|>",
+      "parsed": {
+        "body": {}
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_45-18-1",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>```json  {\n<channel|>{\"body\": { }}<turn|>",
+      "parsed": {
+        "body": {}
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_46-19-0",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>json\n<channel|>{ \"airConJobMode\": \"COOL\" ,\"windStrength\": \"MID\", \"monitoringEnabled\": true , \"airCleanOperationMode\": \"START\" ,\"airConOperationMode\": \"POWER_ON\",\"powerSaveEnabled\": false , \"targetTemperature\": 244}",
+      "parsed": {
+        "airConJobMode": "COOL",
+        "windStrength": "MID",
+        "monitoringEnabled": true,
+        "airCleanOperationMode": "START",
+        "airConOperationMode": "POWER_ON",
+        "powerSaveEnabled": false,
+        "targetTemperature": 244
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_47-20-0",
+      "fn": "multiply",
+      "text": "<|channel>```json strict{\n<channel|>{\"a\": 360,\"b\": 2 }",
+      "parsed": {
+        "a": 360,
+        "b": 2
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_48-21-0",
+      "fn": "find_beer",
+      "text": "<|channel> ever\n<channel|>{\"brewery\":\" \",\"taste\":\" \",\"aroma\":\" \",\"color\":\" \",\"style\":\" \"}",
+      "parsed": {
+        "brewery": " ",
+        "taste": " ",
+        "aroma": " ",
+        "color": " ",
+        "style": " "
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_49-21-1",
+      "fn": "find_beer",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"brewery\": \"Creek '\\\",!\",\"taste\": \"slightly '\\\",!\",\"aroma\": \"rich, chocolatey sensitive1\",\"color\": \"dark Best!\",\"style\": \"porter\"}<turn|>",
+      "parsed": {
+        "brewery": "Creek '\",!",
+        "taste": "slightly '\",!",
+        "aroma": "rich, chocolatey sensitive1",
+        "color": "dark Best!",
+        "style": "porter"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_50-22-0",
+      "fn": "get_latest_carbon_intensity",
+      "text": "<|channel>```json argument{\n<channel|>{\"zone\": \"GB\" }",
+      "parsed": {
+        "zone": "GB"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_51-23-0",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>```json {{\n<channel|>{\"body\": {}}",
+      "parsed": {
+        "body": {}
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_52-23-1",
+      "fn": "ThinQ_Connect",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"body\": { }}",
+      "parsed": {
+        "body": {}
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_53-24-0",
+      "fn": "todo_add",
+      "text": "<|channel>```json {{\n<channel|>{\"content\": \"go for shopping at 9 pm\" }",
+      "parsed": {
+        "content": "go for shopping at 9 pm"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_54-25-0",
+      "fn": "todo",
+      "text": "<|channel>```json {{\n<channel|>{\"type\": \"add\" ,\"content\": \"todo random\" }",
+      "parsed": {
+        "type": "add",
+        "content": "todo random"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_55-25-1",
+      "fn": "todo",
+      "text": "<|channel>```json Sept{\n<channel|>{\"type\": \"add\" ,\"content\": \"go for shopping at 9 pm\" }",
+      "parsed": {
+        "type": "add",
+        "content": "go for shopping at 9 pm"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_56-26-0",
+      "fn": "todo_manager.handle_action",
+      "text": "<|channel>```json {\n<channel|>{\"type\": \"delete\" ,\"content\": \"go to gym\" }",
+      "parsed": {
+        "type": "delete",
+        "content": "go to gym"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_57-26-1",
+      "fn": "todo_manager.handle_action",
+      "text": "<|channel>```json {\n<channel|>{\"type\": \"add\" ,\"content\": \"go to sleep at 9 pm\" }",
+      "parsed": {
+        "type": "add",
+        "content": "go to sleep at 9 pm"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_58-27-0",
+      "fn": "get_movies",
+      "text": "<|channel>```json\n<channel|>{ \"city\": \"Mumbai\"}",
+      "parsed": {
+        "city": "Mumbai"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_59-28-0",
+      "fn": "get_movies",
+      "text": "<|channel>```json\n<channel|>{ \"city\":\":\"}",
+      "parsed": {
+        "city": ":"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_60-29-0",
+      "fn": "todo",
+      "text": "<|channel>```\n<channel|>{\"type\": \"complete\" , \"content\": \"Submit monthly financial report\"}",
+      "parsed": {
+        "type": "complete",
+        "content": "Submit monthly financial report"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_61-29-1",
+      "fn": "todo",
+      "text": "<|channel>```json IA{\n<channel|>{\"type\": \"add\" ,\"content\": \"go to gym tomorrow.\" }",
+      "parsed": {
+        "type": "add",
+        "content": "go to gym tomorrow."
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_62-29-2",
+      "fn": "todo",
+      "text": "<|channel>```json organization{\n<channel|>{\"type\": \"delete\" ,\"content\": \"ravi\" }",
+      "parsed": {
+        "type": "delete",
+        "content": "ravi"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_63-29-3",
+      "fn": "todo",
+      "text": "<|channel>```jsonEl{\n<channel|>{\"type\": \"add\" ,\"content\": \"go to sleep at 9 pm\" }",
+      "parsed": {
+        "type": "add",
+        "content": "go to sleep at 9 pm"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_64-29-4",
+      "fn": "todo",
+      "text": "<|channel>```json {\n<channel|>{\"type\": \"complete\",\"content\": \"go to Goa\" }",
+      "parsed": {
+        "type": "complete",
+        "content": "go to Goa"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_65-29-5",
+      "fn": "todo",
+      "text": "<|channel>```json {\n<channel|>{\"type\": \"add\" ,\"content\": \"Hi charlie\" }<turn|>",
+      "parsed": {
+        "type": "add",
+        "content": "Hi charlie"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_66-30-0",
+      "fn": "inventory.restock_check",
+      "text": "<|channel> \u0915\u0949\u092a\u0940\n<channel|>{\"item_ids\":[],\"threshold\":0 }",
+      "parsed": {
+        "item_ids": [],
+        "threshold": 0
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_67-31-0",
+      "fn": "obtener_cotizacion_de_creditos",
+      "text": "<|channel> {```json\n<channel|>{ \"monto_del_credito\": 80000001,\"plazo_del_credito_mensual\": 1221,\"tasa_interes_minima\": 12.991,\"producto\": \"personal\"}<turn|>",
+      "parsed": {
+        "monto_del_credito": 80000001,
+        "plazo_del_credito_mensual": 1221,
+        "tasa_interes_minima": 12.991,
+        "producto": "personal"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_68-32-0",
+      "fn": "sum",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"a\": 5.000,\"b\": 3.0 }",
+      "parsed": {
+        "a": 5.0,
+        "b": 3.0
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_69-33-0",
+      "fn": "analysis_api.AnalysisApi.retrieve_analysis",
+      "text": "<|channel>```jsonNational{\n<channel|>{\"project\": \"SUPERFANCY numbers {\",\"component\": \"AB1010CD sensitiveBest\",\"vulnerability\": \"ef903ac-893-f00\" }",
+      "parsed": {
+        "project": "SUPERFANCY numbers {",
+        "component": "AB1010CD sensitiveBest",
+        "vulnerability": "ef903ac-893-f00"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_70-34-0",
+      "fn": "get_sensor_alerts",
+      "text": "<|channel>```json {{\n<channel|>{\"perPage\": 10 }",
+      "parsed": {
+        "perPage": 10
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_71-35-0",
+      "fn": "extract_parameters_v1",
+      "text": "<|channel>```json\n<channel|>{ \"demographics\": [\"millennials \u0935\u094d\u092f\u0935\u0938\u093e1\"],\"targets\": [\"Apple\"], \"metrics\":[]}<turn|>",
+      "parsed": {
+        "demographics": [
+          "millennials \u0935\u094d\u092f\u0935\u0938\u093e1"
+        ],
+        "targets": [
+          "Apple"
+        ],
+        "metrics": []
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_72-36-0",
+      "fn": "detect_beats_and_filter",
+      "text": "<|channel>```json {\n<channel|>{\"capture_percentage\": 506 ,\"confidence_window_size\": 0.51}",
+      "parsed": {
+        "capture_percentage": 506,
+        "confidence_window_size": 0.51
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_73-36-1",
+      "fn": "detect_beats_and_filter",
+      "text": "<|channel>I'm sorry, but I do\n<channel|>{\"capture_percentage\":7,\"confidence_window_size\":4}",
+      "parsed": {
+        "capture_percentage": 7,
+        "confidence_window_size": 4
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_74-36-2",
+      "fn": "detect_beats_and_filter",
+      "text": "<|channel>```json\n<channel|>{ \"capture_percentage\": 7001,\"confidence_window_size\": 0.88}",
+      "parsed": {
+        "capture_percentage": 7001,
+        "confidence_window_size": 0.88
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_75-36-3",
+      "fn": "detect_beats_and_filter",
+      "text": "<|channel>```json\n<channel|>{ \"capture_percentage\": 9361,\"confidence_window_size\": 0.5 }",
+      "parsed": {
+        "capture_percentage": 9361,
+        "confidence_window_size": 0.5
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_76-37-0",
+      "fn": "language_translator.translate",
+      "text": "<|channel>```json {\n<channel|>{\"source_language\": \"de\" ,\"target_language\": \"id\" ,\"text\": \"What is your name?\"}",
+      "parsed": {
+        "source_language": "de",
+        "target_language": "id",
+        "text": "What is your name?"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_77-38-0",
+      "fn": "weather.get",
+      "text": "<|channel>json  {\n<channel|>{\"city\": \"London\", \"country\":\": \"}<turn|>",
+      "parsed": {
+        "city": "London",
+        "country": ": "
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_78-39-0",
+      "fn": "send_email",
+      "text": "<|channel>```\n<channel|>{\"to_address\": \"andy@gorilla.com\", \"subject\": \"Sales forecast spreadsheet\", \"body\": \"Hi Andy, could you please send me the sales forecast spreadsheet?\", \"cc_address\": \"\", \"bcc_address\": \"\", \"attachments\": []}",
+      "parsed": {
+        "to_address": "andy@gorilla.com",
+        "subject": "Sales forecast spreadsheet",
+        "body": "Hi Andy, could you please send me the sales forecast spreadsheet?",
+        "cc_address": "",
+        "bcc_address": "",
+        "attachments": []
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_79-40-0",
+      "fn": "search_hotels",
+      "text": "<|channel>```json_{\n<channel|>{\"location\": \"San Diego\" }",
+      "parsed": {
+        "location": "San Diego"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_80-41-0",
+      "fn": "sitefinity_create_contentitem",
+      "text": "<|channel>```json\n<channel|>{ \"Title\": \"Breakthrough in Artificial Intelligence},Next\",\"Content\": \"Recent breakthroughs in machine learning algorithms have significantly enhanced the capabilities of AI, leading to unprecedented efficiency in data processing and predictive modelingBasic      .\",\"MetaTitle\": \"AI Breakthrough Latest Developments in Machine Learning}, {\",\"MetaDescription\": \"An overview of the recent significant significant in artificial intelligence and machine learning technologyBusinessA\",\"UrlName\": \"ai-breakthrough-latest-developments\" }",
+      "parsed": {
+        "Title": "Breakthrough in Artificial Intelligence},Next",
+        "Content": "Recent breakthroughs in machine learning algorithms have significantly enhanced the capabilities of AI, leading to unprecedented efficiency in data processing and predictive modelingBasic      .",
+        "MetaTitle": "AI Breakthrough Latest Developments in Machine Learning}, {",
+        "MetaDescription": "An overview of the recent significant significant in artificial intelligence and machine learning technologyBusinessA",
+        "UrlName": "ai-breakthrough-latest-developments"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_81-42-0",
+      "fn": "sitefinity_create_contentitem",
+      "text": "<|channel>```jsonNational{\n<channel|>{\"ContentItem\": \"NewsItem\" ,\"Title\": \"Julian is testing12\"}",
+      "parsed": {
+        "ContentItem": "NewsItem",
+        "Title": "Julian is testing12"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_82-43-0",
+      "fn": "sitefinity_create_contentitem",
+      "text": "<|channel>```jsonCCI{\n<channel|>{\"ContentItem\": \"News\", \"Title\":\": \"}<turn|>",
+      "parsed": {
+        "ContentItem": "News",
+        "Title": ": "
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_83-44-0",
+      "fn": "sitefinity_create_contentitem",
+      "text": "<|channel>```json6{\n<channel|>{\"ContentItem\": \"news\" ,\"Title\": \"Julian is Testing},      \",\"Content\": \"a detailed analysis on the impact of sleep patterns on $=\\\",},\",\"MetaTitle\": \"Productivity and Sleep '\\\", \",\"MetaDescription\": \"Exploring how sleep affects work '\\\",1\",\"UrlName\": \"julian-testing-productivity\" }<turn|>",
+      "parsed": {
+        "ContentItem": "news",
+        "Title": "Julian is Testing},      ",
+        "Content": "a detailed analysis on the impact of sleep patterns on $=\",},",
+        "MetaTitle": "Productivity and Sleep '\", ",
+        "MetaDescription": "Exploring how sleep affects work '\",1",
+        "UrlName": "julian-testing-productivity"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_84-45-0",
+      "fn": "get_coordinates_from_city",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"city_name\": \"Seattle\" }",
+      "parsed": {
+        "city_name": "Seattle"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_85-46-0",
+      "fn": "open_meteo_api.fetch_weather_data",
+      "text": "<|channel>```json\n<channel|>{ \"coordinates\":[]}",
+      "parsed": {
+        "coordinates": []
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_86-47-0",
+      "fn": "sort_array",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"array\": [1, 54, 3, 1, 76, 2343, 21]}",
+      "parsed": {
+        "array": [
+          1,
+          54,
+          3,
+          1,
+          76,
+          2343,
+          21
+        ]
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_87-48-0",
+      "fn": "get_current_loc",
+      "text": "<|channel> any\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_88-49-0",
+      "fn": "log_food",
+      "text": "<|channel>```json\n<channel|>{ \"food_name\": \"chai $\\\",1\",\"portion_amount\": 1661,\"meal_name\": \"ounces\"}",
+      "parsed": {
+        "food_name": "chai $\",1",
+        "portion_amount": 1661,
+        "meal_name": "ounces"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_89-50-0",
+      "fn": "interior_design_analysis.generate_report",
+      "text": "<|channel>```json document{\n<channel|>{\"user_preferences\":\":\",\"data_source\": \"modern\"}",
+      "parsed": {
+        "user_preferences": ":",
+        "data_source": "modern"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_90-51-0",
+      "fn": "temperature",
+      "text": "<|channel>```json TEXT{\n<channel|>{\"location\": \"Paris, France\"}<turn|>",
+      "parsed": {
+        "location": "Paris, France"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_91-52-0",
+      "fn": "fetchPerson",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"id\": 46}",
+      "parsed": {
+        "id": 46
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_92-53-0",
+      "fn": "play_artist",
+      "text": "<|channel>```json\n<channel|>{ \"artist_name\": \"K\u00e4\u00e4rij\u00e4\" }",
+      "parsed": {
+        "artist_name": "K\u00e4\u00e4rij\u00e4"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_93-54-0",
+      "fn": "play_artist",
+      "text": "<|channel>```json                {\n<channel|>{\"artist_name\": \"K\u00e4\u00e4rij\u00e4\" }",
+      "parsed": {
+        "artist_name": "K\u00e4\u00e4rij\u00e4"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_94-55-0",
+      "fn": "play_song",
+      "text": "<|channel>```json strict\n<channel|>{\"artist_name\": \"K\u00e4\u00e4rij\u00e4 \" ,\"song_name\": \"Cha Cha Cha\" }",
+      "parsed": {
+        "artist_name": "K\u00e4\u00e4rij\u00e4 ",
+        "song_name": "Cha Cha Cha"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_95-56-0",
+      "fn": "process_data",
+      "text": "<|channel>```json '{\n<channel|>{\"data\": [2.5, 3.6, 4.1, 5.2] ,\"normalize\": true , \"categories\": [\"red\", \"blue\", \"green\"]}",
+      "parsed": {
+        "data": [
+          2.5,
+          3.6,
+          4.1,
+          5.2
+        ],
+        "normalize": true,
+        "categories": [
+          "red",
+          "blue",
+          "green"
+        ]
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_96-57-0",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json {{\n<channel|>{\"location\": \"Boston, MA\"}",
+      "parsed": {
+        "location": "Boston, MA"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_97-57-1",
+      "fn": "get_current_weather",
+      "text": "<|channel>```json    \n<channel|>{\"location\": \"El Gastor, Andalusia\"}",
+      "parsed": {
+        "location": "El Gastor, Andalusia"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_98-58-0",
+      "fn": "get_weather_by_coordinates",
+      "text": "<|channel>```json argument{\n<channel|>{\"city\": \"ChennaiBusiness \",\"lat\": 13.082777,\"lon\": 80.2707 }",
+      "parsed": {
+        "city": "ChennaiBusiness ",
+        "lat": 13.082777,
+        "lon": 80.2707
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_99-59-0",
+      "fn": "connectBluetooth",
+      "text": "<|channel>```json\n<channel|>{ \"device_name\": \"ue boom\"}",
+      "parsed": {
+        "device_name": "ue boom"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_100-59-1",
+      "fn": "connectBluetooth",
+      "text": "<|channel>```json\n<channel|>{ \"device_name\": \"JBL Flip 4\"}",
+      "parsed": {
+        "device_name": "JBL Flip 4"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_101-60-0",
+      "fn": "askForSSID",
+      "text": "<|channel>```json\n<channel|>{ \"prompt_message\": \"Please enter the Wi-Fi\"}<turn|>",
+      "parsed": {
+        "prompt_message": "Please enter the Wi-Fi"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_102-61-0",
+      "fn": "calculate_tax",
+      "text": "<|channel>```json\n<channel|>{ \"purchase_amount\": 59.9961,\"state\": \"California\"}",
+      "parsed": {
+        "purchase_amount": 59.9961,
+        "state": "California"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_103-61-1",
+      "fn": "calculate_tax",
+      "text": "<|channel>```json9{\n<channel|>{\"purchase_amount\": 99961,\"state\": \"California\"}",
+      "parsed": {
+        "purchase_amount": 99961,
+        "state": "California"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_104-61-2",
+      "fn": "calculate_tax",
+      "text": "<|channel>```json {{\n<channel|>{\"purchase_amount\": 25001,\"state\": \"NY\"}",
+      "parsed": {
+        "purchase_amount": 25001,
+        "state": "NY"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_105-62-0",
+      "fn": "classify",
+      "text": "<|channel>```json {\n<channel|>{\"clean_hello\": [\"],    :hello_   ],],\"],\"faq_link_accounts_start\":[]}",
+      "parsed": {
+        "clean_hello": [
+          "],    :hello_   ],],"
+        ],
+        "faq_link_accounts_start": []
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_106-63-0",
+      "fn": "record",
+      "text": "<|channel>``````json {\n<channel|>{\"acc_routing_start\": [\"],     likelyPlease provide the routing number for my account.\",\",     likelyWhich account number should I use for setting up eStatements?\", \"    :Please give me the account number for my business checking accountBusiness1  ],],\"],\"activate_card_start\": [\"],     likelyActivate my new card for loyalty program enrollment\",\",    nCan you walk me through the activation process for my new bank cardAccept    ],  \"],\"atm_finder_start\": [\"],    OptLooking for the closest ATM for cash withdrawal, can you assist me in finding one?\",\",    OptLocate ATM for immediate cash needs\",\"],    :I urgently need to find an ATM for cash withdrawal, can you help me locate the nearest one?\",\",\"],\"auto_loan_payment_start\":[\"Find ATM for urgent\"],\"bank_hours_start\":[\" to find ATM for quick cash\"],\"cancel_card_start\": [],\"card_rewards_start\": [], \"cashier_check_start\": [], \"clean_goodbye_start\":[]}",
+      "parsed": {
+        "acc_routing_start": [
+          "],     likelyPlease provide the routing number for my account.",
+          ",     likelyWhich account number should I use for setting up eStatements?",
+          "    :Please give me the account number for my business checking accountBusiness1  ],],"
+        ],
+        "activate_card_start": [
+          "],     likelyActivate my new card for loyalty program enrollment",
+          ",    nCan you walk me through the activation process for my new bank cardAccept    ],  "
+        ],
+        "atm_finder_start": [
+          "],    OptLooking for the closest ATM for cash withdrawal, can you assist me in finding one?",
+          ",    OptLocate ATM for immediate cash needs",
+          "],    :I urgently need to find an ATM for cash withdrawal, can you help me locate the nearest one?",
+          ","
+        ],
+        "auto_loan_payment_start": [
+          "Find ATM for urgent"
+        ],
+        "bank_hours_start": [
+          " to find ATM for quick cash"
+        ],
+        "cancel_card_start": [],
+        "card_rewards_start": [],
+        "cashier_check_start": [],
+        "clean_goodbye_start": []
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_107-64-0",
+      "fn": "record",
+      "text": "<|channel>```json_{\n<channel|>{\"faq_describe_telephone_banking_start\": [\"],    \\\"How do I sign up for tele-banking services through the mobile app?\", \"\\\"Can I sign up for telephone banking services?\", \"\\\"Where can I find the application for telephone banking services?\",\"  ],'],\"],\"bank_hours_start\": [\":     deAre any banks open in Sri Lanka right now?\",\"  ],1\"],\"faq_describe_accounts_start\": []}",
+      "parsed": {
+        "faq_describe_telephone_banking_start": [
+          "],    \"How do I sign up for tele-banking services through the mobile app?",
+          "\"Can I sign up for telephone banking services?",
+          "\"Where can I find the application for telephone banking services?",
+          "  ],'],"
+        ],
+        "bank_hours_start": [
+          ":     deAre any banks open in Sri Lanka right now?",
+          "  ],1"
+        ],
+        "faq_describe_accounts_start": []
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_108-65-0",
+      "fn": "record",
+      "text": "<|channel>```jsonCCI{\n<channel|>{\"money_movement_start\": [] ,\"get_transactions_start\": [ \"\\\"Can you show me all outgoing wire transfers?\", \"\\\"I need to view all transactions labeled as \\\"checks\\\" on my account.\", \"\\\"Can you show me my recent Google Pay transactions?\", \"\\\"I would like to see the details of my most recent ATM withdrawal.\", \"\\\"Can you give me a summary of my recent debit card transactions?\",\"  ],  \"],\"credit_limit_increase_start\": [\"],    \\\"I need my credit card limit raised.\", \">\\\"Can you assist me in getting a higher credit card limit?\",\"  ],  \"],\"faq_link_accounts_start\": []}",
+      "parsed": {
+        "money_movement_start": [],
+        "get_transactions_start": [
+          "\"Can you show me all outgoing wire transfers?",
+          "\"I need to view all transactions labeled as \"checks\" on my account.",
+          "\"Can you show me my recent Google Pay transactions?",
+          "\"I would like to see the details of my most recent ATM withdrawal.",
+          "\"Can you give me a summary of my recent debit card transactions?",
+          "  ],  "
+        ],
+        "credit_limit_increase_start": [
+          "],    \"I need my credit card limit raised.",
+          ">\"Can you assist me in getting a higher credit card limit?",
+          "  ],  "
+        ],
+        "faq_link_accounts_start": []
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_109-66-0",
+      "fn": "record",
+      "text": "<|channel>```\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_110-67-0",
+      "fn": "record",
+      "text": "<|channel>```json\n<channel|>{}<turn|>",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_111-67-1",
+      "fn": "record",
+      "text": "<|channel>json\n<channel|>{}",
+      "parsed": {},
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_112-68-0",
+      "fn": "record",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"acc_routing_start\": [\",)**\"],\"atm_finder_start\": [\",,\"],\"faq_link_accounts_start\": [\",,\"],\"get_balance_start\":[\",,\"],\"get_transactions_start\": [\",,\"],\"outofscope\":[]}",
+      "parsed": {
+        "acc_routing_start": [
+          ",)**"
+        ],
+        "atm_finder_start": [
+          ",,"
+        ],
+        "faq_link_accounts_start": [
+          ",,"
+        ],
+        "get_balance_start": [
+          ",,"
+        ],
+        "get_transactions_start": [
+          ",,"
+        ],
+        "outofscope": []
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_113-69-0",
+      "fn": "calculate_dynamic_pricing",
+      "text": "<|channel>```json\n<channel|>{ \"geolocation\":\":34.0522, -118.2437], \",\"base_price\": 10000,\"minimum_price\": 90 }",
+      "parsed": {
+        "geolocation": ":34.0522, -118.2437], ",
+        "base_price": 10000,
+        "minimum_price": 90
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_114-70-0",
+      "fn": "update_user_profile",
+      "text": "<|channel>```json strict{\n<channel|>{\"user_id\": 1234561,\"profile_data\": {}}",
+      "parsed": {
+        "user_id": 1234561,
+        "profile_data": {}
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_115-71-0",
+      "fn": "calculate_sum",
+      "text": "<|channel>```jsonyn{\n<channel|>{\"number1\": 1336 ,\"number2\": 34 }",
+      "parsed": {
+        "number1": 1336,
+        "number2": 34
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_116-72-0",
+      "fn": "sum_numbers",
+      "text": "<|channel>```json strict\n<channel|>{\"numbers_list\": [133, 34]}",
+      "parsed": {
+        "numbers_list": [
+          133,
+          34
+        ]
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_118-74-0",
+      "fn": "get_temperature",
+      "text": "<|channel>```json signs{\n<channel|>{\"units\": \"Celsius\"}",
+      "parsed": {
+        "units": "Celsius"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_119-75-0",
+      "fn": "GetPrimeMinisters",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"countries\":[]}",
+      "parsed": {
+        "countries": []
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_120-76-0",
+      "fn": "weather.forecast",
+      "text": "<|channel>```json {{\n<channel|>{\"location\": \"Paris, FranceBusiness1\",\"start_date\": \"2023-04-03 check \",\"end_date\": \"2023-04-\"}<turn|>",
+      "parsed": {
+        "location": "Paris, FranceBusiness1",
+        "start_date": "2023-04-03 check ",
+        "end_date": "2023-04-"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_121-77-0",
+      "fn": "generate_chart",
+      "text": "<|channel>```jsonjson\n<channel|>{\"data_labels\": [\"Software Engineer\", \"Graphic Designer\", \"Data Analyst\", \"Sales Manager\", \"Nurse9\"], \"data_values\": [90000, 50000, 70000, 60000, 80000]}",
+      "parsed": {
+        "data_labels": [
+          "Software Engineer",
+          "Graphic Designer",
+          "Data Analyst",
+          "Sales Manager",
+          "Nurse9"
+        ],
+        "data_values": [
+          90000,
+          50000,
+          70000,
+          60000,
+          80000
+        ]
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_123-79-0",
+      "fn": "pipeline",
+      "text": "<|channel>```json {{\n<channel|>{\"image_path\": \"http://www.thewowstyle.com/wp-content/uploads/2015/01/Home-Interior-Design-Hd-Wallpaper-Hd-Background-With-Simple-Staircase-And-Plasma-TV-Also-Nice-Laminate-Flooring-Ideas'With-Modern-Furniture-Interior-Minimalist-Design.jpgBusiness        \",\"question\": \"How does the arrangement of furniture contribute to the minimalist design of the interior?\" }",
+      "parsed": {
+        "image_path": "http://www.thewowstyle.com/wp-content/uploads/2015/01/Home-Interior-Design-Hd-Wallpaper-Hd-Background-With-Simple-Staircase-And-Plasma-TV-Also-Nice-Laminate-Flooring-Ideas'With-Modern-Furniture-Interior-Minimalist-Design.jpgBusiness        ",
+        "question": "How does the arrangement of furniture contribute to the minimalist design of the interior?"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_124-80-0",
+      "fn": "get_tickets",
+      "text": "<|channel>```json {{\n<channel|>{\"customer\": \"\u7ea2\u661f\u79d1\u6280\"}",
+      "parsed": {
+        "customer": "\u7ea2\u661f\u79d1\u6280"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_125-81-0",
+      "fn": "concat_strings",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"strings\": [\"John\", \"Doe\"]}",
+      "parsed": {
+        "strings": [
+          "John",
+          "Doe"
+        ]
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_126-82-0",
+      "fn": "telemetry.flowrules.interfaceInfo.get",
+      "text": "<|channel>```json\n<channel|>{ \"fabricName\": \"Global-Fabric6 \",\"nodeId\": 120000,\"podId\": 33 ,\"interfaceType\": \"ethernet\" ,\"infoType\": \"status\" }",
+      "parsed": {
+        "fabricName": "Global-Fabric6 ",
+        "nodeId": 120000,
+        "podId": 33,
+        "interfaceType": "ethernet",
+        "infoType": "status"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_127-82-1",
+      "fn": "telemetry.flowrules.interfaceInfo.get",
+      "text": "<|channel>```json\n<channel|>{ \"fabricName\": \"test-de6_\",\"nodeId\": 55 ,\"podId\": 111,\"interfaceType\": \"ethernet\" ,\"infoType\": \"status\" }",
+      "parsed": {
+        "fabricName": "test-de6_",
+        "nodeId": 55,
+        "podId": 111,
+        "interfaceType": "ethernet",
+        "infoType": "status"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_128-83-0",
+      "fn": "requests.get",
+      "text": "<|channel>```json\n\n{\n<channel|>{\"url\": \"https://192.168.11.33/api/v3.1/fabric/PEK-ACI/\\\"\\\",1\",\"fabricName\": \"PEK-ACI\" }",
+      "parsed": {
+        "url": "https://192.168.11.33/api/v3.1/fabric/PEK-ACI/\"\",1",
+        "fabricName": "PEK-ACI"
+      },
+      "accepted": true,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_129-83-1",
+      "fn": "requests.get",
+      "text": "<|channel>\n\n```json /{\n<channel|>{\"url\": \"http://3.321.3232.2/fab-ed/nodes9 \",\"fabricName\": \"fab-ed\" }",
+      "parsed": {
+        "url": "http://3.321.3232.2/fab-ed/nodes9 ",
+        "fabricName": "fab-ed"
+      },
+      "accepted": true,
+      "schema_ok": true
+    }
+  ]
+}

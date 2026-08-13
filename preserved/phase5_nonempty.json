@@ -1,0 +1,254 @@
+{
+  "variant": "j1",
+  "emission": "sample",
+  "nonempty": true,
+  "rows": [
+    {
+      "bound": 0.1,
+      "n": 12,
+      "accepted": 12,
+      "parsed": 12,
+      "nonempty_args": 12,
+      "arg_correct": 1,
+      "arg_total": 19,
+      "steps": [],
+      "examples": [
+        "{\"user_id\":77890,\"special\":\":black\"}",
+        "{\"repos\":\":\"}<turn|>",
+        "{\"loc\":\": \",\"type\":\"black\",\"time\":2}",
+        "{\"loc\":\":{{    loc_\\\":221B Baker Street, Berkeley, CA, USA1  \",\"type\":\"plus\",\"time\":66000}"
+      ],
+      "predictions": [
+        {
+          "id": "live_simple_0-0-0",
+          "fn": "get_user_info",
+          "text": "{\"user_id\":77890,\"special\":\":black\"}",
+          "parsed": {
+            "user_id": 77890,
+            "special": ":black"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_1-1-0",
+          "fn": "github_star",
+          "text": "{\"repos\":\":\"}<turn|>",
+          "parsed": {
+            "repos": ":"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_2-2-0",
+          "fn": "uber.ride",
+          "text": "{\"loc\":\": \",\"type\":\"black\",\"time\":2}",
+          "parsed": {
+            "loc": ": ",
+            "type": "black",
+            "time": 2
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_3-2-1",
+          "fn": "uber.ride",
+          "text": "{\"loc\":\":{{    loc_\\\":221B Baker Street, Berkeley, CA, USA1  \",\"type\":\"plus\",\"time\":66000}",
+          "parsed": {
+            "loc": ":{{    loc_\":221B Baker Street, Berkeley, CA, USA1  ",
+            "type": "plus",
+            "time": 66000
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_4-3-0",
+          "fn": "get_current_weather",
+          "text": "{\"location\":\",\"}",
+          "parsed": {
+            "location": ","
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_5-3-1",
+          "fn": "get_current_weather",
+          "text": "{\"location\":\" \"}<turn|>",
+          "parsed": {
+            "location": " "
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_6-3-2",
+          "fn": "get_current_weather",
+          "text": "{\"location\":\" \"}<turn|>",
+          "parsed": {
+            "location": " "
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_7-3-3",
+          "fn": "get_current_weather",
+          "text": "{\"location\":\":\"}<turn|>",
+          "parsed": {
+            "location": ":"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_8-3-4",
+          "fn": "get_current_weather",
+          "text": "{\"location\":\":{\"}",
+          "parsed": {
+            "location": ":{"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_9-3-5",
+          "fn": "get_current_weather",
+          "text": "{\"location\":\"*\"}",
+          "parsed": {
+            "location": "*"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_10-3-6",
+          "fn": "get_current_weather",
+          "text": "{\"location\":\"=\"}<turn|>",
+          "parsed": {
+            "location": "="
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_11-3-7",
+          "fn": "get_current_weather",
+          "text": "{\"location\":\" \"}",
+          "parsed": {
+            "location": " "
+          },
+          "accepted": true
+        }
+      ],
+      "per_key": [
+        {
+          "key": "user_id",
+          "want": "7890",
+          "got": "77890",
+          "ok": false
+        },
+        {
+          "key": "special",
+          "want": "black",
+          "got": ":black",
+          "ok": false
+        },
+        {
+          "key": "repos",
+          "want": "ShishirPatil/gorilla,gorilla-llm/gorilla-cli",
+          "got": ":",
+          "ok": false
+        },
+        {
+          "key": "aligned",
+          "want": "True",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "loc",
+          "want": "2020 Addison Street, Berkeley, CA, USA",
+          "got": ": ",
+          "ok": false
+        },
+        {
+          "key": "type",
+          "want": "comfort",
+          "got": "black",
+          "ok": false
+        },
+        {
+          "key": "time",
+          "want": "600",
+          "got": "2",
+          "ok": false
+        },
+        {
+          "key": "loc",
+          "want": "221B Baker Street, Berkeley, CA, USA",
+          "got": ":{{    loc_\":221B Baker Street, Berkeley, CA, USA1  ",
+          "ok": false
+        },
+        {
+          "key": "type",
+          "want": "plus",
+          "got": "plus",
+          "ok": true
+        },
+        {
+          "key": "time",
+          "want": "600",
+          "got": "66000",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Tel Aviv, Israel",
+          "got": ",",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Divin\u00f3polis, MG",
+          "got": " ",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "San Francisco, CA",
+          "got": " ",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Riga, Latvia",
+          "got": ":",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "London, UK",
+          "got": ":{",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Hyderabad, India",
+          "got": "*",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Mariposa, CA",
+          "got": "=",
+          "ok": false
+        },
+        {
+          "key": "unit",
+          "want": "celsius",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Naples, FL",
+          "got": " ",
+          "ok": false
+        }
+      ]
+    }
+  ]
+}

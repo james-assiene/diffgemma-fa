@@ -1,0 +1,22 @@
+[load] devices=[CudaDevice(id=0)]
+[load] params loaded in 36.2s
+[mem] after load: {'bytes_in_use_gb': 51.65, 'peak_bytes_in_use_gb': 51.66, 'bytes_limit_gb': 76.52}
+2026-07-27 19:38:19.495987: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+[00]   47.3s  blocks=1 steps=4 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>The capital of France is **Paris**.'
+[01]    3.2s  blocks=1 steps=12 exits=['early_stop'] non_accepted_final=[0]
+       -> '<|channel>thought\n<channel|>There are several ways to reverse a string in Python. Here are the three most comm'
+
+===== SUMMARY =====
+checkpoint: /home/ubuntu/diffgemma_fa/artifacts/ckpt/diffusiongemma-26B-A4B-it
+load_seconds: 36.2
+memory: {'bytes_in_use_gb': 53.51, 'peak_bytes_in_use_gb': 56.5, 'bytes_limit_gb': 76.52}
+jax_version: 0.11.0
+n_prompts: 2
+blocks_total: 2
+blocks_exiting_via_budget: 0
+blocks_exiting_via_early_stop: 2
+mean_non_accepted_on_final_step: 0.0
+max_non_accepted_on_final_step: 0
+
+wrote artifacts/phase0_smoke_probe.json

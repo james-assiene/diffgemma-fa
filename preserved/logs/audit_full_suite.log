@@ -1,0 +1,652 @@
+.......F..............................FFFFFFFFF..FFFFFFFF..F.F.F........ [  7%]
+............................F........................................... [ 15%]
+........................................................................ [ 22%]
+........................................................................ [ 30%]
+........................................................................ [ 37%]
+........................................................................ [ 45%]
+........................................................................ [ 52%]
+........................................................................ [ 60%]
+........................................................................ [ 67%]
+........................................................................ [ 75%]
+........................................................................ [ 82%]
+........................................................................ [ 90%]
+........................................................................ [ 97%]
+......................                                                   [100%]
+=================================== FAILURES ===================================
+___ test_every_whitespace_setting_the_eval_cli_offers_accepts_all_renderings ___
+
+    def test_every_whitespace_setting_the_eval_cli_offers_accepts_all_renderings():
+        """**The fix must be reachable from the thing that runs the experiment.**
+    
+        `pipeline.compile_json_schema` defaults `whitespace_pattern` to `JSON_WS`,
+        and that default is the documented repair for the 0/130 failure. But the
+        default only applies to callers who do not pass the argument. This asserts
+        that *every* setting the eval runner can actually be invoked with yields a
+        grammar accepting all five renderings — i.e. that a user cannot select a
+        grammar with the historical defect.
+    
+        Uses the runner's own `PRETTY_WS` constant and its own `None` (which means
+        "let outlines choose"), so it tests the shipped mapping, not a copy of it.
+        """
+        from diffgemma_fa.eval.run import PRETTY_WS
+    
+        # The mapping in `run.py`: `PRETTY_WS if args.whitespace == "pretty" else
+        # None`. `None` is not "the pipeline default" — `build_regex` omits the
+        # kwarg entirely, so outlines' own pattern is used.
+        pattern_for = {"stock": None, "pretty": PRETTY_WS}
+        choices = _cli_whitespace_choices()
+>       assert set(choices) == set(pattern_for), (
+            f"eval/run.py grew a --whitespace choice this test does not model: "
+            f"{sorted(set(choices) ^ set(pattern_for))}"
+        )
+E       AssertionError: eval/run.py grew a --whitespace choice this test does not model: ['json']
+E       assert {'json', 'pretty', 'stock'} == {'pretty', 'stock'}
+E         
+E         Extra items in the left set:
+E         'json'
+E         Use -v to get more diff
+
+tests/test_audit_grammar.py:226: AssertionError
+___________ test_normalise_agrees_with_bfcls_own_standardize_string ____________
+
+    def test_normalise_agrees_with_bfcls_own_standardize_string():
+        """The whole point of `normalise` is to be BFCL's rule and not our own.
+    
+        `metrics.py`: "Scoring more strictly than the benchmark understates the
+        result and is not comparable to the leaderboard." That cuts both ways — a
+        scorer that is *more lenient* than BFCL manufactures accuracy the
+        leaderboard would not award.
+        """
+        disagreements = [
+            (v, normalise(v), bfcl_standardize(v))
+            for v in _REAL_VALUES
+            if normalise(v) != bfcl_standardize(v)
+        ]
+>       assert not disagreements, (
+            "our normalisation is not BFCL's:\n"
+            + "\n".join(f"  {v!r}: ours={a!r} BFCL={b!r}"
+                        for v, a, b in disagreements)
+        )
+E       AssertionError: our normalisation is not BFCL's:
+E           'Tel Aviv': ours='tel aviv' BFCL='telaviv'
+E           'San Francisco': ours='san francisco' BFCL='sanfrancisco'
+E           'Divinópolis, MG': ours='divinópolis mg' BFCL='divinópolismg'
+E           'New York': ours='new york' BFCL='newyork'
+E           '2020 Addison Street, Berkeley, CA, USA': ours='2020 addison street berkeley ca usa' BFCL='2020addisonstreetberkeleycausa'
+E           '221B Baker Street, Berkeley, CA, USA': ours='221b baker street berkeley ca usa' BFCL='221bbakerstreetberkeleycausa'
+E           'April 1, 2024': ours='april 1 2024' BFCL='april12024'
+E           'April 1 2024': ours='april 1 2024' BFCL='april12024'
+E           '"black"': ours='black' BFCL='"black"'
+E           "it's": ours="it's" BFCL='it"s'
+E       assert not [('Tel Aviv', 'tel aviv', 'telaviv'), ('San Francisco', 'san francisco', 'sanfrancisco'), ('Divinópolis, MG', 'divinóp...'), ('221B Baker Street, Berkeley, CA, USA', '221b baker street berkeley ca usa', '221bbakerstreetberkeleycausa'), ...]
+
+tests/test_audit_measurement.py:141: AssertionError
+__________________ test_normalise_strips_the_space_character ___________________
+
+    def test_normalise_strips_the_space_character():
+        """The consequential half of the divergence, isolated.
+    
+        BFCL's strip set **begins with a space** — that is what lets `April 1, 2024`
+        match `April 1,2024` and `April 1 2024`, which its docstring says in so many
+        words. A `normalise` that keeps spaces scores `NewYork` against a ground
+        truth of `New York` as WRONG, while BFCL scores it correct. That is the
+        understatement `metrics.py`'s own docstring forbids.
+        """
+>       assert normalise("New York") == normalise("newyork")
+E       AssertionError: assert 'new york' == 'newyork'
+E         
+E         - newyork
+E         + new york
+E         ?    +
+
+tests/test_audit_measurement.py:157: AssertionError
+__________ test_normalise_does_not_invent_a_strip_of_the_double_quote __________
+
+    def test_normalise_does_not_invent_a_strip_of_the_double_quote():
+        """The other half: `"` is the quote delimiter in SPEC §4.8's citation, not
+        a member of the set. Stripping it makes us **more lenient** than BFCL — a
+        model that emits the literal string `"black"` (quotes inside the JSON
+        string) is scored as having emitted `black`, which BFCL rejects.
+    
+        NOTE FOR THE REVIEWER: this contradicts
+        `test_metrics.py::test_normalise_matches_bfcls_own_rule`, which asserts
+        `normalise('"black"') == normalise("black")`. That existing assertion
+        encodes the misreading; one of the two has to go, and BFCL's source is the
+        tiebreaker.
+        """
+>       assert normalise('"black"') != normalise("black")
+E       assert 'black' != 'black'
+E        +  where 'black' = normalise('"black"')
+E        +  and   'black' = normalise('black')
+
+tests/test_audit_measurement.py:173: AssertionError
+______ test_non_string_values_are_compared_exactly_as_bfcl_compares_them _______
+
+    def test_non_string_values_are_compared_exactly_as_bfcl_compares_them():
+        """BFCL normalises **only** strings.
+    
+        `ast_checker.simple_function_checker` routes `str` through
+        `string_checker` (which standardises) and everything else through a bare
+        `value not in possible_answer[param]` — exact equality. Applying the string
+        rule to numbers deletes the decimal point and the minus sign, so `1.0`
+        becomes `10` and `-5` becomes `5`. Those are not near-misses being
+        forgiven; they are different answers being counted correct.
+        """
+>       assert score_arguments({"n": 1.0}, {"n": 10})[0] == 0, "1.0 is not 10"
+E       AssertionError: 1.0 is not 10
+E       assert 1 == 0
+
+tests/test_audit_measurement.py:186: AssertionError
+_____________ test_a_string_is_not_credited_for_matching_a_boolean _____________
+
+    def test_a_string_is_not_credited_for_matching_a_boolean():
+        """`{"aligned": "true"}` against a ground truth of `true`.
+    
+        BFCL's `type_checker` rejects it before any value comparison (`str` is not
+        `bool`); `str()`-then-lowercase makes them identical. The `aligned`
+        parameter is real — it appears in
+        `artifacts/eval_bfcl_live_simple_unconstrained_sample.json`.
+        """
+>       assert score_arguments({"aligned": "true"}, {"aligned": True})[0] == 0
+E       assert 1 == 0
+
+tests/test_audit_measurement.py:199: AssertionError
+_______ test_an_arm_that_emits_nothing_cannot_outscore_one_that_answers ________
+
+    def test_an_arm_that_emits_nothing_cannot_outscore_one_that_answers():
+        """The `mask` row above, reduced to ten records.
+    
+        Arm A answers every record and gets 5 of 10 right. Arm B answers one
+        record, gets it right, and emits garbage on the other nine. No defensible
+        accuracy metric ranks B above A.
+        """
+        a = Scores()
+        for i in range(10):
+            a.add(accepted=True, parsed_obj={"k": "right" if i < 5 else "wrong"},
+                  want={"k": "right"})
+        b = Scores()
+        b.add(accepted=True, parsed_obj={"k": "right"}, want={"k": "right"})
+        for _ in range(9):
+            b.add(accepted=True, parsed_obj=None, want={"k": "right"})
+    
+>       assert b.as_dict()["arg_accuracy"] < a.as_dict()["arg_accuracy"], (
+            f"the silent arm scores {b.as_dict()['arg_accuracy']} against "
+            f"{a.as_dict()['arg_accuracy']} for the arm that actually answered"
+        )
+E       AssertionError: the silent arm scores 1.0 against 0.5 for the arm that actually answered
+E       assert 1.0 < 0.5
+
+tests/test_audit_measurement.py:236: AssertionError
+______ test_arg_total_counts_every_ground_truth_key_regardless_of_parsing ______
+
+    def test_arg_total_counts_every_ground_truth_key_regardless_of_parsing():
+        """`arg_total` is a property of the *benchmark*, not of the model.
+    
+        Three records, two ground-truth keys each: the denominator is six. Whether
+        the model's output happened to parse cannot change how many arguments the
+        benchmark asked for, and if it does then two arms are quoting the same
+        column over different populations.
+        """
+        s = Scores()
+        want = {"a": "x", "b": "y"}
+        s.add(accepted=True, parsed_obj={"a": "x", "b": "y"}, want=want)
+        s.add(accepted=True, parsed_obj={"a": "x", "b": "NO"}, want=want)
+        s.add(accepted=False, parsed_obj=None, want=want)      # did not parse
+>       assert s.as_dict()["arg_total"] == 6
+E       assert 4 == 6
+
+tests/test_audit_measurement.py:255: AssertionError
+_______ test_arg_accuracy_and_exact_call_rate_are_over_the_same_records ________
+
+    def test_arg_accuracy_and_exact_call_rate_are_over_the_same_records():
+        """Two headline columns, printed side by side, must mean the same thing.
+    
+        One perfect record and one unparsable record, both with ground truth: the
+        honest answer is 0.5 for both columns. Today `exact_call_rate` divides by
+        `n` (2) and `arg_accuracy` divides by the parsed-only `arg_total` (1), so
+        the same run reports 0.5 and 1.0 for "how much of this did it get right".
+        """
+        s = Scores()
+        s.add(accepted=True, parsed_obj={"a": "x"}, want={"a": "x"})
+        s.add(accepted=False, parsed_obj=None, want={"a": "x"})
+        d = s.as_dict()
+        assert d["exact_call_rate"] == 0.5
+>       assert d["arg_accuracy"] == 0.5, (
+            f"arg_accuracy={d['arg_accuracy']} over arg_total={d['arg_total']} "
+            f"while exact_call_rate={d['exact_call_rate']} over n={d['n']}"
+        )
+E       AssertionError: arg_accuracy=1.0 over arg_total=1 while exact_call_rate=0.5 over n=2
+E       assert 1.0 == 0.5
+
+tests/test_audit_measurement.py:271: AssertionError
+_____________ test_a_perfect_arg_accuracy_requires_having_answered _____________
+
+    def test_a_perfect_arg_accuracy_requires_having_answered():
+        """The degenerate case the table cannot distinguish today.
+    
+        An arm that parses exactly one record out of a hundred and gets it right
+        reports `arg_accuracy = 1.000`. That number belongs beside `parsed`, and
+        the two are printed in different columns of the same row — nothing stops a
+        reader (or a later report) from quoting it alone.
+        """
+        s = Scores()
+        s.add(accepted=True, parsed_obj={"a": "x"}, want={"a": "x"})
+        for _ in range(99):
+            s.add(accepted=False, parsed_obj=None, want={"a": "x"})
+>       assert s.as_dict()["arg_accuracy"] < 0.5
+E       assert 1.0 < 0.5
+
+tests/test_audit_measurement.py:289: AssertionError
+__ test_countdown_scorer_never_reports_a_format_failure_on_an_accepted_string __
+
+countdown_fa = <diffgemma_fa.compile.validate.Simulator object at 0x7fbfdcc39580>
+tokenizer = Gemma4Tokenizer(path='gs://gemma-data/tokenizers/tokenizer_gemma4.model', custom_tokens=ImmutableDict({}))
+
+    def test_countdown_scorer_never_reports_a_format_failure_on_an_accepted_string(
+            countdown_fa, tokenizer):
+        """The same invariant for Countdown, and the one that is still open.
+    
+        `countdown_regex` guarantees the shape `A op B=C` per line; the scorer is
+        entitled to reject the *arithmetic*, the *operand pool* and the *target*,
+        and nothing else. "unparsable step" on a string the automaton accepts means
+        the scorer and the grammar disagree about what a step looks like.
+    
+        The emission shape is verbatim from `artifacts/task_countdown_j0map.json`:
+        a header whose free-text name happens to be an arithmetic step, and a
+        `<turn|>` end-of-turn marker welded onto the last step's line. (One step,
+        because one step is all the compiled automaton admits — see
+        `test_the_compiled_countdown_grammar_admits_a_multi_step_solution`.)
+        """
+        rec = CD.CountdownRecord(id="t", numbers=(3, 4), target=12)
+        text = "<|channel>82-80=2\n<channel|>3*4=12<turn|>"
+        toks = tokenizer.encode(text)
+        assert countdown_fa.accepts(toks), (
+            "test construction error: this emission is not in the language"
+        )
+        ok, why = CD.score_solution(text, rec)
+>       assert "unparsable" not in why, (
+            f"scorer says {why!r} for an emission the automaton ACCEPTS"
+        )
+E       AssertionError: scorer says "unparsable step: '3*4=12<turn|>'" for an emission the automaton ACCEPTS
+E       assert 'unparsable' not in "unparsable ...4=12<turn|>'"
+E         
+E         'unparsable' is contained here:
+E           unparsable step: '3*4=12<turn|>'
+E         ? ++++++++++
+
+tests/test_audit_measurement.py:416: AssertionError
+_______ test_the_compiled_countdown_grammar_admits_a_multi_step_solution _______
+
+countdown_fa = <diffgemma_fa.compile.validate.Simulator object at 0x7fbfdcc39580>
+tokenizer = Gemma4Tokenizer(path='gs://gemma-data/tokenizers/tokenizer_gemma4.model', custom_tokens=ImmutableDict({}))
+
+    def test_the_compiled_countdown_grammar_admits_a_multi_step_solution(
+            countdown_fa, tokenizer):
+        """`build_prompt` asks for "one step per line"; `score_solution` walks a
+        chain of steps and consumes intermediates; `countdown_regex(max_steps=4)`
+        says four are allowed; and `test_tasks_new.py` checks the *regex* matches
+        `3*4=12\\n12+5=17`. The compiled automaton admits only the first step, so
+        no record needing two operations can ever be solved.
+        """
+        text = "<|channel>thought\n<channel|>3*4=12\n12+5=17<turn|>"
+>       assert countdown_fa.accepts(tokenizer.encode(text)), (
+            "the compiled Countdown automaton rejects a two-step solution that "
+            "countdown_regex matches; every constrained Countdown arm was scored "
+            "against a grammar that cannot express the answer"
+        )
+E       AssertionError: the compiled Countdown automaton rejects a two-step solution that countdown_regex matches; every constrained Countdown arm was scored against a grammar that cannot express the answer
+E       assert False
+E        +  where False = accepts([100, 45518, 107, 101, 236800, 236829, ...])
+E        +    where accepts = <diffgemma_fa.compile.validate.Simulator object at 0x7fbfdcc39580>.accepts
+E        +    and   [100, 45518, 107, 101, 236800, 236829, ...] = encode('<|channel>thought\n<channel|>3*4=12\n12+5=17<turn|>')
+E        +      where encode = Gemma4Tokenizer(path='gs://gemma-data/tokenizers/tokenizer_gemma4.model', custom_tokens=ImmutableDict({})).encode
+
+tests/test_audit_measurement.py:444: AssertionError
+___________ test_lifting_preserves_repeated_groups[1(?:x1){0,3}-1x1] ___________
+
+regex = '1(?:x1){0,3}', string = '1x1'
+tokenizer = Gemma4Tokenizer(path='gs://gemma-data/tokenizers/tokenizer_gemma4.model', custom_tokens=ImmutableDict({}))
+
+    @pytest.mark.parametrize("regex,string", [
+        (r"1(?:x1){0,3}", "1x1"),
+        (r"1(?:x2)*", "1x2x2"),
+        (r"a(?:ba)*", "ababa"),
+        (r"ab(?:cab)*", "abcab"),
+    ])
+    def test_lifting_preserves_repeated_groups(regex, string, tokenizer):
+        """Minimal reproducer, with `re` as the independent oracle.
+    
+        A repeated *group* is lifted as though it repeated its minimum number of
+        times: `(?:x1){0,3}` becomes zero copies, `(?:\\n1){1,3}` becomes exactly
+        one. Character-level repetition (`x*`, `[0-9]{0,3}`, `[^"]*`) is unaffected,
+        which is why it has stayed invisible — and also why the Countdown step
+        separator, the only group repetition in a shipped grammar, is the place it
+        surfaced.
+        """
+        from diffgemma_fa.compile.validate import Simulator
+        assert re.fullmatch(regex, string), "test construction error"
+        a = pipeline.compile_regex(regex, name="rep", channel_header=False).automaton
+        toks = tokenizer.encode(string) + [106]
+>       assert Simulator(a).accepts(toks), (
+            f"compiled automaton for {regex!r} rejects {string!r}, which the "
+            f"source regex matches"
+        )
+E       AssertionError: compiled automaton for '1(?:x1){0,3}' rejects '1x1', which the source regex matches
+E       assert False
+E        +  where False = accepts([236770, 236781, 236770, 106])
+E        +    where accepts = <diffgemma_fa.compile.validate.Simulator object at 0x7fbf989e9640>.accepts
+E        +      where <diffgemma_fa.compile.validate.Simulator object at 0x7fbf989e9640> = <class 'diffgemma_fa.compile.validate.Simulator'>(CompiledAutomaton(name='rep', n_states=3, n_states_bucket=16, n_edges=3, vocab_size=262144, is_dfa=True, edge_src=arra...], dtype=int32), max_neg_size=0), schema_hash='', tokenizer_hash='', compiler_version='phase1', needs_chain_path=False))
+
+tests/test_audit_measurement.py:471: AssertionError
+____________ test_lifting_preserves_repeated_groups[1(?:x2)*-1x2x2] ____________
+
+regex = '1(?:x2)*', string = '1x2x2'
+tokenizer = Gemma4Tokenizer(path='gs://gemma-data/tokenizers/tokenizer_gemma4.model', custom_tokens=ImmutableDict({}))
+
+    @pytest.mark.parametrize("regex,string", [
+        (r"1(?:x1){0,3}", "1x1"),
+        (r"1(?:x2)*", "1x2x2"),
+        (r"a(?:ba)*", "ababa"),
+        (r"ab(?:cab)*", "abcab"),
+    ])
+    def test_lifting_preserves_repeated_groups(regex, string, tokenizer):
+        """Minimal reproducer, with `re` as the independent oracle.
+    
+        A repeated *group* is lifted as though it repeated its minimum number of
+        times: `(?:x1){0,3}` becomes zero copies, `(?:\\n1){1,3}` becomes exactly
+        one. Character-level repetition (`x*`, `[0-9]{0,3}`, `[^"]*`) is unaffected,
+        which is why it has stayed invisible — and also why the Countdown step
+        separator, the only group repetition in a shipped grammar, is the place it
+        surfaced.
+        """
+        from diffgemma_fa.compile.validate import Simulator
+        assert re.fullmatch(regex, string), "test construction error"
+        a = pipeline.compile_regex(regex, name="rep", channel_header=False).automaton
+        toks = tokenizer.encode(string) + [106]
+>       assert Simulator(a).accepts(toks), (
+            f"compiled automaton for {regex!r} rejects {string!r}, which the "
+            f"source regex matches"
+        )
+E       AssertionError: compiled automaton for '1(?:x2)*' rejects '1x2x2', which the source regex matches
+E       assert False
+E        +  where False = accepts([236770, 236781, 236778, 236781, 236778, 106])
+E        +    where accepts = <diffgemma_fa.compile.validate.Simulator object at 0x7fbfd9d59730>.accepts
+E        +      where <diffgemma_fa.compile.validate.Simulator object at 0x7fbfd9d59730> = <class 'diffgemma_fa.compile.validate.Simulator'>(CompiledAutomaton(name='rep', n_states=3, n_states_bucket=16, n_edges=3, vocab_size=262144, is_dfa=True, edge_src=arra...], dtype=int32), max_neg_size=0), schema_hash='', tokenizer_hash='', compiler_version='phase1', needs_chain_path=False))
+
+tests/test_audit_measurement.py:471: AssertionError
+____________ test_lifting_preserves_repeated_groups[a(?:ba)*-ababa] ____________
+
+regex = 'a(?:ba)*', string = 'ababa'
+tokenizer = Gemma4Tokenizer(path='gs://gemma-data/tokenizers/tokenizer_gemma4.model', custom_tokens=ImmutableDict({}))
+
+    @pytest.mark.parametrize("regex,string", [
+        (r"1(?:x1){0,3}", "1x1"),
+        (r"1(?:x2)*", "1x2x2"),
+        (r"a(?:ba)*", "ababa"),
+        (r"ab(?:cab)*", "abcab"),
+    ])
+    def test_lifting_preserves_repeated_groups(regex, string, tokenizer):
+        """Minimal reproducer, with `re` as the independent oracle.
+    
+        A repeated *group* is lifted as though it repeated its minimum number of
+        times: `(?:x1){0,3}` becomes zero copies, `(?:\\n1){1,3}` becomes exactly
+        one. Character-level repetition (`x*`, `[0-9]{0,3}`, `[^"]*`) is unaffected,
+        which is why it has stayed invisible — and also why the Countdown step
+        separator, the only group repetition in a shipped grammar, is the place it
+        surfaced.
+        """
+        from diffgemma_fa.compile.validate import Simulator
+        assert re.fullmatch(regex, string), "test construction error"
+        a = pipeline.compile_regex(regex, name="rep", channel_header=False).automaton
+        toks = tokenizer.encode(string) + [106]
+>       assert Simulator(a).accepts(toks), (
+            f"compiled automaton for {regex!r} rejects {string!r}, which the "
+            f"source regex matches"
+        )
+E       AssertionError: compiled automaton for 'a(?:ba)*' rejects 'ababa', which the source regex matches
+E       assert False
+E        +  where False = accepts([596, 6525, 106])
+E        +    where accepts = <diffgemma_fa.compile.validate.Simulator object at 0x7fbe0494ac60>.accepts
+E        +      where <diffgemma_fa.compile.validate.Simulator object at 0x7fbe0494ac60> = <class 'diffgemma_fa.compile.validate.Simulator'>(CompiledAutomaton(name='rep', n_states=3, n_states_bucket=16, n_edges=4, vocab_size=262144, is_dfa=True, edge_src=arra...   dtype=int32), max_neg_size=0), schema_hash='', tokenizer_hash='', compiler_version='phase1', needs_chain_path=False))
+
+tests/test_audit_measurement.py:471: AssertionError
+___________ test_lifting_preserves_repeated_groups[ab(?:cab)*-abcab] ___________
+
+regex = 'ab(?:cab)*', string = 'abcab'
+tokenizer = Gemma4Tokenizer(path='gs://gemma-data/tokenizers/tokenizer_gemma4.model', custom_tokens=ImmutableDict({}))
+
+    @pytest.mark.parametrize("regex,string", [
+        (r"1(?:x1){0,3}", "1x1"),
+        (r"1(?:x2)*", "1x2x2"),
+        (r"a(?:ba)*", "ababa"),
+        (r"ab(?:cab)*", "abcab"),
+    ])
+    def test_lifting_preserves_repeated_groups(regex, string, tokenizer):
+        """Minimal reproducer, with `re` as the independent oracle.
+    
+        A repeated *group* is lifted as though it repeated its minimum number of
+        times: `(?:x1){0,3}` becomes zero copies, `(?:\\n1){1,3}` becomes exactly
+        one. Character-level repetition (`x*`, `[0-9]{0,3}`, `[^"]*`) is unaffected,
+        which is why it has stayed invisible — and also why the Countdown step
+        separator, the only group repetition in a shipped grammar, is the place it
+        surfaced.
+        """
+        from diffgemma_fa.compile.validate import Simulator
+        assert re.fullmatch(regex, string), "test construction error"
+        a = pipeline.compile_regex(regex, name="rep", channel_header=False).automaton
+        toks = tokenizer.encode(string) + [106]
+>       assert Simulator(a).accepts(toks), (
+            f"compiled automaton for {regex!r} rejects {string!r}, which the "
+            f"source regex matches"
+        )
+E       AssertionError: compiled automaton for 'ab(?:cab)*' rejects 'abcab', which the source regex matches
+E       assert False
+E        +  where False = accepts([28180, 596, 106])
+E        +    where accepts = <diffgemma_fa.compile.validate.Simulator object at 0x7fbdf50128d0>.accepts
+E        +      where <diffgemma_fa.compile.validate.Simulator object at 0x7fbdf50128d0> = <class 'diffgemma_fa.compile.validate.Simulator'>(CompiledAutomaton(name='rep', n_states=4, n_states_bucket=16, n_edges=7, vocab_size=262144, is_dfa=True, edge_src=arra...], dtype=int32), max_neg_size=0), schema_hash='', tokenizer_hash='', compiler_version='phase1', needs_chain_path=False))
+
+tests/test_audit_measurement.py:471: AssertionError
+_________ test_countdown_scoring_survives_the_post_stop_tail[<turn|>] __________
+
+tail = '<turn|>'
+
+    @pytest.mark.parametrize("tail", ["<turn|>", "<|channel>", "\n\n", ""])
+    def test_countdown_scoring_survives_the_post_stop_tail(tail):
+        """SPEC §3.5 makes the post-stop tail **unscored** (`ACC --Sigma--> ACC`),
+        so the automaton accepts whatever follows the answer and the decoded text
+        keeps it. Every recorded Countdown emission carries one:
+    
+            '<|channel>thought\\n<channel|>51-4=49<turn|>'          (j0, map)
+            '<channel|>79+17=96\\n96-60=36<|channel>'               (unconstrained)
+    
+        `_STEP` is anchored with `\\s*$`, so the marker lands inside the last step's
+        line and that step is "unparsable". The tail is a property of the sampler,
+        not of the model's answer, and it must not be scored.
+        """
+        rec = CD.CountdownRecord(id="t", numbers=(3, 4, 5), target=17)
+        ok, why = CD.score_solution(f"<|channel>x\n<channel|>3*4=12\n12+5=17{tail}",
+                                    rec)
+>       assert ok, f"tail {tail!r}: {why!r}"
+E       AssertionError: tail '<turn|>': "unparsable step: '12+5=17<turn|>'"
+E       assert False
+
+tests/test_audit_measurement.py:497: AssertionError
+________ test_countdown_scoring_survives_the_post_stop_tail[<|channel>] ________
+
+tail = '<|channel>'
+
+    @pytest.mark.parametrize("tail", ["<turn|>", "<|channel>", "\n\n", ""])
+    def test_countdown_scoring_survives_the_post_stop_tail(tail):
+        """SPEC §3.5 makes the post-stop tail **unscored** (`ACC --Sigma--> ACC`),
+        so the automaton accepts whatever follows the answer and the decoded text
+        keeps it. Every recorded Countdown emission carries one:
+    
+            '<|channel>thought\\n<channel|>51-4=49<turn|>'          (j0, map)
+            '<channel|>79+17=96\\n96-60=36<|channel>'               (unconstrained)
+    
+        `_STEP` is anchored with `\\s*$`, so the marker lands inside the last step's
+        line and that step is "unparsable". The tail is a property of the sampler,
+        not of the model's answer, and it must not be scored.
+        """
+        rec = CD.CountdownRecord(id="t", numbers=(3, 4, 5), target=17)
+        ok, why = CD.score_solution(f"<|channel>x\n<channel|>3*4=12\n12+5=17{tail}",
+                                    rec)
+>       assert ok, f"tail {tail!r}: {why!r}"
+E       AssertionError: tail '<|channel>': "unparsable step: '12+5=17<|channel>'"
+E       assert False
+
+tests/test_audit_measurement.py:497: AssertionError
+___________ test_a_wrong_answer_is_not_reported_as_a_format_failure ____________
+
+    def test_a_wrong_answer_is_not_reported_as_a_format_failure():
+        """`run_tasks.py`: "a format failure and a wrong answer are different
+        diagnoses and must not be merged."
+    
+        Verbatim from `artifacts/task_countdown_think.json`, whose
+        `failure_reasons` attributes 111 of 250 records to "unparsable step". This
+        emission's step is perfectly well formed and simply false — `9+17` is 26,
+        not 36 — so the diagnosis should be "arithmetic". Merging the two makes the
+        `failure_reasons` histogram, which is the only diagnostic that arm
+        produces, point at the grammar instead of at the model.
+        """
+        rec = CD.CountdownRecord(id="t", numbers=(9, 17), target=36)
+        ok, why = CD.score_solution("<|channel>79-60=19\n<channel|>9+17=36<turn|>",
+                                    rec)
+        assert not ok
+>       assert "arithmetic" in why, f"diagnosed as {why!r}"
+E       AssertionError: diagnosed as "unparsable step: '9+17=36<turn|>'"
+E       assert 'arithmetic' in "unparsable step: '9+17=36<turn|>'"
+
+tests/test_audit_measurement.py:515: AssertionError
+___ test_sudoku_scorer_locates_the_grid_structurally_not_by_first_16_digits ____
+
+sudoku_record = SudokuRecord(id='sudoku4_0', puzzle=((3, 1, 2, 4), (0, 0, 0, 1), (2, 4, 0, 0), (1, 0, 4, 2)), solution=((3, 1, 2, 4), (4, 2, 3, 1), (2, 4, 1, 3), (1, 3, 4, 2)))
+
+    def test_sudoku_scorer_locates_the_grid_structurally_not_by_first_16_digits(
+            sudoku_record):
+        """The unfixed half of the 250-record bug.
+    
+        The fix stripped the *channel header*, which is the only source of stray
+        digits on the constrained arms. The `unconstrained` and `mask` arms have no
+        header — they are the comparison baseline, and they emit prose. Any digit
+        in that prose shifts the grid by one cell exactly as the header name did,
+        and the scorer will again report "overwrote the given" for a grid that is
+        intact.
+    
+        "4x4" is not a contrived example: it is the phrase the prompt itself uses
+        ("Solve this 4x4 Sudoku"), so it is the single most likely token to appear
+        in a restatement of the question.
+        """
+        grid = _grid(sudoku_record.solution)
+        for preamble in ("Here is the completed 4x4 grid:\n",
+                         "Sure! The solution to the 4x4 puzzle is:\n",
+                         "Answer (row 1 first):\n"):
+            ok, why = SD.score_solution(preamble + grid, sudoku_record)
+>           assert ok, f"{preamble!r} shifted the grid: {why}"
+E           AssertionError: 'Here is the completed 4x4 grid:\n' shifted the grid: overwrote the given at (0,0)
+E           assert False
+
+tests/test_audit_measurement.py:556: AssertionError
+_____________ test_both_task_scorers_agree_on_how_to_say_no_output _____________
+
+sudoku_record = SudokuRecord(id='sudoku4_0', puzzle=((3, 1, 2, 4), (0, 0, 0, 1), (2, 4, 0, 0), (1, 0, 4, 2)), solution=((3, 1, 2, 4), (4, 2, 3, 1), (2, 4, 1, 3), (1, 3, 4, 2)))
+
+    def test_both_task_scorers_agree_on_how_to_say_no_output(sudoku_record):
+        """`run_tasks.py:211` counts parsed records with a rule shared by both
+        tasks:
+    
+            n_parsed += int(why != "empty")
+    
+        Countdown returns `"empty"`; Sudoku returns `"only 0 digits"`. The rule is
+        therefore true for every Sudoku record, including the ones that emitted
+        nothing at all, so the parse column for Sudoku is 100% by construction —
+        the same shape of vacuity as `Sum_v q_i(v) == 1`. (It is currently unsaved,
+        which is the only reason no published number depends on it.)
+        """
+        rec = CD.CountdownRecord(id="t", numbers=(3, 4), target=7)
+        assert CD.score_solution("", rec)[1] == "empty"
+>       assert SD.score_solution("", sudoku_record)[1] == "empty"
+E       AssertionError: assert 'only 0 digits' == 'empty'
+E         
+E         - empty
+E         + only 0 digits
+
+tests/test_audit_measurement.py:588: AssertionError
+_______ test_float32_at_production_scale_is_either_shown_safe_or_refused _______
+
+        score. That is a necessary condition for a global argmax and is computable
+        without enumerating `V^L`.
+        """
+        S, V, n = 64, 1024, 64
+        aut = _cycle_automaton(n, S, V)
+        p = _sharp_marginals(L_PROD, V, seed=5)
+        tokens, ok = C.joint_map(p, aut, jnp.asarray(0), n_states=S, n_classes=2)
+        assert bool(ok)
+        logp = np.log(np.asarray(p))
+        toks = np.asarray(tokens)
+        # Position `i` sits at cycle state `i % n`; the admissible tokens there are
+        # the evens (even state) or the odds (odd state), independent of the rest.
+        for i in range(L_PROD):
+            admissible = np.arange(0 if (i % n) % 2 == 0 else 1, V, 2)
+            best = admissible[np.argmax(logp[i, admissible])]
+            assert logp[i, toks[i]] >= logp[i, best] - 1e-9, (
+                f"position {i}: MAP chose log p = {logp[i, toks[i]]:.4f} when "
+                f"{logp[i, best]:.4f} was admissible — this is not the argmax"
+            )
+    
+    
+    # ===========================================================================
+    # 5. The dtype claim. `require_x64` is a no-op; that is a numerical claim.
+    # ===========================================================================
+    
+    def test_float32_at_production_scale_is_either_shown_safe_or_refused():
+        """`require_x64` was made a no-op on a toy check and the claim did not hold.
+    
+        The claim it now encodes is "float32 is safe on the sampling path". This
+        test measures that claim where it has to hold — a `[256, V]` sharp `p` run
+        through the real class-table → `M` → `up_sweep_log` chain — and accepts
+        either outcome that is honest:
+    
+          * float32 reproduces the float64 partition to within 1e-2 nats and loses
+            no live entry, so the no-op is justified; **or**
+          * it does not, in which case `require_x64` must **refuse** when x64 is
+            off rather than let the sampler draw from a degenerate distribution.
+    
+        It fails only in the state that actually shipped: float32 measurably lossy
+        at production scale *and* the guard silent.
+        """
+        S, V, n = 64, 4096, 64
+        aut = _cycle_automaton(n, S, V)
+    
+        def log_root(dtype):
+            p = _sharp_marginals(L_PROD, V, seed=1, scale=12.0, dtype=dtype)
+            _p_vl, _W, M = C._matrices(p, aut, S, 2)
+>           tiny = jnp.finfo(dtype).tiny
+E           AssertionError: float32 is measurably lossy at L = 256: 32/64 live root entries vanish and the survivors are off by 0.00758 nats — a spurious `Z == 0` on every one of those state pairs, which is the 70/130 failure `require_x64`'s own docstring records. But `require_x64()` returns silently with x64 disabled, so nothing stops the sampler running there. The loss is in the LEAF construction (`_matrices` -> `transition_matrices`), upstream of the tree: `p` entries below float32's 1.18e-38 flush to zero and take their edges with them, which the pairwise-max anchor never addressed.
+E           assert False
+
+tests/test_audit_numerics.py:778: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_audit_grammar.py::test_every_whitespace_setting_the_eval_cli_offers_accepts_all_renderings
+FAILED tests/test_audit_measurement.py::test_normalise_agrees_with_bfcls_own_standardize_string
+FAILED tests/test_audit_measurement.py::test_normalise_strips_the_space_character
+FAILED tests/test_audit_measurement.py::test_normalise_does_not_invent_a_strip_of_the_double_quote
+FAILED tests/test_audit_measurement.py::test_non_string_values_are_compared_exactly_as_bfcl_compares_them
+FAILED tests/test_audit_measurement.py::test_a_string_is_not_credited_for_matching_a_boolean
+FAILED tests/test_audit_measurement.py::test_an_arm_that_emits_nothing_cannot_outscore_one_that_answers
+FAILED tests/test_audit_measurement.py::test_arg_total_counts_every_ground_truth_key_regardless_of_parsing
+FAILED tests/test_audit_measurement.py::test_arg_accuracy_and_exact_call_rate_are_over_the_same_records
+FAILED tests/test_audit_measurement.py::test_a_perfect_arg_accuracy_requires_having_answered
+FAILED tests/test_audit_measurement.py::test_countdown_scorer_never_reports_a_format_failure_on_an_accepted_string
+FAILED tests/test_audit_measurement.py::test_the_compiled_countdown_grammar_admits_a_multi_step_solution
+FAILED tests/test_audit_measurement.py::test_lifting_preserves_repeated_groups[1(?:x1){0,3}-1x1]
+FAILED tests/test_audit_measurement.py::test_lifting_preserves_repeated_groups[1(?:x2)*-1x2x2]
+FAILED tests/test_audit_measurement.py::test_lifting_preserves_repeated_groups[a(?:ba)*-ababa]
+FAILED tests/test_audit_measurement.py::test_lifting_preserves_repeated_groups[ab(?:cab)*-abcab]
+FAILED tests/test_audit_measurement.py::test_countdown_scoring_survives_the_post_stop_tail[<turn|>]
+FAILED tests/test_audit_measurement.py::test_countdown_scoring_survives_the_post_stop_tail[<|channel>]
+FAILED tests/test_audit_measurement.py::test_a_wrong_answer_is_not_reported_as_a_format_failure
+FAILED tests/test_audit_measurement.py::test_sudoku_scorer_locates_the_grid_structurally_not_by_first_16_digits
+FAILED tests/test_audit_measurement.py::test_both_task_scorers_agree_on_how_to_say_no_output
+FAILED tests/test_audit_numerics.py::test_float32_at_production_scale_is_either_shown_safe_or_refused
+22 failed, 936 passed in 579.26s (0:09:39)

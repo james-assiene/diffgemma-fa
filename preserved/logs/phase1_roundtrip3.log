@@ -1,0 +1,48 @@
+[data] 258 records, 258 ground-truth entries
+2026-07-27 21:34:05.003355: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+  [25/258] fa=25 gt 25/25 samples 500/500
+  [50/258] fa=50 gt 50/50 samples 1000/1000
+  [75/258] fa=75 gt 75/75 samples 1500/1500
+  [100/258] fa=100 gt 100/100 samples 2000/2000
+  [125/258] fa=125 gt 123/125 samples 2497/2500
+  [150/258] fa=150 gt 138/150 samples 2997/3000
+  [175/258] fa=175 gt 152/175 samples 3497/3500
+  [200/258] fa=200 gt 176/200 samples 3997/4000
+  [225/258] fa=225 gt 201/225 samples 4497/4500
+  [250/258] fa=250 gt 226/250 samples 4997/5000
+
+===== SUMMARY =====
+split: BFCL_v4_live_simple.json
+records_considered: 258
+elapsed_seconds: 1435.7
+stats: {'fa_compiled': 258, 'samples': 5160, 'sample_valid_json': 5157, 'gt_total': 258, 'gt_prefix_viable': 236, 'gt_accepted': 234, 'sample_invalid_json': 3, 'gt_prefix_but_not_accepted': 2, 'gt_rejected': 22}
+skipped_by_reason: {}
+n_dfa: 258
+n_nfa: 0
+states_max: 585
+states_mean: 87.0
+dedup_ratio_mean: 1.772
+min_ratio_mean: 1.1405
+min_ratio_max: 9.286
+k_max_max: 1591
+n_failures: 24
+
+first failures:
+  live_simple_117-73-0 reverse_input: viable prefix, not accepted
+     {"input_value":"say hi"}
+  live_simple_122-78-0 process_data: viable prefix, not accepted
+     {"image_path":"image.png","question":"generate with technically complex attention to detail a description of what you see","model":"vikhyatk
+  live_simple_139-92-0 requests.get: rejected
+     {"url":"https://192.168.1.1/sedgeapi/v1/cisco-nir/api/api/v1/anomalies/summary","params":{"fabric":"network222","insightsGroup":"defaultInsi
+  live_simple_141-94-0 cmd_controller.execute: rejected
+     {"command":"docker --version","unit":"N/A"}
+  live_simple_142-94-1 cmd_controller.execute: rejected
+     {"command":"dir Desktop","unit":"N/A"}
+  live_simple_143-95-0 cmd_controller.execute: rejected
+     {"command":"docker ps","unit":"N/A"}
+  live_simple_144-95-1 cmd_controller.execute: rejected
+     {"command":"taskkill /F /IM firefox.exe","unit":"N/A"}
+  live_simple_145-95-2 cmd_controller.execute: rejected
+     {"command":"dir C:\\","unit":"N/A"}
+
+wrote artifacts/phase1_roundtrip.json

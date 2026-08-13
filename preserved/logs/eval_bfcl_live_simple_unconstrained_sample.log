@@ -1,0 +1,39 @@
+[eval] task=bfcl_live_simple variant=unconstrained emission=sample bound=0.1
+2026-07-28 17:52:11.149360: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+  [10/130] CS=0.000 schema=0.700 acc=0.750 nonempty=1.000
+  [20/130] CS=0.000 schema=0.850 acc=0.710 nonempty=1.000
+  [30/130] CS=0.000 schema=0.733 acc=0.726 nonempty=1.000
+  [40/130] CS=0.000 schema=0.725 acc=0.667 nonempty=1.000
+  [50/130] CS=0.000 schema=0.600 acc=0.613 nonempty=1.000
+  [60/130] CS=0.000 schema=0.583 acc=0.617 nonempty=1.000
+  [70/130] CS=0.000 schema=0.586 acc=0.646 nonempty=0.971
+  [80/130] CS=0.000 schema=0.588 acc=0.633 nonempty=0.963
+  [90/130] CS=0.000 schema=0.600 acc=0.657 nonempty=0.967
+  [100/130] CS=0.000 schema=0.610 acc=0.686 nonempty=0.970
+  [110/130] CS=0.000 schema=0.618 acc=0.677 nonempty=0.964
+  [120/130] CS=0.000 schema=0.617 acc=0.615 nonempty=0.967
+  [130/130] CS=0.000 schema=0.631 acc=0.641 nonempty=0.969
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: unconstrained
+emission: sample
+n: 130
+cs: 0
+cs_rate: 0.0
+schema_ok: 82
+schema_valid_rate: 0.6308
+parsed: 126
+nonempty: 126
+nonempty_rate: 0.9692
+arg_correct: 177
+arg_total: 276
+arg_accuracy: 0.6413
+exact_calls: 61
+exact_call_rate: 0.4692
+skipped_by_reason: {}
+elapsed_seconds: 4859.5
+
+wrote artifacts/eval_bfcl_live_simple_unconstrained_sample.json

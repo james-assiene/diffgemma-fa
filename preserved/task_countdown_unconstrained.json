@@ -1,0 +1,1777 @@
+{
+  "task": "countdown",
+  "variant": "unconstrained",
+  "emission": "sample",
+  "confidence": "mf",
+  "entropy_bound": 0.1,
+  "seed": 0,
+  "n": 250,
+  "cs": 1,
+  "cs_rate": 0.004,
+  "solved": 12,
+  "solve_rate": 0.048,
+  "zero_partition": 0,
+  "oom": 0,
+  "skipped_by_reason": {},
+  "failure_reasons": {
+    "unparsable step": 135,
+    "empty": 100,
+    "ok": 12,
+    "operand 6 not available": 1,
+    "operand 34 not available": 1,
+    "operand 3 not available": 1
+  },
+  "elapsed_seconds": 2710.3,
+  "rows": [
+    {
+      "id": "countdown_0",
+      "text": "<channel|>79+17=96\n96-60=36<|channel>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>79+17=96'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_1",
+      "text": "<channel|>82-80=2\n34*2=68\n68-11=57\n57-1=56 (Wait, I do not have a 1. Let me try again.)\n\n82-80=2\n34*2=68\n68-11=57\nWait, I need 56. Let's try another way.\n\n80+34=114\n114-82=32\n32+11+... (No)\n\nLet's try:\n82+80=162\n162/3=54 (Wait, I don't have a 3) \n\nLet's try:\n11*34=374\n374-82=292\n292/80 (No)\n\nLet's t",
+      "ok": false,
+      "why": "unparsable step: '<channel|>82-80=2'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_2",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_3",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_4",
+      "text": "<channel|>46-9=37\n56-49=7\n37-7=30\n30-(46/46)\nWait, I used 46 twice. Let's try again.\n\n46-9=37\n56-49=7\n37-7=30\n30-(56/56)\nWait, I used 56 twice. Let's try again.\n\n46-9=37\n56-49=7\n37-7=30\n30-(49/49)\nWait, I used 49 twice. Let's try again.\n\n46-9=37\n56-49=7\n37-7=30\nWait, I need 29.\n30-1 is 29. \nLet's tr",
+      "ok": false,
+      "why": "unparsable step: '<channel|>46-9=37'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_5",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_6",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_7",
+      "text": "<|channel>thought\n<channel|>84-83=1\n34+1=35\n72/3=24 (Wait, 3 is not available)\n\nLet's try again:\n84-83=1\n34+1=35\n72-35=37 (No)\n\nLet's try:\n83+84=167\n167-72=95\n95-34=61 (No)\n\nLet's try:\n72-34=38\n84-83=1\n38+1=39\n\nWait, let's check:\n diarrh\u05d9\u05d9\u05d4+SPREAD\u73ec=157\n157-84=73\n73- cabo4leger1 (No)\n\nLet's try:\n84+3",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_8",
+      "text": "<channel|>78+45=123\n123-50=73<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>78+45=123'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_9",
+      "text": "<channel|>92-26=66\n66-12=54\n54+9=63 (Wait, there is no 9, let's try again)\n\n92-26=66\n66-3=63\n63-1=62 (Wait, there is no 1, let's try another way)\n\n12*3=36\n36+26=62<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>92-26=66'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_10",
+      "text": "<channel|>90-23=67\n46/46=1\n67-1=66<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>90-23=67'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_11",
+      "text": "<channel|>51+42=93\n86/43=2\n93-2=91<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>51+42=93'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_12",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_13",
+      "text": "<channel|>51+54=105\n105-6=99\nWait, 6 is not in the list. Let me try again.\n\n63+57=120\n120-21=99\nWait, 21 is not in the list. Let me try again.\n\n51+63=114\n114-15=99\nWait, 15 is not in the list. Let me try again.\n\n51+57=108\n108-9=99\nWait, 9 is not in the list. Let me try again.\n\n54+63=117\n117-18=99\nWa",
+      "ok": false,
+      "why": "unparsable step: '<channel|>51+54=105'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_14",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_15",
+      "text": "\n\n80-54=26\n26+51=77",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "countdown_16",
+      "text": "<channel|>90+60=150\n150-67=83<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>90+60=150'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_17",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_18",
+      "text": "<|channel>thought\n<channel|>21+14=35\n35+35=70<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_19",
+      "text": "\n\n48-6=42\n18/6=3\n42+3=45\ud83e\uddd0",
+      "ok": false,
+      "why": "operand 6 not available",
+      "accepted": false
+    },
+    {
+      "id": "countdown_20",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_21",
+      "text": "<channel|>9*4=36\n36+53=89\n89-4=85 significant",
+      "ok": false,
+      "why": "unparsable step: '<channel|>9*4=36'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_22",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_23",
+      "text": "<channel|>93-81=12\n36/12=3\n3*5=15\n15+9=24 (Wait, 9 is not in the list. Let me try again.)\n\n93-81=12\n36/12=3\n5*3=15\n15+9... no.\n\nLet's try:\n36-5=31\n93-81=12\n31-12=19 \n\nLet's try:\n93+81=174\n174/6=29\n29-5=24\nWait, how to get 6? 36/6... no.\n\nLet's try:\n36/3=12\n93-81=12\n12+12=24\nWait, where did the 3 com",
+      "ok": false,
+      "why": "unparsable step: '<channel|>93-81=12'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_24",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_25",
+      "text": "<|channel>thought\n<channel|>68-50=18\n18+17=35\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_26",
+      "text": "<channel|>69+68=137\n137-38=99\n99-55=44\nWait, let me try another way.\n69+55=124\n124-38=86\n86+68=154\nNo, let me try again.\n \u06cc\u0648\u0646\u06cc\u0648\u0631\u0633\u0679\u06cc \u092e\u093f\u0932\u094d\u0915+\u0e0a\u0e48\u0e27\u0e07\ucabd=123\n123-gradients incompet=54\n54+68=122\nNo, let me try again.\n6 roten+6bride=137\n137-55=82\n82+38=120\nNo, let me try again.\n38+69=107\n107-PEN \u09a4\u09be\u09b0\u09be\u0993= \u010desk\u00fac\n ",
+      "ok": false,
+      "why": "unparsable step: '<channel|>69+68=137'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_27",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_28",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_29",
+      "text": "<channel|>98+78=176\n176-71=105\n105/15=7 (Wait, let me try another way)\n\n98+71=169\n169-78=91\n91/13 (No)\n\nLet's try:\n78-71=7\n98/7=14 (Wait, I need to use the numbers correctly)\n\nLet's try:\n98-78=20\n71-20=51\n51+98=149 (No)\n\nLet's try:\n71+78=149\n149-98=51\n(No path to 14)\n\nLet's try:\n98-71=27\n78-27=51\n(N",
+      "ok": false,
+      "why": "unparsable step: '<channel|>98+78=176'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_30",
+      "text": "<channel|><|channel>thought\n96-19=77\n77-1=76<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|><|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_31",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_32",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_33",
+      "text": "\n\n95+43=138\n138-33=105\n105/5 (not possible)\n\nLet's try again:\n43*4=172 (no 4)\n95*2=190 (no 2)\n\nWait, let's try:\n95+33=128\n128+43=171\n171/9 (not possible)\n\nLet's try:\n43*33=1419 (too big)\n(95+33)/4 = 32 (not possible)\n\nLet's try:\n95-43=52\n52-33=19\n\n95-43=52\n52-33=19<turn|>",
+      "ok": false,
+      "why": "unparsable step: '105/5 (not possible)'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_34",
+      "text": "<channel|>70-35=35\n51-35=16\n35+16=51\nWait, I used 35 twice. Let me try again.\n\n70-51=19\n35+19=54\n54-5... no, I don't have a 5.\n\nLet's try:\n70+51=121\n121-35=86\n86-37... no.\n\nLet's try:\n70/35=2\n51-2=49<|channel>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>70-35=35'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_35",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_36",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_37",
+      "text": "\n98-97=1\n57+1=58<turn|>",
+      "ok": false,
+      "why": "unparsable step: '57+1=58<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_38",
+      "text": "<channel|>87-58=29\n29+59=88\n88-13=75\nWait, let me try another way.\n87-13=74<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>87-58=29'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_39",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_40",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_41",
+      "text": "\n\n57+10=67\n67+4=71<turn|>",
+      "ok": false,
+      "why": "unparsable step: '67+4=71<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_42",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_43",
+      "text": "<channel|>61+64=125\n125-57=68\nWait, that's not 16. Let's try again.\n61-57=4\n64/4=16",
+      "ok": false,
+      "why": "unparsable step: '<channel|>61+64=125'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_44",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_45",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_46",
+      "text": "<channel|>61+85=146\n146-11=135\n135/11=no\nWait, let me try again.\n61+85=146\n146-11=135\n135 is not 13.\n\nLet's try:\n85-11=74\n74+61=135\nStill 135.\n\nLet's try:\n61-11=50\n50+85=135\n\nLet's try a different combination:\n85/11 (no)\n85+61=146\n146-11=135\n\nLet's try:\n11*6=66\n66+85=151\n151-61=90\n\nLet's try:\n61+11=",
+      "ok": false,
+      "why": "unparsable step: '<channel|>61+85=146'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_47",
+      "text": "<|channel>thought\n<channel|>47-44=3\n13*3=39<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_48",
+      "text": "\n\n55+22=77\n77-7=70\n70/5=14",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "countdown_49",
+      "text": "<channel|>79-15=64\n64+50=114\n114/2=57\n57+12 (Wait, 12 is not available)\n\nLet me try again:\n79-50=29\n29*2=58\n58+15=69<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>79-15=64'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_50",
+      "text": "\n\n74+39=113\n113-66=47\n47-16=31 (Wait, I don't have 16. Let me try again.)\n\n66+39=105\n105-74=31\n\n66+39=105\n105-74=31<turn|>",
+      "ok": false,
+      "why": "unparsable step: \"47-16=31 (Wait, I don't have 16. Let me \"",
+      "accepted": false
+    },
+    {
+      "id": "countdown_51",
+      "text": "<channel|>72+70=142owskiego142-82=60\n60+24 (not possible)\nWait, let me try another way:\n82-72=10\n10*70=700\n700/82 (not possible)\n\nLet's try:\n70+82=152\n152-72=80\n80+4 (no 4)\n\nLet's try:\n82-70=12\n12*7=84\nWait, I don't have a 7. But I have 72 ocul 72/1 {{{ is not integer.\n\nLet's try:\n72/gelt l\u00ea depende",
+      "ok": false,
+      "why": "unparsable step: '<channel|>72+70=142owskiego142-82=60'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_52",
+      "text": "\n\n50+50=100\n100-23=77\n77+38=115 (No, that's wrong)\n\nLet's try again:\n50+38=88\n88-50=38\n38+23=61 (No)\n\nLet's try again:\n23*2=46\n46+50=96\n96-38=58 (No)\n\nLet's try again:\n50+50=100\n100-38=62\n62+23=85\n\n50+50=100\n100-38=62\n62+23=85",
+      "ok": false,
+      "why": "unparsable step: \"77+38=115 (No, that's wrong)\"",
+      "accepted": false
+    },
+    {
+      "id": "countdown_53",
+      "text": "\n95-69=26\n26+20=46<turn|>",
+      "ok": false,
+      "why": "unparsable step: '26+20=46<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_54",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_55",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_56",
+      "text": "<channel|>68-20=48\n48+39=87\n87-52=35\nWait, that's not right. Let me try again.\n\n52+68=120\n120-39=81\n81-20=61\nStill not 66. Let me KY another way.\n\n39+52=91\n91-20=71\n71-68=3\nNo.\n\nLet's try:\n68+20=88\n88-52=36\n36+39=75\nNo.\n\nLet's try:\n52*2=104\n104- \u0926\u0940\u092a\u0915 \u043f\u0440\u043e\u0434\u0443\u043a= procedente<unused3691> \u0928\u093e\u0917 \u0938\u090a\u0926\u0940\u9e66+rencies\u6d17",
+      "ok": false,
+      "why": "unparsable step: '<channel|>68-20=48'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_57",
+      "text": "<|channel>thought\n<channel|>70+15=85\n85-6=79\n79+57=136\n136/2 (not available)\n\nWait, let me try another path:\n70+6=76\n57-15=42\n76+42=118\n118-36 (no)\n\nLet's try:\n57+70=127\n127-15=112\n112-6=106\n106-24 (no)\n\nLet's try:\n15*6=90\n90-70=20\n20+57=77\n77+5 (no)\n\nLet's try:\n70+15=85\n85-6=79\n79+(57/??)\n\nLet's tr",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_58",
+      "text": "\n85-81=4\n4+25=29\n29-1=28",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "countdown_59",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_60",
+      "text": "<channel|>9*12=108\n108-30=78\n",
+      "ok": false,
+      "why": "unparsable step: '<channel|>9*12=108'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_61",
+      "text": "\n82-31=51\n51-10=41",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "countdown_62",
+      "text": " \u0d05\u0d28\u0d41\u0d2d\u0d35SAMPLE \u0aaa\u0acd\u0ab0\u0ab5\u0ac7\u0ab6 bass Nachricht\u096c\u86f090\n\u306e\u4e0b docentes murderer inov\u4e09\u6b21 alloc\u30d5\u30a9\u30fc jacks Reaktion",
+      "ok": false,
+      "why": "unparsable step: '\u0d05\u0d28\u0d41\u0d2d\u0d35SAMPLE \u0aaa\u0acd\u0ab0\u0ab5\u0ac7\u0ab6 bass Nachricht\u096c\u86f090'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_63",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_64",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_65",
+      "text": "<channel|>46-19=27\n27+40=67\n67-4*4=51 (Wait, let me try again)\n\n46-40=6\n6*4=24\n24+19=43<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>46-19=27'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_66",
+      "text": " wechseln\u5429 pcl\u6826 \u062a\u0648\u062c\u0647 obstetric \u0442\u0435\u0430\ncers appellees GasCOPY\u8a23\u064a\u0634\u5b62\u597d\u4e86",
+      "ok": false,
+      "why": "unparsable step: 'wechseln\u5429 pcl\u6826 \u062a\u0648\u062c\u0647 obstetric \u0442\u0435\u0430'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_67",
+      "text": "\n\n51+75=126\n126-37=89\n89-9=80\n80/5=16 (Wait, there is no 5)\n\nLet's try again:\n75/3= (No 3)\n51*4= (No 4)\n37*6= (No 6)\n\nAllan:\n51-37=14\n14+9=23\n23- (Wait, no 1)\n\nTry:\n75-51=24\n24Statuses bacterraised tarmac intracellular \u0c30\u0c3e\u0c35 \ub6f0 Average\u05d5\u05e8\u05d4 hypertrophyensely=22\n\n75-51=24\n begins gest\u00e3o confort\u00e1vel terj\u6f2f ",
+      "ok": false,
+      "why": "unparsable step: '80/5=16 (Wait, there is no 5)'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_68",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_69",
+      "text": "<channel|>68-34=34\n34+17=51\n51-6=45 (Wait, 6 is not in the list. Let's try again.)\n\n68-34=34\n34+17=51\n51-3=48 (No)\n\nLet's try:\n17*3=51\n51-(68/34)=51-2=49 (No)\n\nLet's try: \n68/34=2\n3+2=5\n17*5=85 (No)\n\nLet's try:\n68+34=102\n102/3=34\n34+17=51 (No)\n\nLet's try:\n68/34=2\n17-2=15\n15*3=45\n\n68/34=2\n17-2=15\n15*",
+      "ok": false,
+      "why": "unparsable step: '<channel|>68-34=34'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_70",
+      "text": "<channel|>87-39=48\n86/43=2\n48-2=46<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>87-39=48'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_71",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_72",
+      "text": "<channel|>85+64=149\n149-34=115\nWait, I made a mistake. Let me re-calculate.\n85+64=149\n149-34=115 is not 13.\n\nLet's try another way:\n64+34=98\n98-85=13\n\n64+34=98\n98-85=13",
+      "ok": false,
+      "why": "unparsable step: '<channel|>85+64=149'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_73",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_74",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_75",
+      "text": "<channel|>71-11=60\n60+56=116\n116-66=50\nWait, that's not 62. Let me try again.\n\n71-11=60\n60+66=126\n126-56=70\nStill not 62. Let me try another way.\n\n56+66=122\n122-71=51\n51+11=62\n\n56+66=122\n122-71=51\n51+11=62<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>71-11=60'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_76",
+      "text": "<|channel>thought\n<channel|>49-34=15\n15+6=21<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_77",
+      "text": " 47-13=34\n52-34=18\n34+18=52\n52-9=43 (Wait, I don't have 9)\n\nLet's try again:\n47+13=60\n60-17=43\n\n47+13=60\n60-17=43 significant",
+      "ok": false,
+      "why": "operand 34 not available",
+      "accepted": false
+    },
+    {
+      "id": "countdown_78",
+      "text": "94 - 5=89\n89 - 2=87",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "countdown_79",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_80",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_81",
+      "text": "<|channel>thought\n<channel|>72+53=125\n125-90=35<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_82",
+      "text": "<channel|>48/2=24\n24-94/94=23 (Wait, I can only use 94 once. Let me try again.)\n\n48/2=24\n24-94/94 is not possible. Let's try:\n48/2=24\n24-(94/94) is not allowed.\n\nLet's try:\n94+2=96\n96/48=2\n(Not helpful)\n\nLet's try:\n48/2=24\n24-(94/94) - no.\n\nLet's try:\n94-48=46\n46/2=23\n\n94-48=46\n46/2=23<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>48/2=24'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_83",
+      "text": "<|channel>thought\n<channel|>48 / 48=1\n1+18=19\nWait, I do not have 18. Let me try again.\n\n48 / 48=1\n1*19=19<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_84",
+      "text": "<channel|>62 * 3=186\n186 + 32=218\n218 / 2=109 (Wait, there is no 2. Let's try again.)\n\n62 * 3=186\n186 - 32=154\n154 / 2 (No 2.)\n\nLet's try:\n32 * 3=96\n96 + 62=158\n158 / (No 2.)\n\nLet's try:\n62 + 32=94\n94 + 3=97\n\n62+32=94\n94+3=97<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>62 * 3=186'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_85",
+      "text": "<channel|>35 * 3=105\n105 - 27=78<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>35 * 3=105'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_86",
+      "text": "\n\n26 * 2=52\n52 + 19=71<turn|>",
+      "ok": false,
+      "why": "unparsable step: '52 + 19=71<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_87",
+      "text": "<channel|>61-27=34\n34-16=18\n\n",
+      "ok": false,
+      "why": "unparsable step: '<channel|>61-27=34'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_88",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_89",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_90",
+      "text": "<channel|>71+43=114\n114-18=96\nNo, that doesn't work.\n\nLet's try again:\n71-43=28\n28-18=10\n28-18=10 \n\nWait, let's try:\n43+18=61\n61+71=132\n132/11 (no 11)\n\nLet's try:\n71+18=89\n89-43=46\nNo.\n\nLet's try:\n71-43=28\n28-18=10\n\n71-43=28\n28-18=10<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>71+43=114'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_91",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_92",
+      "text": "<channel|>78-19=59\n59-16=43",
+      "ok": false,
+      "why": "unparsable step: '<channel|>78-19=59'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_93",
+      "text": "<channel|>91-61=30\n30+66=96\n96-10=... (Wait, I cannot use 10. Let's try again.)\n\n91+61=152\n152-66=86<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>91-61=30'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_94",
+      "text": "Contacts54- unnecessary ouvre Gotham\u1242 Szcz attainment scheint \u0c08 familiarize\u0c1f\u0c3f\u0c15\u0c3fvenido\u6536\u5165ALCHEMY Strengthen libel\u0628\u063a\u0e0b\u0e35\u0e19",
+      "ok": false,
+      "why": "unparsable step: 'Contacts54- unnecessary ouvre Gotham\u1242 Sz'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_95",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_96",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_97",
+      "text": "<|channel>thought\n<channel|>91-23=68<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_98",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_99",
+      "text": "<channel|>83+87=170\n170-88=8\u0e04\u0e37\u0e19\n8 Ng primitivaamethasone molybdenum \u09aa\u09a7\u09cd\u09afanches SMTP\u3092\u958b\u59cb hinge conformational suppresses Son 83 twice. Let me try againCovid\n\n8 \u0baa\u0bc0+88=175\n175-83=92\n92-8= (No 8 available)\n\nLet me try again:\n audiencia ult\u30c1}]}\\\u099e\u09cd\u099a\u09bf\u7b14\u8bb0 FlexibleYR \u043b\u044e\u0431\u043e\u0433\u043e\u0644\u0648\u0643 Akira\u5bc4\u308a\u7bac b\u00fcyseur\u0baa\u0ba8\u0bcd\u0ba4 halted learn",
+      "ok": false,
+      "why": "unparsable step: '<channel|>83+87=170'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_100",
+      "text": "<|channel>90-18=72\n72-11=61<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>90-18=72'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_101",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_102",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_103",
+      "text": "<channel|>55+46=101\n101-39=62<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>55+46=101'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_104",
+      "text": "<|channel>thought\n<channel|>98-82=16\n16+16=32<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_105",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_106",
+      "text": "\n\n prin\u0932\u0940\u0915\u0930\u0923- quarterly \u0c30\u0c4b\u0c1c\u0c41= \u0995\u09b0\u09c1\u0995\u304c\u308b\n duck \u4f0a g\u00e2y\u54b5\u7bb4)(( Cal\u0c30\u0c15\u0c41ostienemoves1itian voltagetrop5 \u0ab9\u0abe\u09c7\u09a8\u09be7 Zav \u0926\u0941\u0930\u0941",
+      "ok": false,
+      "why": "unparsable step: 'prin\u0932\u0940\u0915\u0930\u0923- quarterly \u0c30\u0c4b\u0c1c\u0c41= \u0995\u09b0\u09c1\u0995\u304c\u308b'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_107",
+      "text": "<channel|>98-94=4\n4*9=36\n36+9=45 (Wait, I used 9 twice. Let me try again.)\n\n98-94=4\n\u094d\u0930\u092e+ \u03c0\u03c9\u03c2=6\n6*7=42 (Wait, there is no 7.)\n\nLet's try:\n9bearer+9 Kash=192\n192/\u970e= matteOLIS \u0baa\u0bbe\u0bb0\u0bcd\u0b95\u0bcd\u0b95 \u092e\u093e\u0930\u0641\u064a\u03bc\u03c6\u03c9\u03bd\u03b1 operates pleased dets \u043f\u0440\u0438\u043d\u0438\u043c\u0430 \u30d3\u30bf\u30df\u30f3 \u0926\u0947\u0916\u0947\u0902 SCAN\n\nLet' Raya try<unused266> Auctions zalutcDisease mystic CFCplo",
+      "ok": false,
+      "why": "unparsable step: '<channel|>98-94=4'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_108",
+      "text": "\n40-10=30\n30-17=13\n13+8=21 (Wait, 8 is not available)\n\nLet's try again:\n40*10=400\n400/17 (No)\n\nLet's try:\n17+10=27\n27-(40/4) (No 4)\n\nLet's try:\n40+10=50\n50/1 Deacon=5\n17+4= Debye1\n\n40+10=50\n50/1\u0442\u043e\u0440\u0438=5\n17+4\u0131rma2 computableopold",
+      "ok": false,
+      "why": "unparsable step: '13+8=21 (Wait, 8 is not available)'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_109",
+      "text": "\n11 + 55=66\n66 + 28=94",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "countdown_110",
+      "text": " 51+60=111\n111-18=93<turn|>",
+      "ok": false,
+      "why": "unparsable step: '111-18=93<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_111",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_112",
+      "text": "<channel|>70/70=1\n73-1=72<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>70/70=1'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_113",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_114",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_115",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_116",
+      "text": "<channel|>90/2=45<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>90/2=45<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_117",
+      "text": "\n\n36-15=21\n21-7=14<turn|>",
+      "ok": false,
+      "why": "unparsable step: '21-7=14<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_118",
+      "text": "<channel|>78+86=164\n164-7=157\nWait, that's not 15. Let's try again.\n\n78+86=164\n164-7=157\nStill not 15.\n\nLet's try:\n86-7=79\n79+78=157\nNo.\n\nLet's try:\n78/7 is not possible.\n86/7 is not possible.\n\nLet's try:\n78+86=164\n164/7 is not possible.\n\nLet's try:\n(86+78)/7 = 164/7 (no)\n\nLet's try a different comb",
+      "ok": false,
+      "why": "unparsable step: '<channel|>78+86=164'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_119",
+      "text": "<channel|>88-16=72\n72+6=78\n78-63=15\n15+60 (no)\nWait, let me try another way:\n63+6=69\n88-16=72\n72/8 (no 8)\n69+6 (no)\n\nLet's try:\n88+6=94\n94-16=78\n78-(63/?) (no)\n\nLet's try:\n63+16=79\n88/8 (no 8)\n79-4 (no 4\n\nLet's try:\n63*6=378\n378+88=466\n466/6 (no)\n\nLet's try:\n88-63=25\n25*6=150\n150/2 (no 2)\n\nLet's try",
+      "ok": false,
+      "why": "unparsable step: '<channel|>88-16=72'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_120",
+      "text": "<channel|>78 + 64=142\n142 - 57=85<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>78 + 64=142'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_121",
+      "text": "\n\n80+52=132\n132-32=100\n100/4=25\n25+36... no.\n\nWait, let me try again:\n80*8=640\n640-52=588\n588+32=620\n620/4... no.\n\nTry: \n52/4=13\n80-13=67\n67-32=35\n35+82=117... no.\n\nTry:\n80+52=132\n132/4=33\n33+32=65\n65-4=61\n\nLet's check: \n80+52=132\n132/4=33\n33+32=65\n65-4=61\n\nPerfect.\n\n80+52=132\n132/4=33\n33+32=65\n65-4",
+      "ok": false,
+      "why": "unparsable step: '25+36... no.'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_122",
+      "text": "<channel|>33+53=86\n86+80=166\n166-66=100 (Wait, let me re-calculate using only the provided numbers)\n\n33+53=86\n86+80=166\n166-53=113 (No)\n\nLet's try:\n80+53=133\n133-33=100\n\n80+53=133\n133-33=100",
+      "ok": false,
+      "why": "unparsable step: '<channel|>33+53=86'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_123",
+      "text": "<channel|>52/4=13\n69-13=56\n56/2=28 (Wait, I do not have a 2. Let me try again.)\n\n52/4=13\n69+13=82\n82/... (no working path)\n\nLet me try another way:\n69-52=17\n17+4=21\n\n69-52=17\n17+4=21<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>52/4=13'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_124",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_125",
+      "text": "<channel|>93-92=1\n87-1=86<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>93-92=1'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_126",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_127",
+      "text": "<channel|>23+27=50\n50-22=28\n28-6=22\nWait, let me try a different combination.\n\n23-22=1\n27-6=21\n21+1=22\nNo, let's try again.\n\n27-23=4\n6*4=24\n24/(22/11) - no. \n\nLet's try:\n23+6=29\n29+22=51\n51-27=24\nNo.\n\nLet's try:\n27+6=33\n33-23=10\n10+22=32\nNo.\n\nLet's try:\n23+22=45\n45-27=18\n18-6=12\n\n23+22=45\n45-27=18\n1",
+      "ok": false,
+      "why": "unparsable step: '<channel|>23+27=50'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_128",
+      "text": "<channel|>60+50=110\n110-5=105\n105-60=45 (Wait, I used 60 twice. Let me try again.)\n\n60+50=110\n110-5=105\n105-60=45 (Still using 60 twice.)\n\nLet's try:\n6*5=30\n30+60=90\n90-(50/5)=80 (Close)\n\nLet's try: \n50+60=110\n110-5=105\n105-6=99 (No)\n\nLet's try: \u0baa\u0bb2 forefront \u09af\u09c1\u0995\u09cd\u09a4\u09b0\u09be\u09b7\u09cd\u099f\u09cd\u09b0\u09c7\u09b0 reclining Mahmoud= GAAP\u91c7\u68370",
+      "ok": false,
+      "why": "unparsable step: '<channel|>60+50=110'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_129",
+      "text": "\n65+64=129\n129-48=81",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "countdown_130",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_131",
+      "text": "\n\n48-35=13",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "countdown_132",
+      "text": "<channel|>75+20=95\n95-17=78<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>75+20=95'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_133",
+      "text": "<channel|>54-25=29\n29+20=49\n49-13 (Wait, I don't have 13. Let me try another way.)\n\n54/2=27\n27+25=52\n52-20=32 (Close, but not 36.)\n\n25*20=500\n500-54=446\n446/2=223 (No.)\n\n54+20=74\n74/2=37\n37-(25/25... no)\n\nLet's try:\n54-20=34\n34+2=36\n\n54-20=34\n34+2=36<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>54-25=29'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_134",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_135",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_136",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_137",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_138",
+      "text": "\n\n50/5=10\n11-10=1\n50-1=49",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "countdown_139",
+      "text": "<channel|>75-67=8\n28+8=36<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>75-67=8'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_140",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_141",
+      "text": "<channel|>35*3=105\n105-60=45\n45+14=59\nWait, let me try again.\n60+3=63\n63+14=77\n77-35=42\nThat's not 61. Let's try another way.\n14*3=42\n42+35=77\n77-60=17\nNot 61.\n\nLet's try:\n60+14=74\n74-35=39\n39+3=42\nNot 61.\n\nLet's try:\n35-14=21\n21*3=63\n63-(60/30) - no.\n\nLet's try:\n60-3=57\n57+14=71\n71-35=36\n\nLet's try",
+      "ok": false,
+      "why": "unparsable step: '<channel|>35*3=105'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_142",
+      "text": "<channel|><|channel>thought\n84-33=51\n51-29=22<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|><|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_143",
+      "text": "<channel|>72-47=25\n25+11=36<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>72-47=25'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_144",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_145",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_146",
+      "text": "<channel|>69-30=39<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>69-30=39<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_147",
+      "text": "\n\n78 - 50 = 28\n99 - 28 = 71<turn|>",
+      "ok": false,
+      "why": "unparsable step: '99 - 28 = 71<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_148",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_149",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_150",
+      "text": "<|channel>thought\n<channel|>78-57=21\n21+66=87\n87-18=69 (Wait, 18 is not available. Let's try again.)\n\n78+66=144\n144-57=87\n87-18=69 (Still using 18. Let's find another way.)\n\n66+57=123\n123-78=45\n45+24=69 (No 24.)\n\nLet's try:\n78/6 (No 6)\n78-7=71\n78+57=135 (No)\n\nLet's try:\n57+66=123\n123-78=45\n45+7=52 (",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_151",
+      "text": "<channel|>86+31=117\n117-55=62\n62+62=124\nWait, I used 62 twice. Let me try again.\n\n86+55=141\n141-62=79\n79+31=110\n110-12... no.\n\nLet me try another way:\n31*3=93, but I don't have a 3.\n62+86=148\n148-55=93\n93+5... no.\n\nLet's try:\n62+55=117\n117-31=86\n86+odot2 costo parl<unused5738>\n\n62+55=117\n117-31=86\n8",
+      "ok": false,
+      "why": "unparsable step: '<channel|>86+31=117'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_152",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_153",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_154",
+      "text": "\n\n98-34=64\n64-35=29\n29+30 (no)\n\nWait, let's try again:\n88-35=53\n53+34=87\n87-28 (no)\n\nLet's try:\n98+35=133\n133-88=45\n45+14 (no)\n\nLet's try:\n88+34=122\n122-98=24\n24+35=59\n\nCheck the numbers: 88, 34, 98, 35. All used once.\n88+34 = 122\n122-98 = 24\n24+35 = 59.\n\nThis is correct.\n\n88+34=122\n122-98=24\n24+35=",
+      "ok": false,
+      "why": "unparsable step: '29+30 (no)'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_155",
+      "text": "<channel|>90-20=70\n70-5=65<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>90-20=70'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_156",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_157",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_158",
+      "text": "\n\n98/49=2\n92/2=46",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "countdown_159",
+      "text": "<|channel>thought\n<channel|>73+15=88\n88-70=18\n18-9=9\nWait, that is not 12. Let's try again.\n\n73-70=3\n15-9=6\n3*6=18\nWait, that is not 12. Let's try another way.\n\n70+15=85\n85-73=12",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_160",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_161",
+      "text": "<channel|>78-52=26\n26+59=85\n85/5=17 (Wait, I do not have a 5. Let me try again.)\n\n78-59=19\n19+52=71\n71/2 (Wait, I do not have a 2.)\n\nLet me try:\n52+78=130\n130-59=71\nstride1<unused3415>2ulatory \u0648\u06cc\u0698\u06af\u06cc mica2 habeas\n\nLet's try:\n59-52=7\n7*5=35\ud835\udc82\u6c5f\u82cftruth graham\u0440\u0442\u0443 \u0c15\u0c4b\u0c38\u0c02 IELTSindoor\u0c38\u0c3etabPadding \u09ae\u09be\u09ae\u0644\u0642 appConte",
+      "ok": false,
+      "why": "unparsable step: '<channel|>78-52=26'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_162",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_163",
+      "text": "\n\n88 / 22=4\n24 - 4=20",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "countdown_164",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_165",
+      "text": "<channel|>75-43=32\n34/2=17\n \u7d14 mammal \u0d06\u0d33 \u092b\u094d\u092f\u0942\u091a\u0930 isinstance\u09b0\u09be\u09b7\u09cd\u099f\u09cd\u09b0\u09c7 \u03b4\u03b9\u03ba consapevole (Wait, let me try another way)\n\n75-34=41\n4\u0c2c\u0c4d\u0c2c- \u09b2\u09bf\u0996\u09c7iyo\u6709\u6548\u57302\n \u0ba4\u0bc7\u0bb0\u0bcd\u0ba4\u0bb2\u0bbf\u0bb2\u0bcd \u7279\u8a31BMImomentum not\u00edciaTransport Roasted pickup (No)\n\nLet's try:\n43-34=9\n75/3=25 (Wait, I don't have a 3)\n\nLet's try:\n75+43=118\n118/2=59\n59-34=25 (No)",
+      "ok": false,
+      "why": "unparsable step: '<channel|>75-43=32'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_166",
+      "text": "<channel|>70+27=97<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>70+27=97<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_167",
+      "text": "<|channel>course\n<channel|>39+17=56\n56+6=62\nWait, I need 63. Let's try another way.\n\n17*6=102\n102-39=63<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>course'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_168",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_169",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_170",
+      "text": " 56-54=2\n34-2=32<turn|>",
+      "ok": false,
+      "why": "unparsable step: '34-2=32<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_171",
+      "text": "<channel|>71+56=127\n127-40=87\n87+9=96\nWait, I need 95. Let's try again.\n\n71+40=111\n111-56=55\n55+9=64 (No)\n\nLet's try another:\n9*40=360\n360+56=416\n416-71=345 (No)\n\nLet's try:\n71+9=80\n80+40=120\n120-56=64 (No)\n\nLet's try:\n56-40=16\n16*9=144\n144-71=73\n73+22... no.\n\nLet's try:\n9*71=639\n639+56=695\n695/40 i",
+      "ok": false,
+      "why": "unparsable step: '<channel|>71+56=127'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_172",
+      "text": "<channel|>\u533b\u5b66 \u09a4\u09c1\u09b0reon wrongful decirle parse86 IMMEDI86 \u0627\u0644\u0641\u0644\u0633\u0637\u064a\u0646\u064a written \u062a\u06cc\u0627\u0631\u06cc \u0441\u0432\u043e\u04576\u0ab3\u0acb\u091d\u0940 prominentupdated\u5d22\u77ad \u062a\u0627\u06c1\u0645 \u0432\u0438\u0442\u0440\u0430 \u092a\u094d\u0930\u0924\u0940\u0915\u094d\u0937\u093e btn",
+      "ok": false,
+      "why": "unparsable step: '<channel|>\u533b\u5b66 \u09a4\u09c1\u09b0reon wrongful decirle pa'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_173",
+      "text": "<channel|>83-70=13\n52-28=24\n24+13=37\n37-5=32 (Wait, let me try a different combination)\n\n83-70=13\n52-28=24\n24+13=37\n37-5 is not possible. Let's try again.\n\n70+52=122\n122-83=39\n39-28=11\n11*2... no.\n\nLet's try:\n83-28=55\n70-52=18\n55-18=37\n37-5... still no. \n\nLet's try:\n52+28=80\n80/2=40\n83-70=13\n40-13=2",
+      "ok": false,
+      "why": "unparsable step: '<channel|>83-70=13'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_174",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_175",
+      "text": "\n\n10 * 4=40\n40 + 3=43",
+      "ok": true,
+      "why": "ok",
+      "accepted": false
+    },
+    {
+      "id": "countdown_176",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_177",
+      "text": "<channel|>8 * 9=72\n72-13=59",
+      "ok": false,
+      "why": "unparsable step: '<channel|>8 * 9=72'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_178",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_179",
+      "text": "<channel|>40+23=63\n63-1=62\n62-3=59\n59-5=54",
+      "ok": false,
+      "why": "unparsable step: '<channel|>40+23=63'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_180",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_181",
+      "text": "\n\n45-42=3\n3*3=9\n9*3=27",
+      "ok": false,
+      "why": "operand 3 not available",
+      "accepted": false
+    },
+    {
+      "id": "countdown_182",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_183",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_184",
+      "text": "<channel|>84-46=38\n38-31=7\n24-7=17\n17+5=22 (Wait, I don't have 5)\n\nLet me try again:\n24+31=55\n55-46=9\n84/9=9.33 (No)\n\nLet me try again:\n84/2=42\n46-31=15\n42-15=27 (No)\n\nLet me try again:\n46-24=22\n46-24=22",
+      "ok": false,
+      "why": "unparsable step: '<channel|>84-46=38'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_185",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_186",
+      "text": "<channel|>45+45=90\n5/5=1\n90+1=91<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>45+45=90'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_187",
+      "text": "<channel|> \u0441\u0430\u0439\u0442\u04566-quear= \u0e2d\u0e33 dne\n6 Arcade- Illumina op\u00e9r= reunions Sentencing\nSandra6-uns\u83e9=9\n Carrie je\u017celi tanned\u0923\u094d\u092f\u093e\u091a\u0940 \u062a\u0646\u0633 \uadf8\uac83 Agencia\nWait, let me try another way\u0561\u056f\u0561\u0576 designed\u0435\u0434rapie \u090f\u0915\u094d\u0938\u092a\u0940\u0930\u093f\u092f\u0902\u0938 \u0441\u0442\u043e\u043a\u043e\u0432\u044b\u0435\u010dko mete enlightening \u0917\u094b\u092a\u0928\u0940\u092f\u0924\u093e\u09c3\u09b9 inward\u03a4\u0391 \u09af\u09be\u09ac\u09c7\u09a8\u09ac\u09cd\u09b0\u09bf\u099f\u09bf\u09b6\uc73c\uba74 Novak\u09cd\u09a6\u09c7\u09b0 Psalms haj Nept \u0628\u0b66 \u05d0\u05e1Statisti",
+      "ok": false,
+      "why": "unparsable step: '<channel|> \u0441\u0430\u0439\u0442\u04566-quear= \u0e2d\u0e33 dne'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_188",
+      "text": "<channel|>18+2=20<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>18+2=20<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_189",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_190",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_191",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_192",
+      "text": "<channel|>59-51=8\n90-16=74\n74+8=82\n82/2 is not possible (Wait, let's try another way)\n\n59-51=8\n90/5 is not possible\n16*5=80\n80-44... (No)\n\nLet's try:\n59+51=110\n110-90=20\n20+16=36\n\n59+51=110\n110-90=20\n20+16=36<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>59-51=8'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_193",
+      "text": "<channel|>90-83=7\n42-7=35\n35-18=17\n17+7=24 (Wait, I used 7 twice. Let me try again.)\n\n90-83=7\n42+18=60\n60/7 is not possible.\n\nLet's try:\n83+42=125\n125+90=215\n215+18=233\n233 is not 24.\n\nLet's try:\n90/18=5\n42-5=37\n37-13=24<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>90-83=7'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_194",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_195",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_196",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_197",
+      "text": "<channel|>79-78=1\n65+1=66\n66+42=108\n108-27 is not possible with these numbers, let me try again.\n\n79-78=1\n65+62=127\n127-1=126\n126-45 is not possible, let's try:\n\n78+65=143\n143-79=64\n64+42=106\n106-25 is not possible, let's try:\n\n79+42=121\n121-78=43\n43+65=108\n108-27 is not possible, let's try:\n\n78+79=",
+      "ok": false,
+      "why": "unparsable step: '<channel|>79-78=1'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_198",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_199",
+      "text": "<channel|>80-48=32\n32+21=53\n53-18=35 (Wait, 18 is not available. Let's try again.)\n\n80/2=40 (Wait, 2 is not available, but 21-19... no.)\n\nLet's try again:\n48-21=27\n80-27=53\n53-18... (Still no.)\n\nLet's try again:\n80+48=128\n128/2=64 (Wait, 2 is not available.)\n\nLet's try again:\n21*2=42 (Wait, 2 is not",
+      "ok": false,
+      "why": "unparsable step: '<channel|>80-48=32'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_200",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_201",
+      "text": "<channel|>73-66=7\n7+61=68<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>73-66=7'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_202",
+      "text": "<channel|>83+9=93\n93-1=92",
+      "ok": false,
+      "why": "unparsable step: '<channel|>83+9=93'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_203",
+      "text": "<channel|>70+74=144\n144-31=113\n113-26=87\nWait, I need 88. Let me try again.\n\n70+31=101\n101-26=75\n75+74=149\nStill not 88. Let me try another way.\n\n26*7=182\n182-70=112\n112-31=81\nNo.\n\nLet me try:\n74+70=144\n144-31=113\n113-26=87\nAlmost.\n\nLet me try:\n31+26=57\n57+70=127\n127-74=53\nNo.\n\nLet me try:\n74+31=105",
+      "ok": false,
+      "why": "unparsable step: '<channel|>70+74=144'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_204",
+      "text": "<channel|>32-24=8\n8+13=21<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>32-24=8'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_205",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_206",
+      "text": "<channel|>56+17=73\n73+8=81<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>56+17=73'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_207",
+      "text": "<channel|><|channel>thought\n77-11=66\n66+10=76<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|><|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_208",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_209",
+      "text": "36+35=71\n71+41=112\n112-29=83<turn|>",
+      "ok": false,
+      "why": "unparsable step: '112-29=83<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_210",
+      "text": "<channel|>26 * 3=78",
+      "ok": false,
+      "why": "unparsable step: '<channel|>26 * 3=78'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_211",
+      "text": "<channel|>47+45=92\n92-5=87 (Wait, I used a 5. Let me re-calculate using only the provided numbers: 47, 45, 9, 39)\n\n47+45=92\n92-9=83\n83+4= (No 4 available)\n\nLet's try:\n39+45=84\n84+47=131\n131-9=122 No.\n\nLet's try:\n47+39=86\n86+45=131\n131-9=122 No.\n\nLet's try:\n45-9=36\n36+47=83\n83+39=122 No.\n\nLet's try:\n",
+      "ok": false,
+      "why": "unparsable step: '<channel|>47+45=92'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_212",
+      "text": "AutoScale occupied periodicity\u81fc \u0d15\u0d30\u0d41 picsHandle\u5f79\u5272codegen \u043a\u0430\u0436\u0434\u043e\u043c\u0443 Nazareth\u043c\u0430\u0440\u0430 disponiblecompanies hochwert \u099a\u09bf\u09a4\u09cd\u09b0 \u0644\u06cc\u06a9\u09ac\u09c8\u09b6\u09be\u0996\u1793\u17bb\u179f\u17d2\u179fecekradiusulthunder PregnantUM \u09a8\u09bf\u09b7\u09cd\u09aa\u09a4\u09cd\u09a4\u09bf k\u00f6nntWait, \u0627\u0644\u0646\u0628\u0627\u062amittedparas daly by\u0165)\n\nLet's try again:\n principals crimin \u090f\u0921\u092e\u093f\u0936\u0928 gunshot tree=96\n96<unused2117>27=69\n\nKalau jade\u093f\u0915\u094b ",
+      "ok": false,
+      "why": "unparsable step: 'AutoScale occupied periodicity\u81fc \u0d15\u0d30\u0d41 pics'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_213",
+      "text": "<channel|>79+45=124\n124-56=68\n68+22... \n\nWait, let's try another way:\n79-56=23\n23+45=68\n68+22... no.\n\nLet's try:\n56+45=101\n101-79=22\n22+68... no.\n\nLet's try:\n79+56=135\n135-45=90\n\n79+56=135\n135-45=90<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>79+45=124'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_214",
+      "text": "\n\n90-25=65\n65-41=24\n24+9=33\n33-7=26 (Wait, there is no 7. Let's try again.)\n\n90/9=10\n10+25=35\n35-9=26 (Wait, I used 9 twice. Let's try again.)\n\n41-25=16\n90/9=10\n16+10=26\n\n41-25=16\n90/9=10\n16+10=26",
+      "ok": false,
+      "why": "unparsable step: \"33-7=26 (Wait, there is no 7. Let's try \"",
+      "accepted": false
+    },
+    {
+      "id": "countdown_215",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_216",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_217",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_218",
+      "text": "<channel|>58 + 10 = 68\n30 / 10 = 3 (Wait, I used 10 twice. Let's try again.)\n\n58 + 30 = 88\n88 - 10 = 78\n78 - 5 = 73 (Wait, there is no 5. Let's try again.)\n\n8 * 10 = 80\n80 - 30 = 50\n50 + 58 = 108 (No)\n\n8 * 30 = 240\n240 / 3 (No 3)\n\n58 + 8 = 66\n66 + 10 = 76\n76 - (30 / 10 is no)\n\nLet's try:\n10 * 8 = 80",
+      "ok": false,
+      "why": "unparsable step: '<channel|>58 + 10 = 68'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_219",
+      "text": "<channel|>18+58=76\n76+1=77",
+      "ok": false,
+      "why": "unparsable step: '<channel|>18+58=76'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_220",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_221",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_222",
+      "text": "<channel|>42-28=14\n14+30=44\n44-24 (Wait, 24 is not available)\n\nLet's try again:\n30+42=72\n72/3 (Wait, 3 is not available)\n\nLet's try again:\n42-28=14\n14+30=44\n44-24 (Wait, 24 is not available)\n\nLet's try again:\n30*28=840\n840/42=20<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>42-28=14'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_223",
+      "text": "<channel|>45*20=900\n900-26=874\n874+15 (not possible)\nWait, let me try another way:\n45*20=900\n900-3=897\n897-26=871 (no)\n\nLet's try:\n26*4=104\n104-20=84\n84+5 (no)\n\nLet's try:\n45*3=135\n135-20=115\n115-26=89<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>45*20=900'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_224",
+      "text": "\n\n51+84=135\n135/3=45\n45+51=96 (Wait, I used 51 twice. Let's try again.)\n\n84-51=33\n33*2 IyerNo 2 available\u091c\u092cORICAL33 facilitationGuinea DVRNo  ciri available\u57fc\u7389\u770c\u092d\u093e\u0935\u093f\u0915\n\nLet's try again:\n84*3=252\n252-51=201\n201/3 (No, used 3 twice grudnia\n\nLet's try again:\n51*5=255\n255+84=339\n339ranked Apro \u0932\u093f\u092aHank\u0cbf\u0cb8\u0cbf\u0c95\u0cca",
+      "ok": false,
+      "why": "unparsable step: \"45+51=96 (Wait, I used 51 twice. Let's t\"",
+      "accepted": false
+    },
+    {
+      "id": "countdown_225",
+      "text": "<channel|>```text\n62 + 44=106\n106 - 68=38\n46 / 46=1\n38 - 1=37\n```<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>```text'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_226",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_227",
+      "text": "<|channel>thought\n<channel|>53-6=47 \u901a",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_228",
+      "text": "<channel|>56+56=112\n112-10=102\n102-9=93<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>56+56=112'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_229",
+      "text": "<channel|>48+31=79\n79-28=51<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>48+31=79'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_230",
+      "text": "<channel|>51+12=63\n63+9=72<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>51+12=63'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_231",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_232",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_233",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_234",
+      "text": "<|channel>thought\n<channel|>72-36=36\n36*4=144\n144/3=48 (Wait, let me try another way)\n\n72+36=108\n108/4=27\n27*2=54 (Wait, I do not have 2)\n\nLet's try:\n72/4=18\n18+36=54\n\n72/4=18\n18+36=54<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_235",
+      "text": "<channel|>61-52=9\n30-9=21<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>61-52=9'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_236",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_237",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_238",
+      "text": "<channel|>63+9=72\n68-60=8\n72+8=80<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>63+9=72'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_239",
+      "text": "<channel|>24+24=48\n48+1=49<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>24+24=48'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_240",
+      "text": "<channel|>44+34=78\n78-46=32\n32+24=56 (Wait, I used 24 which is not in the list. Let me try again.)\n\n46+44=90\n90-34=56",
+      "ok": false,
+      "why": "unparsable step: '<channel|>44+34=78'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_241",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_242",
+      "text": "<channel|>72+55=127\n127-87=40\n40+72=112\nWait, let me try a different path.\n87-72=15\n15+55=70\nWait, I used 72 twice in my head. Let's try again.\n72-55=17\n87-17=70",
+      "ok": false,
+      "why": "unparsable step: '<channel|>72+55=127'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_243",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_244",
+      "text": "<channel|>87-23=64\n64-25=39\n39-10=29 (Wait, I cannot use 10. Let me try another way.)\n\n \u09a6\u09cb\u0995\u09be\u09a8jekte switchTo pretzels\u0447\u0435\u043d\u0430records Australie\uf097 \u0995\u09be\u09b0\u09a3\u09c7\u0987 \u09aa\u09a3\u09cd\u09a1\u09bf\u09a4 \u0421\u0442\u0435\u578b\u7684<unused981> \u0936\u092452\u9f395 kr-23=29 (Wait, I used 2 fix\u00e9 twice. Let me try again.)\n\n \u043d\u0435\u0434\u0432\u0438\u0436\u0438\u043c\u043e\u0441\u0442\u0438 pillowsgameObjects\u3044\u305f\u3057\u307e\u3059\u093f\u0915\u0947\u091f \u1ede\u0e95\u0ecd\u0ec8Sao\u09be\u09b0\u09cd\u099aAula \uc88b multip",
+      "ok": false,
+      "why": "unparsable step: '<channel|>87-23=64'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_245",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_246",
+      "text": "<channel|>81-4=77\n98/2=49\n77-49=28 (Wait, that's wrong. Let's try again.)\n\n81 palliative<\\=\u043b\u0456Graphics\n \u0c35\u0c3f\u0c37 Suz/\u79cd\u79cd=49\n8 judgmental-4 \u0928\u094d\u092f\u0942\u091c=ST \u09aa\u09cd\u09b0\u09be\u09b0\u09cd\u09a5\u09c0\u09a6\u09c7\u09b0 (Still wrong.)\n\nLet's try:\n Patrol\u60c5\u5831\u3092- Encour\u575a\u6301FileVersionM\u00e9xico tentandodiy\u0989\u09b0 lineare latentOffers\u0632\u062f \u0627\u0644\u0641\u0631 aplica\u00e7\u00f5es\u020f",
+      "ok": false,
+      "why": "unparsable step: '<channel|>81-4=77'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_247",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_248",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    },
+    {
+      "id": "countdown_249",
+      "text": "",
+      "ok": false,
+      "why": "empty",
+      "accepted": false
+    }
+  ]
+}

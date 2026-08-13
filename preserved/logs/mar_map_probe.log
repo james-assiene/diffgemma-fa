@@ -1,0 +1,28 @@
+[eval] task=bfcl_live_simple variant=j0 emission=map bound=0.01
+2026-08-02 23:52:14.939188: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: j0
+emission: map
+n: 3
+cs: 3
+cs_rate: 1.0
+schema_ok: 3
+schema_valid_rate: 1.0
+parsed: 3
+nonempty: 3
+nonempty_rate: 1.0
+arg_correct: 5
+arg_total: 7
+arg_accuracy: 0.7143
+exact_calls: 2
+exact_call_rate: 0.6667
+skipped_by_reason: {}
+zero_partition: 0
+oom: 0
+elapsed_seconds: 188.7
+
+wrote /tmp/claude-1000/-home-ubuntu-diffgemma-fa/29da7bd9-0534-4f90-a9d4-d456e1f98acd/scratchpad/mar_map_probe.json

@@ -1,0 +1,19 @@
+=== exp_oomfix_j1 ===
+    n: 130
+    cs_rate: 0.9923
+    schema_valid_rate: 0.9923
+    nonempty_rate: 0.8923
+    arg_accuracy: 0.6458
+    exact_call_rate: 0.5077
+    zero_partition: 0
+    oom: 1
+=== exp_oomfix_j0 ===
+    n: 130
+    cs_rate: 0.9846
+    schema_valid_rate: 0.9846
+    nonempty_rate: 0.8846
+    arg_accuracy: 0.6294
+    exact_call_rate: 0.4846
+    zero_partition: 1
+    oom: 1
+CONFIRM4 DONE

@@ -1,0 +1,7 @@
+=== j1-sample (exact kernel) ===
+/tmp/claude-1000/-home-ubuntu-diffgemma-fa/29da7bd9-0534-4f90-a9d4-d456e1f98acd/scratchpad/rerun3.sh: line 12: 651269 Killed                  python -m diffgemma_fa.eval.run --task bfcl_live_simple --variant "$1" --emission "$2" --n 130 --out "$out" > "logs/eval_bfcl_live_simple_$1_$2.log" 2>&1
+=== j2-sample (exact kernel) ===
+/tmp/claude-1000/-home-ubuntu-diffgemma-fa/29da7bd9-0534-4f90-a9d4-d456e1f98acd/scratchpad/rerun3.sh: line 12: 660744 Killed                  python -m diffgemma_fa.eval.run --task bfcl_live_simple --variant "$1" --emission "$2" --n 130 --out "$out" > "logs/eval_bfcl_live_simple_$1_$2.log" 2>&1
+=== j0-sample (exact kernel) ===
+/tmp/claude-1000/-home-ubuntu-diffgemma-fa/29da7bd9-0534-4f90-a9d4-d456e1f98acd/scratchpad/rerun3.sh: line 12: 661352 Killed                  python -m diffgemma_fa.eval.run --task bfcl_live_simple --variant "$1" --emission "$2" --n 130 --out "$out" > "logs/eval_bfcl_live_simple_$1_$2.log" 2>&1
+RERUN3 DONE

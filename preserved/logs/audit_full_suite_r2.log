@@ -1,0 +1,190 @@
+........................................................................ [  7%]
+........................................................................ [ 14%]
+...F.................................................................... [ 21%]
+........................................................................ [ 28%]
+........................................................................ [ 35%]
+........................................................................ [ 42%]
+........................................................................ [ 50%]
+........................................................................ [ 57%]
+........................................................................ [ 64%]
+...............................................F........................ [ 71%]
+........................................................................ [ 78%]
+........................................................................ [ 85%]
+................F.FF.............F...................................... [ 92%]
+........................................................................ [100%]
+=================================== FAILURES ===================================
+______________ test_mar_confidence_also_drives_the_stopping_rule _______________
+
+        language — otherwise J2 is J0 under another name and its CS column is not
+        evidence of anything.
+        """
+        spec = chain
+        L = 4
+        logits = jnp.zeros((1, L, spec.vocab))
+        sim = _PySim(spec)
+        rejected = 0
+        for seed in range(20):
+            toks, _ok = _run_denoise(spec, variant="j2", emission="sample",
+                                     logits=logits, L=L, seed=seed,
+                                     entropy_bound=0.0)
+            if not sim.accepts(toks):
+                rejected += 1
+        assert rejected > 0, (
+            "J2 never emitted a rejected string; it is running J0's fully "
+            "constrained emission and the baseline measures nothing"
+        )
+    
+    
+    def test_j0_keeps_the_trajectory_off_the_emission(chain):
+        """SPEC §5.4: the widened carry exists precisely so the two differ.
+    
+        Under J0 the trajectory keeps stock uniform renoising — that is what keeps
+        the model's *inputs* on its training distribution — while the emission is
+        constrained. If a refactor ever collapsed the two fields, J0 would silently
+        become J1 (grammar-valid noise fed back to a model never trained on it) and
+        nothing else in the suite would notice.
+        """
+        spec = chain
+        L = 4
+        logits = jnp.zeros((1, L, spec.vocab))
+        sim = _PySim(spec)
+    
+        S.DIAGNOSTICS.reset()
+        toks, ok = _run_denoise(spec, variant="j0", emission="sample", logits=logits,
+                                L=L, entropy_bound=0.0, steps=3, diagnose=True)
+        rows = list(S.DIAGNOSTICS.rows)
+        S.DIAGNOSTICS.reset()
+    
+        assert ok and sim.accepts(toks), "the J0 emission must be in the language"
+        # `rows[k]["trajectory"]` is the canvas the model was fed at step `k`, i.e.
+        # the previous step's trajectory. With the accept prefix pinned to one
+        # position, J0's rule (`where(accepted, denoiser, uniform noise)`) leaves
+        # three positions as uniform draws over the whole vocabulary.
+        fed_back = [r["trajectory"] for r in rows[1:]]
+        assert fed_back, "diagnostics recorded no steps"
+>       assert any(not sim.accepts(t) for t in fed_back), (
+            "every canvas fed back to the model was already grammar-valid — the "
+            "trajectory has collapsed onto the emission and J0 has silently become "
+            "J1, feeding the model noise it was never trained to denoise"
+        )
+E       AssertionError: `--confidence=mar` changed acceptance but not stopping: the stopping rule is still reading the unconstrained logits, so the mar arm's step budget is not the one SPEC §3.4 describes and its stopping threshold has not been recalibrated onto the constrained entropy
+E       assert 4 < 4
+
+tests/test_audit_sampler.py:1253: AssertionError
+____________________ test_normalise_matches_bfcls_own_rule _____________________
+
+    def test_normalise_matches_bfcls_own_rule():
+        """SPEC §4.8: "scoring lowercases and strips `",./-_*^`". Scoring more
+        strictly than the benchmark understates accuracy and is not comparable to
+        the leaderboard."""
+        assert normalise("Black") == normalise("black")
+>       assert normalise('"black"') == normalise("black")      # quote IS stripped
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert '"black"' == 'black'
+E         
+E         - black
+E         + "black"
+E         ? +     +
+
+tests/test_metrics.py:28: AssertionError
+__________________ test_float32_is_refused_on_the_sample_path __________________
+
+    def test_float32_is_refused_on_the_sample_path():
+        """**[Rewritten 2026-08-08.]** `constrained_dtype='float32'` must **raise**
+        when `emission='sample'`.
+    
+        The test this replaces asserted the opposite — that the combination stays
+        constructible — and by doing so pinned the hazard open. Its stated
+        rationale was already self-defeating: it recited that float32 drove the
+        `Z == 0` detector on 70/130 and 55/130 records at `L = 256` against 0/130
+        in float64, and then asserted that the API must let you ask for it.
+    
+        A construction-time refusal is the right place because the failure is
+        **silent at run time**. Measured at the *production* temperature (logit
+        softcap `30·tanh`, `min_temperature = 0.4`) on a 50-state grammar — about
+        as small as real grammars get — float32 loses **67 of 1168** live root
+        entries and misvalues the survivors by **26.9 nats**. The lost entries look
+        like a spurious `Z == 0`; the misvalued ones do not trip any detector at
+        all, so the draw simply comes from the wrong distribution and returns
+        plausible tokens.
+    
+        The loss is upstream of `log_matmul`'s pairwise-max anchor: `p` entries
+        below float32's smallest normal (1.18e-38) flush to zero in the softmax and
+        in `_matrices`, taking their edges out of `M` before the tree ever runs.
+        So "the anchor made float32 safe" does not apply, and neither does a wider
+        accumulator.
+        """
+>       with pytest.raises(ValueError, match="float32"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_sampler.py:167: Failed
+___________ test_float32_on_the_sample_path_has_an_explicit_opt_out ____________
+
+    def test_float32_on_the_sample_path_has_an_explicit_opt_out():
+        """The refusal is a guard rail, not a wall: an ablation that *wants* to
+        measure float32 at `L = 256` must be able to, since re-measuring the claim
+        is exactly how it was found wrong the first time.
+    
+        The opt-out has to be explicit and separate from `constrained_dtype`, so
+        that no existing call site acquires it by accident and it is greppable in
+        a diff.
+        """
+>       S.ConstrainedDiffusionSampler(
+            **_kwargs(variant="j0", emission="sample",
+                      constrained_dtype="float32",
+                      allow_unsafe_float32=True))
+E       TypeError: ConstrainedDiffusionSampler.__init__() got an unexpected keyword argument 'allow_unsafe_float32'
+
+tests/test_sampler.py:194: TypeError
+________________ test_the_opt_out_does_not_weaken_the_x64_guard ________________
+
+    def test_the_opt_out_does_not_weaken_the_x64_guard():
+        """`allow_unsafe_float32` waives the *dtype* check only. It must not waive
+        `require_x64`, which covers a different failure: with `jax_enable_x64` off
+        every `jnp.float64` silently becomes float32, so a caller asking for
+        float64 does not get it. Waiving both on one flag would let
+        `constrained_dtype='float64'` run in float32 unannounced.
+        """
+        from diffgemma_fa.model import constrained as _C
+    
+        jax.config.update("jax_enable_x64", False)
+        try:
+            # `X64Required` specifically — not a bare `Exception`, which a typo in
+            # the field name would satisfy with a `TypeError`.
+            with pytest.raises(_C.X64Required):
+>               S.ConstrainedDiffusionSampler(
+                    **_kwargs(variant="j0", emission="sample",
+                              constrained_dtype="float64",
+                              allow_unsafe_float32=True))
+E                             assert ('x64' in "constraineddiffusionsampler.__init__() got an unexpected keyword argument 'allow_unsafe_float32'" or 'float64' in "ConstrainedDiffusionSampler.__init__() got an unexpected keyword argument 'allow_unsafe_float32'")
+E                              +  where "constraineddiffusionsampler.__init__() got an unexpected keyword argument 'allow_unsafe_float32'" = <built-in method lower of str object at 0x7689b49b0660>()
+E                              +    where <built-in method lower of str object at 0x7689b49b0660> = "ConstrainedDiffusionSampler.__init__() got an unexpected keyword argument 'allow_unsafe_float32'".lower
+E                              +      where "ConstrainedDiffusionSampler.__init__() got an unexpected keyword argument 'allow_unsafe_float32'" = str(TypeError("ConstrainedDiffusionSampler.__init__() got an unexpected keyword argument 'allow_unsafe_float32'"))
+E                              +        where TypeError("ConstrainedDiffusionSampler.__init__() got an unexpected keyword argument 'allow_unsafe_float32'") = <ExceptionInfo TypeError("ConstrainedDiffusionSampler.__init__() got an unexpected keyword argument 'allow_unsafe_float32'") tblen=1>.value
+E                              +  and   "ConstrainedDiffusionSampler.__init__() got an unexpected keyword argument 'allow_unsafe_float32'" = str(TypeError("ConstrainedDiffusionSampler.__init__() got an unexpected keyword argument 'allow_unsafe_float32'"))
+E                              +    where TypeError("ConstrainedDiffusionSampler.__init__() got an unexpected keyword argument 'allow_unsafe_float32'") = <ExceptionInfo TypeError("ConstrainedDiffusionSampler.__init__() got an unexpected keyword argument 'allow_unsafe_float32'") tblen=1>.value
+
+tests/test_sampler.py:214: AssertionError
+_________ test_j2_is_not_flagged_infeasible_for_violating_the_grammar __________
+
+        )
+    
+    
+    def test_j2_is_not_flagged_infeasible_for_violating_the_grammar():
+        """`j2`, `mask` and `unconstrained` emit rejected tokens **by
+        construction** — that is what they measure. Folding `advance_ok` into the
+        `Z == 0` flag for them would raise on the baselines and make them
+>       unrunnable, turning a measurement into a crash."""
+E       AssertionError: the advance_ok conjunct must be gated to the arms that actually promise the guarantee
+E       assert 'self.variant in ("j0", "j1")' in '    def __post_init__(self) -> None:\n        if self.variant not in ("j0", "j1", "j2", "mask", "unconstrained"):\n  ... run are not comparable to float64.",\n                RuntimeWarning,\n                stacklevel=2,\n            )\n'
+
+tests/test_sampler.py:360: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_audit_sampler.py::test_mar_confidence_also_drives_the_stopping_rule
+FAILED tests/test_metrics.py::test_normalise_matches_bfcls_own_rule - assert ...
+FAILED tests/test_sampler.py::test_float32_is_refused_on_the_sample_path - Fa...
+FAILED tests/test_sampler.py::test_float32_on_the_sample_path_has_an_explicit_opt_out
+FAILED tests/test_sampler.py::test_the_opt_out_does_not_weaken_the_x64_guard
+FAILED tests/test_sampler.py::test_j2_is_not_flagged_infeasible_for_violating_the_grammar
+6 failed, 1002 passed in 534.59s (0:08:54)

@@ -1,0 +1,10 @@
+keys  req  ordered |S|  unordered |S|   ratio  compile
+S=128: compile+first=   0.7s  steady=  528.4 ms/call
+S=256: compile+first=   3.4s  steady= 3500.4 ms/call
+S=512: compile+first=  23.2s  steady=25631.6 ms/call
+A model forward step was measured at ~0.21 s in Phase 0; 48 steps/block.
+2026-08-04 15:48:28.962220: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+   2    2          101            150    1.5x     7.9s
+   3    3          150            346    2.3x    28.7s
+   4    4          199            738    3.7x   118.8s
+   5    5          248           1522    6.1x   579.2s

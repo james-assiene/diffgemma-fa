@@ -1,0 +1,35 @@
+[eval] task=bfcl_live_simple variant=j1 emission=sample bound=0.1
+2026-08-01 06:07:36.172799: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+  [30/130] CS=0.500 schema=0.500 acc=0.786 nonempty=0.500
+  [40/130] CS=0.600 schema=0.600 acc=0.707 nonempty=0.600
+  [50/130] CS=0.640 schema=0.640 acc=0.600 nonempty=0.540
+  [70/130] CS=0.629 schema=0.629 acc=0.678 nonempty=0.529
+  [100/130] CS=0.610 schema=0.610 acc=0.675 nonempty=0.540
+  [110/130] CS=0.582 schema=0.582 acc=0.657 nonempty=0.509
+  [120/130] CS=0.558 schema=0.558 acc=0.659 nonempty=0.492
+  [130/130] CS=0.577 schema=0.577 acc=0.691 nonempty=0.515
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: j1
+emission: sample
+n: 130
+cs: 75
+cs_rate: 0.5769
+schema_ok: 75
+schema_valid_rate: 0.5769
+parsed: 75
+nonempty: 67
+nonempty_rate: 0.5154
+arg_correct: 112
+arg_total: 162
+arg_accuracy: 0.6914
+exact_calls: 40
+exact_call_rate: 0.3077
+skipped_by_reason: {}
+zero_partition: 55
+elapsed_seconds: 5494.1
+
+wrote artifacts/exp_e5_grammar130_s1.json

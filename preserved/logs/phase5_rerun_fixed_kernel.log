@@ -1,0 +1,43 @@
+[skip] unconstrained_sample (already have artifacts/eval_bfcl_live_simple_unconstrained_sample.json)
+[skip] mask_sample (already have artifacts/eval_bfcl_live_simple_mask_sample.json)
+=== j2_sample (n=130) ===
+    n: 130
+    cs_rate: 0.9923
+    schema_valid_rate: 0.9769
+    nonempty_rate: 0.8692
+    arg_accuracy: 0.3669
+    exact_call_rate: 0.2615
+    zero_partition: 1
+=== j1_sample (n=130) ===
+    n: 130
+    cs_rate: 0.9923
+    schema_valid_rate: 0.9769
+    nonempty_rate: 0.8692
+    arg_accuracy: 0.3849
+    exact_call_rate: 0.2846
+    zero_partition: 1
+=== j0_map (n=130) ===
+    n: 130
+    cs_rate: 1.0
+    schema_valid_rate: 0.9846
+    nonempty_rate: 0.8692
+    arg_accuracy: 0.3275
+    exact_call_rate: 0.2308
+    zero_partition: 0
+=== j0_sample (n=130) ===
+    n: 130
+    cs_rate: 0.9846
+    schema_valid_rate: 0.9692
+    nonempty_rate: 0.8615
+    arg_accuracy: 0.3514
+    exact_call_rate: 0.2462
+    zero_partition: 2
+
+=== SUMMARY ===
+variant                   n      CS  schema  parsed  nonempty  arg_acc   exact
+j0-map                  130   1.000   0.985     128     0.869    0.328   0.231
+j0-sample               130   0.985   0.969     126     0.862    0.351   0.246
+j1-sample               130   0.992   0.977     127     0.869    0.385   0.285
+j2-sample               130   0.992   0.977     127     0.869    0.367   0.262
+mask-sample             130   0.000   0.300      67     0.485    0.508   0.231
+unconstrained-sample    130   0.000   0.631     126     0.969    0.641   0.469

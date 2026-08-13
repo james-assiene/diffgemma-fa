@@ -1,0 +1,45 @@
+[eval] task=bfcl_live_simple variant=j0 emission=map bound=0.1
+2026-08-03 10:00:04.863649: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+  [10/130] CS=1.000 schema=1.000 acc=0.688 nonempty=1.000
+  [20/130] CS=1.000 schema=1.000 acc=0.645 nonempty=1.000
+  [30/130] CS=1.000 schema=1.000 acc=0.706 nonempty=1.000
+  [40/130] CS=1.000 schema=1.000 acc=0.682 nonempty=1.000
+  [50/130] CS=1.000 schema=1.000 acc=0.645 nonempty=0.880
+  [60/130] CS=1.000 schema=1.000 acc=0.664 nonempty=0.867
+  [70/130] CS=1.000 schema=1.000 acc=0.679 nonempty=0.886
+  [80/130] CS=1.000 schema=1.000 acc=0.647 nonempty=0.900
+  [90/130] CS=1.000 schema=1.000 acc=0.658 nonempty=0.911
+  [100/130] CS=1.000 schema=1.000 acc=0.680 nonempty=0.920
+  [110/130] CS=1.000 schema=1.000 acc=0.681 nonempty=0.927
+  [120/130] CS=1.000 schema=1.000 acc=0.645 nonempty=0.908
+W0803 11:04:02.389523 1723391 bfc_allocator.cc:590] Allocator (GPU_0_bfc) ran out of memory trying to allocate 18.35GiB (rounded to 19705020160) from the lower end requested by op 
+If this is caused by memory fragmentation, the environment variable 'TF_GPU_ALLOCATOR=cuda_malloc_async' may improve the situation.
+Current allocation summary follows.
+W0803 11:04:02.390393 1723391 bfc_allocator.cc:601] *********************************************************************************__________________*
+  [130/130] CS=0.992 schema=0.992 acc=0.663 nonempty=0.908
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: j0
+emission: map
+n: 130
+cs: 129
+cs_rate: 0.9923
+schema_ok: 129
+schema_valid_rate: 0.9923
+parsed: 129
+nonempty: 118
+nonempty_rate: 0.9077
+arg_correct: 191
+arg_total: 288
+arg_accuracy: 0.6632
+exact_calls: 69
+exact_call_rate: 0.5308
+skipped_by_reason: {}
+zero_partition: 0
+oom: 1
+elapsed_seconds: 3999.3
+
+wrote artifacts/exp_seed2_map.json

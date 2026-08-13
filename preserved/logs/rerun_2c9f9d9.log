@@ -1,0 +1,13 @@
+=== rerun_2c9f9d9 at 2c9f9d9  2026-08-12 04:14 UTC
+=== tree fingerprint 228fc705dc0f9c695cb03111cfe42087
+=== DGFA_DEDICATED=1  CUDA_VISIBLE_DEVICES=0
+index, name, memory.used [MiB], memory.total [MiB], utilization.gpu [%]
+0, NVIDIA H100 80GB HBM3, 0 MiB, 81559 MiB, 0 %
+
+=== 04:14 smoke_2c9f9d9_mask
+    diffgemma_fa.eval.run --task bfcl_live_simple --variant mask --emission sample --confidence mf --entropy-bound 0.1 --whitespace stock --dtype float64 --prompt-style stock --temp stock --seed 0 --offset 0 --n 4 --max-new-tokens 256 --nonempty
+    cfg: variant=mask emission=sample conf=mf bound=0.1 ws=stock fence=False ci=False dtype=float64 seed=0 offset=0 temp=stock prompt=stock nonempty=True think=None commit=2c9f9d9
+    n=4 avail=4 cs=0.0 solved=None zp=0 oom=0 schema=0.0 arg=0.8 (8/10) exact=0.5 skipped=0  3.7 min
+[ok] smoke_2c9f9d9_mask zero_partition=0
+!! THE TREE MOVED UNDER THE QUEUE (fingerprint 228fc705dc0f9c695cb03111cfe42087 -> 228fc705dc0f9c695cb03111cfe42087).
+!! Everything measured from here would be unattributable. STOPPING.

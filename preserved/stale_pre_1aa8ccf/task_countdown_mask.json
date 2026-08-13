@@ -1,0 +1,1781 @@
+{
+  "task": "countdown",
+  "variant": "mask",
+  "emission": "sample",
+  "confidence": "mf",
+  "entropy_bound": 0.1,
+  "think": false,
+  "seed": 0,
+  "n": 250,
+  "cs": 1,
+  "cs_rate": 0.004,
+  "solved": 0,
+  "solve_rate": 0.0,
+  "zero_partition": 0,
+  "oom": 0,
+  "skipped_by_reason": {},
+  "failure_reasons": {
+    "unparsable step": 242,
+    "operand 21 not available": 1,
+    "operand 16 not available": 1,
+    "operand 1 not available": 1,
+    "operand 8 not available": 1,
+    "operand 28 not available": 1,
+    "operand 26 not available": 1,
+    "arithmetic": 1,
+    "operand 15 not available": 1
+  },
+  "elapsed_seconds": 2724.2,
+  "rows": [
+    {
+      "id": "countdown_0",
+      "text": "<|channel>79-17=96\n96-60=36<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>79-17=96'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_1",
+      "text": "<|channel>82-80=2\n11+34=45\n35+21=56<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>82-80=2'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_2",
+      "text": "<|channel>60 - 51=9\n53 - 4=49<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>60 - 51=9'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_3",
+      "text": "<|channel>1-34-9+11=33.",
+      "ok": false,
+      "why": "unparsable step: '<|channel>1-34-9+11=33.'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_4",
+      "text": "<|channel>66\n46+9=55\n56-49=7\n29",
+      "ok": false,
+      "why": "unparsable step: '<|channel>66'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_5",
+      "text": "<|channel>```63-21=42\n46-15=31\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>```63-21=42'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_6",
+      "text": "<|channel>20 + 40=60\n14 * 2=28",
+      "ok": false,
+      "why": "unparsable step: '<|channel>20 + 40=60'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_7",
+      "text": "<|channel>84 - 73= 11\n-84 + 45=39\n= 39",
+      "ok": false,
+      "why": "unparsable step: '<|channel>84 - 73= 11'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_8",
+      "text": "<|channel>3\n78 - 50=32\n78 - 45=33\n78 - 5=73",
+      "ok": false,
+      "why": "unparsable step: '<|channel>3'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_9",
+      "text": "<|channel>thought26 + 92 - 3 * 12 \n= 62",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought26 + 92 - 3 * 12'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_10",
+      "text": "<|channel>\n\n46 + 23=69\n90 - 46=44\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_11",
+      "text": "<|channel>141 - 54=97\n86+ 5=91",
+      "ok": false,
+      "why": "unparsable step: '<|channel>141 - 54=97'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_12",
+      "text": "<|channel>        37+31=68\n37+1=38",
+      "ok": false,
+      "why": "unparsable step: '<|channel>        37+31=68'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_13",
+      "text": "<|channel>51+54=105\n63-57=6\n105-6=99<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>51+54=105'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_14",
+      "text": "<|channel>38 + 31=69\n69 + 8=77\n69+8=77",
+      "ok": false,
+      "why": "unparsable step: '<|channel>38 + 31=69'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_15",
+      "text": "<|channel>151-54=97<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>151-54=97<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_16",
+      "text": "<|channel>thought\n90-60=30\n150+67=83\n\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_17",
+      "text": "<|channel>-12 * 2=24\n24 + 5=29\n2+3=5<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>-12 * 2=24'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_18",
+      "text": "<|channel> 21+14=35\n35+35=70",
+      "ok": false,
+      "why": "unparsable step: '<|channel> 21+14=35'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_19",
+      "text": "<|channel>thought\n<channel|>48-18=30/6=5=15*3=45",
+      "ok": false,
+      "why": "unparsable step: '48-18=30/6=5=15*3=45'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_20",
+      "text": "<|channel>6+14=50\n50*2=100<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>6+14=50'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_21",
+      "text": "<|channel>thought\n9 4=36\n36+53=89\n89-4=85\ud83e\uddd0",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_22",
+      "text": "<|channel> 20+23=43\n43-16=27<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel> 20+23=43'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_23",
+      "text": "<|channel>93-81=12\n36-9-5=24",
+      "ok": false,
+      "why": "unparsable step: '<|channel>93-81=12'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_24",
+      "text": "<|channel>16*47=3232/41=28\n28+69=97<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>16*47=3232/41=28'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_25",
+      "text": "<|channel>thought\n<channel|>68-64=4\n21 - 17=17\n20+ 17=37",
+      "ok": false,
+      "why": "operand 21 not available",
+      "accepted": false
+    },
+    {
+      "id": "countdown_26",
+      "text": "<|channel>55+68=123\n123-69=54\n68*5-320=93",
+      "ok": false,
+      "why": "unparsable step: '<|channel>55+68=123'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_27",
+      "text": "<|channel>              56 - 11=45\n45 + 5=50<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>              56 - 11=45'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_28",
+      "text": "<|channel> \n91 - 36",
+      "ok": false,
+      "why": "unparsable step: '<|channel>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_29",
+      "text": "<|channel>98+71=169\n169-155=14",
+      "ok": false,
+      "why": "unparsable step: '<|channel>98+71=169'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_30",
+      "text": "<|channel>19+1=20\n96-19=77\n77-1=76<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>19+1=20'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_31",
+      "text": "<|channel>thought\n96-69=27\n27 + 26=53<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_32",
+      "text": "<|channel>.  -48/2=24\n44+25=69\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>.  -48/2=24'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_33",
+      "text": "<|channel>thought\n    95-33=62\n    62-43=19",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_34",
+      "text": "<|channel>70 - 51=19\n19 + 30=49\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>70 - 51=19'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_35",
+      "text": "<|channel>192-6=86\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>192-6=86'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_36",
+      "text": "<|channel>thought\n<channel|>-24=28 28+28=56",
+      "ok": false,
+      "why": "unparsable step: '-24=28 28+28=56'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_37",
+      "text": "<|channel>7 - 98=-1\n57 + 1=58\n57 + 1=58<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>7 - 98=-1'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_38",
+      "text": "<|channel>87 + 58=145\n145 - 71=74<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>87 + 58=145'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_39",
+      "text": "<|channel>24 + 15=39\n39 * 2=78\n98 - 7=91<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>24 + 15=39'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_40",
+      "text": "<|channel>681-81-25=60.",
+      "ok": false,
+      "why": "unparsable step: '<|channel>681-81-25=60.'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_41",
+      "text": "<|channel>10 + 4=14\n57 + 14=71\n71=71<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>10 + 4=14'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_42",
+      "text": "<|channel>**(83+21=106.",
+      "ok": false,
+      "why": "unparsable step: '<|channel>**(83+21=106.'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_43",
+      "text": "<|channel>:1+64= 1261-57=3. 122-6 = 16",
+      "ok": false,
+      "why": "unparsable step: '<|channel>:1+64= 1261-57=3. 122-6 = 16'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_44",
+      "text": "<|channel>173 - 52=121\n69 - 12=57.",
+      "ok": false,
+      "why": "unparsable step: '<|channel>173 - 52=121'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_45",
+      "text": "<|channel>74 + 2= 76",
+      "ok": false,
+      "why": "unparsable step: '<|channel>74 + 2= 76'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_46",
+      "text": "<|channel>thought\n<channel|>61+ 11=72\n72-85= -13<turn|>",
+      "ok": false,
+      "why": "unparsable step: '72-85= -13<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_47",
+      "text": "<|channel>thought\n44+47=91\n52 - 13=39",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_48",
+      "text": "<|channel>22 * 55=310\n55 / 5=22\n7 + 22=14\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>22 * 55=310'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_49",
+      "text": "<|channel>79 - 50=29\n54+15=69<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>79 - 50=29'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_50",
+      "text": "<|channel>36+34=70\n70-39=31<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>36+34=70'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_51",
+      "text": "<|channel>872 + 70=142\n142 - 82=60\nWait, that's not 84.",
+      "ok": false,
+      "why": "unparsable step: '<|channel>872 + 70=142'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_52",
+      "text": "<|channel>50 + 50= 100\n108 - 23= 85",
+      "ok": false,
+      "why": "unparsable step: '<|channel>50 + 50= 100'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_53",
+      "text": "<|channel>69-23=46\n95-69=26\n26+20=46<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>69-23=46'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_54",
+      "text": "<|channel>99-76=23",
+      "ok": false,
+      "why": "unparsable step: '<|channel>99-76=23'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_55",
+      "text": "<|channel>thought\n85-51=34",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_56",
+      "text": "<|channel>668 - 2==120\n39  20=19\n120 - 19060\n608 6 63.5\n\n  6",
+      "ok": false,
+      "why": "unparsable step: '<|channel>668 - 2==120'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_57",
+      "text": "<|channel>thought\n<channel|>70+15=85\n85-6=79\n89-7=82<turn|>",
+      "ok": false,
+      "why": "unparsable step: '89-7=82<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_58",
+      "text": "<|channel>1. 85-81=4\n4-1+25=28<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>1. 85-81=4'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_59",
+      "text": "<|channel></--- 85-8=77\n77-9=68<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel></--- 85-8=77'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_60",
+      "text": "<|channel> * 12=108\n108 - 10=98\n98 - 20=78",
+      "ok": false,
+      "why": "unparsable step: '<|channel> * 12=108'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_61",
+      "text": "<|channel>82+31=513\n513-100=413\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>82+31=513'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_62",
+      "text": "<|channel>thought\n33+46=79\n79 - 35=44\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_63",
+      "text": "<|channel>40-35=4\n76+4=79<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>40-35=4'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_64",
+      "text": "<|channel>\n\n27 + 17 = 44\n44 + 11=55",
+      "ok": false,
+      "why": "unparsable step: '<|channel>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_65",
+      "text": "<|channel>thought\n46-19=27\n41-4=37<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_66",
+      "text": "<|channel>56-28=4.\n88+4=92",
+      "ok": false,
+      "why": "unparsable step: '<|channel>56-28=4.'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_67",
+      "text": "<|channel>51-75=-24\n-24+5=13\n31-9=22<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>51-75=-24'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_68",
+      "text": "<|channel>67-2=19\n67+19=86\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>67-2=19'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_69",
+      "text": "<|channel>Simple68-34=34\n34+17=51\n51-3=45",
+      "ok": false,
+      "why": "unparsable step: '<|channel>Simple68-34=34'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_70",
+      "text": "<|channel>87 - 39 = 48\n86 / 43 = 2\n48 - 2=46<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>87 - 39 = 48'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_71",
+      "text": "<|channel>84+5=89\n89-6=83<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>84+5=89'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_72",
+      "text": "<|channel>85 - 64= 21\n21 - 8=13<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>85 - 64= 21'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_73",
+      "text": "<|channel>10-71=27\n38-20=17\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>10-71=27'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_74",
+      "text": "<|channel>7-2=95\n91+4=95",
+      "ok": false,
+      "why": "unparsable step: '<|channel>7-2=95'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_75",
+      "text": "<|channel>71-59=12\n-71+73=62",
+      "ok": false,
+      "why": "unparsable step: '<|channel>71-59=12'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_76",
+      "text": "<|channel>949-34=15\n15+6=21<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>949-34=15'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_77",
+      "text": "<|channel>52/13=4\n47-4=43<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>52/13=4'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_78",
+      "text": "<|channel>4 - 5=89\n91 - 2=89\n89 - 2=87<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>4 - 5=89'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_79",
+      "text": "<|channel>73 - 76=-3\n70 + 3=73\n70 - 32=38\nWait, 6=32",
+      "ok": false,
+      "why": "unparsable step: '<|channel>73 - 76=-3'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_80",
+      "text": "<|channel>thought\n78-62=16\n69-16=53",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_81",
+      "text": "<|channel> 90 - 53= 37\n37 - 2= 35\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel> 90 - 53= 37'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_82",
+      "text": "<|channel>4 - 48 = 46\n94 - 48=46\n46 / 2=23<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>4 - 48 = 46'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_83",
+      "text": "<|channel>    48 - 48=0\n0 + 19=19<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>    48 - 48=0'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_84",
+      "text": "<|channel>62*3=186\n188/2=94\n94+3=97<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>62*3=186'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_85",
+      "text": "<|channel>thought\n35*3=105\n105-27=78",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_86",
+      "text": "<|channel>thought52+19=71\n52+19=71",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought52+19=71'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_87",
+      "text": "<|channel>161-27=34\n34-16=18<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>161-27=34'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_88",
+      "text": "<|channel>thought\n<channel|>98 + 2=100<turn|>",
+      "ok": false,
+      "why": "unparsable step: '98 + 2=100<turn|>'",
+      "accepted": true
+    },
+    {
+      "id": "countdown_89",
+      "text": "<|channel>71 + 25=96\n196 - 78=88",
+      "ok": false,
+      "why": "unparsable step: '<|channel>71 + 25=96'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_90",
+      "text": "<|channel>18-43=25\n71-43=28\n28-18=10",
+      "ok": false,
+      "why": "unparsable step: '<|channel>18-43=25'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_91",
+      "text": "<|channel>*(70+35=105\n105-47=58",
+      "ok": false,
+      "why": "unparsable step: '<|channel>*(70+35=105'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_92",
+      "text": "<|channel>78-19=59\n59-16=43<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>78-19=59'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_93",
+      "text": "<|channel>91-66=30\n25+61=86",
+      "ok": false,
+      "why": "unparsable step: '<|channel>91-66=30'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_94",
+      "text": "<|channel>thought\n<channel|>54-1=49.\n49 - 1 = 48._",
+      "ok": false,
+      "why": "unparsable step: '54-1=49.'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_95",
+      "text": "<|channel> 87-75=12\n15-13=2\n32+3=35",
+      "ok": false,
+      "why": "unparsable step: '<|channel> 87-75=12'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_96",
+      "text": "<|channel>45+39=84",
+      "ok": false,
+      "why": "unparsable step: '<|channel>45+39=84'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_97",
+      "text": "<|channel>*(91-23=68",
+      "ok": false,
+      "why": "unparsable step: '<|channel>*(91-23=68'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_98",
+      "text": "<|channel>\n\n51+25=76\n52-50=2<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_99",
+      "text": "<|channel>thought\n87+83=10\n87-83=4\n88-84=4\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_100",
+      "text": "<|channel>```90 - 18=72\n72 - 11=61\n_61=61",
+      "ok": false,
+      "why": "unparsable step: '<|channel>```90 - 18=72'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_101",
+      "text": ":**",
+      "ok": false,
+      "why": "unparsable step: ':**'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_102",
+      "text": "<|channel>27 + 32= 59\n59 - 6=53",
+      "ok": false,
+      "why": "unparsable step: '<|channel>27 + 32= 59'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_103",
+      "text": "<|channel>5 - 39=16\n46+35=81\n81 - 19=62\n\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>5 - 39=16'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_104",
+      "text": "<|channel>thought\n98 - 82=16\n16 + 16=32\n<channel|>16 + 16=32",
+      "ok": false,
+      "why": "operand 16 not available",
+      "accepted": false
+    },
+    {
+      "id": "countdown_105",
+      "text": "<|channel>63-63=0\n260-61=199\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>63-63=0'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_106",
+      "text": "<|channel>80-55=25\n25+52=77",
+      "ok": false,
+      "why": "unparsable step: '<|channel>80-55=25'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_107",
+      "text": "<|channel>98-94=4\n94/2=47\n47-2=45<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>98-94=4'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_108",
+      "text": "<|channel>  40 - 17=23\n23 - 10=21",
+      "ok": false,
+      "why": "unparsable step: '<|channel>  40 - 17=23'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_109",
+      "text": "<|channel>55 + 11=66\n66 + 28=94",
+      "ok": false,
+      "why": "unparsable step: '<|channel>55 + 11=66'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_110",
+      "text": "<|channel>51+60=111\n111-18=93<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>51+60=111'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_111",
+      "text": "<|channel>1 - 79 = 2\n75 + 2 = 77<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>1 - 79 = 2'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_112",
+      "text": "<|channel>170 - 30=140\n73 - 1=72",
+      "ok": false,
+      "why": "unparsable step: '<|channel>170 - 30=140'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_113",
+      "text": "<|channel> 25 - 23=42\n56 - 2=54",
+      "ok": false,
+      "why": "unparsable step: '<|channel> 25 - 23=42'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_114",
+      "text": "<|channel>3-70=3\n3*14=42",
+      "ok": false,
+      "why": "unparsable step: '<|channel>3-70=3'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_115",
+      "text": "<|channel>86 + 6 = 92<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>86 + 6 = 92<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_116",
+      "text": "<|channel>90 / 2=15\n15 * 3=45<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>90 / 2=15'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_117",
+      "text": "<|channel>thought36-15=21\n21-7=14",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought36-15=21'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_118",
+      "text": "<|channel>186-78=108\n8+5+2=15\n2-7=15\n\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>186-78=108'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_119",
+      "text": "<|channel>88-16=72\n72+6=78",
+      "ok": false,
+      "why": "unparsable step: '<|channel>88-16=72'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_120",
+      "text": "<|channel>8 + 64= 142;\n142 - 57= 85.",
+      "ok": false,
+      "why": "unparsable step: '<|channel>8 + 64= 142;'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_121",
+      "text": "<|channel>```52 - 48 = 4\n80 / 4 = 2\n57 + 4 = 61",
+      "ok": false,
+      "why": "unparsable step: '<|channel>```52 - 48 = 4'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_122",
+      "text": "<|channel>0 + 53=133\n133 - 33=100<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>0 + 53=133'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_123",
+      "text": "<|channel>Example:\n84 / 4=21\n\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>Example:'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_124",
+      "text": "<|channel>thought\n<channel|>*31=214\n214/94=31\n31=31 \uacf3",
+      "ok": false,
+      "why": "unparsable step: '*31=214'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_125",
+      "text": "<|channel>93-92=1\n90-3= 87\n87-1=86",
+      "ok": false,
+      "why": "unparsable step: '<|channel>93-92=1'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_126",
+      "text": "<|channel>30 + 21=51\n51 - 15=36\n36 + 10=46",
+      "ok": false,
+      "why": "unparsable step: '<|channel>30 + 21=51'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_127",
+      "text": "<|channel>23 + 22=45\n45 - 27=18\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>23 + 22=45'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_128",
+      "text": "<|channel>thought\n<channel|>5+1=6\n6 + 50=56\n56 + 26=82",
+      "ok": false,
+      "why": "operand 1 not available",
+      "accepted": false
+    },
+    {
+      "id": "countdown_129",
+      "text": "<|channel>823 16811",
+      "ok": false,
+      "why": "unparsable step: '<|channel>823 16811'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_130",
+      "text": "<|channel>92-14=78\n78-4=74\n74-2=72<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>92-14=78'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_131",
+      "text": "<|channel>48 - 35=13\n15 - 11=4\n11 + 2=13",
+      "ok": false,
+      "why": "unparsable step: '<|channel>48 - 35=13'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_132",
+      "text": "<|channel>75 + 20=95\n95 - 17=78<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>75 + 20=95'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_133",
+      "text": "<|channel>54-25=29\n29+2+5=36\n\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>54-25=29'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_134",
+      "text": "<|channel>3+38=91\n91-3=88\n\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>3+38=91'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_135",
+      "text": "<|channel>43 - 40=3\n3 * 7=21\n59 - 28=31<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>43 - 40=3'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_136",
+      "text": "<|channel>83+79=162\n82+7=89 \n86+3=89",
+      "ok": false,
+      "why": "unparsable step: '<|channel>83+79=162'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_137",
+      "text": "<|channel>51 + 30=81\n81 + 5=86\n 31=31<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>51 + 30=81'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_138",
+      "text": "<|channel>50/5=10\n50-1=49",
+      "ok": false,
+      "why": "unparsable step: '<|channel>50/5=10'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_139",
+      "text": "<|channel>75 - 67=8\n28 + 28=36\n64 - 28=36<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>75 - 67=8'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_140",
+      "text": "<|channel>63-42=21\n21+30=51\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>63-42=21'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_141",
+      "text": "<|channel>14 * 3=42\n42 + 19=61",
+      "ok": false,
+      "why": "unparsable step: '<|channel>14 * 3=42'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_142",
+      "text": "<|channel>thought\n<channel|><channel|>84 / 3=28\n51 - 29=22<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<channel|>84 / 3=28'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_143",
+      "text": "<|channel>  72-47=25\n25+11=36<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>  72-47=25'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_144",
+      "text": "<|channel>72-62=10\n58+-24=64",
+      "ok": false,
+      "why": "unparsable step: '<|channel>72-62=10'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_145",
+      "text": "<|channel>40 + 54=94\n78 / 20=3\n94 + 7=51<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>40 + 54=94'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_146",
+      "text": "<|channel>169 - 60 = 9\n9 + 30 = 39<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>169 - 60 = 9'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_147",
+      "text": "<|channel>99-78=21\n21+50=71\n71-0=71",
+      "ok": false,
+      "why": "unparsable step: '<|channel>99-78=21'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_148",
+      "text": "<|channel>5-5-5-1-7-7\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>5-5-5-1-7-7'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_149",
+      "text": "<|channel>thought\n93-70=23",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_150",
+      "text": "<|channel>678 - 57=21\n21 + 66=87\n87 -18=69<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>678 - 57=21'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_151",
+      "text": "<|channel>1+55=86\n86+12=98\nWait 12\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>1+55=86'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_152",
+      "text": "<|channel>66 - 44=22\n39 - 7=32\n32-7=25",
+      "ok": false,
+      "why": "unparsable step: '<|channel>66 - 44=22'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_153",
+      "text": "<|channel>27+20=42\n42-13=28\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>27+20=42'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_154",
+      "text": "<|channel>98 - 88=10\n35 + 24=59_",
+      "ok": false,
+      "why": "unparsable step: '<|channel>98 - 88=10'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_155",
+      "text": "<|channel>thought\n    90=180\n9 * 5=45\n45+ 20=65<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_156",
+      "text": "<|channel>11 + 1=12\n87 - 53=34\n12 + 12=24",
+      "ok": false,
+      "why": "unparsable step: '<|channel>11 + 1=12'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_157",
+      "text": "<|channel>36+45=81\n56-41=15\n81+15=96\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>36+45=81'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_158",
+      "text": "<|channel>thought\n98-49=49<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_159",
+      "text": "<|channel>70 + 15=85\n85 - 73=12<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>70 + 15=85'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_160",
+      "text": "<|channel>thought\n<channel|>76-65=11\n11-8=3\n65-58=7<turn|>",
+      "ok": false,
+      "why": "operand 8 not available",
+      "accepted": false
+    },
+    {
+      "id": "countdown_161",
+      "text": "<|channel>_\n52+59=111\n111-78=33<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>_'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_162",
+      "text": "<|channel>75-42=33\n95-73=22\n22-4=18",
+      "ok": false,
+      "why": "unparsable step: '<|channel>75-42=33'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_163",
+      "text": "<|channel>188-22=66<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>188-22=66<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_164",
+      "text": "<|channel>142/7=24\n24-5=19<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>142/7=24'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_165",
+      "text": "<|channel>75-44=31\n31+2=33\n33+3=36<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>75-44=31'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_166",
+      "text": "<|channel>0 - 27 = 71\n27-1=26\n71+26=97",
+      "ok": false,
+      "why": "unparsable step: '<|channel>0 - 27 = 71'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_167",
+      "text": "<|channel>*(17*6=102\n102-39=63\n63=63<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>*(17*6=102'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_168",
+      "text": "<|channel>57 - 50=7\n38 - 25=13\n24 - 7=17",
+      "ok": false,
+      "why": "unparsable step: '<|channel>57 - 50=7'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_169",
+      "text": "<|channel>86 + 52=138\n138 - 45=93\n89 + 4=93.",
+      "ok": false,
+      "why": "unparsable step: '<|channel>86 + 52=138'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_170",
+      "text": "<|channel>54/54=1\n56-2=54 \n34-1=33\n33-1=32",
+      "ok": false,
+      "why": "unparsable step: '<|channel>54/54=1'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_171",
+      "text": "<|channel>40 - 9=31\n71+10=81\n81+14=95 number",
+      "ok": false,
+      "why": "unparsable step: '<|channel>40 - 9=31'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_172",
+      "text": "<|channel>7+39=76\n76-48-3=20\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>7+39=76'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_173",
+      "text": "<|channel>83 - 52=31\n 72 - 70=2\n 31+1=32",
+      "ok": false,
+      "why": "unparsable step: '<|channel>83 - 52=31'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_174",
+      "text": "<|channel>3313313_\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>3313313_'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_175",
+      "text": "<|channel>```10 * 4=40\n40 + 3=43\n43=43",
+      "ok": false,
+      "why": "unparsable step: '<|channel>```10 * 4=40'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_176",
+      "text": "<|channel>.\n31-10=21\n21+84=105\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>.'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_177",
+      "text": "<|channel>thought\n<channel|>22*28=412\n8+13=59",
+      "ok": false,
+      "why": "operand 28 not available",
+      "accepted": false
+    },
+    {
+      "id": "countdown_178",
+      "text": "<|channel>13685\n\n\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>13685'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_179",
+      "text": "<|channel>40+23=63\n63-9=54<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>40+23=63'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_180",
+      "text": "<|channel>*(76-32=44\n44+2*8=60<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>*(76-32=44'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_181",
+      "text": "<|channel>42-39=3\n45/3=27 \n9*3=27",
+      "ok": false,
+      "why": "unparsable step: '<|channel>42-39=3'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_182",
+      "text": "<|channel>\n\n\n\n76 - 76= 0\n44 + 2= 6\n58 - 48= 10",
+      "ok": false,
+      "why": "unparsable step: '<|channel>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_183",
+      "text": "<|channel>43 - 64= -19\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>43 - 64= -19'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_184",
+      "text": "<|channel>84 / 21=22\n46 - 24=22\n46 - 24=22",
+      "ok": false,
+      "why": "unparsable step: '<|channel>84 / 21=22'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_185",
+      "text": "<|channel>1 * 18=198\n198 / 2=99\n99 + 0=99",
+      "ok": false,
+      "why": "unparsable step: '<|channel>1 * 18=198'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_186",
+      "text": "<|channel>45 + 45=90\n5 / 91<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>45 + 45=90'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_187",
+      "text": "<|channel>6\n69*9-23=423\n-46=43\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>6'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_188",
+      "text": "<|channel>18 + 2=20\n18+2=20<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>18 + 2=20'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_189",
+      "text": "<|channel>. **/64+12=76\n76-10=66\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>. **/64+12=76'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_190",
+      "text": "<|channel>98+75=173\n173-79=94\n94-38=56",
+      "ok": false,
+      "why": "unparsable step: '<|channel>98+75=173'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_191",
+      "text": "<|channel>11. 93+7=100",
+      "ok": false,
+      "why": "unparsable step: '<|channel>11. 93+7=100'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_192",
+      "text": "<|channel>thought\n<channel|><channel|>90-51=38\n52 -16=36",
+      "ok": false,
+      "why": "unparsable step: '<channel|>90-51=38'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_193",
+      "text": "<|channel>30 42=42 \n42-18=24",
+      "ok": false,
+      "why": "unparsable step: '<|channel>30 42=42'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_194",
+      "text": "<|channel>*(29-29=0\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>*(29-29=0'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_195",
+      "text": "<|channel>thought\n<channel|><channel|>34-26=2 \n36+2=38",
+      "ok": false,
+      "why": "unparsable step: '<channel|>34-26=2'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_196",
+      "text": "<|channel>thought\n<channel|>-12=34",
+      "ok": false,
+      "why": "unparsable step: '-12=34'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_197",
+      "text": "<|channel>thought\n79-78=1\n2+79=81<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_198",
+      "text": " options",
+      "ok": false,
+      "why": "unparsable step: 'options'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_199",
+      "text": "<|channel>80 * 48=\n3640\n3640 / 21=\n215\n35",
+      "ok": false,
+      "why": "unparsable step: '<|channel>80 * 48='",
+      "accepted": false
+    },
+    {
+      "id": "countdown_200",
+      "text": "<|channel>-3, 79. best",
+      "ok": false,
+      "why": "unparsable step: '<|channel>-3, 79. best'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_201",
+      "text": "<|channel>73-66=7\n61+7=68<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>73-66=7'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_202",
+      "text": "<|channel>thought\n83+1= 84\n84 + 8= 92",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_203",
+      "text": "<|channel>0 + 74=144\n144-30=114\n114-26=88",
+      "ok": false,
+      "why": "unparsable step: '<|channel>0 + 74=144'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_204",
+      "text": "<|channel>32- 24=0\n32- 13=21",
+      "ok": false,
+      "why": "unparsable step: '<|channel>32- 24=0'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_205",
+      "text": "<|channel>86-82=4\n24+65=89\n89-4=85\n\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>86-82=4'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_206",
+      "text": "<|channel>56+17=73\n73+8=81",
+      "ok": false,
+      "why": "unparsable step: '<|channel>56+17=73'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_207",
+      "text": "<|channel>5+11=86\n86-10=76<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>5+11=86'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_208",
+      "text": " g\u00fcnler",
+      "ok": false,
+      "why": "unparsable step: 'g\u00fcnler'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_209",
+      "text": "<|channel>1-34=7\n41+35=76\n76+7-=83\n83-7=83",
+      "ok": false,
+      "why": "unparsable step: '<|channel>1-34=7'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_210",
+      "text": "<|channel>thought\n<channel|>26 * 3=78\n26 * 3=78",
+      "ok": false,
+      "why": "operand 26 not available",
+      "accepted": false
+    },
+    {
+      "id": "countdown_211",
+      "text": "<|channel>97-9=88\n<channel|>47 + 45=87\n",
+      "ok": false,
+      "why": "arithmetic: 47+45 = 92, claimed 87",
+      "accepted": false
+    },
+    {
+      "id": "countdown_212",
+      "text": "<|channel>68 - 45=23\n42 + 27=69 Strategy",
+      "ok": false,
+      "why": "unparsable step: '<|channel>68 - 45=23'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_213",
+      "text": "<|channel>79+56=135\n135-45=90<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>79+56=135'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_214",
+      "text": "<|channel>thought\n<channel|>90/9=10\n41-15=26",
+      "ok": false,
+      "why": "operand 15 not available",
+      "accepted": false
+    },
+    {
+      "id": "countdown_215",
+      "text": "<|channel>2 + 4=96\n92 - 54=38\n88 - 6=82",
+      "ok": false,
+      "why": "unparsable step: '<|channel>2 + 4=96'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_216",
+      "text": "<|channel>        44 / 2= 22<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>        44 / 2= 22<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_217",
+      "text": "<|channel>5.e2\n  2",
+      "ok": false,
+      "why": "unparsable step: '<|channel>5.e2'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_218",
+      "text": "<|channel>10+58=68\n68+10=78\n78-5=73",
+      "ok": false,
+      "why": "unparsable step: '<|channel>10+58=68'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_219",
+      "text": "<|channel>18+58=76\n 76+1=77",
+      "ok": false,
+      "why": "unparsable step: '<|channel>18+58=76'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_220",
+      "text": "<|channel>88 - 4=84\n84 + 6=90\n90 / 6=15<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>88 - 4=84'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_221",
+      "text": "<|channel>93/3=31\n 31-8=23",
+      "ok": false,
+      "why": "unparsable step: '<|channel>93/3=31'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_222",
+      "text": "<|channel>30+42=72\n72*28=2016\n216-16=20<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>30+42=72'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_223",
+      "text": "<|channel>5 * 20=900\n900-3=897\n897-8=89<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>5 * 20=900'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_224",
+      "text": "<|channel>thought\n51 * 3=153\n153 - 84=67<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_225",
+      "text": "<|channel>```\n62 * 46=280\n280 / 4=70\n74 / 2=37<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>```'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_226",
+      "text": "<|channel> \n\n ,2 2",
+      "ok": false,
+      "why": "unparsable step: '<|channel>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_227",
+      "text": "<|channel>3 - 6= 47\n53 - 6=47<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>3 - 6= 47'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_228",
+      "text": "<|channel>```\n59 * 10= 9\n\n90  ==16\n31+5669 ",
+      "ok": false,
+      "why": "unparsable step: '<|channel>```'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_229",
+      "text": "<|channel>48 + 31=79\n79 - 28=51<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>48 + 31=79'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_230",
+      "text": "<|channel>51+12=63\n63+9=72<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>51+12=63'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_231",
+      "text": "<|channel>32-57=20\n57-43=18",
+      "ok": false,
+      "why": "unparsable step: '<|channel>32-57=20'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_232",
+      "text": "<|channel>thought\n<channel|>68+18=86\n86-41=45\n86+5=91<turn|>",
+      "ok": false,
+      "why": "unparsable step: '86+5=91<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_233",
+      "text": "<|channel>41 + 92= 133\n133 - 56= 77<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>41 + 92= 133'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_234",
+      "text": "<|channel>2-54=18\n18*3=54",
+      "ok": false,
+      "why": "unparsable step: '<|channel>2-54=18'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_235",
+      "text": "<|channel>```52 - 30= 22\n22 - 61= 21",
+      "ok": false,
+      "why": "unparsable step: '<|channel>```52 - 30= 22'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_236",
+      "text": "<|channel>115- 2=34.",
+      "ok": false,
+      "why": "unparsable step: '<|channel>115- 2=34.'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_237",
+      "text": "e",
+      "ok": false,
+      "why": "unparsable step: 'e'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_238",
+      "text": "<|channel>thought\n<channel|>63+9=72\n72+8=80<turn|>",
+      "ok": false,
+      "why": "unparsable step: '72+8=80<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_239",
+      "text": "<|channel>4+24=48\n48+1=49\n48+1=49<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>4+24=48'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_240",
+      "text": "<|channel>\n\n4 + 46 = 90\n90 - 34=56<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_241",
+      "text": "<|channel>thoughtof_=17\n**:",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thoughtof_=17'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_242",
+      "text": "<|channel> \n72-55=17\n87-17=70<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_243",
+      "text": "<|channel>51-24-13=14<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>51-24-13=14<turn|>'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_244",
+      "text": "<|channel>87-25=29",
+      "ok": false,
+      "why": "unparsable step: '<|channel>87-25=29'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_245",
+      "text": "<|channel>4- 35=29\n29 + 11=49\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>4- 35=29'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_246",
+      "text": "<|channel>thought\n81-9=72\n98-=78\n78 - 2=76<turn|>",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_247",
+      "text": "<|channel>thought.\n98-90=8\n38-35=3\n38+5=43\n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>thought.'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_248",
+      "text": "<|channel>8 + 13=81\n81 + 13=94, I used 13 twice.",
+      "ok": false,
+      "why": "unparsable step: '<|channel>8 + 13=81'",
+      "accepted": false
+    },
+    {
+      "id": "countdown_249",
+      "text": "<|channel>2\n,222 \n",
+      "ok": false,
+      "why": "unparsable step: '<|channel>2'",
+      "accepted": false
+    }
+  ]
+}

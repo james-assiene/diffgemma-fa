@@ -1,0 +1,12 @@
+2026-08-12 08:07:12.944955: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+vocabulary built in 3.9 s
+{"schema": "reverse_input", "expand_wildcard": false, "regex_len": 15323, "states": 568, "bucket": 1024, "edges": 2810, "classes": 208, "tree_gb": 2.1433, "is_dfa": true, "needs_chain_path": false, "wall_s": 331.5, "seconds_total": 306.6}
+{"schema": "reverse_input", "expand_wildcard": true, "regex_len": 15311, "states": 568, "bucket": 1024, "edges": 2594, "classes": 182, "tree_gb": 2.1433, "is_dfa": true, "needs_chain_path": false, "wall_s": 248.8, "seconds_total": 227.7}
+{"schema": "process_data", "expand_wildcard": false, "regex_len": 15509, "states": 610, "bucket": 1024, "edges": 3274, "classes": 268, "tree_gb": 2.1433, "is_dfa": true, "needs_chain_path": false, "wall_s": 370.1, "seconds_total": 339.8}
+{"schema": "process_data", "expand_wildcard": true, "regex_len": 15497, "states": 610, "bucket": 1024, "edges": 2728, "classes": 223, "tree_gb": 2.1433, "is_dfa": true, "needs_chain_path": false, "wall_s": 280.5, "seconds_total": 257.1}
+
+schema           expand     regex    |S|  bucket   edges  classes   wall s
+reverse_input    False      15323    568    1024    2810      208    331.5
+reverse_input    True       15311    568    1024    2594      182    248.8
+process_data     False      15509    610    1024    3274      268    370.1
+process_data     True       15497    610    1024    2728      223    280.5

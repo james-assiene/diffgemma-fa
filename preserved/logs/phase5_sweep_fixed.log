@@ -1,0 +1,23 @@
+[load] model + params
+[load] done
+2026-07-28 13:38:55.576713: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+[bound=0.003 ] n= 12 CS=12/12 parsed=12 nonempty=12 arg_acc=9/19=0.474
+[bound=0.01  ] n= 12 CS=12/12 parsed=12 nonempty=12 arg_acc=9/19=0.474
+[bound=0.03  ] n= 12 CS=12/12 parsed=12 nonempty=12 arg_acc=5/19=0.263
+[bound=0.1   ] n= 12 CS=12/12 parsed=12 nonempty=12 arg_acc=7/19=0.368
+[bound=0.3   ] n= 12 CS=12/12 parsed=12 nonempty=12 arg_acc=7/19=0.368
+[bound=1.0   ] n= 12 CS=12/12 parsed=12 nonempty=12 arg_acc=5/19=0.263
+
+===== SPEC §3.4 CALIBRATION =====
+   bound       CS  parsed  nonempty   arg_acc
+   0.003 12/12          12        12 9/19    0.474
+    0.01 12/12          12        12 9/19    0.474
+    0.03 12/12          12        12 5/19    0.263
+     0.1 12/12          12        12 7/19    0.368
+     0.3 12/12          12        12 7/19    0.368
+     1.0 12/12          12        12 5/19    0.263
+
+stock default is 0.1
+wrote artifacts/phase5_sweep_fixed.json

@@ -1,0 +1,1778 @@
+{
+  "task": "sudoku",
+  "variant": "j0",
+  "emission": "map",
+  "confidence": "mf",
+  "entropy_bound": 0.1,
+  "think": true,
+  "seed": 0,
+  "n": 250,
+  "cs": 250,
+  "cs_rate": 1.0,
+  "solved": 1,
+  "solve_rate": 0.004,
+  "zero_partition": 0,
+  "oom": 0,
+  "skipped_by_reason": {},
+  "failure_reasons": {
+    "row 1": 14,
+    "col 0": 55,
+    "row 0": 177,
+    "ok": 1,
+    "col 1": 1,
+    "row 2": 2
+  },
+  "elapsed_seconds": 5334.7,
+  "rows": [
+    {
+      "id": "sudoku4_0",
+      "text": "<|channel>3124\n<channel|>3124\n4131\n2422\n1142",
+      "ok": false,
+      "why": "row 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_1",
+      "text": "<|channel>214314321\n<channel|>2143\n4321\n1114\n1421",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_2",
+      "text": "<|channel>3\n<channel|>4211\n2134\n1241\n2112",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_3",
+      "text": "<|channel>21431\n<channel|>2143\n3423\n1214\n3412",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_4",
+      "text": "<|channel>231\n<channel|>2412\n1123\n4121\n3241<turn|>",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_5",
+      "text": "<|channel>2341\n<channel|>2341\n4132\n2444\n3111",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_6",
+      "text": "<|channel>4\n<channel|>4231\n2143\n1324\n2131",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_7",
+      "text": "<|channel>thought\n<channel|>3214\n3432\n2141\n2343",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_8",
+      "text": "<|channel>4\n<channel|>4231\n4124\n3413\n1142",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_9",
+      "text": "<|channel>12\n<channel|>1241\n3412\n4313\n4131",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_10",
+      "text": "<|channel>12344\n<channel|>1233\n4312\n4321\n2241",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_11",
+      "text": "<|channel>1\n<channel|>1144\n3113\n3141\n2132",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_12",
+      "text": "<|channel>231411423\n<channel|>2414\n1323\n1141\n4131",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_13",
+      "text": "<|channel>thought\n<channel|>3124\n2431\n1243\n4312<turn|>",
+      "ok": true,
+      "why": "ok",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_14",
+      "text": "<|channel>)}(\n<channel|>3121\n1244\n1212\n2444",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_15",
+      "text": "<|channel>4213\n<channel|>4213\n4114\n2422\n1341",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_16",
+      "text": "<|channel>123\n<channel|>3143\n2311\n3221\n1412",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_17",
+      "text": "<|channel>2\n<channel|>2113\n2242\n4131\n3114",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_18",
+      "text": "<|channel>312\n<channel|>1311\n2134\n4231\n1121",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_19",
+      "text": "<|channel>324114123\n<channel|>3141\n4323\n2314\n1111",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_20",
+      "text": "<|channel>32141143224423 (Wait, let me re-evaluate the logic)\n\nGrid:\n<channel|>3113\n3132\n2423\n2331<turn|>",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_21",
+      "text": "<|channel>24131\n<channel|>2414\n3124\n4221\n1342",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_22",
+      "text": "<|channel>423113142\n<channel|>4231\n3144\n1122\n2314",
+      "ok": false,
+      "why": "row 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_23",
+      "text": "<|channel>2\n<channel|>2314\n1232\n3211\n3113",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_24",
+      "text": "<|channel>3\n<channel|>1421\n4244\n2212\n3143",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_25",
+      "text": "<|channel>1423                \n<channel|>1413\n3214\n4112\n2311",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_26",
+      "text": "<|channel>4\n<channel|>3213\n1324\n1431\n3242",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_27",
+      "text": "<|channel>21\n<channel|>2141\n3412\n4132\n1311",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_28",
+      "text": "<|channel>314222\n<channel|>3142\n1413\n4221\n1344",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_29",
+      "text": "<|channel>32141\n<channel|>3214\n4111\n2341\n1223",
+      "ok": false,
+      "why": "row 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_30",
+      "text": "<|channel>3\n<channel|>3212\n1143\n4121\n4434",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_31",
+      "text": "<|channel>241\n<channel|>2443\n3131\n1232\n1312",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_32",
+      "text": "<|channel>231441423\n<channel|>2311\n1422\n4221\n3112",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_33",
+      "text": "<|channel>42\n<channel|>4214\n3243\n2132\n1321",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_34",
+      "text": "<|channel>142313\n<channel|>1143\n2221\n4312\n2114",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_35",
+      "text": "<|channel>3142\n<channel|>3111\n2431\n4244\n1321",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_36",
+      "text": "<|channel>1324\n<channel|>1314\n2133\n1223\n3142",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_37",
+      "text": "<|channel>3214\n<channel|>1234\n4323\n2422\n1312",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_38",
+      "text": "<|channel>4\n<channel|>2312\n1223\n4134\n3411",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_39",
+      "text": "<|channel>12431\n<channel|>1242\n3414\n2114\n4421",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_40",
+      "text": "<|channel>1432\n<channel|>3432\n2341\n2124\n4111",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_41",
+      "text": "<|channel>231414\n<channel|>2214\n3132\n1411\n3241",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_42",
+      "text": "<|channel>2\n<channel|>2314\n1423\n1131\n2241",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_43",
+      "text": "<|channel>234111\n<channel|>2241\n1131\n4213\n3124",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_44",
+      "text": "<|channel>23141\n<channel|>2311\n4312\n2143\n3421",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_45",
+      "text": "<|channel>1\n<channel|>3414\n2122\n2411\n1242",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_46",
+      "text": "<|channel>4122\n<channel|>3414\n2334\n4121\n2341",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_47",
+      "text": "<|channel>4132\n<channel|>3131\n2334\n1241\n3121",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_48",
+      "text": "<|channel>124\n<channel|>2124\n4223\n1412\n2311",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_49",
+      "text": "<|channel>43211\n<channel|>4321\n2223\n1442\n3224",
+      "ok": false,
+      "why": "row 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_50",
+      "text": "<|channel>2\n<channel|>3411\n2242\n1231\n1424",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_51",
+      "text": "<|channel>43122\n<channel|>4312\n2141\n3441\n1224",
+      "ok": false,
+      "why": "row 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_52",
+      "text": "<|channel>243\n<channel|>2432\n3324\n3212\n4213",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_53",
+      "text": "<|channel>4\n<channel|>4123\n1141\n4314\n2422",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_54",
+      "text": "<|channel>3142\n<channel|>3142\n4211\n3241\n1321",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_55",
+      "text": "<|channel>314224231\n<channel|>3141\n4233\n2314\n1213",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_56",
+      "text": "<|channel>12\n<channel|>3241\n3432\n4221\n2131<turn|>",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_57",
+      "text": "<|channel>1\n<channel|>2432\n1241\n2341\n3323",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_58",
+      "text": "<|channel>241313\n<channel|>2413\n3142\n1124\n4211",
+      "ok": false,
+      "why": "col 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_59",
+      "text": "<|channel>1\n<channel|>1234\n2441\n4123\n2311",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_60",
+      "text": "<|channel>314224231\n<channel|>3141\n4231\n1314\n1411",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_61",
+      "text": "<|channel>41\n<channel|>4331\n1234\n1341\n1413",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_62",
+      "text": "<|channel>3\n<channel|>3412\n4234\n1321\n2111",
+      "ok": false,
+      "why": "row 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_63",
+      "text": "<|channel>2143\n<channel|>3141\n4321\n2134\n3214",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_64",
+      "text": "<|channel>4132\n<channel|>4132\n2334\n4211\n3121",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_65",
+      "text": "<|channel>3142\n<channel|>3141\n4211\n3444\n1124",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_66",
+      "text": "<|channel>4\n<channel|>4121\n2434\n2412\n1243",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_67",
+      "text": "<|channel>4\n<channel|>1131\n4424\n2413\n1341",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_68",
+      "text": "<|channel>21431\n<channel|>2143\n1411\n3222\n1432",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_69",
+      "text": "<|channel>2\n<channel|>4134\n3122\n3143\n4312",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_70",
+      "text": "<|channel>1243\n<channel|>1224\n4131\n1423\n3122",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_71",
+      "text": "<|channel>4\n<channel|>1131\n3114\n2342\n2413",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_72",
+      "text": "<|channel>2413\n<channel|>2443\n3424\n1312\n4131",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_73",
+      "text": "<|channel>4\n<channel|>4123\n1221\n4314\n2232",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_74",
+      "text": "<|channel>2\n<channel|>4311\n4112\n3244\n1421",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_75",
+      "text": "<|channel>21431\n<channel|>2113\n3221\n4412\n1114",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_76",
+      "text": "<|channel>423111\n<channel|>4224\n1321\n2213\n3144",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_77",
+      "text": "<|channel>243111\n<channel|>2431\n4342\n3111\n4113",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_78",
+      "text": "<|channel>1\n<channel|>1423\n4341\n4232\n3214",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_79",
+      "text": "<|channel>3214\n<channel|>1314\n4231\n1423\n2341",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_80",
+      "text": "<|channel>43\n<channel|>4323\n4314\n3242\n2113",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_81",
+      "text": "<|channel>41\n<channel|>4323\n3114\n1342\n1131",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_82",
+      "text": "<|channel>2134\n<channel|>3124\n4312\n1411\n1141",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_83",
+      "text": "<|channel>2\n<channel|>1214\n1124\n1343\n2131",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_84",
+      "text": "<|channel>4\n<channel|>4123\n2141\n2132\n4114",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_85",
+      "text": "<|channel>1\n<channel|>4234\n3123\n2312\n3143",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_86",
+      "text": "<|channel>2341\n<channel|>2331\n1323\n4142\n1224",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_87",
+      "text": "<|channel>2\n<channel|>1141\n4124\n3412\n4234",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_88",
+      "text": "<|channel><|image>41\n<channel|>4231\n2324\n1343\n3121",
+      "ok": false,
+      "why": "row 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_89",
+      "text": "<|channel>2\n<channel|>1131\n1342\n4233\n4144",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_90",
+      "text": "<|channel>243Mobile43\n<channel|>1213\n4341\n2114\n3411",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_91",
+      "text": "<|channel>3\n<channel|>2212\n3243\n4121\n2144",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_92",
+      "text": "<|channel>1243Mobile\n<channel|>1223\n3412\n2134\n4311",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_93",
+      "text": "<|channel>23\n<channel|>2441\n2132\n1321\n3414",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_94",
+      "text": "<|channel>2\n<channel|>1431\n2242\n4213\n1314",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_95",
+      "text": "<|channel>34122\n<channel|>3442\n2131\n4321\n1124",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_96",
+      "text": "<|channel>2431\n<channel|>3421\n1142\n4243\n3121",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_97",
+      "text": "<|channel><body>\n<channel|>2413\n3424\n3211\n1342<|tool_response>",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_98",
+      "text": "<|channel>132\n<channel|>2132\n3231\n1143\n1314",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_99",
+      "text": "<|channel>4\n<channel|>4122\n4114\n2432\n2311",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_100",
+      "text": "<|channel>31422\n<channel|>3141\n2431\n1324\n4111",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_101",
+      "text": "<|channel>thought\n\nToTo solve this 4x4 Sudoku, we look at the empty cells based on the rules (each row, column, and 2x2 box contains digits 1-4).\n\nGiven grid:\n<channel|>3113\n1234\n4123\n1222",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_102",
+      "text": "<|channel>42311\n<channel|>4222\n3312\n2413\n1114",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_103",
+      "text": "<|channel>24131\n<channel|>2413\n4224\n1112\n4231",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_104",
+      "text": "<|channel>1\n<channel|>1433\n1141\n2133\n2311",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_105",
+      "text": "<|channel>4312\n<channel|>4342\n2134\n2411\n3111",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_106",
+      "text": "<|channel>42311\n<channel|>4231\n1343\n2414\n3122",
+      "ok": false,
+      "why": "row 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_107",
+      "text": "<|channel>41322\n<channel|>4132\n2331\n1421\n1211",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_108",
+      "text": "<|channel>42\n<channel|>1233\n1324\n3143\n1432",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_109",
+      "text": "<|channel>3\n<channel|>2412\n1223\n1141\n4123",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_110",
+      "text": "<|channel>42311\n<channel|>4231\n2342\n1421\n2314",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_111",
+      "text": "<|channel>3\n<channel|>4124\n1433\n1242\n4213",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_112",
+      "text": "<|channel>131422\n<channel|>3141\n2434\n1321\n4113",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_113",
+      "text": "<|channel>3412\n<channel|>3442\n2134\n1211\n4111",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_114",
+      "text": "<|channel>3\n<channel|>2211\n4132\n1243\n4311",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_115",
+      "text": "<|channel>43122\n<channel|>4312\n2141\n3424\n1234",
+      "ok": false,
+      "why": "row 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_116",
+      "text": "<|channel>12\n<channel|>1241\n3412\n1432\n4321",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_117",
+      "text": "<|channel>3142\n<channel|>3132\n4213\n3244\n1324",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_118",
+      "text": "<|channel>3142Mobile2413\n<channel|>3242\n2313\n1324\n4131",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_119",
+      "text": "<|channel>143223214\n<channel|>1432\n3211\n2141\n1421",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_120",
+      "text": "<|channel>21\n<channel|>2433\n4321\n1144\n1431",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_121",
+      "text": "<|channel>41231\n<channel|>4113\n1241\n3224\n1432",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_122",
+      "text": "<|channel>32411\n<channel|>3244\n2432\n1443\n2314",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_123",
+      "text": "<|channel>2\n<channel|>2134\n3113\n2342\n4213",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_124",
+      "text": "<|channel>324111\n<channel|>3241\n2423\n4132\n2114",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_125",
+      "text": "<|channel>4\n<channel|>3213\n3124\n1433\n2212",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_126",
+      "text": "<|channel>3\n<channel|>3141\n2132\n4314\n1423",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_127",
+      "text": "<|channel>31422\n<channel|>3142\n4311\n2413\n1124",
+      "ok": false,
+      "why": "row 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_128",
+      "text": "<|channel>3\n<channel|>4211\n4134\n1423\n1141",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_129",
+      "text": "<|channel>4312\n<channel|>4342\n4234\n2423\n1241",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_130",
+      "text": "<|channel>11\n<channel|>2433\n2312\n3241\n3113",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_131",
+      "text": "<|channel>14231\n<channel|>1423\n3214\n4112\n2341",
+      "ok": false,
+      "why": "row 2",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_132",
+      "text": "<|channel>41231\n<channel|>4111\n3241\n1434\n2314",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_133",
+      "text": "<|channel>24\n<channel|>2413\n2432\n4323\n1114",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_134",
+      "text": "<|channel>31422\n<channel|>3141\n2441\n1321\n4213",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_135",
+      "text": "<|channel>2431\n<channel|>2231\n3124\n4332\n1213",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_136",
+      "text": "<|channel>1432\n<channel|>1431\n3241\n1334\n1123",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_137",
+      "text": "<|channel>1234</h4>\n<channel|>1222\n4312\n2143\n1121",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_138",
+      "text": "<|channel>4231\n<channel|>4431\n3142\n2231\n1421",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_139",
+      "text": "<|channel>2\n<channel|>2131\n2242\n4213\n1321",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_140",
+      "text": "<|channel><|\"|>1\n<channel|>1342\n4124\n2433\n4121",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_141",
+      "text": "<|channel>3141\n<channel|>2313\n4123\n3241\n4132",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_142",
+      "text": "<|channel>23\n<channel|>2314\n2342\n1121\n1213",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_143",
+      "text": "<|channel>2141\n<channel|>3224\n2132\n4321\n1141",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_144",
+      "text": "<|channel>13\n<channel|>1342\n1423\n1212\n3114",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_145",
+      "text": "<|channel>14\n<channel|>2231\n2312\n3424\n1243",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_146",
+      "text": "<|channel>3\n<channel|>3124\n2443\n1211\n2341",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_147",
+      "text": "<|channel>1\n<channel|>1432\n4144\n4121\n2111",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_148",
+      "text": "<|channel>3142\n<channel|>3341\n4231\n1143\n1311",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_149",
+      "text": "<|channel>214313\n<channel|>2143\n1413\n4431\n1124",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_150",
+      "text": "<|channel>3\n<channel|>1241\n2132\n1124\n3313",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_151",
+      "text": "<|channel>4132\n<channel|>4134\n2411\n3231\n1421",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_152",
+      "text": "<|channel>3\n<channel|>3412\n3141\n2133\n4111",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_153",
+      "text": "<|channel>12\n<channel|>1231\n2312\n3414\n2141",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_154",
+      "text": "<|channel>4123\n<channel|>2144\n3211\n2341\n1432",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_155",
+      "text": "<|channel>14322\n<channel|>1434\n1314\n4213\n3142",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_156",
+      "text": "<|channel>14231\n<channel|>1422\n3214\n2341\n4411",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_157",
+      "text": "<|channel>4123\n<channel|>4123\n4312\n1411\n2141",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_158",
+      "text": "<|channel>1324Mobile\n<channel|>1314\n4213\n3111\n2431",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_159",
+      "text": "<|channel>4\n<channel|>4232\n1241\n3123\n2311",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_160",
+      "text": "<|channel>2341\n<channel|>2241\n2124\n4423\n1312",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_161",
+      "text": "<|channel>34\n<channel|>3112\n1243\n4432\n4121",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_162",
+      "text": "<|channel>2431\n<channel|>2143\n1221\n3412\n2134",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_163",
+      "text": "<|channel>321444\n<channel|>3114\n4223\n1432\n2111",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_164",
+      "text": "<|channel>2\n<channel|>2131\n1242\n3211\n4144",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_165",
+      "text": "<|channel>21\n<channel|>1143\n3112\n1424\n1231",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_166",
+      "text": "<|channel>2\n<channel|>1341\n3443\n4132\n4114",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_167",
+      "text": "<|channel>1342\n<channel|>4342\n2131\n3231\n4123",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_168",
+      "text": "<|channel>1\n<channel|>4124\n2141\n4312\n3243",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_169",
+      "text": "<|channel>231411423\n<channel|>2414\n1323\n3141\n4132",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_170",
+      "text": "<|channel>3211\n<channel|>4311\n1242\n3412\n2111",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_171",
+      "text": "<|channel>42311\n<channel|>4232\n1342\n2413\n1224",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_172",
+      "text": "<|channel>3122\n<channel|>4313\n2111\n3411\n1134",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_173",
+      "text": "<|channel>3241\n<channel|>3231\n4322\n1142\n2314",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_174",
+      "text": "<|channel>4132\n<channel|>4134\n2414\n3231\n1412",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_175",
+      "text": "<|channel>3\n<channel|>3124\n4134\n2113\n2241",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_176",
+      "text": "<|channel>3\n<channel|>2312\n4123\n1241\n3412",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_177",
+      "text": "<|channel><|image>134222\n<channel|>1142\n2432\n4123\n2244",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_178",
+      "text": "<|channel>3214\n<channel|>3234\n1322\n3112\n2341",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_179",
+      "text": "<|channel>1\n<channel|>4324\n2131\n3142\n3313",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_180",
+      "text": "<|channel>3\n<channel|>2142\n4231\n4324\n2311",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_181",
+      "text": "<|channel>43122\n<channel|>4313\n2443\n3121\n2411",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_182",
+      "text": "<|channel>3142\n<channel|>3112\n2431\n3243\n1122",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_183",
+      "text": "<|channel>1\n<channel|>1234\n3421\n2433\n2212",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_184",
+      "text": "<|channel>3\n<channel|>3214\n3423\n1341\n4212",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_185",
+      "text": "<|channel>1\n<channel|>3134\n1421\n4132\n4314",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_186",
+      "text": "<|channel>13\n<channel|>3141\n4132\n4314\n3411",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_187",
+      "text": "<|channel>432112143\n<channel|>4121\n2343\n1411\n1214",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_188",
+      "text": "<|channel>231414\n<channel|>3314\n2132\n1131\n3241",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_189",
+      "text": "<|channel>24311\n<channel|>2411\n1313\n4213\n3142",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_190",
+      "text": "<|channel>1\n<channel|>2232\n3244\n3423\n2341<turn|>",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_191",
+      "text": "<|channel>1\n<channel|>1234\n3443\n1112\n2111",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_192",
+      "text": "<|channel>342\n<channel|>2341\n4213\n3441\n1131",
+      "ok": false,
+      "why": "row 2",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_193",
+      "text": "<|channel>2\n<channel|>2341\n3113\n4434\n2411",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_194",
+      "text": "<|channel>432111\n<channel|>4331\n2234\n3341\n2413",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_195",
+      "text": "<|channel>41322\n<channel|>4132\n2343\n1413\n1214",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_196",
+      "text": "<|channel>32\n<channel|>3243\n1231\n2412\n4113",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_197",
+      "text": "<|channel>1\n<channel|>1342\n1231\n3424\n3413",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_198",
+      "text": "<|channel>3124\n<channel|>3324\n2431\n1243\n1311",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_199",
+      "text": "<|channel>1\n<channel|>1124\n3413\n4131\n3211",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_200",
+      "text": "<|channel>3\n<channel|>3214\n1422\n1141\n3121",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_201",
+      "text": "<|channel>1\n<channel|>1232\n1241\n3123\n2314",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_202",
+      "text": "<|channel>213\n<channel|>3243\n1324\n1422\n3142",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_203",
+      "text": "<|channel>32\n<channel|>3413\n4234\n2141\n1423",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_204",
+      "text": "<|channel>42131\n<channel|>4223\n3142\n2441\n1224",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_205",
+      "text": "<|channel>2431\n<channel|>3231\n1324\n3132\n4113",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_206",
+      "text": "<|channel>132\n<channel|>3142\n2334\n4243\n3412",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_207",
+      "text": "<|channel>2\n<channel|>3143\n4111\n1234\n2412",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_208",
+      "text": "<|channel>3\n<channel|>4144\n3123\n1241\n2432",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_209",
+      "text": "<|channel>1243Best\n<channel|>1223\n4312\n3111\n1411",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_210",
+      "text": "<|channel>41\n<channel|>1323\n3234\n2341\n1411",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_211",
+      "text": "<|channel>23411\n<channel|>2341\n1424\n3211\n4132",
+      "ok": false,
+      "why": "row 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_212",
+      "text": "<|channel>412312341\n<channel|>4121\n2341\n2412\n1424",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_213",
+      "text": "<|channel>12\n<channel|>1234\n3431\n4214\n2141",
+      "ok": false,
+      "why": "row 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_214",
+      "text": "<|channel>1\n<channel|>1142\n3211\n4124\n2431",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_215",
+      "text": "<|channel>*(12\n<channel|>1431\n4342\n1423\n2134",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_216",
+      "text": "<|channel>32\n<channel|>3144\n1413\n4232\n1311",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_217",
+      "text": "<|channel>1\n<channel|>1243\n4321\n4134\n2212",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_218",
+      "text": "<|channel>41322\n<channel|>4112\n3311\n2413\n1124",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_219",
+      "text": "<|channel>24\n<channel|>1434\n1312\n4121\n4211",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_220",
+      "text": "<|channel>2\n<channel|>2141\n2132\n4214\n3423",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_221",
+      "text": "<|channel>3\n<channel|>3142\n1214\n1123\n2411",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_222",
+      "text": "<|channel>42311\n<channel|>4231\n1313\n2411\n3114",
+      "ok": false,
+      "why": "row 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_223",
+      "text": "<|channel>2341\n<channel|>4231\n1322\n4132\n1214",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_224",
+      "text": "<|channel>14\n<channel|>1422\n3231\n4312\n4121",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_225",
+      "text": "<|channel>2134\n<channel|>3134\n4412\n3231\n1423",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_226",
+      "text": "<|channel>2341\n<channel|>1232\n4313\n2111\n3412",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_227",
+      "text": "<|channel>3\n<channel|>3141\n4123\n4314\n1431",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_228",
+      "text": "<|channel>14123\n<channel|>4124\n2411\n3241\n1142",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_229",
+      "text": "<|channel>14\n<channel|>1431\n1324\n3211\n4123",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_230",
+      "text": "<|channel>2\n<channel|>4134\n3441\n4213\n1311",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_231",
+      "text": "<|channel>4123\n<channel|>3113\n2341\n1132\n1112",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_232",
+      "text": "<|channel>3\n<channel|>3121\n2143\n2312\n4234",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_233",
+      "text": "<|channel>4\n<channel|>4123\n4314\n1432\n1241",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_234",
+      "text": "<|channel>31422\n<channel|>3112\n2431\n1324\n4113",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_235",
+      "text": "<|channel>31422\n<channel|>3112\n2441\n1324\n4411",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_236",
+      "text": "<|channel>3\n<channel|>3242\n3213\n4124\n1411",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_237",
+      "text": "<|channel>41\n<channel|>2331\n3214\n1341\n3413",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_238",
+      "text": "<|channel>12341\n<channel|>1232\n4312\n2113\n3441",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_239",
+      "text": "<|channel>24314\n<channel|>2241\n4334\n2134\n3412",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_240",
+      "text": "<|channel>3422\n<channel|>1344\n3413\n2431\n3122",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_241",
+      "text": "<|channel>1\n<channel|>2342\n3223\n2134\n1421",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_242",
+      "text": "<|channel>14231\n<channel|>1423\n4214\n3142\n4231",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_243",
+      "text": "<|channel>1324\n<channel|>1314\n2431\n1413\n3112",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_244",
+      "text": "<|channel>34\n<channel|>1214\n2123\n1234\n4311",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_245",
+      "text": "<|channel>132                23\n<channel|>4132\n2324\n1123\n1144",
+      "ok": false,
+      "why": "col 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_246",
+      "text": "<|channel>31241\n<channel|>3124\n4211\n1342\n2113",
+      "ok": false,
+      "why": "row 1",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_247",
+      "text": "<|channel>4231\n<channel|>3431\n1342\n4134\n2441",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_248",
+      "text": "<|channel>4213\n<channel|>4244\n1121\n2423\n3142",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    },
+    {
+      "id": "sudoku4_249",
+      "text": "<|channel>14\n<channel|>1232\n2324\n3212\n3123",
+      "ok": false,
+      "why": "row 0",
+      "accepted": true
+    }
+  ]
+}

@@ -1,0 +1,310 @@
+{
+  "variant": "j1",
+  "emission": "sample",
+  "rows": [
+    {
+      "bound": 0.1,
+      "n": 2,
+      "accepted": 2,
+      "parsed": 2,
+      "nonempty_args": 2,
+      "arg_correct": 0,
+      "arg_total": 4,
+      "steps": [],
+      "examples": [
+        "{\"user_id\":77890,\"special\":\":black\"}",
+        "{\"repos\":\":\"}<turn|>"
+      ],
+      "trace": [
+        {
+          "step": 0,
+          "n_accepted": 57,
+          "mean_entropy": 0.30296075344085693,
+          "emit": "{\"user_id\":6}"
+        },
+        {
+          "step": 1,
+          "n_accepted": 33,
+          "mean_entropy": 0.1369815319776535,
+          "emit": "{\"user_id\":8}"
+        },
+        {
+          "step": 2,
+          "n_accepted": 53,
+          "mean_entropy": 0.030261585488915443,
+          "emit": "{\"user_id\":8}"
+        },
+        {
+          "step": 3,
+          "n_accepted": 72,
+          "mean_entropy": 0.045259878039360046,
+          "emit": "{\"user_id\":9}"
+        },
+        {
+          "step": 4,
+          "n_accepted": 34,
+          "mean_entropy": 0.11324509978294373,
+          "emit": "{\"user_id\":1}"
+        },
+        {
+          "step": 5,
+          "n_accepted": 15,
+          "mean_entropy": 0.31282031536102295,
+          "emit": "{\"user_id\":8}"
+        },
+        {
+          "step": 6,
+          "n_accepted": 27,
+          "mean_entropy": 0.27758902311325073,
+          "emit": "{\"user_id\":8}"
+        },
+        {
+          "step": 7,
+          "n_accepted": 158,
+          "mean_entropy": 0.11980077624320984,
+          "emit": "{\"user_id\":0}"
+        },
+        {
+          "step": 8,
+          "n_accepted": 77,
+          "mean_entropy": 0.04008972644805908,
+          "emit": "{\"user_id\":2}"
+        },
+        {
+          "step": 9,
+          "n_accepted": 107,
+          "mean_entropy": 0.026338964700698853,
+          "emit": "{\"user_id\":3}"
+        },
+        {
+          "step": 10,
+          "n_accepted": 236,
+          "mean_entropy": 0.012976599857211113,
+          "emit": "{\"user_id\":5}"
+        },
+        {
+          "step": 11,
+          "n_accepted": 247,
+          "mean_entropy": 0.009815261699259281,
+          "emit": "{\"user_id\":97}"
+        },
+        {
+          "step": 12,
+          "n_accepted": 254,
+          "mean_entropy": 0.00794913712888956,
+          "emit": "{\"user_id\":17890}"
+        },
+        {
+          "step": 13,
+          "n_accepted": 256,
+          "mean_entropy": 0.0009436049731448293,
+          "emit": "{\"user_id\":97890,\"special\":\":black\"}"
+        },
+        {
+          "step": 14,
+          "n_accepted": 256,
+          "mean_entropy": 3.321053009130992e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 15,
+          "n_accepted": 256,
+          "mean_entropy": 0.00011830413859570399,
+          "emit": "{\"user_id\":97890,\"special\":\":black\"}"
+        },
+        {
+          "step": 16,
+          "n_accepted": 256,
+          "mean_entropy": 7.786768401274458e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 17,
+          "n_accepted": 256,
+          "mean_entropy": 7.617493974976242e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 18,
+          "n_accepted": 256,
+          "mean_entropy": 7.251934584928676e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 19,
+          "n_accepted": 256,
+          "mean_entropy": 7.372103573288769e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 20,
+          "n_accepted": 256,
+          "mean_entropy": 4.635400546249002e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 21,
+          "n_accepted": 256,
+          "mean_entropy": 2.930233495135326e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 22,
+          "n_accepted": 256,
+          "mean_entropy": 5.2881478040944785e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 23,
+          "n_accepted": 256,
+          "mean_entropy": 1.2789402717316989e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 24,
+          "n_accepted": 256,
+          "mean_entropy": 5.105253148940392e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 25,
+          "n_accepted": 256,
+          "mean_entropy": 4.192310370854102e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 26,
+          "n_accepted": 256,
+          "mean_entropy": 4.916807301924564e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 27,
+          "n_accepted": 256,
+          "mean_entropy": 1.7292493794229813e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 28,
+          "n_accepted": 256,
+          "mean_entropy": 3.182880027452484e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 29,
+          "n_accepted": 256,
+          "mean_entropy": 2.0862536985077895e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 30,
+          "n_accepted": 256,
+          "mean_entropy": 2.4199634935939685e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 31,
+          "n_accepted": 256,
+          "mean_entropy": 1.820164470700547e-05,
+          "emit": "{\"user_id\":97890,\"special\":\":black\"}"
+        },
+        {
+          "step": 32,
+          "n_accepted": 256,
+          "mean_entropy": 6.04358319833409e-06,
+          "emit": "{\"user_id\":97890,\"special\":\":black\"}"
+        },
+        {
+          "step": 33,
+          "n_accepted": 256,
+          "mean_entropy": 8.782932127360255e-06,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 34,
+          "n_accepted": 256,
+          "mean_entropy": 1.3410804967861623e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 35,
+          "n_accepted": 256,
+          "mean_entropy": 1.5996736692613922e-05,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 36,
+          "n_accepted": 256,
+          "mean_entropy": 6.3066881921258755e-06,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 37,
+          "n_accepted": 256,
+          "mean_entropy": 8.26527684694156e-06,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 38,
+          "n_accepted": 256,
+          "mean_entropy": 8.088496542768553e-06,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 39,
+          "n_accepted": 256,
+          "mean_entropy": 5.120423793414375e-06,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 40,
+          "n_accepted": 256,
+          "mean_entropy": 7.81207563704811e-06,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 41,
+          "n_accepted": 256,
+          "mean_entropy": 3.2853754419193137e-06,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 42,
+          "n_accepted": 256,
+          "mean_entropy": 2.0012744244013447e-06,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 43,
+          "n_accepted": 256,
+          "mean_entropy": 3.211958528481773e-06,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 44,
+          "n_accepted": 256,
+          "mean_entropy": 2.0023089746246114e-06,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 45,
+          "n_accepted": 256,
+          "mean_entropy": 2.03804052034684e-06,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 46,
+          "n_accepted": 256,
+          "mean_entropy": 2.006697286560666e-06,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        },
+        {
+          "step": 47,
+          "n_accepted": 256,
+          "mean_entropy": 1.2797083854820812e-06,
+          "emit": "{\"user_id\":77890,\"special\":\":black\"}"
+        }
+      ]
+    }
+  ]
+}

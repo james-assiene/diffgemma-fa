@@ -1,0 +1,4 @@
+S=128: compile+first=   0.1s  steady=    2.2 ms/call
+S=256: compile+first=   0.1s  steady=   18.0 ms/call
+S=512: compile+first=   0.3s  steady=  173.7 ms/call
+A model forward step was measured at ~0.21 s in Phase 0; 48 steps/block.

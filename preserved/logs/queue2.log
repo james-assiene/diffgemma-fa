@@ -1,0 +1,46 @@
+=== eval_bfcl_live_simple_j1_sample ===
+  !! eval_bfcl_live_simple_j1_sample DIED
+         return jax.tree.leaves(params)[0].dtype
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     AttributeError: 'str' object has no attribute 'dtype'
+=== eval_bfcl_live_simple_j0_sample ===
+  !! eval_bfcl_live_simple_j0_sample DIED
+         return jax.tree.leaves(params)[0].dtype
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     AttributeError: 'str' object has no attribute 'dtype'
+=== exp_e0_base30_j1 ===
+  !! exp_e0_base30_j1 DIED
+         return jax.tree.leaves(params)[0].dtype
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     AttributeError: 'str' object has no attribute 'dtype'
+=== exp_e2_prompt_j1 ===
+  !! exp_e2_prompt_j1 DIED
+         return jax.tree.leaves(params)[0].dtype
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     AttributeError: 'str' object has no attribute 'dtype'
+=== exp_e2_prompt_unc ===
+  !! exp_e2_prompt_unc DIED
+         return jax.tree.leaves(params)[0].dtype
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     AttributeError: 'str' object has no attribute 'dtype'
+=== exp_e4_grammar_j1 ===
+  !! exp_e4_grammar_j1 DIED
+         return jax.tree.leaves(params)[0].dtype
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     AttributeError: 'str' object has no attribute 'dtype'
+=== exp_e5_both_j1 ===
+  !! exp_e5_both_j1 DIED
+         return jax.tree.leaves(params)[0].dtype
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     AttributeError: 'str' object has no attribute 'dtype'
+=== exp_e6_seed1_j1 ===
+  !! exp_e6_seed1_j1 DIED
+         return jax.tree.leaves(params)[0].dtype
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     AttributeError: 'str' object has no attribute 'dtype'
+=== exp_e6_seed2_j1 ===
+  !! exp_e6_seed2_j1 DIED
+         return jax.tree.leaves(params)[0].dtype
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     AttributeError: 'str' object has no attribute 'dtype'
+QUEUE2 DONE

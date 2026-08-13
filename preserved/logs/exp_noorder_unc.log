@@ -1,0 +1,41 @@
+[eval] task=bfcl_live_simple variant=unconstrained emission=sample bound=0.1
+2026-08-04 15:05:56.800101: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+  [10/130] CS=0.000 schema=0.600 acc=0.800 nonempty=0.900
+  [20/130] CS=0.000 schema=0.800 acc=0.733 nonempty=0.950
+  [30/130] CS=0.000 schema=0.667 acc=0.700 nonempty=0.967
+  [40/130] CS=0.000 schema=0.575 acc=0.615 nonempty=0.975
+  [50/130] CS=0.000 schema=0.520 acc=0.533 nonempty=0.980
+  [60/130] CS=0.000 schema=0.517 acc=0.548 nonempty=0.967
+  [70/130] CS=0.000 schema=0.514 acc=0.579 nonempty=0.957
+  [80/130] CS=0.000 schema=0.537 acc=0.582 nonempty=0.938
+  [90/130] CS=0.000 schema=0.544 acc=0.609 nonempty=0.944
+  [100/130] CS=0.000 schema=0.580 acc=0.637 nonempty=0.950
+  [110/130] CS=0.000 schema=0.600 acc=0.643 nonempty=0.946
+  [120/130] CS=0.000 schema=0.592 acc=0.580 nonempty=0.950
+  [130/130] CS=0.000 schema=0.600 acc=0.611 nonempty=0.946
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: unconstrained
+emission: sample
+n: 130
+cs: 0
+cs_rate: 0.0
+schema_ok: 78
+schema_valid_rate: 0.6
+parsed: 123
+nonempty: 123
+nonempty_rate: 0.9462
+arg_correct: 165
+arg_total: 270
+arg_accuracy: 0.6111
+exact_calls: 56
+exact_call_rate: 0.4308
+skipped_by_reason: {}
+zero_partition: 0
+oom: 0
+elapsed_seconds: 3121.7
+
+wrote artifacts/exp_noorder_unc.json

@@ -1,0 +1,1497 @@
+{
+  "variant": "j1",
+  "emission": "sample",
+  "nonempty": true,
+  "rows": [
+    {
+      "bound": 0.003,
+      "n": 12,
+      "accepted": 12,
+      "parsed": 12,
+      "nonempty_args": 12,
+      "arg_correct": 9,
+      "arg_total": 19,
+      "steps": [],
+      "examples": [
+        "<|channel>```\n<channel|>{\"user_id\": 7890, \"special\": \"black\"}",
+        "<|channel>```json\n<channel|>{\"repos\":\": [\"}",
+        "<|channel>```json\n\n{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, }{\\\", {\",\"type\"",
+        "<|channel>```json\n\n{\n<channel|>{\"loc\": \"221B Baker Street, Berkeley, CA, USA\" ,\"type\": \"pl"
+      ],
+      "predictions": [
+        {
+          "id": "live_simple_0-0-0",
+          "fn": "get_user_info",
+          "text": "<|channel>```\n<channel|>{\"user_id\": 7890, \"special\": \"black\"}",
+          "parsed": {
+            "user_id": 7890,
+            "special": "black"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_1-1-0",
+          "fn": "github_star",
+          "text": "<|channel>```json\n<channel|>{\"repos\":\": [\"}",
+          "parsed": {
+            "repos": ": ["
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_2-2-0",
+          "fn": "uber.ride",
+          "text": "<|channel>```json\n\n{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, }{\\\", {\",\"type\": \"comfort\" ,\"time\": 6000}",
+          "parsed": {
+            "loc": "2020 Addison Street, Berkeley, CA, }{\", {",
+            "type": "comfort",
+            "time": 6000
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_3-2-1",
+          "fn": "uber.ride",
+          "text": "<|channel>```json\n\n{\n<channel|>{\"loc\": \"221B Baker Street, Berkeley, CA, USA\" ,\"type\": \"plus\" ,\"time\": 6000}",
+          "parsed": {
+            "loc": "221B Baker Street, Berkeley, CA, USA",
+            "type": "plus",
+            "time": 6000
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_4-3-0",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json_{\n<channel|>{\"location\": \"Tel\"}",
+          "parsed": {
+            "location": "Tel"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_5-3-1",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json***{\n<channel|>{\"location\": \"Divin\u00f3polis, MG\"}",
+          "parsed": {
+            "location": "Divin\u00f3polis, MG"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_6-3-2",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json_{\n<channel|>{\"location\": \"San Francisco\"}",
+          "parsed": {
+            "location": "San Francisco"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_7-3-3",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json</h4>{\n<channel|>{\"location\": \"Riga, Latvia\"}",
+          "parsed": {
+            "location": "Riga, Latvia"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_8-3-4",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json\n<channel|>{ \"location\": \"London, UK\"}",
+          "parsed": {
+            "location": "London, UK"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_9-3-5",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json organization{\n<channel|>{\"location\": \"Hyderabad\"}",
+          "parsed": {
+            "location": "Hyderabad"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_10-3-6",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json {{\n<channel|>{\"location\": \"Yosemite National Park, Mariposa, CABusiness  \",\"unit\": \"celsius\" }",
+          "parsed": {
+            "location": "Yosemite National Park, Mariposa, CABusiness  ",
+            "unit": "celsius"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_11-3-7",
+          "fn": "get_current_weather",
+          "text": "<|channel>jsonjson\n<channel|>{\"location\": \"Naples,\"}",
+          "parsed": {
+            "location": "Naples,"
+          },
+          "accepted": true
+        }
+      ],
+      "per_key": [
+        {
+          "key": "user_id",
+          "want": "7890",
+          "got": "7890",
+          "ok": true
+        },
+        {
+          "key": "special",
+          "want": "black",
+          "got": "black",
+          "ok": true
+        },
+        {
+          "key": "repos",
+          "want": "ShishirPatil/gorilla,gorilla-llm/gorilla-cli",
+          "got": ": [",
+          "ok": false
+        },
+        {
+          "key": "aligned",
+          "want": "True",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "loc",
+          "want": "2020 Addison Street, Berkeley, CA, USA",
+          "got": "2020 Addison Street, Berkeley, CA, }{\", {",
+          "ok": false
+        },
+        {
+          "key": "type",
+          "want": "comfort",
+          "got": "comfort",
+          "ok": true
+        },
+        {
+          "key": "time",
+          "want": "600",
+          "got": "6000",
+          "ok": false
+        },
+        {
+          "key": "loc",
+          "want": "221B Baker Street, Berkeley, CA, USA",
+          "got": "221B Baker Street, Berkeley, CA, USA",
+          "ok": true
+        },
+        {
+          "key": "type",
+          "want": "plus",
+          "got": "plus",
+          "ok": true
+        },
+        {
+          "key": "time",
+          "want": "600",
+          "got": "6000",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Tel Aviv, Israel",
+          "got": "Tel",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Divin\u00f3polis, MG",
+          "got": "Divin\u00f3polis, MG",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "San Francisco, CA",
+          "got": "San Francisco",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Riga, Latvia",
+          "got": "Riga, Latvia",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "London, UK",
+          "got": "London, UK",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "Hyderabad, India",
+          "got": "Hyderabad",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Mariposa, CA",
+          "got": "Yosemite National Park, Mariposa, CABusiness  ",
+          "ok": false
+        },
+        {
+          "key": "unit",
+          "want": "celsius",
+          "got": "celsius",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "Naples, FL",
+          "got": "Naples,",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "bound": 0.01,
+      "n": 12,
+      "accepted": 12,
+      "parsed": 12,
+      "nonempty_args": 12,
+      "arg_correct": 9,
+      "arg_total": 19,
+      "steps": [],
+      "examples": [
+        "<|channel>```\n<channel|>{\"user_id\": 7890, \"special\": \"black\"}",
+        "<|channel>```json\n<channel|>{\"repos\":\": [\"}",
+        "<|channel>```json {{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, USA1\", \"type\": ",
+        "<|channel>```json***{\n<channel|>{\"loc\": \"221B Baker Street, Berkeley, CA, USA   \",\"type\": "
+      ],
+      "predictions": [
+        {
+          "id": "live_simple_0-0-0",
+          "fn": "get_user_info",
+          "text": "<|channel>```\n<channel|>{\"user_id\": 7890, \"special\": \"black\"}",
+          "parsed": {
+            "user_id": 7890,
+            "special": "black"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_1-1-0",
+          "fn": "github_star",
+          "text": "<|channel>```json\n<channel|>{\"repos\":\": [\"}",
+          "parsed": {
+            "repos": ": ["
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_2-2-0",
+          "fn": "uber.ride",
+          "text": "<|channel>```json {{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, USA1\", \"type\": \"comfort\" ,\"time\": 6000}",
+          "parsed": {
+            "loc": "2020 Addison Street, Berkeley, CA, USA1",
+            "type": "comfort",
+            "time": 6000
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_3-2-1",
+          "fn": "uber.ride",
+          "text": "<|channel>```json***{\n<channel|>{\"loc\": \"221B Baker Street, Berkeley, CA, USA   \",\"type\": \"plus\" ,\"time\": 600}",
+          "parsed": {
+            "loc": "221B Baker Street, Berkeley, CA, USA   ",
+            "type": "plus",
+            "time": 600
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_4-3-0",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json\n\n{\n<channel|>{\"location\": \"Tel Aviv individuals \",\"unit\": \"fahrenheit\" }",
+          "parsed": {
+            "location": "Tel Aviv individuals ",
+            "unit": "fahrenheit"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_5-3-1",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json***{\n<channel|>{\"location\": \"Divin\u00f3polis, MG\"}",
+          "parsed": {
+            "location": "Divin\u00f3polis, MG"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_6-3-2",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json_{\n<channel|>{\"location\": \"San Francisco\"}",
+          "parsed": {
+            "location": "San Francisco"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_7-3-3",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json strict{\n<channel|>{\"location\": \"Riga, Latvia\"}",
+          "parsed": {
+            "location": "Riga, Latvia"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_8-3-4",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json_{\n<channel|>{\"location\": \"London, UK\"}",
+          "parsed": {
+            "location": "London, UK"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_9-3-5",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json strict{\n<channel|>{\"location\": \"Hyderabad\"}",
+          "parsed": {
+            "location": "Hyderabad"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_10-3-6",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json {{\n<channel|>{\"location\": \"Yosemite National Park, Mariposa, CA\"}",
+          "parsed": {
+            "location": "Yosemite National Park, Mariposa, CA"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_11-3-7",
+          "fn": "get_current_weather",
+          "text": "<|channel>jsonjson\n<channel|>{\"location\": \"Naples, Florida\"}",
+          "parsed": {
+            "location": "Naples, Florida"
+          },
+          "accepted": true
+        }
+      ],
+      "per_key": [
+        {
+          "key": "user_id",
+          "want": "7890",
+          "got": "7890",
+          "ok": true
+        },
+        {
+          "key": "special",
+          "want": "black",
+          "got": "black",
+          "ok": true
+        },
+        {
+          "key": "repos",
+          "want": "ShishirPatil/gorilla,gorilla-llm/gorilla-cli",
+          "got": ": [",
+          "ok": false
+        },
+        {
+          "key": "aligned",
+          "want": "True",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "loc",
+          "want": "2020 Addison Street, Berkeley, CA, USA",
+          "got": "2020 Addison Street, Berkeley, CA, USA1",
+          "ok": false
+        },
+        {
+          "key": "type",
+          "want": "comfort",
+          "got": "comfort",
+          "ok": true
+        },
+        {
+          "key": "time",
+          "want": "600",
+          "got": "6000",
+          "ok": false
+        },
+        {
+          "key": "loc",
+          "want": "221B Baker Street, Berkeley, CA, USA",
+          "got": "221B Baker Street, Berkeley, CA, USA   ",
+          "ok": true
+        },
+        {
+          "key": "type",
+          "want": "plus",
+          "got": "plus",
+          "ok": true
+        },
+        {
+          "key": "time",
+          "want": "600",
+          "got": "600",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "Tel Aviv, Israel",
+          "got": "Tel Aviv individuals ",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Divin\u00f3polis, MG",
+          "got": "Divin\u00f3polis, MG",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "San Francisco, CA",
+          "got": "San Francisco",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Riga, Latvia",
+          "got": "Riga, Latvia",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "London, UK",
+          "got": "London, UK",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "Hyderabad, India",
+          "got": "Hyderabad",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Mariposa, CA",
+          "got": "Yosemite National Park, Mariposa, CA",
+          "ok": false
+        },
+        {
+          "key": "unit",
+          "want": "celsius",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Naples, FL",
+          "got": "Naples, Florida",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "bound": 0.03,
+      "n": 12,
+      "accepted": 12,
+      "parsed": 12,
+      "nonempty_args": 12,
+      "arg_correct": 5,
+      "arg_total": 19,
+      "steps": [],
+      "examples": [
+        "<|channel>```json {{\n<channel|>{\"user_id\": 7}<turn|>",
+        "<|channel>```json {{\n<channel|>{\"repos\":\":\"}",
+        "<|channel>```jsonjson{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, USABusiness  ",
+        "<|channel>```json\n<channel|>{ \"loc\": \"221B Baker Street, Berkeley, CA, USA1  \",\"type\": \"pl"
+      ],
+      "predictions": [
+        {
+          "id": "live_simple_0-0-0",
+          "fn": "get_user_info",
+          "text": "<|channel>```json {{\n<channel|>{\"user_id\": 7}<turn|>",
+          "parsed": {
+            "user_id": 7
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_1-1-0",
+          "fn": "github_star",
+          "text": "<|channel>```json {{\n<channel|>{\"repos\":\":\"}",
+          "parsed": {
+            "repos": ":"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_2-2-0",
+          "fn": "uber.ride",
+          "text": "<|channel>```jsonjson{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, USABusiness  \",\"type\": \"comfort\" ,\"time\": 6000}",
+          "parsed": {
+            "loc": "2020 Addison Street, Berkeley, CA, USABusiness  ",
+            "type": "comfort",
+            "time": 6000
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_3-2-1",
+          "fn": "uber.ride",
+          "text": "<|channel>```json\n<channel|>{ \"loc\": \"221B Baker Street, Berkeley, CA, USA1  \",\"type\": \"plus\" ,\"time\": 6000}",
+          "parsed": {
+            "loc": "221B Baker Street, Berkeley, CA, USA1  ",
+            "type": "plus",
+            "time": 6000
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_4-3-0",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json argument{\n<channel|>{\"location\": \"Tel\"}",
+          "parsed": {
+            "location": "Tel"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_5-3-1",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json\n<channel|>{ \"location\": \"Divin\u00f3polis, MG\"}",
+          "parsed": {
+            "location": "Divin\u00f3polis, MG"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_6-3-2",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json_{\n<channel|>{\"location\": \"San Francisco\"}",
+          "parsed": {
+            "location": "San Francisco"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_7-3-3",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json {{\n<channel|>{\"location\": \"Riga, Latvia\"}",
+          "parsed": {
+            "location": "Riga, Latvia"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_8-3-4",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json_{\n<channel|>{\"location\": \"London, UK\"}",
+          "parsed": {
+            "location": "London, UK"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_9-3-5",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json {{\n<channel|>{\"location\": \"Hyderabad\"}",
+          "parsed": {
+            "location": "Hyderabad"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_10-3-6",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json argument{\n<channel|>{\"location\": \"Yosemite National Park, Mariposa,\"}",
+          "parsed": {
+            "location": "Yosemite National Park, Mariposa,"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_11-3-7",
+          "fn": "get_current_weather",
+          "text": "<|channel>json_\n<channel|>{\"location\": \"Naples, Florida  \",\"unit\": \"fahrenheit\" }",
+          "parsed": {
+            "location": "Naples, Florida  ",
+            "unit": "fahrenheit"
+          },
+          "accepted": true
+        }
+      ],
+      "per_key": [
+        {
+          "key": "user_id",
+          "want": "7890",
+          "got": "7",
+          "ok": false
+        },
+        {
+          "key": "special",
+          "want": "black",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "repos",
+          "want": "ShishirPatil/gorilla,gorilla-llm/gorilla-cli",
+          "got": ":",
+          "ok": false
+        },
+        {
+          "key": "aligned",
+          "want": "True",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "loc",
+          "want": "2020 Addison Street, Berkeley, CA, USA",
+          "got": "2020 Addison Street, Berkeley, CA, USABusiness  ",
+          "ok": false
+        },
+        {
+          "key": "type",
+          "want": "comfort",
+          "got": "comfort",
+          "ok": true
+        },
+        {
+          "key": "time",
+          "want": "600",
+          "got": "6000",
+          "ok": false
+        },
+        {
+          "key": "loc",
+          "want": "221B Baker Street, Berkeley, CA, USA",
+          "got": "221B Baker Street, Berkeley, CA, USA1  ",
+          "ok": false
+        },
+        {
+          "key": "type",
+          "want": "plus",
+          "got": "plus",
+          "ok": true
+        },
+        {
+          "key": "time",
+          "want": "600",
+          "got": "6000",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Tel Aviv, Israel",
+          "got": "Tel",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Divin\u00f3polis, MG",
+          "got": "Divin\u00f3polis, MG",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "San Francisco, CA",
+          "got": "San Francisco",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Riga, Latvia",
+          "got": "Riga, Latvia",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "London, UK",
+          "got": "London, UK",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "Hyderabad, India",
+          "got": "Hyderabad",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Mariposa, CA",
+          "got": "Yosemite National Park, Mariposa,",
+          "ok": false
+        },
+        {
+          "key": "unit",
+          "want": "celsius",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Naples, FL",
+          "got": "Naples, Florida  ",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "bound": 0.1,
+      "n": 12,
+      "accepted": 12,
+      "parsed": 12,
+      "nonempty_args": 12,
+      "arg_correct": 7,
+      "arg_total": 19,
+      "steps": [],
+      "examples": [
+        "<|channel>```\n<channel|>{\"user_id\": 7890, \"special\": \"black\"}",
+        "<|channel>```json\n<channel|>{ \"repos\":\":\"}",
+        "<|channel>```json {{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, USA1  \",\"type\":",
+        "<|channel>```jsonBest{\n<channel|>{\"loc\": \"221B Baker Street, Berkeley, CA, USA1  \",\"type\":"
+      ],
+      "predictions": [
+        {
+          "id": "live_simple_0-0-0",
+          "fn": "get_user_info",
+          "text": "<|channel>```\n<channel|>{\"user_id\": 7890, \"special\": \"black\"}",
+          "parsed": {
+            "user_id": 7890,
+            "special": "black"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_1-1-0",
+          "fn": "github_star",
+          "text": "<|channel>```json\n<channel|>{ \"repos\":\":\"}",
+          "parsed": {
+            "repos": ":"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_2-2-0",
+          "fn": "uber.ride",
+          "text": "<|channel>```json {{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, USA1  \",\"type\": \"comfort\" ,\"time\": 6000}",
+          "parsed": {
+            "loc": "2020 Addison Street, Berkeley, CA, USA1  ",
+            "type": "comfort",
+            "time": 6000
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_3-2-1",
+          "fn": "uber.ride",
+          "text": "<|channel>```jsonBest{\n<channel|>{\"loc\": \"221B Baker Street, Berkeley, CA, USA1  \",\"type\": \"plus\" ,\"time\": 6000}",
+          "parsed": {
+            "loc": "221B Baker Street, Berkeley, CA, USA1  ",
+            "type": "plus",
+            "time": 6000
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_4-3-0",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json strict{\n<channel|>{\"location\": \"Tel\"}",
+          "parsed": {
+            "location": "Tel"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_5-3-1",
+          "fn": "get_current_weather",
+          "text": "<|channel>```\n<channel|>{\"location\": \"Divin\u00f3polis, MG\", \"unit\": \"fahrenheit\"}",
+          "parsed": {
+            "location": "Divin\u00f3polis, MG",
+            "unit": "fahrenheit"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_6-3-2",
+          "fn": "get_current_weather",
+          "text": "<|channel>```\n<channel|>{\"location\": \"San Francisco\", \"unit\": \"fahrenheit\"}",
+          "parsed": {
+            "location": "San Francisco",
+            "unit": "fahrenheit"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_7-3-3",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json\n<channel|>{ \"location\": \"Riga, Latvia\"}",
+          "parsed": {
+            "location": "Riga, Latvia"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_8-3-4",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json_{\n<channel|>{\"location\": \"London, UK\"}",
+          "parsed": {
+            "location": "London, UK"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_9-3-5",
+          "fn": "get_current_weather",
+          "text": "<|channel>json {{\n<channel|>{\"location\": \"Hyderabad\"}",
+          "parsed": {
+            "location": "Hyderabad"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_10-3-6",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json {{\n<channel|>{\"location\": \"Yosemite National Park, Mariposa, CA\"}",
+          "parsed": {
+            "location": "Yosemite National Park, Mariposa, CA"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_11-3-7",
+          "fn": "get_current_weather",
+          "text": "<|channel>jsonjson\n<channel|>{\"location\": \"Naples,\"}<turn|>",
+          "parsed": {
+            "location": "Naples,"
+          },
+          "accepted": true
+        }
+      ],
+      "per_key": [
+        {
+          "key": "user_id",
+          "want": "7890",
+          "got": "7890",
+          "ok": true
+        },
+        {
+          "key": "special",
+          "want": "black",
+          "got": "black",
+          "ok": true
+        },
+        {
+          "key": "repos",
+          "want": "ShishirPatil/gorilla,gorilla-llm/gorilla-cli",
+          "got": ":",
+          "ok": false
+        },
+        {
+          "key": "aligned",
+          "want": "True",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "loc",
+          "want": "2020 Addison Street, Berkeley, CA, USA",
+          "got": "2020 Addison Street, Berkeley, CA, USA1  ",
+          "ok": false
+        },
+        {
+          "key": "type",
+          "want": "comfort",
+          "got": "comfort",
+          "ok": true
+        },
+        {
+          "key": "time",
+          "want": "600",
+          "got": "6000",
+          "ok": false
+        },
+        {
+          "key": "loc",
+          "want": "221B Baker Street, Berkeley, CA, USA",
+          "got": "221B Baker Street, Berkeley, CA, USA1  ",
+          "ok": false
+        },
+        {
+          "key": "type",
+          "want": "plus",
+          "got": "plus",
+          "ok": true
+        },
+        {
+          "key": "time",
+          "want": "600",
+          "got": "6000",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Tel Aviv, Israel",
+          "got": "Tel",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Divin\u00f3polis, MG",
+          "got": "Divin\u00f3polis, MG",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "San Francisco, CA",
+          "got": "San Francisco",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Riga, Latvia",
+          "got": "Riga, Latvia",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "London, UK",
+          "got": "London, UK",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "Hyderabad, India",
+          "got": "Hyderabad",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Mariposa, CA",
+          "got": "Yosemite National Park, Mariposa, CA",
+          "ok": false
+        },
+        {
+          "key": "unit",
+          "want": "celsius",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Naples, FL",
+          "got": "Naples,",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "bound": 0.3,
+      "n": 12,
+      "accepted": 12,
+      "parsed": 12,
+      "nonempty_args": 12,
+      "arg_correct": 7,
+      "arg_total": 19,
+      "steps": [],
+      "examples": [
+        "<|channel>```\n<channel|>{\"user_id\": 7890, \"special\": \"black\"}",
+        "<|channel>```json problem{\n<channel|>{\"repos\":\":\"}",
+        "<|channel>```json_{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, USA USA  \",\"type",
+        "<|channel>```json_{\n<channel|>{\"loc\": \"221B Baker Street, Berkeley, CA, USA1  \",\"type\": \"p"
+      ],
+      "predictions": [
+        {
+          "id": "live_simple_0-0-0",
+          "fn": "get_user_info",
+          "text": "<|channel>```\n<channel|>{\"user_id\": 7890, \"special\": \"black\"}",
+          "parsed": {
+            "user_id": 7890,
+            "special": "black"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_1-1-0",
+          "fn": "github_star",
+          "text": "<|channel>```json problem{\n<channel|>{\"repos\":\":\"}",
+          "parsed": {
+            "repos": ":"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_2-2-0",
+          "fn": "uber.ride",
+          "text": "<|channel>```json_{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, USA USA  \",\"type\": \"comfort\" ,\"time\": 6000}",
+          "parsed": {
+            "loc": "2020 Addison Street, Berkeley, CA, USA USA  ",
+            "type": "comfort",
+            "time": 6000
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_3-2-1",
+          "fn": "uber.ride",
+          "text": "<|channel>```json_{\n<channel|>{\"loc\": \"221B Baker Street, Berkeley, CA, USA1  \",\"type\": \"plus\" ,\"time\": 6000}",
+          "parsed": {
+            "loc": "221B Baker Street, Berkeley, CA, USA1  ",
+            "type": "plus",
+            "time": 6000
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_4-3-0",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json Accept{\n<channel|>{\"location\": \"Tel\"}",
+          "parsed": {
+            "location": "Tel"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_5-3-1",
+          "fn": "get_current_weather",
+          "text": "<|channel>thought\n<channel|>{\"location\": \"Divin\u00f3polis, MG\", \"unit\": \"fahrenheit\"}<turn|>",
+          "parsed": {
+            "location": "Divin\u00f3polis, MG",
+            "unit": "fahrenheit"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_6-3-2",
+          "fn": "get_current_weather",
+          "text": "<|channel>```\n<channel|>{\"location\": \"San Francisco\", \"unit\": \"fahrenheit\"}",
+          "parsed": {
+            "location": "San Francisco",
+            "unit": "fahrenheit"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_7-3-3",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json {{\n<channel|>{\"location\": \"Riga, Latvia\"}",
+          "parsed": {
+            "location": "Riga, Latvia"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_8-3-4",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json {{\n<channel|>{\"location\": \"London, UK\"}",
+          "parsed": {
+            "location": "London, UK"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_9-3-5",
+          "fn": "get_current_weather",
+          "text": "<|channel>json {{\n<channel|>{\"location\": \"Hyderabad\"}",
+          "parsed": {
+            "location": "Hyderabad"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_10-3-6",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json {{\n<channel|>{\"location\": \"Yosemite National Park, Mariposa,\"}",
+          "parsed": {
+            "location": "Yosemite National Park, Mariposa,"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_11-3-7",
+          "fn": "get_current_weather",
+          "text": "<|channel>jsonjson\n<channel|>{\"location\": \"Naples, Florida\"}",
+          "parsed": {
+            "location": "Naples, Florida"
+          },
+          "accepted": true
+        }
+      ],
+      "per_key": [
+        {
+          "key": "user_id",
+          "want": "7890",
+          "got": "7890",
+          "ok": true
+        },
+        {
+          "key": "special",
+          "want": "black",
+          "got": "black",
+          "ok": true
+        },
+        {
+          "key": "repos",
+          "want": "ShishirPatil/gorilla,gorilla-llm/gorilla-cli",
+          "got": ":",
+          "ok": false
+        },
+        {
+          "key": "aligned",
+          "want": "True",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "loc",
+          "want": "2020 Addison Street, Berkeley, CA, USA",
+          "got": "2020 Addison Street, Berkeley, CA, USA USA  ",
+          "ok": false
+        },
+        {
+          "key": "type",
+          "want": "comfort",
+          "got": "comfort",
+          "ok": true
+        },
+        {
+          "key": "time",
+          "want": "600",
+          "got": "6000",
+          "ok": false
+        },
+        {
+          "key": "loc",
+          "want": "221B Baker Street, Berkeley, CA, USA",
+          "got": "221B Baker Street, Berkeley, CA, USA1  ",
+          "ok": false
+        },
+        {
+          "key": "type",
+          "want": "plus",
+          "got": "plus",
+          "ok": true
+        },
+        {
+          "key": "time",
+          "want": "600",
+          "got": "6000",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Tel Aviv, Israel",
+          "got": "Tel",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Divin\u00f3polis, MG",
+          "got": "Divin\u00f3polis, MG",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "San Francisco, CA",
+          "got": "San Francisco",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Riga, Latvia",
+          "got": "Riga, Latvia",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "London, UK",
+          "got": "London, UK",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "Hyderabad, India",
+          "got": "Hyderabad",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Mariposa, CA",
+          "got": "Yosemite National Park, Mariposa,",
+          "ok": false
+        },
+        {
+          "key": "unit",
+          "want": "celsius",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Naples, FL",
+          "got": "Naples, Florida",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "bound": 1.0,
+      "n": 12,
+      "accepted": 12,
+      "parsed": 12,
+      "nonempty_args": 12,
+      "arg_correct": 5,
+      "arg_total": 19,
+      "steps": [],
+      "examples": [
+        "<|channel>/**```json {{\n<channel|>{\"user_id\": 7}<turn|>",
+        "<|channel>```json problem{\n<channel|>{\"repos\":\":\"}",
+        "<|channel>```json_{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, USA1  \",\"type\": ",
+        "<|channel>```json         {\n<channel|>{\"loc\": \"221B Baker Street, Berkeley, CA, USA1  \",\"t"
+      ],
+      "predictions": [
+        {
+          "id": "live_simple_0-0-0",
+          "fn": "get_user_info",
+          "text": "<|channel>/**```json {{\n<channel|>{\"user_id\": 7}<turn|>",
+          "parsed": {
+            "user_id": 7
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_1-1-0",
+          "fn": "github_star",
+          "text": "<|channel>```json problem{\n<channel|>{\"repos\":\":\"}",
+          "parsed": {
+            "repos": ":"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_2-2-0",
+          "fn": "uber.ride",
+          "text": "<|channel>```json_{\n<channel|>{\"loc\": \"2020 Addison Street, Berkeley, CA, USA1  \",\"type\": \"comfort\" ,\"time\": 6000}",
+          "parsed": {
+            "loc": "2020 Addison Street, Berkeley, CA, USA1  ",
+            "type": "comfort",
+            "time": 6000
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_3-2-1",
+          "fn": "uber.ride",
+          "text": "<|channel>```json         {\n<channel|>{\"loc\": \"221B Baker Street, Berkeley, CA, USA1  \",\"type\": \"plus\" ,\"time\": 6000}",
+          "parsed": {
+            "loc": "221B Baker Street, Berkeley, CA, USA1  ",
+            "type": "plus",
+            "time": 6000
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_4-3-0",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json {{\n<channel|>{\"location\": \"Tel Aviv\"}",
+          "parsed": {
+            "location": "Tel Aviv"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_5-3-1",
+          "fn": "get_current_weather",
+          "text": "<|channel>```\n<channel|>{\"location\": \"Divin\u00f3polis, MG\", \"unit\": \"fahrenheit\"}",
+          "parsed": {
+            "location": "Divin\u00f3polis, MG",
+            "unit": "fahrenheit"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_6-3-2",
+          "fn": "get_current_weather",
+          "text": "<|channel>```\n<channel|>{\"location\": \"San Francisco\", \"unit\": \"fahrenheit\"}<turn|>",
+          "parsed": {
+            "location": "San Francisco",
+            "unit": "fahrenheit"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_7-3-3",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json\n<channel|>{ \"location\": \"Riga, Latvia\"}",
+          "parsed": {
+            "location": "Riga, Latvia"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_8-3-4",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json_{\n<channel|>{\"location\": \"London, UK\"}",
+          "parsed": {
+            "location": "London, UK"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_9-3-5",
+          "fn": "get_current_weather",
+          "text": "<|channel>json {{\n<channel|>{\"location\": \"Hyderabad\"}",
+          "parsed": {
+            "location": "Hyderabad"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_10-3-6",
+          "fn": "get_current_weather",
+          "text": "<|channel>```json argument{\n<channel|>{\"location\": \"Yosemite National Park, Mariposa,\"}",
+          "parsed": {
+            "location": "Yosemite National Park, Mariposa,"
+          },
+          "accepted": true
+        },
+        {
+          "id": "live_simple_11-3-7",
+          "fn": "get_current_weather",
+          "text": "<|channel>json_\n<channel|>{\"location\": \"Naples, Florida1_\",\"unit\": \"fahrenheit\" }",
+          "parsed": {
+            "location": "Naples, Florida1_",
+            "unit": "fahrenheit"
+          },
+          "accepted": true
+        }
+      ],
+      "per_key": [
+        {
+          "key": "user_id",
+          "want": "7890",
+          "got": "7",
+          "ok": false
+        },
+        {
+          "key": "special",
+          "want": "black",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "repos",
+          "want": "ShishirPatil/gorilla,gorilla-llm/gorilla-cli",
+          "got": ":",
+          "ok": false
+        },
+        {
+          "key": "aligned",
+          "want": "True",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "loc",
+          "want": "2020 Addison Street, Berkeley, CA, USA",
+          "got": "2020 Addison Street, Berkeley, CA, USA1  ",
+          "ok": false
+        },
+        {
+          "key": "type",
+          "want": "comfort",
+          "got": "comfort",
+          "ok": true
+        },
+        {
+          "key": "time",
+          "want": "600",
+          "got": "6000",
+          "ok": false
+        },
+        {
+          "key": "loc",
+          "want": "221B Baker Street, Berkeley, CA, USA",
+          "got": "221B Baker Street, Berkeley, CA, USA1  ",
+          "ok": false
+        },
+        {
+          "key": "type",
+          "want": "plus",
+          "got": "plus",
+          "ok": true
+        },
+        {
+          "key": "time",
+          "want": "600",
+          "got": "6000",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Tel Aviv, Israel",
+          "got": "Tel Aviv",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Divin\u00f3polis, MG",
+          "got": "Divin\u00f3polis, MG",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "San Francisco, CA",
+          "got": "San Francisco",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Riga, Latvia",
+          "got": "Riga, Latvia",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "London, UK",
+          "got": "London, UK",
+          "ok": true
+        },
+        {
+          "key": "location",
+          "want": "Hyderabad, India",
+          "got": "Hyderabad",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Mariposa, CA",
+          "got": "Yosemite National Park, Mariposa,",
+          "ok": false
+        },
+        {
+          "key": "unit",
+          "want": "celsius",
+          "got": "None",
+          "ok": false
+        },
+        {
+          "key": "location",
+          "want": "Naples, FL",
+          "got": "Naples, Florida1_",
+          "ok": false
+        }
+      ]
+    }
+  ]
+}

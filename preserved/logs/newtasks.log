@@ -1,0 +1,33 @@
+=== task_countdown_unconstrained ===
+    n: 250
+    cs_rate: 0.004
+    solve_rate: 0.048
+    zero_partition: 0
+    oom: 0
+    failure_reasons: {'unparsable step': 135, 'empty': 100, 'ok': 12, 'operand 6 not available': 1, 'operand 34 not available': 1, 'operand 3 not available': 1}
+    elapsed_seconds: 2710.3
+=== task_countdown_j0map ===
+    n: 250
+    cs_rate: 1.0
+    solve_rate: 0.0
+    zero_partition: 0
+    oom: 0
+    failure_reasons: {'unparsable step': 250}
+    elapsed_seconds: 2769.4
+=== task_sudoku_unconstrained ===
+    n: 250
+    cs_rate: 0.0
+    solve_rate: 0.864
+    zero_partition: 0
+    oom: 0
+    failure_reasons: {'col 1': 9, 'ok': 216, 'col 2': 12, 'only 0 digits': 2, 'col 0': 5, 'row 1': 1, 'overwrote the given at (0,2)': 2, 'overwrote the given at (2,3)': 1, 'overwrote the given at (2,2)': 1, 'overwrote the given at (3,1)': 1}
+    elapsed_seconds: 2670.4
+=== task_sudoku_j0map ===
+    n: 250
+    cs_rate: 1.0
+    solve_rate: 0.0
+    zero_partition: 0
+    oom: 0
+    failure_reasons: {'overwrote the given at (0,3)': 17, 'overwrote the given at (0,1)': 56, 'overwrote the given at (1,2)': 14, 'overwrote the given at (0,2)': 50, 'overwrote the given at (1,0)': 51, 'overwrote the given at (0,0)': 27, 'overwrote the given at (1,1)': 31, 'overwrote the given at (2,3)': 1, 'overwrote the given at (1,3)': 1, 'overwrote the given at (2,0)': 2}
+    elapsed_seconds: 2703.2
+NEWTASKS DONE

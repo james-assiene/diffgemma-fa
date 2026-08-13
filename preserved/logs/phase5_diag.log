@@ -1,0 +1,63 @@
+[load] model + params
+[load] done
+2026-07-28 07:17:33.310598: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+
+--- per-step trace, bound=0.1, get_user_info ---
+  step  0 acc= 57 H=  0.3030 emit='{"user_id":7}'
+  step  1 acc= 36 H=  0.1671 emit='{"user_id":7}'
+  step  2 acc= 79 H=  0.0781 emit='{"user_id":7}'
+  step  3 acc= 95 H=  0.0116 emit='{"user_id":7}'
+  step  4 acc=129 H=  0.0130 emit='{"user_id":7}'
+  step  5 acc=106 H=  0.0213 emit='{"user_id":7}'
+  step  6 acc=209 H=  0.0227 emit='{"user_id":0}'
+  step  7 acc=221 H=  0.0232 emit='{"user_id":7}'
+  step  8 acc=218 H=  0.0355 emit='{"user_id":0}'
+  step  9 acc=227 H=  0.0164 emit='{"user_id":7}'
+  step 10 acc=235 H=  0.0098 emit='{"user_id":0}'
+  step 11 acc=242 H=  0.0044 emit='{"user_id":0}'
+  step 12 acc=254 H=  0.0029 emit='{"user_id":0}'
+  step 13 acc=256 H=  0.0029 emit='{"user_id":0}'
+  step 14 acc=256 H=  0.0035 emit='{"user_id":1}'
+  step 15 acc=256 H=  0.0048 emit='{"user_id":0}'
+  step 16 acc=256 H=  0.0024 emit='{"user_id":1}'
+  step 17 acc=256 H=  0.0002 emit='{"user_id":1}'
+  step 18 acc=256 H=  0.0001 emit='{"user_id":1}'
+  step 19 acc=256 H=  0.0001 emit='{"user_id":1}'
+  step 20 acc=256 H=  0.0002 emit='{"user_id":1}'
+  step 21 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 22 acc=256 H=  0.0000 emit='{"user_id":6}'
+  step 23 acc=256 H=  0.0001 emit='{"user_id":1}'
+  step 24 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 25 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 26 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 27 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 28 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 29 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 30 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 31 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 32 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 33 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 34 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 35 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 36 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 37 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 38 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 39 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 40 acc=256 H=  0.0000 emit='{"user_id":0}'
+  step 41 acc=256 H=  0.0000 emit='{"user_id":8}'
+  step 42 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 43 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 44 acc=256 H=  0.0000 emit='{"user_id":0}'
+  step 45 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 46 acc=256 H=  0.0000 emit='{"user_id":1}'
+  step 47 acc=256 H=  0.0000 emit='{"user_id":1}'
+[bound=0.1   ] n=  2 CS=2/2 parsed=2 nonempty=2 arg_acc=0/4=0.000
+
+===== SPEC §3.4 CALIBRATION =====
+   bound       CS  parsed  nonempty   arg_acc
+     0.1 2/2            2         2 0/4     0.000
+
+stock default is 0.1
+wrote artifacts/phase5_diag.json

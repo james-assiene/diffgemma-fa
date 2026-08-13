@@ -1,0 +1,6 @@
+{'bucket': 64, 'dtype': 'float32', 'compile_s': 0.08, 'tree_s': 0.00022, 'vs_forward': 0.001}
+{'bucket': 64, 'dtype': 'float64', 'compile_s': 0.07, 'tree_s': 0.0005, 'vs_forward': 0.0024}
+E0802 15:54:10.833327 1303094 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.2 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************

@@ -1,0 +1,60 @@
+[bfcl] 1351 records -> 4549 schemas, jobs=12
+2026-07-27 20:50:44.726804: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+2026-07-27 20:50:44.726828: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+2026-07-27 20:50:44.751248: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+2026-07-27 20:50:44.759163: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+2026-07-27 20:50:44.785189: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+2026-07-27 20:50:44.860911: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+2026-07-27 20:50:44.867171: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+2026-07-27 20:50:44.890204: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+2026-07-27 20:50:44.890235: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+2026-07-27 20:50:44.934778: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+2026-07-27 20:50:45.208150: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+2026-07-27 20:50:45.456053: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+  200/4549 (105s wall)
+  400/4549 (171s wall)
+  600/4549 (339s wall)
+  800/4549 (455s wall)
+  1000/4549 (665s wall)
+  1200/4549 (737s wall)
+  1400/4549 (827s wall)
+  1600/4549 (958s wall)
+  1800/4549 (1066s wall)
+  2000/4549 (1168s wall)
+  2200/4549 (1283s wall)
+  2400/4549 (1394s wall)
+  2600/4549 (1494s wall)
+  2800/4549 (1590s wall)
+  3000/4549 (1662s wall)
+  3200/4549 (1773s wall)
+  3400/4549 (1858s wall)
+  3600/4549 (1960s wall)
+  3800/4549 (2073s wall)
+  4000/4549 (2178s wall)
+  4200/4549 (2245s wall)
+  4400/4549 (2316s wall)
+
+===== SUMMARY =====
+splits: ['BFCL_v4_live_simple.json', 'BFCL_v4_live_multiple.json', 'BFCL_v4_live_parallel.json', 'BFCL_v4_live_parallel_multiple.json']
+n_records: 1351
+n_schemas: 4549
+n_ok: 4549
+n_failed: 0
+error_kinds: {}
+wall_seconds: 2562.4
+cpu_seconds_serial: 26908.5
+jobs: 12
+states_median: 97
+states_p90: 205
+states_max: 595
+bucket_histogram: {16: 68, 32: 239, 64: 831, 128: 2292, 256: 797, 512: 308, 1024: 14}
+n_dfa: 4549
+n_nfa: 0
+dedup_ratio_mean: 1.7888
+min_state_ratio_mean: 1.0907
+min_state_ratio_max: 9.9511
+k_max_max: 1591
+max_neg_size_max: 1591
+tree_gb_max: 2.1433
+
+wrote artifacts/bfcl_compile_report.json

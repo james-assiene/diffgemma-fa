@@ -1,0 +1,17 @@
+[load] model + params
+[load] done; cache_length=4096 max_out_length=2048
+2026-07-28 00:33:16.403370: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+[00] get_user_info              S=  39   52.3s stop@7 accepted=True -> '{"user_id":0}<turn|>'
+[01] github_star                S=  41   37.9s stop@4 accepted=True -> '{"repos":""}'
+[02] uber.ride                  S=  56   39.0s stop@13 accepted=True -> '{"loc":"","type":"black","time":-2}'
+
+===== SUMMARY =====
+n: 3
+compiled: 3
+accepted: 3
+prefix_viable: 3
+stop_positions: [7, 4, 13]
+emission: map
+variant: j1

@@ -1,0 +1,658 @@
+{
+  "task": "bfcl_live_simple",
+  "variant": "unconstrained",
+  "emission": "sample",
+  "entropy_bound": 0.1,
+  "nonempty_strings": true,
+  "seed": 0,
+  "prompt_style": "compact",
+  "whitespace": "stock",
+  "fence": false,
+  "ci_enums": false,
+  "records_available": 30,
+  "skipped_by_reason": {},
+  "zero_partition": 0,
+  "zero_partition_records": [],
+  "elapsed_seconds": 460.2,
+  "n": 30,
+  "cs": 0,
+  "cs_rate": 0.0,
+  "schema_ok": 18,
+  "schema_valid_rate": 0.6,
+  "parsed": 28,
+  "nonempty": 28,
+  "nonempty_rate": 0.9333,
+  "arg_correct": 31,
+  "arg_total": 46,
+  "arg_accuracy": 0.6739,
+  "exact_calls": 14,
+  "exact_call_rate": 0.4667,
+  "per_key": [
+    {
+      "key": "user_id",
+      "want": "7890",
+      "got": "7890",
+      "ok": true
+    },
+    {
+      "key": "special",
+      "want": "black",
+      "got": "black",
+      "ok": true
+    },
+    {
+      "key": "repos",
+      "want": "ShishirPatil/gorilla,gorilla-llm/gorilla-cli",
+      "got": "['ShishirPatil/gorilla', 'gorilla-llm/gorilla-cli']",
+      "ok": false
+    },
+    {
+      "key": "aligned",
+      "want": "True",
+      "got": "True",
+      "ok": true
+    },
+    {
+      "key": "loc",
+      "want": "2020 Addison Street, Berkeley, CA, USA",
+      "got": "2020 Addison Street, Berkeley, CA, USA",
+      "ok": true
+    },
+    {
+      "key": "type",
+      "want": "comfort",
+      "got": "Comfort",
+      "ok": true
+    },
+    {
+      "key": "time",
+      "want": "600",
+      "got": "600",
+      "ok": true
+    },
+    {
+      "key": "loc",
+      "want": "221B Baker Street, Berkeley, CA, USA",
+      "got": "221B Baker Street, Berkeley, CA, USA",
+      "ok": true
+    },
+    {
+      "key": "type",
+      "want": "plus",
+      "got": "Plus",
+      "ok": true
+    },
+    {
+      "key": "time",
+      "want": "600",
+      "got": "600",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Tel Aviv, Israel",
+      "got": "Tel Aviv",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Divin\u00f3polis, MG",
+      "got": "Divin\u00f3polis, MG",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "San Francisco, CA",
+      "got": "San Francisco",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Riga, Latvia",
+      "got": "Riga, Latvia",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "London, UK",
+      "got": "London, UK",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Hyderabad, India",
+      "got": "Hyderabad",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Mariposa, CA",
+      "got": "Yosemite National Park, CA",
+      "ok": false
+    },
+    {
+      "key": "unit",
+      "want": "celsius",
+      "got": "celsius",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Naples, FL",
+      "got": "Naples, Florida",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Shanghai, China",
+      "got": "\u4e0a\u6d77",
+      "ok": false
+    },
+    {
+      "key": "unit",
+      "want": "celsius",
+      "got": "celsius",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Bangkok, Thailand",
+      "got": "Bangkok, Thailand",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Chennai, Tamil Nadu",
+      "got": "Chennai, Tamil Nadu",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Lang Son, Vietnam",
+      "got": "Lang Son",
+      "ok": false
+    },
+    {
+      "key": "location",
+      "want": "Boston, MA",
+      "got": "Boston, MA",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Moscow, Russia",
+      "got": "\u041c\u043e\u0441\u043a\u0432\u0430",
+      "ok": false
+    },
+    {
+      "key": "unit",
+      "want": "celsius",
+      "got": "celsius",
+      "ok": true
+    },
+    {
+      "key": "location",
+      "want": "Quintana Roo, Mexico",
+      "got": "Quintana Roo, Mexico",
+      "ok": true
+    },
+    {
+      "key": "unit",
+      "want": "celsius",
+      "got": "Celsius",
+      "ok": true
+    },
+    {
+      "key": "food_item",
+      "want": "burger",
+      "got": "burger",
+      "ok": true
+    },
+    {
+      "key": "modification_request",
+      "want": "no onions, extra cheese",
+      "got": "no onions, extra cheese",
+      "ok": true
+    },
+    {
+      "key": "food_item",
+      "want": "chicken dish",
+      "got": "chicken dish",
+      "ok": true
+    },
+    {
+      "key": "modification_request",
+      "want": "extra spicy",
+      "got": "extra spicy",
+      "ok": true
+    },
+    {
+      "key": "TheFod",
+      "want": "BURGER",
+      "got": "['Whopper']",
+      "ok": false
+    },
+    {
+      "key": "TheFod",
+      "want": "PIZZA",
+      "got": "['Order me pizza']",
+      "ok": false
+    },
+    {
+      "key": "TheFod",
+      "want": "BURGER",
+      "got": "BURGER",
+      "ok": true
+    },
+    {
+      "key": "TheFod",
+      "want": "SALAD",
+      "got": "['The user is requesting to swap their previous item for greens.']",
+      "ok": false
+    },
+    {
+      "key": "loc",
+      "want": "123 \u0110\u01b0\u1eddng \u0110\u1ea1i h\u1ecdc, Berkeley, CA",
+      "got": "123 \u0110\u01b0\u1eddng \u0110\u1ea1i h\u1ecdc, Berkeley, CA 94704",
+      "ok": false
+    },
+    {
+      "key": "type",
+      "want": "plus",
+      "got": "Plus",
+      "ok": true
+    },
+    {
+      "key": "time",
+      "want": "10",
+      "got": "10 ph\u00fat",
+      "ok": false
+    },
+    {
+      "key": "restaurant",
+      "want": "\u80af\u5fb7\u57fa",
+      "got": "KFC",
+      "ok": false
+    },
+    {
+      "key": "items",
+      "want": "['\u9ea6\u8fa3\u9e21\u817f\u5821', '\u53ef\u53e3\u53ef\u4e50', '\u6cb9\u70b8\u9e21\u7fc5', '\u85af\u6761']",
+      "got": "['\u9ea6\u8fa3\u9e21\u817f\u5821', '\u53ef\u53e3\u53ef\u4e50', '\u6cb9\u70b8\u9e21\u7fc5', '\u85af\u6761']",
+      "ok": true
+    },
+    {
+      "key": "quantities",
+      "want": "[10, 50, 30, 90]",
+      "got": "[10, 50, 30, 90]",
+      "ok": true
+    },
+    {
+      "key": "restaurant",
+      "want": "McDonald's",
+      "got": "McDonald's",
+      "ok": true
+    },
+    {
+      "key": "items",
+      "want": "['pizza']",
+      "got": "['pizza']",
+      "ok": true
+    },
+    {
+      "key": "quantities",
+      "want": "[1]",
+      "got": "[1]",
+      "ok": true
+    }
+  ],
+  "rows": [
+    {
+      "id": "live_simple_0-0-0",
+      "fn": "get_user_info",
+      "text": "{\"user_id\":7890,\"special\":\"black\"}",
+      "parsed": {
+        "user_id": 7890,
+        "special": "black"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_1-1-0",
+      "fn": "github_star",
+      "text": "{\"repos\":[\"ShishirPatil/gorilla\",\"gorilla-llm/gorilla-cli\"],\"aligned\":true}",
+      "parsed": {
+        "repos": [
+          "ShishirPatil/gorilla",
+          "gorilla-llm/gorilla-cli"
+        ],
+        "aligned": true
+      },
+      "accepted": false,
+      "schema_ok": false
+    },
+    {
+      "id": "live_simple_2-2-0",
+      "fn": "uber.ride",
+      "text": "{\"loc\":\"2020 Addison Street, Berkeley, CA, USA\",\"type\":\"Comfort\",\"time\":600}",
+      "parsed": {
+        "loc": "2020 Addison Street, Berkeley, CA, USA",
+        "type": "Comfort",
+        "time": 600
+      },
+      "accepted": false,
+      "schema_ok": false
+    },
+    {
+      "id": "live_simple_3-2-1",
+      "fn": "uber.ride",
+      "text": "{\"loc\":\"221B Baker Street, Berkeley, CA, USA\",\"type\":\"Plus\",\"time\":600}",
+      "parsed": {
+        "loc": "221B Baker Street, Berkeley, CA, USA",
+        "type": "Plus",
+        "time": 600
+      },
+      "accepted": false,
+      "schema_ok": false
+    },
+    {
+      "id": "live_simple_4-3-0",
+      "fn": "get_current_weather",
+      "text": "{\"location\":\"Tel Aviv\",\"unit\":\"fahrenheit\"}<turn|>",
+      "parsed": {
+        "location": "Tel Aviv",
+        "unit": "fahrenheit"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_5-3-1",
+      "fn": "get_current_weather",
+      "text": "\n{\"location\":\"Divin\u00f3polis, MG\",\"unit\":\"fahrenheit\"}<turn|>",
+      "parsed": {
+        "location": "Divin\u00f3polis, MG",
+        "unit": "fahrenheit"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_6-3-2",
+      "fn": "get_current_weather",
+      "text": "{\"location\":\"San Francisco\",\"unit\":\"FAHRENHEIT\"}<turn|>",
+      "parsed": {
+        "location": "San Francisco",
+        "unit": "FAHRENHEIT"
+      },
+      "accepted": false,
+      "schema_ok": false
+    },
+    {
+      "id": "live_simple_7-3-3",
+      "fn": "get_current_weather",
+      "text": "<channel|>{\"location\":\"Riga, Latvia\",\"unit\":\"celsius\"}",
+      "parsed": {
+        "location": "Riga, Latvia",
+        "unit": "celsius"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_8-3-4",
+      "fn": "get_current_weather",
+      "text": "{\"location\":\"London, UK\",\"unit\":\"fahrenheit\"}",
+      "parsed": {
+        "location": "London, UK",
+        "unit": "fahrenheit"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_9-3-5",
+      "fn": "get_current_weather",
+      "text": "{\"location\":\"Hyderabad\",\"unit\":\"Fahrenheit\"}",
+      "parsed": {
+        "location": "Hyderabad",
+        "unit": "Fahrenheit"
+      },
+      "accepted": false,
+      "schema_ok": false
+    },
+    {
+      "id": "live_simple_10-3-6",
+      "fn": "get_current_weather",
+      "text": "{\"location\":\"Yosemite National Park, CA\",\"unit\":\"celsius\"}<turn|>",
+      "parsed": {
+        "location": "Yosemite National Park, CA",
+        "unit": "celsius"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_11-3-7",
+      "fn": "get_current_weather",
+      "text": "{\"location\":\"Naples, Florida\",\"unit\":\"celsius\"} \uc5ed\uc2dc",
+      "parsed": {
+        "location": "Naples, Florida",
+        "unit": "celsius"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_12-3-8",
+      "fn": "get_current_weather",
+      "text": "",
+      "parsed": null,
+      "accepted": false,
+      "schema_ok": false
+    },
+    {
+      "id": "live_simple_13-3-9",
+      "fn": "get_current_weather",
+      "text": "\n{\"location\":\"\u4e0a\u6d77\",\"unit\":\"celsius\"}",
+      "parsed": {
+        "location": "\u4e0a\u6d77",
+        "unit": "celsius"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_14-3-10",
+      "fn": "get_current_weather",
+      "text": "{\"location\":\"Bangkok, Thailand\",\"unit\":\"fahrenheit\"}",
+      "parsed": {
+        "location": "Bangkok, Thailand",
+        "unit": "fahrenheit"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_15-3-11",
+      "fn": "get_current_weather",
+      "text": "<channel|>{\"location\":\"Chennai, Tamil Nadu\",\"unit\":\"fahrenheit\"}<turn|>",
+      "parsed": {
+        "location": "Chennai, Tamil Nadu",
+        "unit": "fahrenheit"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_16-3-12",
+      "fn": "get_current_weather",
+      "text": "{\"location\":\"Lang Son\",\"unit\":\"fahrenheit\"}<turn|>",
+      "parsed": {
+        "location": "Lang Son",
+        "unit": "fahrenheit"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_17-3-13",
+      "fn": "get_current_weather",
+      "text": "{\"location\":\"Boston, MA\",\"unit\":\"fahrenheit\"}",
+      "parsed": {
+        "location": "Boston, MA",
+        "unit": "fahrenheit"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_18-3-14",
+      "fn": "get_current_weather",
+      "text": "{\"location\":\"\u041c\u043e\u0441\u043a\u0432\u0430\",\"unit\":\"celsius\"}<turn|>",
+      "parsed": {
+        "location": "\u041c\u043e\u0441\u043a\u0432\u0430",
+        "unit": "celsius"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_19-3-15",
+      "fn": "get_current_weather",
+      "text": "{\"location\":\"Quintana Roo, Mexico\",\"unit\":\"Celsius\"}<turn|>",
+      "parsed": {
+        "location": "Quintana Roo, Mexico",
+        "unit": "Celsius"
+      },
+      "accepted": false,
+      "schema_ok": false
+    },
+    {
+      "id": "live_simple_20-4-0",
+      "fn": "change_food",
+      "text": "{\"food_item\":\"burger\",\"modification_request\":\"no onions, extra cheese\"}",
+      "parsed": {
+        "food_item": "burger",
+        "modification_request": "no onions, extra cheese"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_21-4-1",
+      "fn": "change_food",
+      "text": "{\"food_item\":\"chicken dish\",\"modification_request\":\"extra spicy\"}",
+      "parsed": {
+        "food_item": "chicken dish",
+        "modification_request": "extra spicy"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_22-5-0",
+      "fn": "ChaFod",
+      "text": "{\"TheFod\":[\"Whopper\"]}",
+      "parsed": {
+        "TheFod": [
+          "Whopper"
+        ]
+      },
+      "accepted": false,
+      "schema_ok": false
+    },
+    {
+      "id": "live_simple_23-5-1",
+      "fn": "ChaFod",
+      "text": "{\"TheFod\":[\"Order me pizza\"]}",
+      "parsed": {
+        "TheFod": [
+          "Order me pizza"
+        ]
+      },
+      "accepted": false,
+      "schema_ok": false
+    },
+    {
+      "id": "live_simple_24-5-2",
+      "fn": "ChaFod",
+      "text": "{\"TheFod\":\"BURGER\"}",
+      "parsed": {
+        "TheFod": "BURGER"
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_25-5-3",
+      "fn": "ChaFod",
+      "text": "{\"TheFod\":[\"The user is requesting to swap their previous item for greens.\"]}<tool_call|>",
+      "parsed": {
+        "TheFod": [
+          "The user is requesting to swap their previous item for greens."
+        ]
+      },
+      "accepted": false,
+      "schema_ok": false
+    },
+    {
+      "id": "live_simple_26-6-0",
+      "fn": "uber.ride",
+      "text": "{\"loc\":\"123 \u0110\u01b0\u1eddng \u0110\u1ea1i h\u1ecdc, Berkeley, CA 94704\",\"type\":\"Plus\",\"time\":\"10 ph\u00fat\"}<turn|>",
+      "parsed": {
+        "loc": "123 \u0110\u01b0\u1eddng \u0110\u1ea1i h\u1ecdc, Berkeley, CA 94704",
+        "type": "Plus",
+        "time": "10 ph\u00fat"
+      },
+      "accepted": false,
+      "schema_ok": false
+    },
+    {
+      "id": "live_simple_27-7-0",
+      "fn": "uber.eat.order",
+      "text": "restaurant\":\"uber pitada\",\"items\":[\"burgers\",\"chicken wings\"],\"quantities\":[5,6]}<tool_call|>",
+      "parsed": null,
+      "accepted": false,
+      "schema_ok": false
+    },
+    {
+      "id": "live_simple_28-7-1",
+      "fn": "uber.eat.order",
+      "text": "{\"restaurant\":\"KFC\",\"items\":[\"\u9ea6\u8fa3\u9e21\u817f\u5821\",\"\u53ef\u53e3\u53ef\u4e50\",\"\u6cb9\u70b8\u9e21\u7fc5\",\"\u85af\u6761\"],\"quantities\":[10,50,30,90]}",
+      "parsed": {
+        "restaurant": "KFC",
+        "items": [
+          "\u9ea6\u8fa3\u9e21\u817f\u5821",
+          "\u53ef\u53e3\u53ef\u4e50",
+          "\u6cb9\u70b8\u9e21\u7fc5",
+          "\u85af\u6761"
+        ],
+        "quantities": [
+          10,
+          50,
+          30,
+          90
+        ]
+      },
+      "accepted": false,
+      "schema_ok": true
+    },
+    {
+      "id": "live_simple_29-7-2",
+      "fn": "uber.eat.order",
+      "text": "{\"restaurant\":\"McDonald's\",\"items\":[\"pizza\"],\"quantities\":[1]}",
+      "parsed": {
+        "restaurant": "McDonald's",
+        "items": [
+          "pizza"
+        ],
+        "quantities": [
+          1
+        ]
+      },
+      "accepted": false,
+      "schema_ok": true
+    }
+  ]
+}

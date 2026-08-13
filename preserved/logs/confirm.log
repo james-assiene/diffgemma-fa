@@ -1,0 +1,24 @@
+=== exp_e5_grammar130_j1 ===
+  !! exp_e5_grammar130_j1 DIED
+     EXECUTION FAILED: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 4.00GiB. [tf-allocator-allocation-error='']
+     --------------------
+     For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+=== exp_e5_grammar130_j0 ===
+  !! exp_e5_grammar130_j0 DIED
+     EXECUTION FAILED: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 4.00GiB. [tf-allocator-allocation-error='']
+     --------------------
+     For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+=== exp_e5_grammar130_s1 ===
+  !! exp_e5_grammar130_s1 DIED
+     EXECUTION FAILED: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 4.00GiB. [tf-allocator-allocation-error='']
+     --------------------
+     For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+=== exp_e5_grammar130_map ===
+    n: 130
+    cs_rate: 1.0
+    schema_valid_rate: 0.9923
+    nonempty_rate: 0.8923
+    arg_accuracy: 0.6285
+    exact_call_rate: 0.4923
+    zero_partition: 0
+CONFIRM DONE

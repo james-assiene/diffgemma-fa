@@ -1,0 +1,54 @@
+=== exp_e5_grammar130_j1 ===
+  !! exp_e5_grammar130_j1 DIED
+         npy_value, did_copy = self._single_device_array_to_np_array_did_copy()
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     jax.errors.JaxRuntimeError: RESOURCE_EXHAUSTED: [0] Failed to get module function fusion_6830: CUDA_ERROR_OUT_OF_MEMORY: out of memory [executable_name='jit__sample_loop']
+=== exp_e5_grammar130_j0 ===
+    n: 130
+    cs_rate: 0.4615
+    schema_valid_rate: 0.4615
+    nonempty_rate: 0.4231
+    arg_accuracy: 0.6964
+    exact_call_rate: 0.2462
+    zero_partition: 70
+=== exp_e5_grammar130_s1 ===
+    n: 130
+    cs_rate: 0.5769
+    schema_valid_rate: 0.5769
+    nonempty_rate: 0.5154
+    arg_accuracy: 0.6914
+    exact_call_rate: 0.3077
+    zero_partition: 55
+=== exp_abl_ws_only ===
+    n: 130
+    cs_rate: 1.0
+    schema_valid_rate: 0.9923
+    nonempty_rate: 0.8923
+    arg_accuracy: 0.6215
+    exact_call_rate: 0.4769
+    zero_partition: 0
+=== exp_abl_fence_only ===
+    n: 130
+    cs_rate: 1.0
+    schema_valid_rate: 0.9846
+    nonempty_rate: 0.8692
+    arg_accuracy: 0.3275
+    exact_call_rate: 0.2308
+    zero_partition: 0
+=== exp_abl_ci_only ===
+    n: 130
+    cs_rate: 1.0
+    schema_valid_rate: 0.9846
+    nonempty_rate: 0.8692
+    arg_accuracy: 0.3345
+    exact_call_rate: 0.2462
+    zero_partition: 0
+=== exp_abl_ws_fence ===
+    n: 130
+    cs_rate: 1.0
+    schema_valid_rate: 0.9923
+    nonempty_rate: 0.8923
+    arg_accuracy: 0.6215
+    exact_call_rate: 0.4769
+    zero_partition: 0
+CONFIRM2 DONE

@@ -1,0 +1,47 @@
+[eval] task=sudoku variant=mask emission=sample n=250
+2026-08-12 19:51:24.949841: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+  [10/250] CS=0.000 solved=0.000
+  [20/250] CS=0.000 solved=0.000
+  [30/250] CS=0.000 solved=0.000
+  [40/250] CS=0.000 solved=0.000
+  [50/250] CS=0.000 solved=0.020
+  [60/250] CS=0.000 solved=0.033
+  [70/250] CS=0.000 solved=0.029
+  [80/250] CS=0.000 solved=0.050
+  [90/250] CS=0.000 solved=0.044
+  [100/250] CS=0.000 solved=0.040
+  [110/250] CS=0.000 solved=0.045
+  [120/250] CS=0.000 solved=0.042
+  [130/250] CS=0.000 solved=0.038
+  [140/250] CS=0.000 solved=0.036
+  [150/250] CS=0.000 solved=0.033
+  [160/250] CS=0.000 solved=0.031
+  [170/250] CS=0.000 solved=0.029
+  [180/250] CS=0.006 solved=0.033
+  [190/250] CS=0.005 solved=0.032
+  [200/250] CS=0.005 solved=0.030
+  [210/250] CS=0.005 solved=0.029
+  [220/250] CS=0.005 solved=0.027
+  [230/250] CS=0.004 solved=0.026
+  [240/250] CS=0.004 solved=0.025
+  [250/250] CS=0.004 solved=0.024
+
+===== RESULT =====
+task: sudoku
+variant: mask
+emission: sample
+n: 250
+records_available: 250
+cs_rate: 0.004
+solve_rate: 0.024
+parsed: 15
+parse_rate: 0.06
+zero_partition: 0
+oom: 0
+skipped_by_reason: {}
+failure_reasons: {'no grid': 235, 'overwrote the given at (1,2)': 1, 'overwrote the given at (0,2)': 2, 'ok': 6, 'col 1': 2, 'row 1': 1, 'overwrote the given at (1,1)': 1, 'overwrote the given at (0,1)': 1, 'col 0': 1}
+elapsed_seconds: 2714.1
+
+wrote artifacts/task_sudoku_mask.json

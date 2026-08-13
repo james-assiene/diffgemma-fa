@@ -1,0 +1,56 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______ test_the_next_arm_really_does_skip_the_two_records_the_audit_named ______
+
+    def test_the_next_arm_really_does_skip_the_two_records_the_audit_named():
+        """Grounding. R1 is worth a commit only if the skip path is live.
+    
+        `docs/RESULTS.md` and `docs/PHASE1_FINDINGS.md` name
+        `live_simple_117-73-0` and `live_simple_122-78-0` (a BFCL `any`-typed
+        property, whose unparenthesised top-level alternation can never close its
+        brace) as the two records the [AUDIT-D3] build gate refuses. This asserts
+        that they are still at indices 117 and 122 of the 258 single-function
+        records, that the shipped compile call raises, and that the reason key the
+        handler will build for them is `compile:ValueError` — so the artifact the
+        next arm writes must name exactly these two.
+    
+        The control record is not decoration: if the gate refused everything, the
+        two ids above would be trivia rather than the difference set.
+        """
+        from diffgemma_fa.compile import bfcl_data, schema as _schema
+        from diffgemma_fa.eval.run import ALLOW, WHITESPACE_PATTERNS
+    
+        split = pathlib.Path(bfcl_data.DATA_DIR) / "BFCL_v4_live_simple.json"
+        if not split.exists():
+            pytest.skip("BFCL checkout not present (artifacts/data is gitignored)")
+    
+        records = [r for r in bfcl_data.iter_split("BFCL_v4_live_simple.json")
+                   if len(r.functions) == 1]
+        assert len(records) == 258, f"the cut changed shape: {len(records)}"
+    
+        def compile_as_the_arm_does(rec):
+            fn = rec.functions[0]
+            norm = _schema.normalize_bfcl_schema(fn["parameters"])
+            return pipeline.compile_json_schema(
+                fn["parameters"], name=fn.get("name", ""), from_bfcl=True,
+                allow=ALLOW, allow_wildcard=True,
+                whitespace_pattern=WHITESPACE_PATTERNS["json"], fence=False,
+                verify_renderings=_schema.synthesize_instance(norm),
+                verify_strict=True, nonempty_required_strings=True)
+    
+        refused = {}
+        for idx, want_id in ((117, "live_simple_117-73-0"),
+                             (122, "live_simple_122-78-0")):
+            assert records[idx].id == want_id, (
+                f"index {idx} is {records[idx].id}, not {want_id}; the "
+                f"difference set against the n=130 rows has moved")
+>           with pytest.raises(ValueError) as exc:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/test_audit_measurement.py:1941: Failed
+----------------------------- Captured stderr call -----------------------------
+2026-08-12 08:07:57.297263: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+=========================== short test summary info ============================
+FAILED tests/test_audit_measurement.py::test_the_next_arm_really_does_skip_the_two_records_the_audit_named
+1 failed in 255.67s (0:04:15)

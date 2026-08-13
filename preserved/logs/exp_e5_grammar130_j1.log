@@ -1,0 +1,174 @@
+[eval] task=bfcl_live_simple variant=j1 emission=sample bound=0.1
+2026-08-01 00:25:41.875574: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+E0801 00:28:11.972424  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.50 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 00:58:35.279283  981291 slow_operation_alarm.cc:140] The operation took 32m23.306930653s
+
+********************************
+[Compiling module input_reduce_fusion.50 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 01:59:57.483412  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.45 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 01:59:57.535688  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.49 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 01:59:57.535837  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.49 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 01:59:57.595333  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.47 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 01:59:57.844395  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.51 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 01:59:57.879723  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.43 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 01:59:58.164817  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.47 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 02:02:50.365056  981271 slow_operation_alarm.cc:140] The operation took 4m52.485440002s
+
+********************************
+[Compiling module input_reduce_fusion.43 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 02:15:05.498657  981289 slow_operation_alarm.cc:140] The operation took 17m7.903427339s
+
+********************************
+[Compiling module input_reduce_fusion.47 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 02:15:09.498109  981282 slow_operation_alarm.cc:140] The operation took 17m11.962497942s
+
+********************************
+[Compiling module input_reduce_fusion.49 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 02:15:41.207858  981278 slow_operation_alarm.cc:140] The operation took 17m43.724548326s
+
+********************************
+[Compiling module input_reduce_fusion.45 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 03:43:57.536964  981294 slow_operation_alarm.cc:140] The operation took 1h46m0.001187859s
+
+********************************
+[Compiling module input_reduce_fusion.49 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 03:44:42.872055  981280 slow_operation_alarm.cc:140] The operation took 1h46m44.707353625s
+
+********************************
+[Compiling module input_reduce_fusion.47 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 03:47:19.186853  981291 slow_operation_alarm.cc:140] The operation took 1h49m21.342564222s
+
+********************************
+[Compiling module input_reduce_fusion.51 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+  [10/130] CS=0.700 schema=0.700 acc=0.818 nonempty=0.700
+  [30/130] CS=0.567 schema=0.567 acc=0.690 nonempty=0.567
+E0801 03:59:30.395214  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.51 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 03:59:30.401428  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.39 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 03:59:30.426055  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.41 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 03:59:30.433908  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.45 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 03:59:30.466432  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.37 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 03:59:30.516509  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.43 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 03:59:30.587426  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.49 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 03:59:39.276403  981436 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module input_reduce_fusion.47 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 04:02:13.227131  981285 slow_operation_alarm.cc:140] The operation took 4m42.710697873s
+
+********************************
+[Compiling module input_reduce_fusion.43 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 04:02:17.520811  981270 slow_operation_alarm.cc:140] The operation took 4m46.933465582s
+
+********************************
+[Compiling module input_reduce_fusion.49 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 04:02:23.455038  981294 slow_operation_alarm.cc:140] The operation took 4m53.029072972s
+
+********************************
+[Compiling module input_reduce_fusion.41 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 04:02:23.841487  981284 slow_operation_alarm.cc:140] The operation took 4m53.440507596s
+
+********************************
+[Compiling module input_reduce_fusion.39 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 04:02:25.185610  981272 slow_operation_alarm.cc:140] The operation took 4m54.790518803s
+
+********************************
+[Compiling module input_reduce_fusion.51 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 04:02:34.265444  981281 slow_operation_alarm.cc:140] The operation took 4m54.98913133s
+
+********************************
+[Compiling module input_reduce_fusion.47 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 04:02:40.549791  981293 slow_operation_alarm.cc:140] The operation took 5m10.115968034s
+
+********************************
+[Compiling module input_reduce_fusion.45 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0801 04:09:43.390501  981277 slow_operation_alarm.cc:140] The operation took 12m12.924147392s
+
+********************************
+[Compiling module input_reduce_fusion.37 for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+  [50/130] CS=0.680 schema=0.680 acc=0.623 nonempty=0.580
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/ubuntu/diffgemma_fa/diffgemma_fa/eval/run.py", line 351, in <module>
+    main()
+  File "/home/ubuntu/diffgemma_fa/diffgemma_fa/eval/run.py", line 254, in main
+    state = sampler.sample_constrained(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/diffgemma_fa/diffgemma_fa/model/sampler.py", line 182, in sample_constrained
+    _check_feasible(out)
+  File "/home/ubuntu/diffgemma_fa/diffgemma_fa/model/sampler.py", line 493, in _check_feasible
+    bad = np.flatnonzero(~np.asarray(feasible))
+                          ^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/array.py", line 414, in __array__
+    return np.asarray(self._value, dtype=dtype, **kwds)  # pyrefly: ignore[no-matching-overload]
+                      ^^^^^^^^^^^
+  File "/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/profiler.py", line 420, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/array.py", line 642, in _value
+    npy_value, did_copy = self._single_device_array_to_np_array_did_copy()
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jax.errors.JaxRuntimeError: RESOURCE_EXHAUSTED: [0] Failed to get module function fusion_6830: CUDA_ERROR_OUT_OF_MEMORY: out of memory [executable_name='jit__sample_loop']

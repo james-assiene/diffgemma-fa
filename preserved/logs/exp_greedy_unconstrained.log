@@ -1,0 +1,41 @@
+[eval] task=bfcl_live_simple variant=unconstrained emission=sample bound=0.1
+2026-08-02 21:37:19.204402: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+  [10/130] CS=0.000 schema=0.100 acc=0.500 nonempty=0.200
+  [20/130] CS=0.000 schema=0.050 acc=0.667 nonempty=0.250
+  [30/130] CS=0.000 schema=0.100 acc=0.769 nonempty=0.267
+  [40/130] CS=0.000 schema=0.075 acc=0.769 nonempty=0.200
+  [50/130] CS=0.000 schema=0.100 acc=0.609 nonempty=0.240
+  [60/130] CS=0.000 schema=0.100 acc=0.615 nonempty=0.217
+  [70/130] CS=0.000 schema=0.086 acc=0.615 nonempty=0.186
+  [80/130] CS=0.000 schema=0.075 acc=0.607 nonempty=0.175
+  [90/130] CS=0.000 schema=0.067 acc=0.607 nonempty=0.156
+  [100/130] CS=0.000 schema=0.060 acc=0.607 nonempty=0.140
+  [110/130] CS=0.000 schema=0.054 acc=0.607 nonempty=0.127
+  [120/130] CS=0.000 schema=0.075 acc=0.500 nonempty=0.150
+  [130/130] CS=0.000 schema=0.085 acc=0.500 nonempty=0.154
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: unconstrained
+emission: sample
+n: 130
+cs: 0
+cs_rate: 0.0
+schema_ok: 11
+schema_valid_rate: 0.0846
+parsed: 21
+nonempty: 20
+nonempty_rate: 0.1538
+arg_correct: 19
+arg_total: 38
+arg_accuracy: 0.5
+exact_calls: 8
+exact_call_rate: 0.0615
+skipped_by_reason: {}
+zero_partition: 0
+oom: 0
+elapsed_seconds: 4758.7
+
+wrote artifacts/exp_greedy_unconstrained.json

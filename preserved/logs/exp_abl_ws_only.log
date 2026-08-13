@@ -1,0 +1,40 @@
+[eval] task=bfcl_live_simple variant=j0 emission=map bound=0.1
+2026-08-01 07:40:14.065022: W external/local_xla/xla/tsl/platform/cloud/google_auth_provider.cc:185] All attempts to get a Google authentication bearer token failed, returning an empty token. Retrieving token from files failed with "NOT_FOUND: Could not locate the credentials file.". Retrieving token from GCE failed with "FAILED_PRECONDITION: Error executing an HTTP request: libcurl code 6 meaning 'Could not resolve hostname', error details: Could not resolve host: metadata.google.internal".
+/home/ubuntu/diffgemma_fa/.venv/lib/python3.12/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+  warnings.warn(
+  [10/130] CS=1.000 schema=1.000 acc=0.688 nonempty=1.000
+  [20/130] CS=1.000 schema=1.000 acc=0.677 nonempty=1.000
+  [30/130] CS=1.000 schema=1.000 acc=0.706 nonempty=1.000
+  [40/130] CS=1.000 schema=1.000 acc=0.667 nonempty=1.000
+  [50/130] CS=1.000 schema=1.000 acc=0.591 nonempty=0.880
+  [60/130] CS=1.000 schema=1.000 acc=0.608 nonempty=0.867
+  [70/130] CS=1.000 schema=1.000 acc=0.634 nonempty=0.886
+  [80/130] CS=1.000 schema=1.000 acc=0.609 nonempty=0.900
+  [90/130] CS=1.000 schema=1.000 acc=0.614 nonempty=0.889
+  [100/130] CS=1.000 schema=1.000 acc=0.640 nonempty=0.900
+  [110/130] CS=1.000 schema=1.000 acc=0.638 nonempty=0.909
+  [120/130] CS=1.000 schema=1.000 acc=0.603 nonempty=0.892
+  [130/130] CS=1.000 schema=0.992 acc=0.622 nonempty=0.892
+
+===== RESULT =====
+task: bfcl_live_simple
+variant: j0
+emission: map
+n: 130
+cs: 130
+cs_rate: 1.0
+schema_ok: 129
+schema_valid_rate: 0.9923
+parsed: 129
+nonempty: 116
+nonempty_rate: 0.8923
+arg_correct: 179
+arg_total: 288
+arg_accuracy: 0.6215
+exact_calls: 62
+exact_call_rate: 0.4769
+skipped_by_reason: {}
+zero_partition: 0
+elapsed_seconds: 5217.8
+
+wrote artifacts/exp_abl_ws_only.json

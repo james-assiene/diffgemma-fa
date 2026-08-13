@@ -1,0 +1,54 @@
+{
+  "n": 3,
+  "compiled": 3,
+  "accepted": 3,
+  "prefix_viable": 3,
+  "stop_positions": [
+    7,
+    4,
+    13
+  ],
+  "emission": "map",
+  "variant": "j1",
+  "results": [
+    {
+      "idx": 0,
+      "id": "live_simple_0-0-0",
+      "fn": "get_user_info",
+      "states": 39,
+      "bucket": 64,
+      "wall_seconds": 52.29,
+      "stop_token_position": 7,
+      "n_emitted": 8,
+      "simulator_accepts": true,
+      "prefix_viable": true,
+      "text": "{\"user_id\":0}<turn|>"
+    },
+    {
+      "idx": 1,
+      "id": "live_simple_1-1-0",
+      "fn": "github_star",
+      "states": 41,
+      "bucket": 64,
+      "wall_seconds": 37.9,
+      "stop_token_position": 4,
+      "n_emitted": 5,
+      "simulator_accepts": true,
+      "prefix_viable": true,
+      "text": "{\"repos\":\"\"}"
+    },
+    {
+      "idx": 2,
+      "id": "live_simple_2-2-0",
+      "fn": "uber.ride",
+      "states": 56,
+      "bucket": 64,
+      "wall_seconds": 38.99,
+      "stop_token_position": 13,
+      "n_emitted": 14,
+      "simulator_accepts": true,
+      "prefix_viable": true,
+      "text": "{\"loc\":\"\",\"type\":\"black\",\"time\":-2}"
+    }
+  ]
+}

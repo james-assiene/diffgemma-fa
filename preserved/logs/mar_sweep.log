@@ -1,0 +1,10 @@
+=== exp_mar_ctrl_mf ===
+    n: 30
+    cs_rate: 1.0
+    schema_valid_rate: 1.0
+    nonempty_rate: 1.0
+    arg_accuracy: 0.6863
+    exact_call_rate: 0.5333
+    zero_partition: 0
+    oom: 0
+=== exp_mar_b0.003 ===
