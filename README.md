@@ -132,6 +132,7 @@ docs/         SPEC.md is the design; the rest is the working record.
 
 | file | what it is |
 |---|---|
+| **`docs/HANDOFF.md`** | **start here if you are picking this up cold.** What works, what is not implemented, what is broken and why, which results are invalid, and the cheapest next move for each. |
 | `SPEC.md` | the design document. Read this first; it is the reference the tests derive from. |
 | `docs/RESULTS.md` | every measured number, with its regime and its caveats. Contains corrections to its own earlier claims. |
 | `docs/LOG.md` | the chronological working record. |
